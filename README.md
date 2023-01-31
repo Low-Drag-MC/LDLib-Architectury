@@ -34,7 +34,7 @@ doesn't really help with Create.
 Next is the `@ExpectPlatform` annotation. It allows the implementation of a method to be replaced
 at compile time per-loader, letting you make your own abstractions. It is part of the Architectury
 plugin and does not cause an extra dependency. However, it can only be placed on static methods. See 
-[ExampleExpectPlatform](common/src/main/java/net/examplemod/ExampleExpectPlatform.java) in common 
+[ExampleExpectPlatform](common/src/main/java/net/creategreg/ExampleExpectPlatform.java) in common 
 for an example.
 
 Finally, simply have a common interface with implementation based on the loader. You might have a

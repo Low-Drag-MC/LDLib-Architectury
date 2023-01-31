@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
-  "id": "examplemod",
+  "id": "creategreg",
   "version": "${version}",
-  "name": "Example Mod",
+  "name": "Create-Greg",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
-    "Me!"
+    "KilaBash"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
     "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
   "license": "Insert License Here",
-  "icon": "assets/examplemod/icon.png",
+  "icon": "assets/creategreg/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.examplemod.fabric.ExampleModFabric"
+      "com.lowdragmc.creategreg.fabric.CreateGregFabric"
     ]
   },
   "mixins": [
-    "examplemod.mixins.json",
-    "examplemod-common.mixins.json"
+    "creategreg.mixins.json",
+    "creategreg-common.mixins.json"
   ],
   "depends": {
     "minecraft": "${minecraft_version}",

@@ -11,8 +11,21 @@ loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
     forge {
+        mixinConfig(
+                "${mod_id}-common.mixins.json",
+                "${mod_id}.mixins.json"
+        )
+
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+
+        dataGen{
+            mod(mod_id)
+        }
+    }
+
+    launches {
+
     }
 }
 
@@ -65,15 +78,6 @@ processResources {
 
     filesMatching("META-INF/mods.toml") {
         expand properties
-    }
-}
-
-loom {
-    forge {
-        mixinConfig(
-                "examplemod-common.mixins.json",
-                "examplemod.mixins.json"
-        )
     }
 }
 

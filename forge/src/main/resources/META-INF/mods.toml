@@ -4,30 +4,30 @@ loaderVersion = "[${forge_version},)"
 license = "Insert License Here"
 
 [[mods]]
-modId = "examplemod"
+modId = "creategreg"
 version = "${version}"
-displayName = "Example Mod"
-authors = "Me!"
+displayName = "Create-Greg"
+authors = "KilaBash!"
 description = '''
 This is an example description! Tell everyone what your mod is about!
 '''
 logoFile = "icon.png"
 
-[[dependencies.examplemod]]
+[[dependencies.creategreg]]
 modId = "forge"
 mandatory = true
 versionRange = "[${forge_version},)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.examplemod]]
+[[dependencies.creategreg]]
 modId = "minecraft"
 mandatory = true
 versionRange = "${minecraft_version}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.examplemod]]
+[[dependencies.creategreg]]
 modId="create"
 mandatory=true
 versionRange="${create_version}"
