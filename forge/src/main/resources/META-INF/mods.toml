@@ -1,33 +1,32 @@
 modLoader = "javafml"
 loaderVersion = "[${forge_version},)"
 #issueTrackerURL = ""
-license = "Insert License Here"
+license = "${mod_license}"
 
 [[mods]]
-modId = "creategreg"
+modId = "ldlib"
 version = "${version}"
-displayName = "Create-Greg"
-authors = "KilaBash!"
-description = '''
-This is an example description! Tell everyone what your mod is about!
-'''
+displayName = "${mod_name}"
+authors = "KilaBash, WarmthDawn"
+description = "${mod_description}"
 logoFile = "icon.png"
+displayURL = "${mod_url}"
 
-[[dependencies.creategreg]]
+[[dependencies.ldlib]]
 modId = "forge"
 mandatory = true
 versionRange = "[${forge_version},)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.creategreg]]
+[[dependencies.ldlib]]
 modId = "minecraft"
 mandatory = true
 versionRange = "${minecraft_version}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.creategreg]]
+[[dependencies.ldlib]]
 modId="create"
 mandatory=true
 versionRange="${create_version}"

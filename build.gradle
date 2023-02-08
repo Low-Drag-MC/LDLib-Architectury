@@ -57,7 +57,7 @@ allprojects {
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    archivesBaseName = rootProject.archives_base_name
+    archivesBaseName = rootProject.mod_id
     group = rootProject.maven_group
 
     // Formats the mod version to include the loader, Minecraft version, and build number (if present)

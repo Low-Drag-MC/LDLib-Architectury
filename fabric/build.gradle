@@ -69,6 +69,10 @@ processResources {
             "fabric_loader_version", fabric_loader_version,
             "fabric_api_version", fabric_api_version,
             "minecraft_version", minecraft_version,
+            "mod_license", mod_license,
+            "mod_name", mod_name,
+            "mod_description", mod_description,
+            "mod_url", mod_url,
             "create_version", create_fabric_version // on fabric, use the entire version, unlike forge
     )
     properties.forEach((k, v) -> inputs.property(k, v))
@@ -111,7 +115,7 @@ components.java {
 publishing {
     publications {
         mavenFabric(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
+            artifactId = rootProject.mod_id + "-" + project.name
             from components.java
         }
     }
