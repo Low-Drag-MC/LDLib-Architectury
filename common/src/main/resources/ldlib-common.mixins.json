@@ -4,9 +4,24 @@
   "package": "com.lowdragmc.lowdraglib.core",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "MixinTitleScreen"
+    "mixins.BlockEntityRendererDispatcherMixin",
+    "mixins.BlockModelShaperMixin",
+    "mixins.ItemRendererMixin",
+    "mixins.LanguageMixin",
+    "mixins.ParticleEngineMixin",
+    "mixins.WorldRendererMixin",
+    "mixins.accessor.gui.AbstractContainerScreenAccessor",
+    "mixins.accessor.jei.RecipesGuiAccessor",
+    "mixins.accessor.jei.RecipeSlotAccessor",
+    "mixins.accessor.rei.AbstractDisplayViewingScreenAccessor"
   ],
   "mixins": [
+    "mixins.BlockEntityMixin",
+    "mixins.JeiRecipeLayoutMixin",
+    "mixins.accessor.RecipeLayoutAccessor",
+    "mixins.accessor.gui.AbstractContainerMenuAccessor",
+    "mixins.accessor.gui.SlotAccessor",
+    "mixins.accessor.jei.RecipeSlotsAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

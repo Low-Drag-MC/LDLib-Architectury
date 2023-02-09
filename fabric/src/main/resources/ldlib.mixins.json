@@ -4,8 +4,16 @@
   "package": "com.lowdragmc.lowdraglib.fabric.core",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "mixin.GameRendererMixin",
+    "mixin.ModelManagerMixin",
+    "mixin.ShaderInstanceMixin",
+    "mixin.TextureAtlasMixin",
+    "mixin.jei.KeyBoardHandlerMixin",
+    "mixin.jei.MouseHandlerMixin"
   ],
   "mixins": [
+    "mixin.MinecraftServerMixin",
+    "mixin.accessor.PackRepositoryMixin"
   ],
   "injectors": {
     "defaultRequire": 1

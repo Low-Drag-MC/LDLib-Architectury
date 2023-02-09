@@ -17,6 +17,12 @@
   "entrypoints": {
     "main": [
       "com.lowdragmc.lowdraglib.fabric.LDLibFabric"
+    ],
+    "client": [
+      "com.lowdragmc.lowdraglib.fabric.client.ClientProxyImpl"
+    ],
+    "rei_client": [
+      "com.lowdragmc.lowdraglib.fabric.rei.REIPlugin"
     ]
   },
   "mixins": [
