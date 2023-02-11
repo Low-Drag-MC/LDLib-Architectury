@@ -7,6 +7,10 @@ architectury {
     forge()
 }
 
+static def isJetBrainsRuntime() {
+    return System.getProperty('java.vm.vendor').contains('JetBrains')
+}
+
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
@@ -21,6 +25,15 @@ loom {
 
         dataGen{
             mod(mod_id)
+        }
+    }
+
+    if (isJetBrainsRuntime()) {
+        runs {
+            client {
+                vmArgs '-XX:+AllowEnhancedClassRedefinition'
+                vmArgs '-XX:HotswapAgent=fatjar'
+            }
         }
     }
 }
