@@ -126,11 +126,11 @@ public class UniformCache {
 		int loc = getUniformLocation(location);
 		if (loc == -1) {
 			if (Platform.isDevEnv()) {
-				LDLib.LOGGER.error("can't find uniform with name {}", location);
-				var shaders = new int[2];
-				GL20.glGetAttachedShaders(programId, null, shaders);
-				LDLib.LOGGER.error("attached shader source {}", GL20.glGetShaderSource(shaders[0]));
-				LDLib.LOGGER.error("attached shader source {}", GL20.glGetShaderSource(shaders[1]));
+//				LDLib.LOGGER.error("can't find uniform with name {}", location);
+//				var shaders = new int[2];
+//				GL20.glGetAttachedShaders(programId, null, shaders);
+//				LDLib.LOGGER.error("attached shader source {}", GL20.glGetShaderSource(shaders[0]));
+//				LDLib.LOGGER.error("attached shader source {}", GL20.glGetShaderSource(shaders[1]));
 			}
 			return;
 		}

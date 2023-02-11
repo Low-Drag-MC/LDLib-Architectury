@@ -4,6 +4,8 @@ import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.shader.management.ShaderProgram;
 import com.lowdragmc.lowdraglib.client.shader.uniform.UniformCache;
 import com.lowdragmc.lowdraglib.client.utils.RenderBufferUtils;
+import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
+import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.utils.LdUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Rect;
@@ -12,7 +14,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector4f;
-import io.github.fabricators_of_create.porting_lib.util.FluidStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -79,13 +80,11 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawFluidForGui(PoseStack poseStack, FluidStack contents, int tankCapacity, int startX, int startY, int widthT, int heightT) {
+    public static void drawFluidForGui(PoseStack poseStack, FluidStack contents, long tankCapacity, int startX, int startY, int widthT, int heightT) {
         ResourceLocation LOCATION_BLOCKS_TEXTURE = InventoryMenu.BLOCK_ATLAS;
-        FluidAttributes fluid = contents.getFluid().getAttributes();
-        ResourceLocation fluidStill = fluid.getStillTexture();
-        TextureAtlasSprite fluidStillSprite = Minecraft.getInstance().getTextureAtlas(LOCATION_BLOCKS_TEXTURE).apply(fluidStill);
-        int fluidColor = fluid.getColor(contents) | 0xff000000;
-        int scaledAmount = contents.getAmount() * heightT / tankCapacity;
+        TextureAtlasSprite fluidStillSprite = FluidHelper.getStillTexture(contents);
+        int fluidColor = FluidHelper.getColor(contents) | 0xff000000;
+        int scaledAmount = (int) (contents.getAmount() * heightT / tankCapacity);
         if (contents.getAmount() > 0 && scaledAmount < 1) {
             scaledAmount = 1;
         }
@@ -191,10 +190,8 @@ public class DrawerHelper {
         ItemRenderer itemRenderer = mc.getItemRenderer();
 
         itemRenderer.blitOffset = 200.0F;
-        Font font = net.minecraftforge.client.RenderProperties.get(itemStack).getFont(itemStack);
-        if (font == null) font = mc.font;
         itemRenderer.renderAndDecorateItem(itemStack, x, y);
-        itemRenderer.renderGuiItemDecorations(font, itemStack, x, y, altTxt);
+        itemRenderer.renderGuiItemDecorations(mc.font, itemStack, x, y, altTxt);
         itemRenderer.blitOffset = 0.0F;
 
         RenderSystem.depthMask(false);

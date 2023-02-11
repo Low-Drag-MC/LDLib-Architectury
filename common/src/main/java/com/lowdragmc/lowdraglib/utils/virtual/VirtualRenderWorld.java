@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.utils.virtual;
 
-import com.jozufozu.flywheel.api.FlywheelWorld;
 import net.minecraft.core.*;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -32,7 +31,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class VirtualRenderWorld extends Level implements FlywheelWorld {
+public class VirtualRenderWorld extends Level {
 	public final Map<BlockPos, BlockState> blocksAdded = new HashMap<>();
 	public final Map<BlockPos, BlockEntity> besAdded = new HashMap<>();
 	public final Set<SectionPos> spannedSections = new HashSet<>();

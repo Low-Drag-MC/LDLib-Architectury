@@ -182,8 +182,8 @@ public class FacadeBlockAndTintGetter implements BlockAndTintGetter {
         return parent.getBlockFloorHeight(pPos);
     }
 
-    @Override
-    public @Nullable BlockEntity getExistingBlockEntity(BlockPos pos) {
-        return pos.equals(this.pos) ? tile : BlockAndTintGetter.super.getExistingBlockEntity(pos);
-    }
+//    @Override
+//    public @Nullable BlockEntity getExistingBlockEntity(BlockPos pos) {
+//        return pos.equals(this.pos) ? tile : BlockAndTintGetter.super.getExistingBlockEntity(pos);
+//    }
 }

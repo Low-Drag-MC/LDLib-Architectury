@@ -3,21 +3,21 @@ package com.lowdragmc.lowdraglib.gui.widget;
 import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.msic.ItemStackTransfer;
+import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ItemStackSelectorWidget extends WidgetGroup {
     private Consumer<ItemStack> onItemStackUpdate;
-    private final IItemHandlerModifiable handler;
+    private final IItemTransfer handler;
     private final TextFieldWidget itemField;
     private ItemStack item = ItemStack.EMPTY;
 
@@ -26,10 +26,7 @@ public class ItemStackSelectorWidget extends WidgetGroup {
         setClientSideWidget();
         itemField = (TextFieldWidget) new TextFieldWidget(22, 0, width - 46, 20, null, s -> {
             if (s != null && !s.isEmpty()) {
-                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(s));
-                if (item == null) {
-                    item = ItemStack.EMPTY.getItem();
-                }
+                Item item = Registry.ITEM.get(new ResourceLocation(s));
                 if (!ItemStack.isSameItemSameTags(item.getDefaultInstance(), this.item)) {
                     this.item = item.getDefaultInstance();
                     onUpdate();
@@ -37,7 +34,7 @@ public class ItemStackSelectorWidget extends WidgetGroup {
             }
         }).setResourceLocationOnly().setHoverTooltips("ldlib.gui.tips.item_selector");
 
-        addWidget(new PhantomSlotWidget(handler = new ItemStackHandler(1), 0, 1, 1)
+        addWidget(new PhantomSlotWidget(handler = new ItemStackTransfer(1), 0, 1, 1)
                 .setClearSlotOnRightClick(true)
                 .setChangeListener(() -> {
                     setItemStack(handler.getStackInSlot(0));
@@ -73,7 +70,7 @@ public class ItemStackSelectorWidget extends WidgetGroup {
     public ItemStackSelectorWidget setItemStack(ItemStack itemStack) {
         item = Objects.requireNonNullElse(itemStack, ItemStack.EMPTY).copy();
         handler.setStackInSlot(0, item);
-        itemField.setCurrentString(item.getItem().getRegistryName().toString());
+        itemField.setCurrentString(Registry.ITEM.getKey(item.getItem()).toString());
         return this;
     }
 

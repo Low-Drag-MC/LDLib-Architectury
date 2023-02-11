@@ -8,6 +8,7 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
+import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.mojang.blaze3d.platform.InputConstants;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
@@ -40,7 +41,7 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
         super();
     }
 
-    public PhantomSlotWidget(IItemHandlerModifiable itemHandler, int slotIndex, int xPosition, int yPosition) {
+    public PhantomSlotWidget(IItemTransfer itemHandler, int slotIndex, int xPosition, int yPosition) {
         super(itemHandler, slotIndex, xPosition, yPosition, true, true);
     }
 

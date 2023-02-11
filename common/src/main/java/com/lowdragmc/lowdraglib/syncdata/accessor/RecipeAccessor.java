@@ -1,15 +1,16 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
+import io.github.fabricators_of_create.porting_lib.util.ServerLifecycleHooks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class RecipeAccessor extends CustomObjectAccessor<Recipe> {
 
@@ -37,7 +38,7 @@ public class RecipeAccessor extends CustomObjectAccessor<Recipe> {
                 if (LDLib.isRemote()) {
                     recipeManager = Minecraft.getInstance().getConnection().getRecipeManager();
                 } else {
-                    recipeManager = ServerLifecycleHooks.getCurrentServer().getRecipeManager();
+                    recipeManager = Platform.getMinecraftServer().getRecipeManager();
                 }
                 for (Recipe<?> recipe : recipeManager.getRecipes()) {
                     if (recipe.getType() == type && recipe.getId().equals(id)) {

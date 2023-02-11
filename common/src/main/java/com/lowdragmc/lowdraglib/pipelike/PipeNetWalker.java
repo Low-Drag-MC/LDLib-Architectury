@@ -110,7 +110,7 @@ public abstract class PipeNetWalker {
         running = false;
         root.walked.clear();
         if (i >= maxWalks)
-            LDLib.LOGGER.fatal("The walker reached the maximum amount of walks {}", i);
+            LDLib.LOGGER.warn("The walker reached the maximum amount of walks {}", i);
         invalid = true;
     }
 

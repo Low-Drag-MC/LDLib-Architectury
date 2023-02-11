@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.syncdata;
 
 
+import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.syncdata.accessor.SimpleObjectAccessor;
 import com.lowdragmc.lowdraglib.syncdata.payload.*;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
@@ -12,7 +13,6 @@ import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.GenericArrayType;
@@ -78,6 +78,7 @@ public class TypedPayloadRegistries {
                 accessorSearchListUnsorted.add(Pair.of(priority, accessor));
             }
         }
+        loaded = false;
     }
 
     public static <P, T extends ObjectTypedPayload<P>> void registerSimple(Class<T> clazz, Supplier<T> factory, Class<P> objType, int priority) {
@@ -185,9 +186,11 @@ public class TypedPayloadRegistries {
 
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.GUI_TEXTURE_ACCESSOR, 1000);
         register(StringPayload.class, StringPayload::new, SyncedFieldAccessors.COMPONENT_ACCESSOR, 1000);
+
+        sort();
     }
 
-    public static void postInit() {
+    public static void sort() {
         if (loaded) {
             return;
         }

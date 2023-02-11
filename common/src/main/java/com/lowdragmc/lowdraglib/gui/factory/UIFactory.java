@@ -1,10 +1,13 @@
 package com.lowdragmc.lowdraglib.gui.factory;
 
+import com.lowdragmc.lowdraglib.Platform;
+import com.lowdragmc.lowdraglib.core.mixins.accessor.ServerPlayerAccessor;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIOpen;
+import com.lowdragmc.lowdraglib.side.ForgeEventHooks;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -15,9 +18,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 
 public abstract class UIFactory<T> {
     public final int uiFactoryId;
@@ -32,9 +32,6 @@ public abstract class UIFactory<T> {
     }
 
     public final boolean openUI(T holder, ServerPlayer player) {
-        if (player instanceof FakePlayer) {
-            return false;
-        }
         ModularUI uiTemplate = createUITemplate(holder, player);
         if (uiTemplate == null) return false;
         uiTemplate.initWidgets();
@@ -42,8 +39,8 @@ public abstract class UIFactory<T> {
         if (player.containerMenu != player.inventoryMenu) {
             player.closeContainer();
         }
-        player.nextContainerCounter();
-        int currentWindowId = player.containerCounter;
+        ((ServerPlayerAccessor) player).callNextContainerCounter();
+        int currentWindowId = ((ServerPlayerAccessor) player).getContainerCounter();
 
         FriendlyByteBuf serializedHolder = new FriendlyByteBuf(Unpooled.buffer());
         writeHolderToSyncData(serializedHolder, holder);
@@ -54,11 +51,13 @@ public abstract class UIFactory<T> {
 
         LDLNetworking.NETWORK.sendToPlayer(new SPacketUIOpen(uiFactoryId, serializedHolder, currentWindowId), player);
 
-        player.initMenu(container);
+        ((ServerPlayerAccessor) player).callInitMenu(container);
         player.containerMenu = container;
 
         //and fire forge event only in the end
-        MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Open(player, container));
+        if (Platform.isForge()) {
+            ForgeEventHooks.postPlayerContainerEvent(player, container);
+        }
         return true;
     }
 

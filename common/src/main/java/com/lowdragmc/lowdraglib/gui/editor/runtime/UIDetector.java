@@ -43,7 +43,7 @@ public class UIDetector {
 
     public static <A extends Annotation, T, C> List<C> scanClasses(Class<A> annotationClass, Class<T> baseClazz, BiPredicate<A, Class<? extends T>> predicate, Function<Class<? extends T>, C> mapping) {
         List<C> result = new ArrayList<>();
-        ReflectionUtils.getAnnotationClasses(annotationClass, clazz -> {
+        ReflectionUtils.findAnnotationClasses(annotationClass, clazz -> {
             if (baseClazz.isAssignableFrom(clazz)) {
                 try {
                     Class<? extends T> realClass =  (Class<? extends T>) clazz;

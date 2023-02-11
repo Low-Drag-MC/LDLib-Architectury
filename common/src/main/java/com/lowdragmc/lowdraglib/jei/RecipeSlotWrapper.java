@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.jei;
 
-import com.lowdragmc.lowdraglib.core.mixins.accessor.jei.RecipeSlotAccessor;
+import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeSlotAccessor;
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;

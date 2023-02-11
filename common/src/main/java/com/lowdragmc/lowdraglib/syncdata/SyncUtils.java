@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib.syncdata;
 
+import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
@@ -21,7 +21,7 @@ public class SyncUtils {
             if (!(newValue instanceof FluidStack)) {
                 return true;
             }
-            return !fluidStack.isFluidStackIdentical((FluidStack) newValue);
+            return !fluidStack.isFluidStackEqual((FluidStack) newValue);
         }
 
         return !oldValue.equals(newValue);

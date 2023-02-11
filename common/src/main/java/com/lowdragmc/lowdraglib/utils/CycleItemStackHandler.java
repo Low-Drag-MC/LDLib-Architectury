@@ -1,12 +1,12 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class CycleItemStackHandler implements IItemHandler {
+public class CycleItemStackHandler implements IItemTransfer {
     private List<List<ItemStack>> stacks;
 
 
@@ -28,6 +28,13 @@ public class CycleItemStackHandler implements IItemHandler {
     public ItemStack getStackInSlot(int i) {
         List<ItemStack> stackList = stacks.get(i);
         return stackList == null || stackList.isEmpty() ? ItemStack.EMPTY : stackList.get(Math.abs((int)(System.currentTimeMillis() / 1000) % stackList.size()));
+    }
+
+    @Override
+    public void setStackInSlot(int index, ItemStack stack) {
+        if (index >= 0 && index < stacks.size()) {
+            stacks.set(index, List.of(stack));
+        }
     }
 
     public List<ItemStack> getStackList(int i){

@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.factory.HeldItemUIFactory;
 import com.lowdragmc.lowdraglib.gui.factory.UIEditorFactory;
 import com.lowdragmc.lowdraglib.gui.factory.UIFactory;
 import com.lowdragmc.lowdraglib.networking.LDLNetworking;
+import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 
 
 public class CommonProxy {
@@ -15,5 +16,6 @@ public class CommonProxy {
         UIFactory.register(HeldItemUIFactory.INSTANCE);
         UIFactory.register(UIEditorFactory.INSTANCE);
         UIDetector.init();
+        TypedPayloadRegistries.init();
     }
 }

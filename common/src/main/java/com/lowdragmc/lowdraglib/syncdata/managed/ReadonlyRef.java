@@ -22,7 +22,7 @@ public class ReadonlyRef implements IRef {
 
     protected void init() {
         if (!lazy) {
-            if (getReference().get() instanceof IContentChangeAware<?> handler) {
+            if (getReference().get() instanceof IContentChangeAware handler) {
                 replaceHandler(handler);
             } else {
                 throw new IllegalArgumentException("complex sync field must be an IContentChangeAware if not lazy!");
@@ -30,7 +30,7 @@ public class ReadonlyRef implements IRef {
         }
     }
 
-    protected void replaceHandler(IContentChangeAware<?> handler) {
+    protected void replaceHandler(IContentChangeAware handler) {
         var onContentChanged = handler.getOnContentsChanged();
         if (onContentChanged != null) {
             handler.setOnContentsChanged(() -> {

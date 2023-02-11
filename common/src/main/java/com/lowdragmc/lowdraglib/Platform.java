@@ -4,6 +4,8 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
+
 public class Platform {
 
     @ExpectPlatform
@@ -36,6 +38,11 @@ public class Platform {
     @ExpectPlatform
     @Nullable
     public static MinecraftServer getMinecraftServer() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static Path getGamePath() {
         throw new AssertionError();
     }
 }

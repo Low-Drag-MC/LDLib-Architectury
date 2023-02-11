@@ -31,7 +31,7 @@ public class LocalizationUtils {
      * @return the localized string.
      */
     public static String format(String localisationKey, Object... substitutions) {
-        if (LDLib.isClient()) {
+        if (!LDLib.isClient()) {
             return String.format(localisationKey, substitutions);
         } else {
             if (RESOURCE != null && RESOURCE.hasResource(localisationKey)) {

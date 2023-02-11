@@ -25,7 +25,7 @@ public class ClientCommands {
     @SuppressWarnings("unchecked")
     public static <S> List<LiteralArgumentBuilder<S>> createClientCommands() {
         return List.of(
-                (LiteralArgumentBuilder<S>) createLiteral("ldlib").then(createLiteral("reload_shader")
+                (LiteralArgumentBuilder<S>) createLiteral("ldlib_client").then(createLiteral("reload_shader")
                         .executes(context -> {
                             Shaders.reload();
                             ShaderManager.getInstance().reload();

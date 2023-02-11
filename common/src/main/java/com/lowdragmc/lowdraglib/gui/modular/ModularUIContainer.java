@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.modular;
 
-import com.lowdragmc.lowdraglib.core.mixins.accessor.gui.AbstractContainerMenuAccessor;
+import com.lowdragmc.lowdraglib.core.mixins.accessor.AbstractContainerMenuAccessor;
 import com.lowdragmc.lowdraglib.gui.util.PerTickIntCounter;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;

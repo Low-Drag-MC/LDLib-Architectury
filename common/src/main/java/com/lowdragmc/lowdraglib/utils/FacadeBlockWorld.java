@@ -91,10 +91,10 @@ public class FacadeBlockWorld extends DummyWorld {
         return  world == null ? super.getBiome(pos) : world.getBiome(pos);
     }
 
-    @Override
-    public @Nullable BlockEntity getExistingBlockEntity(BlockPos pos) {
-        return  world == null ? super.getExistingBlockEntity(pos) : pos.equals(this.pos) ? tile : world.getExistingBlockEntity(pos);
-    }
+//    @Override
+//    public @Nullable BlockEntity getExistingBlockEntity(BlockPos pos) {
+//        return  world == null ? super.getExistingBlockEntity(pos) : pos.equals(this.pos) ? tile : world.getExistingBlockEntity(pos);
+//    }
 
     @Override
     @Environment(EnvType.CLIENT)

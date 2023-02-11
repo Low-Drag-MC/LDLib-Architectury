@@ -2,11 +2,9 @@ package com.lowdragmc.lowdraglib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
+import com.lowdragmc.lowdraglib.json.factory.FluidStackTypeAdapter;
 import com.lowdragmc.lowdraglib.json.IGuiTextureTypeAdapter;
 import com.lowdragmc.lowdraglib.json.ItemStackTypeAdapter;
-import com.simibubi.create.Create;
-import io.github.fabricators_of_create.porting_lib.util.FluidStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -26,14 +24,18 @@ public class LDLib {
     public static final Random random = new Random();
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapterFactory(IGuiTextureTypeAdapter.INSTANCE)
+            .registerTypeAdapterFactory(FluidStackTypeAdapter.INSTANCE)
             .registerTypeAdapter(ItemStack.class, ItemStackTypeAdapter.INSTANCE)
-            .registerTypeAdapter(FluidStack.class, FluidStackTypeAdapter.INSTANCE)
             .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
             .create();
     public static File location;
 
     public static void init() {
-        LOGGER.info("{} initializing! Create version: {} on platform: {}", NAME, Create.VERSION, Platform.platformName());
+        LOGGER.info("{} is initializing on platform: {}", NAME, Platform.platformName());
+        location = new File(Platform.getGamePath().toFile(), "ldlib");
+        if (location.mkdir()) {
+            LOGGER.info("create ldlib config folder");
+        }
     }
 
     public static ResourceLocation location(String path) {

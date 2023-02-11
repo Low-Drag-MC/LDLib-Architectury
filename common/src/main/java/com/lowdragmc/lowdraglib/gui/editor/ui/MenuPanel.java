@@ -49,7 +49,7 @@ public class MenuPanel extends WidgetGroup {
                     tag = new CompoundTag();
                 }
             } catch (IOException e) {
-                LDLib.LOGGER.error(e);
+                LDLib.LOGGER.error(e.getMessage());
             }
             for (UIDetector.Wrapper<RegisterUI, MenuTab> wrapper : UIDetector.REGISTER_MENU_TABS) {
                 var tab = wrapper.creator().get();

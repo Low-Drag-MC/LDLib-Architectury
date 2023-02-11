@@ -4,7 +4,10 @@ import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
-import com.lowdragmc.lowdraglib.utils.FluidUtils;
+import com.lowdragmc.lowdraglib.msic.ItemStackTransfer;
+import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
+import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -12,9 +15,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public class BlockSelectorWidget extends WidgetGroup {
     private Consumer<BlockState> onBlockStateUpdate;
     private Block block;
-    private final IItemHandlerModifiable handler;
+    private final IItemTransfer handler;
     private final TextFieldWidget blockField;
     private final Map<Property, Comparable> properties;
 
@@ -33,7 +33,7 @@ public class BlockSelectorWidget extends WidgetGroup {
         properties = new HashMap<>();
         blockField = (TextFieldWidget) new TextFieldWidget(22, 0, width - (isState ?  46 : 26), 20, null, s -> {
             if (s != null && !s.isEmpty()) {
-                Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(s));
+                Block block = Registry.BLOCK.get(new ResourceLocation(s));
                 if (this.block != block) {
                     this.block = block;
                     onUpdate();
@@ -41,16 +41,15 @@ public class BlockSelectorWidget extends WidgetGroup {
             }
         }).setResourceLocationOnly().setHoverTooltips("ldlib.gui.tips.block_selector");
 
-        addWidget(new PhantomSlotWidget(handler = new ItemStackHandler(1), 0, 1, 1)
+        addWidget(new PhantomSlotWidget(handler = new ItemStackTransfer(1), 0, 1, 1)
                 .setClearSlotOnRightClick(true)
                 .setChangeListener(() -> {
                     ItemStack stack = handler.getStackInSlot(0);
                     if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem itemBlock)) {
-                        var optional = FluidUtils.getFluidHandler(stack);
-                        if (optional.isPresent()) {
-                            var handler = optional.orElse(null);
-                            if (handler.getTanks() > 0) {
-                                var fluid = handler.getFluidInTank(0).getFluid();
+                        var fluidTransfer = FluidTransferHelper.getFluidTransfer(handler, 0);
+                        if (fluidTransfer != null) {
+                            if (fluidTransfer.getTanks() > 0) {
+                                var fluid = fluidTransfer.getFluidInTank(0).getFluid();
                                 setBlock(fluid.defaultFluidState().createLegacyBlock());
                                 onUpdate();
                                 return;
@@ -114,7 +113,7 @@ public class BlockSelectorWidget extends WidgetGroup {
             block = blockState.getBlock();
             new ItemStack(block);
             handler.setStackInSlot(0, new ItemStack(block));
-            blockField.setCurrentString(block.getRegistryName() == null ? "" : block.getRegistryName().toString());
+            blockField.setCurrentString(Registry.BLOCK.getKey(block));
             for (Property<?> property : blockState.getBlock().getStateDefinition().getProperties()) {
                 properties.put(property, blockState.getValue(property));
             }

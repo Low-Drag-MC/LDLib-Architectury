@@ -4,6 +4,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 
+import java.io.File;
+import java.nio.file.Path;
+
 public class PlatformImpl {
 
 	protected static MinecraftServer SERVER;
@@ -30,6 +33,10 @@ public class PlatformImpl {
 
 	public static MinecraftServer getMinecraftServer() {
 		return SERVER;
+	}
+
+	public static Path getGamePath() {
+		return FabricLoader.getInstance().getGameDir();
 	}
 
 }

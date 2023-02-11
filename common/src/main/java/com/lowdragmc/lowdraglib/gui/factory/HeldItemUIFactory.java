@@ -62,7 +62,7 @@ public class HeldItemUIFactory extends UIFactory<HeldItemUIFactory.HeldItemHolde
 
         @Override
         public boolean isInvalid() {
-            return !player.getItemInHand(hand).equals(held, false);
+            return !ItemStack.isSameItemSameTags(player.getItemInHand(hand), held);
         }
 
         @Override

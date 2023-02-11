@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.core.mixins.accessor.jei.RecipesGuiAccessor;
+import com.lowdragmc.lowdraglib.core.mixins.jei.RecipesGuiAccessor;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIJeiHandler;
 import mezz.jei.api.IModPlugin;

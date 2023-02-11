@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.core.mixins.accessor.gui.SlotAccessor;
+import com.lowdragmc.lowdraglib.core.mixins.accessor.SlotAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
@@ -14,13 +14,13 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
+import com.lowdragmc.lowdraglib.msic.ItemStackTransfer;
+import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
-import io.github.fabricators_of_create.porting_lib.transfer.item.SlotItemHandler;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
@@ -28,6 +28,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -94,7 +95,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         setContainerSlot(inventory, slotIndex);
     }
 
-    public SlotWidget(IItemHandler itemHandler, int slotIndex, int xPosition, int yPosition, boolean canTakeItems, boolean canPutItems) {
+    public SlotWidget(IItemTransfer itemHandler, int slotIndex, int xPosition, int yPosition, boolean canTakeItems, boolean canPutItems) {
         super(new Position(xPosition, yPosition), new Size(18, 18));
         this.canTakeItems = canTakeItems;
         this.canPutItems = canPutItems;
@@ -105,8 +106,8 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return new WidgetSlot(inventory, index, 0, 0);
     }
 
-    protected Slot createSlot(IItemHandler itemHandler, int index) {
-        return new WidgetSlotItemHandler(itemHandler, index, 0, 0);
+    protected Slot createSlot(IItemTransfer itemHandler, int index) {
+        return new WidgetSlotItemTransfer(itemHandler, index, 0, 0);
     }
 
     public SlotWidget setContainerSlot(Container inventory, int slotIndex) {
@@ -114,7 +115,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return this;
     }
 
-    public SlotWidget setHandlerSlot(IItemHandler itemHandler, int slotIndex) {
+    public SlotWidget setHandlerSlot(IItemTransfer itemHandler, int slotIndex) {
         updateSlot(createSlot(itemHandler, slotIndex));
         return this;
     }
@@ -256,7 +257,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }
     }
 
-    public SlotWidget(IItemHandlerModifiable itemHandler, int slotIndex, int xPosition, int yPosition) {
+    public SlotWidget(IItemTransfer itemHandler, int slotIndex, int xPosition, int yPosition) {
         this(itemHandler, slotIndex, xPosition, yPosition, true, true);
     }
 
@@ -383,34 +384,70 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     }
 
-    protected class WidgetSlotItemHandler extends SlotItemHandler {
+    protected class WidgetSlotItemTransfer extends Slot {
+        private static final Container emptyInventory = new SimpleContainer(0);
+        private final IItemTransfer itemHandler;
+        private final int index;
 
-        public WidgetSlotItemHandler(IItemHandler itemHandler, int index, int xPosition, int yPosition) {
-            super(itemHandler, index, xPosition, yPosition);
+        public WidgetSlotItemTransfer(IItemTransfer itemHandler, int index, int xPosition, int yPosition) {
+            super(emptyInventory, index, xPosition, yPosition);
+            this.itemHandler = itemHandler;
+            this.index = index;
         }
 
         @Override
         public boolean mayPlace(@Nonnull ItemStack stack) {
-            return SlotWidget.this.canPutStack(stack) && super.mayPlace(stack);
+            return SlotWidget.this.canPutStack(stack) && (!stack.isEmpty() && this.itemHandler.isItemValid(this.index, stack));
         }
 
         @Override
-        public boolean mayPickup(Player playerIn) {
-            return SlotWidget.this.canTakeStack(playerIn) && super.mayPickup(playerIn);
+        public boolean mayPickup(@Nullable Player playerIn) {
+            return SlotWidget.this.canTakeStack(playerIn) && !this.itemHandler.extractItem(index, 1, true).isEmpty();
+        }
+
+        @Override
+        @Nonnull
+        public ItemStack getItem()
+        {
+            return this.itemHandler.getStackInSlot(index);
         }
 
         @Override
         public void set(@Nonnull ItemStack stack) {
-            super.set(stack);
+            this.itemHandler.setStackInSlot(index, stack);
+            this.setChanged();
             if (changeListener != null) {
                 changeListener.run();
             }
         }
 
+        @Override
+        public void onQuickCraft(@Nonnull ItemStack oldStackIn, @Nonnull ItemStack newStackIn) {
+
+        }
+
+        @Override
+        public int getMaxStackSize()
+        {
+            return this.itemHandler.getSlotLimit(this.index);
+        }
+
+        @Override
+        public int getMaxStackSize(@Nonnull ItemStack stack) {
+            ItemStack maxAdd = stack.copy();
+            int maxInput = stack.getMaxStackSize();
+            maxAdd.setCount(maxInput);
+            ItemStack currentStack = this.itemHandler.getStackInSlot(index);
+            this.itemHandler.setStackInSlot(index, ItemStack.EMPTY);
+            ItemStack remainder = this.itemHandler.insertItem(index, maxAdd, true);
+            this.itemHandler.setStackInSlot(index, currentStack);
+            return maxInput - remainder.getCount();
+        }
+
         @NotNull
         @Override
         public ItemStack remove(int amount) {
-            var result = super.remove(amount);
+            var result = this.itemHandler.extractItem(index, amount, false);
             if (changeListener != null && !getItem().isEmpty()) {
                 changeListener.run();
             }
@@ -431,7 +468,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     public void buildConfigurator(ConfiguratorGroup father) {
-        var handler = new ItemStackHandler();
+        var handler = new ItemStackTransfer();
         handler.setStackInSlot(0, Blocks.STONE.asItem().getDefaultInstance());
         father.addConfigurators(new WrapperConfigurator("ldlib.gui.editor.group.preview", new SlotWidget(){
             @Override

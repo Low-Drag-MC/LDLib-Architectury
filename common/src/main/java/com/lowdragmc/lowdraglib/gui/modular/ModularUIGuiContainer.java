@@ -1,10 +1,12 @@
 package com.lowdragmc.lowdraglib.gui.modular;
 
-import com.lowdragmc.lowdraglib.core.mixins.accessor.gui.AbstractContainerScreenAccessor;
+import com.lowdragmc.lowdraglib.Platform;
+import com.lowdragmc.lowdraglib.core.mixins.accessor.AbstractContainerScreenAccessor;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
+import com.lowdragmc.lowdraglib.side.ForgeEventHooks;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
@@ -24,7 +26,6 @@ import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -114,10 +115,10 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         tooltipComponent = null;
 
         DrawerHelper.drawGradientRect(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ScreenEvent.BackgroundDrawnEvent(this, poseStack));
+        if (Platform.isForge()) ForgeEventHooks.postBackgroundRenderedEvent(this, poseStack);
 
         modularUI.mainGroup.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.DrawBackground(this, poseStack, mouseX, mouseY));
+        if (Platform.isForge()) ForgeEventHooks.postRenderBackgroundEvent(this, poseStack, mouseX, mouseY);
 
         modularUI.mainGroup.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
 
@@ -138,7 +139,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.hoveredSlot = null;
 
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.DrawForeground(this, poseStack, mouseX, mouseY));
+        if (Platform.isForge()) ForgeEventHooks.postRenderForegroundEvent(this, poseStack, mouseX, mouseY);
 
         renderItemStackOnMouse(mouseX, mouseY);
         renderReturningItemStack();
@@ -180,8 +181,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         RenderSystem.applyModelViewMatrix();
         this.setBlitOffset(200);
         this.itemRenderer.blitOffset = 200.0F;
-        Font font = net.minecraftforge.client.RenderProperties.get(stack).getFont(stack);
-        if (font == null) font = this.font;
+        Font font = Minecraft.getInstance().font;
         this.itemRenderer.renderAndDecorateItem(stack, pX, pY);
         this.itemRenderer.renderGuiItemDecorations(font, stack, pX, pY - (((AbstractContainerScreenAccessor)this).getDraggingItem().isEmpty() ? 0 : 8), text);
         this.setBlitOffset(0);

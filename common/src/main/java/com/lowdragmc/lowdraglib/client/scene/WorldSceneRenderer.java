@@ -2,7 +2,6 @@ package com.lowdragmc.lowdraglib.client.scene;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
-import com.lowdragmc.lowdraglib.client.ClientPlatform;
 import com.lowdragmc.lowdraglib.client.shader.management.ShaderManager;
 import com.lowdragmc.lowdraglib.client.utils.glu.Project;
 import com.lowdragmc.lowdraglib.utils.*;
@@ -391,7 +390,6 @@ public abstract class WorldSceneRenderer {
         }
 
         Minecraft mc = Minecraft.getInstance();
-        RenderType oldRenderLayer = ClientPlatform.getRenderType();
 
         float particleTicks = mc.getFrameTime();
         if (useCache) {
@@ -400,7 +398,6 @@ public abstract class WorldSceneRenderer {
             BlockRenderDispatcher blockrendererdispatcher = mc.getBlockRenderer();
             try { // render com.lowdragmc.lowdraglib.test.block in each layer
                 for (RenderType layer : RenderType.chunkBufferLayers()) {
-                    ClientPlatform.setRenderType(layer);
                     PoseStack matrixstack = new PoseStack();
                     renderedBlocksMap.forEach((renderedBlocks, hook) -> {
                         if (layer == RenderType.translucent()) { // render tesr before translucent
@@ -428,7 +425,6 @@ public abstract class WorldSceneRenderer {
                     layer.clearRenderState();
                 }
             } finally {
-                ClientPlatform.setRenderType(oldRenderLayer);
             }
         }
 
@@ -470,7 +466,6 @@ public abstract class WorldSceneRenderer {
                         if (Thread.interrupted())
                             return;
                         RenderType layer = layers.get(i);
-                        ClientPlatform.setRenderType(layer);
                         BufferBuilder buffer = new BufferBuilder(layer.bufferSize());
                         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
                         renderedBlocksMap.forEach((renderedBlocks, hook) -> {
@@ -493,7 +488,6 @@ public abstract class WorldSceneRenderer {
                     }
                     ModelBlockRenderer.clearCache();
                 } finally {
-                    ClientPlatform.setRenderType(null);
                 }
                 Set<BlockPos> poses = new HashSet<>();
                 renderedBlocksMap.forEach((renderedBlocks, hook) -> {

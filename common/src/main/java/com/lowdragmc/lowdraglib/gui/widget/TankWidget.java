@@ -13,12 +13,13 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.TextFormattingUtil;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
-import com.lowdragmc.lowdraglib.utils.FluidUtils;
+import com.lowdragmc.lowdraglib.msic.FluidStorage;
+import com.lowdragmc.lowdraglib.side.fluid.*;
+import com.lowdragmc.lowdraglib.side.fluid.FluidActionResult;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -30,19 +31,12 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidTank;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
+
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -58,7 +52,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Nullable
     @Getter
-    protected IFluidTank fluidTank;
+    protected IFluidStorage fluidTank;
     @Configurable
     @Setter
     protected boolean showAmount;
@@ -86,7 +80,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     protected IngredientIO ingredientIO = IngredientIO.RENDER_ONLY;
 
     protected FluidStack lastFluidInTank;
-    protected int lastTankCapacity;
+    protected long lastTankCapacity;
     @Setter
     protected Runnable changeListener;
     @NotNull
@@ -98,11 +92,11 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         setFillDirection(ProgressTexture.FillDirection.DOWN_TO_UP);
     }
 
-    public TankWidget(IFluidTank fluidTank, int x, int y, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
+    public TankWidget(IFluidStorage fluidTank, int x, int y, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
         this(fluidTank, x, y, 18, 18, allowClickContainerFilling, allowClickContainerEmptying);
     }
 
-    public TankWidget(@Nullable IFluidTank fluidTank, int x, int y, int width, int height, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
+    public TankWidget(@Nullable IFluidStorage fluidTank, int x, int y, int width, int height, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
         super(new Position(x, y), new Size(width, height));
         this.fluidTank = fluidTank;
         this.showAmount = true;
@@ -111,7 +105,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         this.drawHoverTips = true;
     }
 
-    public TankWidget setFluidTank(IFluidTank fluidTank) {
+    public TankWidget setFluidTank(IFluidStorage fluidTank) {
         this.fluidTank = fluidTank;
         if (isClientSideWidget) {
             setClientSideWidget();
@@ -141,7 +135,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public Object getJEIIngredient() {
         if (lastFluidInTank == null) return null;
         if (LDLib.isReiLoaded()) {
-            return lastFluidInTank.isEmpty() ? null : EntryStacks.of(FluidStackHooksForge.fromForge(lastFluidInTank));
+            return lastFluidInTank.isEmpty() ? null : EntryStacks.of(lastFluidInTank.getFluid(), lastFluidInTank.getAmount());
         }
         return lastFluidInTank.isEmpty() ? null : lastFluidInTank;
     }
@@ -227,14 +221,14 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (drawHoverTips && isMouseOverElement(mouseX, mouseY)) {
             List<Component> tooltips = new ArrayList<>();
             if (lastFluidInTank != null && !lastFluidInTank.isEmpty()) {
-                FluidAttributes fluid = lastFluidInTank.getFluid().getAttributes();
-                tooltips.add(fluid.getDisplayName(lastFluidInTank));
-                tooltips.add(new TranslatableComponent("ldlib.fluid.amount", lastFluidInTank.getAmount(), lastTankCapacity));
-                tooltips.add(new TranslatableComponent("ldlib.fluid.temperature", fluid.getTemperature(lastFluidInTank)));
-                tooltips.add(new TranslatableComponent(fluid.isGaseous(lastFluidInTank) ? "ldlib.fluid.state_gas" : "ldlib.fluid.state_liquid"));
+                var fluid = lastFluidInTank.getFluid();
+                tooltips.add(FluidHelper.getDisplayName(lastFluidInTank));
+                tooltips.add(Component.translatable("ldlib.fluid.amount", lastFluidInTank.getAmount(), lastTankCapacity));
+                tooltips.add(Component.translatable("ldlib.fluid.temperature", FluidHelper.getTemperature(lastFluidInTank)));
+                tooltips.add(Component.translatable(FluidHelper.isLighterThanAir(lastFluidInTank) ? "ldlib.fluid.state_gas" : "ldlib.fluid.state_liquid"));
             } else {
-                tooltips.add(new TranslatableComponent("ldlib.fluid.empty"));
-                tooltips.add(new TranslatableComponent("ldlib.fluid.amount", 0, lastTankCapacity));
+                tooltips.add(Component.translatable("ldlib.fluid.empty"));
+                tooltips.add(Component.translatable("ldlib.fluid.amount", 0, lastTankCapacity));
             }
             if (gui != null) {
                 tooltips.addAll(tooltipTexts);
@@ -257,15 +251,15 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             FluidStack fluidStack = fluidTank.getFluid();
             if (fluidTank.getCapacity() != lastTankCapacity) {
                 this.lastTankCapacity = fluidTank.getCapacity();
-                writeUpdateInfo(0, buffer -> buffer.writeVarInt(lastTankCapacity));
+                writeUpdateInfo(0, buffer -> buffer.writeVarLong(lastTankCapacity));
             }
             if (!fluidStack.isFluidEqual(lastFluidInTank)) {
                 this.lastFluidInTank = fluidStack.copy();
-                CompoundTag fluidStackTag = fluidStack.writeToNBT(new CompoundTag());
+                CompoundTag fluidStackTag = fluidStack.saveToTag(new CompoundTag());
                 writeUpdateInfo(2, buffer -> buffer.writeNbt(fluidStackTag));
             } else if (fluidStack.getAmount() != lastFluidInTank.getAmount()) {
                 this.lastFluidInTank.setAmount(fluidStack.getAmount());
-                writeUpdateInfo(3, buffer -> buffer.writeVarInt(lastFluidInTank.getAmount()));
+                writeUpdateInfo(3, buffer -> buffer.writeVarLong(lastFluidInTank.getAmount()));
             } else {
                 super.detectAndSendChanges();
                 return;
@@ -281,17 +275,17 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         buffer.writeBoolean(fluidTank != null);
         if (fluidTank != null) {
             this.lastTankCapacity = fluidTank.getCapacity();
-            buffer.writeVarInt(lastTankCapacity);
+            buffer.writeVarLong(lastTankCapacity);
             FluidStack fluidStack = fluidTank.getFluid();
             this.lastFluidInTank = fluidStack.copy();
-            buffer.writeNbt(fluidStack.writeToNBT(new CompoundTag()));
+            buffer.writeNbt(fluidStack.saveToTag(new CompoundTag()));
         }
     }
 
     @Override
     public void readInitialData(FriendlyByteBuf buffer) {
         if (buffer.readBoolean()) {
-            this.lastTankCapacity = buffer.readVarInt();
+            this.lastTankCapacity = buffer.readVarLong();
             readUpdateInfo(2, buffer);
         }
     }
@@ -300,13 +294,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Environment(EnvType.CLIENT)
     public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
         if (id == 0) {
-            this.lastTankCapacity = buffer.readVarInt();
+            this.lastTankCapacity = buffer.readVarLong();
         } else if (id == 1) {
             this.lastFluidInTank = null;
         } else if (id == 2) {
-            this.lastFluidInTank = FluidStack.loadFluidStackFromNBT(buffer.readNbt());
+            this.lastFluidInTank = FluidStack.loadFromTag(buffer.readNbt());
         } else if (id == 3 && lastFluidInTank != null) {
-            this.lastFluidInTank.setAmount(buffer.readVarInt());
+            this.lastFluidInTank.setAmount(buffer.readVarLong());
         } else if (id == 4) {
             ItemStack currentStack = gui.getModularUIContainer().getCarried();
             int newStackSize = buffer.readVarInt();
@@ -337,20 +331,20 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (fluidTank == null) return -1;
         Player player = gui.entityPlayer;
         ItemStack currentStack = gui.getModularUIContainer().getCarried();
-        if (!currentStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) return -1;
+        var handler = FluidTransferHelper.getFluidTransfer(gui.entityPlayer, gui.getModularUIContainer());
+        if (handler == null) return -1;
         int maxAttempts = isShiftKeyDown ? currentStack.getCount() : 1;
-
         if (allowClickFilled && fluidTank.getFluidAmount() > 0) {
             boolean performedFill = false;
             FluidStack initialFluid = fluidTank.getFluid();
             for (int i = 0; i < maxAttempts; i++) {
-                FluidActionResult result = FluidUtils.tryFillContainer(currentStack, (IFluidHandler) fluidTank, Integer.MAX_VALUE, null, false);
+                FluidActionResult result = FluidTransferHelper.tryFillContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, false);
                 if (!result.isSuccess()) break;
-                currentStack = FluidUtils.tryFillContainer(currentStack, (IFluidHandler) fluidTank, Integer.MAX_VALUE, null, true).getResult();
+                currentStack = FluidTransferHelper.tryFillContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, true).getResult();
                 performedFill = true;
             }
             if (performedFill) {
-                SoundEvent soundevent = initialFluid.getFluid().getAttributes().getFillSound(initialFluid);
+                SoundEvent soundevent = FluidHelper.getFillSound(initialFluid);
                 player.level.playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                 gui.getModularUIContainer().setCarried(currentStack);
                 return currentStack.getCount();
@@ -360,14 +354,14 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (allowClickDrained) {
             boolean performedEmptying = false;
             for (int i = 0; i < maxAttempts; i++) {
-                FluidActionResult result = FluidUtils.tryEmptyContainer(currentStack, (IFluidHandler) fluidTank, Integer.MAX_VALUE, null, false);
+                FluidActionResult result = FluidTransferHelper.tryEmptyContainer(currentStack, (IFluidTransfer) fluidTank, Integer.MAX_VALUE, null, false);
                 if (!result.isSuccess()) break;
-                currentStack = FluidUtils.tryEmptyContainer(currentStack, (IFluidHandler) fluidTank, Integer.MAX_VALUE, null, true).getResult();
+                currentStack = FluidTransferHelper.tryEmptyContainer(currentStack, (IFluidTransfer) fluidTank, Integer.MAX_VALUE, null, true).getResult();
                 performedEmptying = true;
             }
-            FluidStack filledFluid = fluidTank.getFluid();
+            var filledFluid = fluidTank.getFluid();
             if (performedEmptying) {
-                SoundEvent soundevent = filledFluid.getFluid().getAttributes().getEmptySound(filledFluid);
+                SoundEvent soundevent = FluidHelper.getEmptySound(filledFluid);
                 player.level.playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                 gui.getModularUIContainer().setCarried(currentStack);
                 return currentStack.getCount();
@@ -380,12 +374,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Environment(EnvType.CLIENT)
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if ((allowClickDrained || allowClickFilled) && isMouseOverElement(mouseX, mouseY)) {
-            ItemStack currentStack = gui.getModularUIContainer().getCarried();
-            if (button == 0 && currentStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
-                boolean isShiftKeyDown = isShiftDown();
-                writeClientAction(1, writer -> writer.writeBoolean(isShiftKeyDown));
-                playButtonClickSound();
-                return true;
+            if (button == 0) {
+                if (FluidTransferHelper.getFluidTransfer(gui.entityPlayer, gui.getModularUIContainer()) != null) {
+                    boolean isShiftKeyDown = isShiftDown();
+                    writeClientAction(1, writer -> writer.writeBoolean(isShiftKeyDown));
+                    playButtonClickSound();
+                    return true;
+                }
             }
         }
         return false;
@@ -393,8 +388,8 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     public void buildConfigurator(ConfiguratorGroup father) {
-        var handler = new FluidTank(5000);
-        handler.fill(new FluidStack(Fluids.WATER, 3000), IFluidHandler.FluidAction.EXECUTE);
+        var handler = new FluidStorage(5000);
+        handler.fill(FluidStack.create(Fluids.WATER, 3000), false);
         father.addConfigurators(new WrapperConfigurator("ldlib.gui.editor.group.preview", new TankWidget() {
             @Override
             public void updateScreen() {

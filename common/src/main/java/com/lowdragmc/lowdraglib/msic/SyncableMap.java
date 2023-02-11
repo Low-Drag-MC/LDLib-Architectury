@@ -8,6 +8,8 @@ import com.lowdragmc.lowdraglib.syncdata.accessor.ManagedAccessor;
 import com.lowdragmc.lowdraglib.syncdata.managed.ManagedHolder;
 import com.lowdragmc.lowdraglib.syncdata.payload.PrimitiveTypedPayload;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -26,7 +28,7 @@ import java.util.Set;
  * @param <K>
  * @param <V>
  */
-public abstract class SyncableMap<K, V> implements Map<K, V>, IContentChangeAware<SyncableMap<K, V>>, ITagSerializable<Tag> {
+public abstract class SyncableMap<K, V> implements Map<K, V>, IContentChangeAware, ITagSerializable<Tag> {
 
     private final IAccessor keyAccessor;
     private final IAccessor valueAccessor;
@@ -64,19 +66,9 @@ public abstract class SyncableMap<K, V> implements Map<K, V>, IContentChangeAwar
     }
 
     private final Map<K, V> map = new HashMap<>();
-    private Runnable onContentsChanged = () -> {
-    };
 
-    @Override
-    public SyncableMap<K, V> setOnContentsChanged(Runnable onContentChanged) {
-        this.onContentsChanged = onContentChanged;
-        return this;
-    }
-
-    @Override
-    public Runnable getOnContentsChanged() {
-        return onContentsChanged;
-    }
+    @Setter @Getter
+    private Runnable onContentsChanged = () -> {};
 
     @Override
     public int size() {

@@ -12,7 +12,7 @@ public class ReadonlyArrayRef extends ReadonlyRef {
     @Override
     protected void init() {
         var value = getReference().get();
-        if (value instanceof IContentChangeAware<?> handler) {
+        if (value instanceof IContentChangeAware handler) {
             super.init();
             return;
         }
@@ -25,13 +25,13 @@ public class ReadonlyArrayRef extends ReadonlyRef {
             if (!IContentChangeAware.class.isAssignableFrom(componentType)) {
                 throw new IllegalArgumentException("complex sync field must be an IContentChangeAware if not lazy!");
             }
-            for (var handler : (IContentChangeAware<?>[]) value) {
+            for (var handler : (IContentChangeAware[]) value) {
                 replaceHandler(handler);
             }
             return;
         } else if (value instanceof Collection<?> collection) {
             for (var item : collection) {
-                if (item instanceof IContentChangeAware<?> handler) {
+                if (item instanceof IContentChangeAware handler) {
                     replaceHandler(handler);
                 } else {
                     throw new IllegalArgumentException("complex sync field must be an IContentChangeAware if not lazy!");

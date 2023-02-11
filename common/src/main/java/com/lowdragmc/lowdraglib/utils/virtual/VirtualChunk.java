@@ -56,10 +56,11 @@ public class VirtualChunk extends ChunkAccess {
 			sections[i] = new VirtualChunkSection(this, i << 4);
 		}
 
-		Mods.STARLIGHT.executeIfInstalled(() -> () -> {
-			((ExtendedChunk)this).setBlockNibbles(StarLightEngine.getFilledEmptyLight(this));
-			((ExtendedChunk)this).setSkyNibbles(StarLightEngine.getFilledEmptyLight(this));
-		});
+		// TODO START LIGHT
+//		Mods.STARLIGHT.executeIfInstalled(() -> () -> {
+//			((ExtendedChunk)this).setBlockNibbles(StarLightEngine.getFilledEmptyLight(this));
+//			((ExtendedChunk)this).setSkyNibbles(StarLightEngine.getFilledEmptyLight(this));
+//		});
 	}
 
 	@Override

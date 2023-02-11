@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata;
 
-public interface IContentChangeAware<T extends IContentChangeAware<T>> {
-    T setOnContentsChanged(Runnable onContentChanged);
+public interface IContentChangeAware {
+    void setOnContentsChanged(Runnable onContentChanged);
     Runnable getOnContentsChanged();
 }

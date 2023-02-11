@@ -1,27 +1,29 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.lowdragmc.lowdraglib.core",
+  "package": "com.lowdragmc.lowdraglib.core.mixins",
   "compatibilityLevel": "JAVA_17",
+  "plugin": "com.lowdragmc.lowdraglib.core.mixins.LDLibMixinPlugin",
   "client": [
-    "mixins.BlockEntityRendererDispatcherMixin",
-    "mixins.BlockModelShaperMixin",
-    "mixins.ItemRendererMixin",
-    "mixins.LanguageMixin",
-    "mixins.ParticleEngineMixin",
-    "mixins.WorldRendererMixin",
-    "mixins.accessor.gui.AbstractContainerScreenAccessor",
-    "mixins.accessor.jei.RecipesGuiAccessor",
-    "mixins.accessor.jei.RecipeSlotAccessor",
-    "mixins.accessor.rei.AbstractDisplayViewingScreenAccessor"
+    "BlockEntityRendererDispatcherMixin",
+    "BlockModelShaperMixin",
+    "ItemRendererMixin",
+    "LanguageMixin",
+    "ParticleEngineMixin",
+    "WorldRendererMixin",
+    "accessor.AbstractContainerScreenAccessor",
+    "jei.RecipesGuiAccessor",
+    "jei.RecipeSlotAccessor",
+    "rei.AbstractDisplayViewingScreenAccessor"
   ],
   "mixins": [
-    "mixins.BlockEntityMixin",
-    "mixins.JeiRecipeLayoutMixin",
-    "mixins.accessor.RecipeLayoutAccessor",
-    "mixins.accessor.gui.AbstractContainerMenuAccessor",
-    "mixins.accessor.gui.SlotAccessor",
-    "mixins.accessor.jei.RecipeSlotsAccessor"
+    "BlockEntityMixin",
+    "accessor.AbstractContainerMenuAccessor",
+    "accessor.ServerPlayerAccessor",
+    "accessor.SlotAccessor",
+    "jei.RecipeSlotsAccessor",
+    "jei.JeiRecipeLayoutMixin",
+    "jei.RecipeLayoutAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -3,42 +3,43 @@ package com.lowdragmc.lowdraglib.gui.widget;
 import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.msic.FluidStorage;
+import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
+import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public class FluidStackSelectorWidget extends WidgetGroup {
-    private Consumer<FluidStack> onFluidStackUpdate;
-    private final FluidTank handler;
+    private Consumer<FluidStack> onIFluidStackUpdate;
+    private final IFluidStorage handler;
     private final TextFieldWidget fluidField;
-    private FluidStack fluid = FluidStack.EMPTY;
+    private FluidStack fluid = FluidStack.empty();
 
     public FluidStackSelectorWidget(int x, int y, int width) {
         super(x, y, width, 20);
         setClientSideWidget();
         fluidField = (TextFieldWidget) new TextFieldWidget(22, 0, width - 46, 20, null, s -> {
             if (s != null && !s.isEmpty()) {
-                Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(s));
+                Fluid fluid = Registry.FLUID.get(new ResourceLocation(s));
                 if (fluid == null) {
-                    fluid = FluidStack.EMPTY.getFluid();
+                    fluid = FluidStack.empty().getFluid();
                 }
-                if (!this.fluid.isFluidEqual(new FluidStack(fluid, 1000))) {
-                    this.fluid = new FluidStack(fluid, 1000);
+                if (!this.fluid.isFluidEqual(FluidStack.create(fluid, 1000))) {
+                    this.fluid = FluidStack.create(fluid, 1000);
                     onUpdate();
                 }
             }
         }).setResourceLocationOnly().setHoverTooltips("ldlib.gui.tips.fluid_selector");
 
-        addWidget(new PhantomFluidWidget(handler = new FluidTank(1000),1, 1)
-                .setFluidStackUpdater(fluidStack -> {
-                    setFluidStack(fluidStack);
+        addWidget(new PhantomFluidWidget(handler = new FluidStorage(1000),1, 1)
+                .setIFluidStackUpdater(fluidStack -> {
+                    setIFluidStack(fluidStack);
                     onUpdate();
                 }).setBackground(new ColorBorderTexture(1, -1)));
         addWidget(fluidField);
@@ -64,29 +65,29 @@ public class FluidStackSelectorWidget extends WidgetGroup {
                 .setHoverBorderTexture(1, -1).setHoverTooltips("ldlib.gui.tips.fluid_tag"));
     }
 
-    public FluidStack getFluidStack() {
+    public FluidStack getIFluidStack() {
         return fluid;
     }
 
-    public FluidStackSelectorWidget setFluidStack(FluidStack fluidStack) {
-        fluid = Objects.requireNonNullElse(fluidStack, FluidStack.EMPTY).copy();
-        if (fluid != FluidStack.EMPTY) {
+    public FluidStackSelectorWidget setIFluidStack(FluidStack fluidStack) {
+        fluid = Objects.requireNonNullElse(fluidStack, FluidStack.empty()).copy();
+        if (fluid != FluidStack.empty()) {
             fluid.setAmount(1000);
         }
         handler.setFluid(fluid);
-        fluidField.setCurrentString(fluid.getFluid().getRegistryName().toString());
+        fluidField.setCurrentString(Registry.FLUID.getKey(fluid.getFluid()));
         return this;
     }
 
-    public FluidStackSelectorWidget setOnFluidStackUpdate(Consumer<FluidStack> onFluidStackUpdate) {
-        this.onFluidStackUpdate = onFluidStackUpdate;
+    public FluidStackSelectorWidget setOnIFluidStackUpdate(Consumer<FluidStack> onIFluidStackUpdate) {
+        this.onIFluidStackUpdate = onIFluidStackUpdate;
         return this;
     }
 
     private void onUpdate() {
         handler.setFluid(fluid);
-        if (onFluidStackUpdate != null) {
-            onFluidStackUpdate.accept(fluid);
+        if (onIFluidStackUpdate != null) {
+            onIFluidStackUpdate.accept(fluid);
         }
     }
 }

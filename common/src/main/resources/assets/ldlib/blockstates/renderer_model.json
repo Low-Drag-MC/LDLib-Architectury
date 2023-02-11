@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "ldlib:block/renderer_model"
+    }
+  }
+}

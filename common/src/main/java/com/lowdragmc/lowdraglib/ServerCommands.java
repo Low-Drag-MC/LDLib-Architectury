@@ -1,7 +1,5 @@
 package com.lowdragmc.lowdraglib;
 
-import com.lowdragmc.lowdraglib.client.shader.Shaders;
-import com.lowdragmc.lowdraglib.client.shader.management.ShaderManager;
 import com.lowdragmc.lowdraglib.gui.factory.UIEditorFactory;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;

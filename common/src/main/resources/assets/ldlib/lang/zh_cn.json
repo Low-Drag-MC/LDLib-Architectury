@@ -1,0 +1,9 @@
+{
+  "ldlib.gui.tips.confirm": "确认",
+  "ldlib.gui.tips.cancel": "取消",
+  "ldlib.fluid.empty": "空",
+  "ldlib.fluid.amount": "§9流体：%d/%d mB",
+  "ldlib.fluid.temperature": "§cw温度：%d K",
+  "ldlib.fluid.state_gas": "§a状态：气体",
+  "ldlib.fluid.state_liquid": "§a状态：流体"
+}
