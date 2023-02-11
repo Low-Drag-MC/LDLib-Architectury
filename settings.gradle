@@ -8,8 +8,12 @@ pluginManagement {
     }
 }
 
-include("common")
-include("fabric")
-include("forge")
+include("ldlib-common")
+include("ldlib-fabric")
+include("ldlib-forge")
 
-rootProject.name = "ldlib-architectury"
+project(':ldlib-common').setProjectDir(new File("common"))
+project(':ldlib-forge').setProjectDir(new File("forge"))
+project(':ldlib-fabric').setProjectDir(new File("fabric"))
+
+rootProject.name = "${mod_name}"

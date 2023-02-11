@@ -12,19 +12,19 @@ static def isJetBrainsRuntime() {
 }
 
 loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
+    accessWidenerPath = project(":ldlib-common").file("src/main/resources/ldlib.accesswidener")
 
     forge {
         mixinConfig(
-                "${mod_id}-common.mixins.json",
-                "${mod_id}.mixins.json"
+                "ldlib-common.mixins.json",
+                "ldlib.mixins.json"
         )
 
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
         dataGen{
-            mod(mod_id)
+            mod("ldlib")
         }
     }
 
@@ -60,8 +60,8 @@ repositories {
 
 dependencies {
     forge("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
-    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    common(project(path: ":ldlib-common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: ":ldlib-common", configuration: "transformProductionForge")) { transitive = false }
 
     // Create and its dependencies
     modImplementation("com.simibubi.create:create-${minecraft_version}:${create_forge_version}:slim") { transitive = false }
@@ -118,7 +118,7 @@ jar {
 }
 
 sourcesJar {
-    def commonSources = project(":common").sourcesJar
+    def commonSources = project(":ldlib-common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 }
