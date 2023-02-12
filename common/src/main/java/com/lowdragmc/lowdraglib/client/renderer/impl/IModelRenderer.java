@@ -59,10 +59,8 @@ public class IModelRenderer implements IRenderer {
         this.useCustomBakedModel = useCustomBakedModel;
         if (LDLib.isClient()) {
             blockModels = new ConcurrentHashMap<>();
-            if (isRaw()) {
-                registerTextureSwitchEvent();
-                CACHE.add(modelLocation);
-            }
+            CACHE.add(modelLocation);
+            registerTextureSwitchEvent();
         }
     }
 
@@ -152,9 +150,12 @@ public class IModelRenderer implements IRenderer {
         if (atlasName.equals(TextureAtlas.LOCATION_BLOCKS)) {
             itemModel = null;
             blockModels.clear();
-            UnbakedModel model = getModel();
-            for (Material material : model.getMaterials(ModelFactory::getUnBakedModel, new HashSet<>())) {
-                register.accept(material.texture());
+            if (CACHE.contains(modelLocation)) {
+                UnbakedModel model = getModel();
+                for (Material material : model.getMaterials(ModelFactory::getUnBakedModel, new HashSet<>())) {
+                    register.accept(material.texture());
+                }
+                CACHE.remove(modelLocation);
             }
         }
     }

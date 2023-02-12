@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "ldlib",
+  "id": "${mod_id}",
   "version": "${version}",
   "name": "${mod_name}",
   "description": "${mod_description}",
@@ -12,7 +12,7 @@
     "sources": "${mod_url}"
   },
   "license": "${mod_license}",
-  "icon": "assets/ldlib/icon.png",
+  "icon": "assets/${mod_id}/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -29,8 +29,8 @@
     ]
   },
   "mixins": [
-    "ldlib.mixins.json",
-    "ldlib-common.mixins.json"
+    "${mod_id}.mixins.json",
+    "${mod_id}-common.mixins.json"
   ],
   "depends": {
     "minecraft": "${minecraft_version}",

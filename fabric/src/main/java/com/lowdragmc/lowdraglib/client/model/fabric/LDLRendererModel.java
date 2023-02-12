@@ -1,8 +1,11 @@
 package com.lowdragmc.lowdraglib.client.model.fabric;
 
+import com.lowdragmc.lowdraglib.client.model.IRendererWrapper;
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.mojang.datafixers.util.Pair;
+import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.fabric.api.client.model.ModelProviderContext;
 import net.fabricmc.fabric.api.client.model.ModelResourceProvider;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
@@ -62,7 +65,9 @@ public class LDLRendererModel implements UnbakedModel {
         return new RendererBakedModel();
     }
 
-    public static final class RendererBakedModel implements BakedModel, FabricBakedModel {
+    public static final class RendererBakedModel implements BakedModel, FabricBakedModel, IRendererWrapper {
+        @Getter @Setter
+        IRenderer renderer = IRenderer.EMPTY;
 
         @Override
         public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction direction, RandomSource random) {
@@ -71,7 +76,7 @@ public class LDLRendererModel implements UnbakedModel {
 
         @Override
         public boolean useAmbientOcclusion() {
-            return false;
+            return renderer.useAO();
         }
 
         @Override
@@ -81,7 +86,7 @@ public class LDLRendererModel implements UnbakedModel {
 
         @Override
         public boolean usesBlockLight() {
-            return false;
+            return renderer.useBlockLight();
         }
 
         @Override
@@ -91,7 +96,7 @@ public class LDLRendererModel implements UnbakedModel {
 
         @Override
         public TextureAtlasSprite getParticleIcon() {
-            return Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(MissingTextureAtlasSprite.getLocation());
+            return renderer.getParticleTexture();
         }
 
         @Override

@@ -2,8 +2,20 @@ architectury {
     common(rootProject.enabled_platforms.split(","))
 }
 
+String getConfig(String key) {
+    return project.getParent().properties.get(key)
+}
+
+def mod_id = getConfig("mod_id")
+def minecraft_version = getConfig("minecraft_version")
+def fabric_loader_version = getConfig("fabric_loader_version")
+def create_fabric_version = getConfig("create_fabric_version")
+def jei_version = getConfig("jei_version")
+def rei_version = getConfig("rei_version")
+
+
 loom {
-    accessWidenerPath = file("src/main/resources/ldlib.accesswidener")
+    accessWidenerPath = file("src/main/resources/${mod_id}.accesswidener")
 }
 
 repositories {

@@ -80,4 +80,14 @@ public interface IRenderer {
     default TextureAtlasSprite getParticleTexture() {
         return Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(MissingTextureAtlasSprite.getLocation());
     }
+
+    @Environment(EnvType.CLIENT)
+    default boolean useAO() {
+        return false;
+    }
+
+    @Environment(EnvType.CLIENT)
+    default boolean useBlockLight() {
+        return false;
+    }
 }

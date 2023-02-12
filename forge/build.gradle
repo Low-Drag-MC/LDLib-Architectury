@@ -2,6 +2,26 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
+String getConfig(String key) {
+    return project.getParent().properties.get(key)
+}
+
+def parent_path = project.getParent() == rootProject ? "" : project.getParent().getPath()
+def mod_id = getConfig("mod_id")
+def common_project = project("${parent_path}:${mod_id}-common")
+def version = getConfig("version")
+def mod_license = getConfig("mod_license")
+def mod_name = getConfig("mod_name")
+def mod_description = getConfig("mod_description")
+def mod_url = getConfig("mod_url")
+def minecraft_version = getConfig("minecraft_version")
+def create_forge_version = getConfig("create_forge_version")
+def registrate_forge_version = getConfig("registrate_forge_version")
+def flywheel_forge_minecraft_version = getConfig("flywheel_forge_minecraft_version")
+def flywheel_forge_version = getConfig("flywheel_forge_version")
+def jei_version = getConfig("jei_version")
+def rei_version = getConfig("rei_version")
+
 architectury {
     platformSetupLoomIde()
     forge()
@@ -12,19 +32,19 @@ static def isJetBrainsRuntime() {
 }
 
 loom {
-    accessWidenerPath = project(":ldlib-common").file("src/main/resources/ldlib.accesswidener")
+    accessWidenerPath = common_project.file("src/main/resources/${mod_id}.accesswidener")
 
     forge {
         mixinConfig(
-                "ldlib-common.mixins.json",
-                "ldlib.mixins.json"
+                "${mod_id}-common.mixins.json",
+                "${mod_id}.mixins.json"
         )
 
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
         dataGen{
-            mod("ldlib")
+            mod("${mod_id}")
         }
     }
 
@@ -60,8 +80,8 @@ repositories {
 
 dependencies {
     forge("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
-    common(project(path: ":ldlib-common", configuration: "namedElements")) { transitive = false }
-    shadowCommon(project(path: ":ldlib-common", configuration: "transformProductionForge")) { transitive = false }
+    common(project(path: "${parent_path}:${mod_id}-common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: "${parent_path}:${mod_id}-common", configuration: "transformProductionForge")) { transitive = false }
 
     // Create and its dependencies
     modImplementation("com.simibubi.create:create-${minecraft_version}:${create_forge_version}:slim") { transitive = false }
@@ -83,7 +103,8 @@ dependencies {
 processResources {
     // set up properties for filling into metadata
     Map<String, String> properties = Map.of(
-            "version", version as String,
+            "mod_id", mod_id,
+            "version", version,
             "forge_version", forge_version.split("\\.")[0], // only specify major version of forge
             "minecraft_version", minecraft_version,
             "mod_license", mod_license,
@@ -118,7 +139,7 @@ jar {
 }
 
 sourcesJar {
-    def commonSources = project(":ldlib-common").sourcesJar
+    def commonSources = common_project.sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 }

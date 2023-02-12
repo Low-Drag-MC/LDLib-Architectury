@@ -8,12 +8,12 @@ pluginManagement {
     }
 }
 
-include("ldlib-common")
-include("ldlib-fabric")
-include("ldlib-forge")
+include("${mod_id}-common")
+include("${mod_id}-fabric")
+include("${mod_id}-forge")
 
-project(':ldlib-common').setProjectDir(new File("common"))
-project(':ldlib-forge').setProjectDir(new File("forge"))
-project(':ldlib-fabric').setProjectDir(new File("fabric"))
+project(":${mod_id}-common").setProjectDir(new File("common"))
+project(":${mod_id}-forge").setProjectDir(new File("forge"))
+project(":${mod_id}-fabric").setProjectDir(new File("fabric"))
 
 rootProject.name = "${mod_name}"

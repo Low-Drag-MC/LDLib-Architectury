@@ -2,6 +2,27 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
+String getConfig(String key) {
+    return project.getParent().properties.get(key)
+}
+
+def parent_path = project.getParent() == rootProject ? "" : project.getParent().getPath()
+def mod_id = getConfig("mod_id")
+def common_project = project("${parent_path}:${mod_id}-common")
+def version = getConfig("version")
+def mod_license = getConfig("mod_license")
+def mod_name = getConfig("mod_name")
+def mod_description = getConfig("mod_description")
+def mod_url = getConfig("mod_url")
+def minecraft_version = getConfig("minecraft_version")
+def fabric_loader_version = getConfig("fabric_loader_version")
+def fabric_api_version = getConfig("fabric_api_version")
+def create_fabric_version = getConfig("create_fabric_version")
+def jei_version = getConfig("jei_version")
+def rei_version = getConfig("rei_version")
+def lazydfu_version = getConfig("lazydfu_version")
+def modmenu_version = getConfig("modmenu_version")
+
 architectury {
     platformSetupLoomIde()
     fabric()
@@ -11,22 +32,22 @@ sourceSets {
     main {
         resources {
             srcDir("src/generated/resources")
-            srcDir(project(":ldlib-common").file("src/generated/resources"))
+            srcDir(common_project.file("src/generated/resources"))
             exclude("**/.cache")
         }
     }
 }
 
 loom {
-    accessWidenerPath = project(":ldlib-common").file("src/main/resources/ldlib.accesswidener")
+    accessWidenerPath = common_project.file("src/main/resources/${mod_id}.accesswidener")
 
     runs {
         create("dataCommon") {
             inherit(getByName("client"))
             name("Minecraft Data")
             property("fabric-api.datagen")
-            property("fabric-api.datagen.modid", "ldlib")
-            property("fabric-api.datagen.output-dir", project(":ldlib-common").file("src/generated/resources").absolutePath)
+            property("fabric-api.datagen.modid", "${mod_id}")
+            property("fabric-api.datagen.output-dir", common_project.file("src/generated/resources").absolutePath)
             property("fabric-api.datagen.strict-validation")
         }
     }
@@ -53,8 +74,8 @@ repositories {
 
 dependencies {
     modImplementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
-    common(project(path: ":ldlib-common", configuration: "namedElements")) { transitive = false }
-    shadowCommon(project(path: ":ldlib-common", configuration: "transformProductionFabric")) { transitive = false }
+    common(project(path: "${parent_path}:${mod_id}-common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: "${parent_path}:${mod_id}-common", configuration: "transformProductionFabric")) { transitive = false }
 
     // dependencies
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_api_version}")
@@ -81,6 +102,7 @@ dependencies {
 processResources {
     // set up properties for filling into metadata
     Map<String, String> properties = Map.of(
+            "mod_id", mod_id,
             "version", version,
             "fabric_loader_version", fabric_loader_version,
             "fabric_api_version", fabric_api_version,
@@ -117,7 +139,7 @@ jar {
 }
 
 sourcesJar {
-    def commonSources = project(":ldlib-common").sourcesJar
+    def commonSources = common_project.sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 }
