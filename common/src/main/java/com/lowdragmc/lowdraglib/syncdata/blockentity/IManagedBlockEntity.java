@@ -1,11 +1,12 @@
 package com.lowdragmc.lowdraglib.syncdata.blockentity;
 
-import com.lowdragmc.lowdraglib.syncdata.IManaged;
+import com.lowdragmc.lowdraglib.syncdata.IManagedStorage;
+import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
-public interface IManagedBlockEntity extends IManaged {
+public interface IManagedBlockEntity {
 
     /**
      * @return the block entity type
@@ -28,4 +29,12 @@ public interface IManagedBlockEntity extends IManaged {
         return (BlockEntity) this;
     }
 
+    default IRef[] getNonLazyFields() {
+        return getRootStorage().getNonLazyFields();
+    }
+
+    /**
+     * Get the managed storage
+     */
+    IManagedStorage getRootStorage();
 }

@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.objects.Object2ByteMap;
 import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -167,8 +168,10 @@ public class TypedPayloadRegistries {
         PrimitiveTypedPayload.registerAll();
 
         registerPayload(ArrayPayload.class, ArrayPayload::new);
+        registerPayload(FriendlyBufPayload.class, FriendlyBufPayload::new);
 
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.TAG_SERIALIZABLE_ACCESSOR, 100);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.MANAGED_ACCESSOR, 100);
         register(EnumValuePayload.class, EnumValuePayload::new, SyncedFieldAccessors.ENUM_ACCESSOR, 1000);
 
         registerSimple(NbtTagPayload.class, NbtTagPayload::new, Tag.class, 99);

@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.syncdata.blockentity;
 
 import com.lowdragmc.lowdraglib.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib.networking.both.PacketRPCMethodPayload;
+import com.lowdragmc.lowdraglib.syncdata.IManaged;
 import com.lowdragmc.lowdraglib.syncdata.field.RPCMethodMeta;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,28 +15,28 @@ public interface IRPCBlockEntity extends IManagedBlockEntity {
      * Get the RPC method
      */
     @Nullable
-    default RPCMethodMeta getRPCMethod(String methodName) {
-        return getFieldHolder().getRpcMethodMap().get(methodName);
+    default RPCMethodMeta getRPCMethod(IManaged managed, String methodName) {
+        return managed.getFieldHolder().getRpcMethodMap().get(methodName);
     }
 
-    default PacketRPCMethodPayload generateRpcPacket(String methodName, Object... args) {
-        return PacketRPCMethodPayload.of(this, methodName,args);
+    default PacketRPCMethodPayload generateRpcPacket(IManaged managed, String methodName, Object... args) {
+        return PacketRPCMethodPayload.of(managed, this, methodName,args);
     }
 
     @Environment(EnvType.CLIENT)
-    default void rpcToServer(String methodName, Object... args) {
-        var packet = generateRpcPacket(methodName, args);
+    default void rpcToServer(IManaged managed, String methodName, Object... args) {
+        var packet = generateRpcPacket(managed, methodName, args);
         LDLNetworking.NETWORK.sendToServer(packet);
     }
 
 
-    default void rpcToPlayer(ServerPlayer player, String methodName, Object... args) {
-        var packet = generateRpcPacket(methodName, args);
+    default void rpcToPlayer(IManaged managed, ServerPlayer player, String methodName, Object... args) {
+        var packet = generateRpcPacket(managed, methodName, args);
         LDLNetworking.NETWORK.sendToPlayer(packet, player);
     }
 
-    default void rpcToTracking(ServerPlayer player, String methodName, Object... args) {
-        var packet = generateRpcPacket(methodName, args);
+    default void rpcToTracking(IManaged managed, ServerPlayer player, String methodName, Object... args) {
+        var packet = generateRpcPacket(managed, methodName, args);
         LDLNetworking.NETWORK.sendToTrackingChunk(packet, getSelf().getLevel().getChunkAt(getSelf().getBlockPos()));
     }
 

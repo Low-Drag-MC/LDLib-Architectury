@@ -9,9 +9,11 @@
     "BlockModelShaperMixin",
     "ItemRendererMixin",
     "LanguageMixin",
+    "ModelBakeryMixin",
     "ParticleEngineMixin",
     "WorldRendererMixin",
     "accessor.AbstractContainerScreenAccessor",
+    "accessor.VertexFormatAccessor",
     "jei.RecipesGuiAccessor",
     "jei.RecipeSlotAccessor",
     "rei.AbstractDisplayViewingScreenAccessor"
@@ -21,9 +23,9 @@
     "accessor.AbstractContainerMenuAccessor",
     "accessor.ServerPlayerAccessor",
     "accessor.SlotAccessor",
-    "jei.RecipeSlotsAccessor",
     "jei.JeiRecipeLayoutMixin",
-    "jei.RecipeLayoutAccessor"
+    "jei.RecipeLayoutAccessor",
+    "jei.RecipeSlotsAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

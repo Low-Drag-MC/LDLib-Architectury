@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
 
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.managed.IManagedVar;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.PrimitiveTypedPayload;
@@ -40,7 +41,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
         public IntAccessor() {
             super(int.class, Integer.class);
         }
-        public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+        public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
             if(field instanceof IManagedVar.Int intField) {
                 return PrimitiveTypedPayload.ofInt(intField.intValue());
             }
@@ -48,7 +49,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
             return Objects.requireNonNull(result, "Field %s is not an int field".formatted(field));
         }
 
-        public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+        public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
             var primitivePayload = ensurePrimitive(payload);
             if(field instanceof IManagedVar.Int intField) {
                 intField.setInt(primitivePayload.getAsInt());
@@ -63,7 +64,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
         public LongAccessor() {
             super(long.class, Long.class);
         }
-        public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+        public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
             if(field instanceof IManagedVar.Long longField) {
                 return PrimitiveTypedPayload.ofLong(longField.longValue());
             }
@@ -71,7 +72,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
             return Objects.requireNonNull(result, "Field %s is not a long field".formatted(field));
         }
 
-        public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+        public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
             var primitivePayload = ensurePrimitive(payload);
             if(field instanceof IManagedVar.Long longField) {
                 longField.setLong(primitivePayload.getAsLong());
@@ -86,7 +87,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
         public FloatAccessor() {
             super(float.class, Float.class);
         }
-        public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+        public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
             if(field instanceof IManagedVar.Float floatField) {
                 return PrimitiveTypedPayload.ofFloat(floatField.floatValue());
             }
@@ -94,7 +95,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
             return Objects.requireNonNull(result, "Field %s is not a float field".formatted(field));
         }
 
-        public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+        public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
             var primitivePayload = ensurePrimitive(payload);
             if(field instanceof IManagedVar.Float floatField) {
                 floatField.setFloat(primitivePayload.getAsFloat());
@@ -109,7 +110,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
         public DoubleAccessor() {
             super(double.class, Double.class);
         }
-        public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+        public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
             if(field instanceof IManagedVar.Double doubleField) {
                 return PrimitiveTypedPayload.ofDouble(doubleField.doubleValue());
             }
@@ -117,7 +118,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
             return Objects.requireNonNull(result, "Field %s is not a double field".formatted(field));
         }
 
-        public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+        public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
             var primitivePayload = ensurePrimitive(payload);
             if(field instanceof IManagedVar.Double doubleField) {
                 doubleField.setDouble(primitivePayload.getAsDouble());
@@ -132,7 +133,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
         public BooleanAccessor() {
             super(boolean.class, Boolean.class);
         }
-        public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+        public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
             if(field instanceof IManagedVar.Boolean booleanField) {
                 return PrimitiveTypedPayload.ofBoolean(booleanField.booleanValue());
             }
@@ -140,7 +141,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
             return Objects.requireNonNull(result, "Field %s is not a boolean field".formatted(field));
         }
 
-        public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+        public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
             var primitivePayload = ensurePrimitive(payload);
             if(field instanceof IManagedVar.Boolean booleanField) {
                 booleanField.setBoolean(primitivePayload.getAsBoolean());
@@ -155,7 +156,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
         public ByteAccessor() {
             super(byte.class, Byte.class);
         }
-        public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+        public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
             if(field instanceof IManagedVar.Byte byteField) {
                 return PrimitiveTypedPayload.ofByte(byteField.byteValue());
             }
@@ -163,7 +164,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
             return Objects.requireNonNull(result, "Field %s is not a byte field".formatted(field));
         }
 
-        public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+        public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
             var primitivePayload = ensurePrimitive(payload);
             if(field instanceof IManagedVar.Byte byteField) {
                 byteField.setByte(primitivePayload.getAsByte());
@@ -178,7 +179,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
         public CharAccessor() {
             super(char.class, Character.class);
         }
-        public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+        public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
             if(field instanceof IManagedVar.Char charField) {
                 return PrimitiveTypedPayload.ofChar(charField.charValue());
             }
@@ -186,7 +187,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
             return Objects.requireNonNull(result, "Field %s is not a char field".formatted(field));
         }
 
-        public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+        public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
             var primitivePayload = ensurePrimitive(payload);
             if(field instanceof IManagedVar.Char charField) {
                 charField.setChar(primitivePayload.getAsChar());
@@ -201,7 +202,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
         public ShortAccessor() {
             super(short.class, Short.class);
         }
-        public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+        public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
             if(field instanceof IManagedVar.Short shortField) {
                 return PrimitiveTypedPayload.ofShort(shortField.shortValue());
             }
@@ -209,7 +210,7 @@ public abstract class PrimitiveAccessor extends ManagedAccessor {
             return Objects.requireNonNull(result, "Field %s is not a short field".formatted(field));
         }
 
-        public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+        public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
             var primitivePayload = ensurePrimitive(payload);
             if(field instanceof IManagedVar.Short shortField) {
                 shortField.setShort(primitivePayload.getAsShort());

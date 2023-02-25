@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.syncdata.accessor;
 
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.UIResourceTexture;
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
 import net.minecraft.nbt.CompoundTag;
@@ -18,7 +19,7 @@ public class IGuiTextureAccessor extends CustomObjectAccessor<IGuiTexture>{
     }
 
     @Override
-    public ITypedPayload<?> serialize(IGuiTexture value) {
+    public ITypedPayload<?> serialize(AccessorOp op, IGuiTexture value) {
         var tag = IGuiTexture.serializeWrapper(value);
         if (tag == null) {
             tag = new CompoundTag();
@@ -33,7 +34,7 @@ public class IGuiTextureAccessor extends CustomObjectAccessor<IGuiTexture>{
     }
 
     @Override
-    public IGuiTexture deserialize(ITypedPayload<?> payload) {
+    public IGuiTexture deserialize(AccessorOp op, ITypedPayload<?> payload) {
         if (payload instanceof NbtTagPayload nbtTagPayload) {
             var tag = (CompoundTag)nbtTagPayload.getPayload();
             var type = tag.getString("type");

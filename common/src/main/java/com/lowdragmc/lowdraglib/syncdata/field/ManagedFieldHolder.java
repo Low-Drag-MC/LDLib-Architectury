@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib.syncdata.field;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.syncdata.IManaged;
 import com.lowdragmc.lowdraglib.syncdata.ManagedFieldUtils;
-import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class ManagedFieldHolder {
     /**
      * @param clazz the class to get the sync field keys from
      */
-    public ManagedFieldHolder(Class<? extends IAutoSyncBlockEntity> clazz) {
+    public ManagedFieldHolder(Class<? extends IManaged> clazz) {
         this.clazz = clazz;
         this.initAll();
     }
@@ -35,12 +35,12 @@ public class ManagedFieldHolder {
      * @param clazz  the class to get the sync field keys from
      * @param parent the parent class to get the sync field keys from
      */
-    public ManagedFieldHolder(Class<? extends IAutoSyncBlockEntity> clazz, ManagedFieldHolder parent) {
+    public ManagedFieldHolder(Class<? extends IManaged> clazz, ManagedFieldHolder parent) {
         this(clazz);
         merge(parent);
     }
 
-    private final Class<? extends IAutoSyncBlockEntity> clazz;
+    private final Class<? extends IManaged> clazz;
 
 
     private void initAll() {
@@ -59,7 +59,6 @@ public class ManagedFieldHolder {
             fieldNameMap.put(key.getName(), key);
         }
     }
-
 
     public ManagedKey[] getFields() {
         return fields;

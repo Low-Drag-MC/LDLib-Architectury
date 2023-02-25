@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
 
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.IAccessor;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.syncdata.managed.ManagedHolder;
@@ -35,7 +36,7 @@ public class CollectionAccessor extends ReadonlyAccessor implements IArrayLikeAc
     }
 
     @Override
-    public ITypedPayload<?> readFromReadonlyField(Object obj) {
+    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj) {
         if (!(obj instanceof Collection<?> collection)) {
             throw new IllegalArgumentException("Field %s is not Collection".formatted(obj));
         }
@@ -52,7 +53,7 @@ public class CollectionAccessor extends ReadonlyAccessor implements IArrayLikeAc
         for (int i = 0; i < size; i++) {
             var element = iter.next();
             var holder = ManagedHolder.of(element);
-            var payload = childAccessor.readManagedField(holder);
+            var payload = childAccessor.readManagedField(op, holder);
             result[i] = payload;
         }
 
@@ -60,7 +61,7 @@ public class CollectionAccessor extends ReadonlyAccessor implements IArrayLikeAc
     }
 
     @Override
-    public void writeToReadonlyField(Object obj, ITypedPayload<?> payload) {
+    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload) {
         if (!(obj instanceof Collection<?>)) {
             throw new IllegalArgumentException("Field %s is not Collection".formatted(obj));
         }
@@ -77,7 +78,7 @@ public class CollectionAccessor extends ReadonlyAccessor implements IArrayLikeAc
         collection.clear();
         for (ITypedPayload<?> element : array) {
             var holder = ManagedHolder.ofType(childType);
-            childAccessor.writeManagedField(holder, element);
+            childAccessor.writeManagedField(op, holder, element);
             collection.add(holder.value());
         }
     }

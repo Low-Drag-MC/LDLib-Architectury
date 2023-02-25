@@ -4,9 +4,7 @@ package com.lowdragmc.lowdraglib.syncdata.managed;
 public interface IManagedVar<T> {
     T value();
     void set(T value);
-
     boolean isPrimitive();
-
     Class<T> getType();
 
     interface Int extends IManagedVar<Integer> {

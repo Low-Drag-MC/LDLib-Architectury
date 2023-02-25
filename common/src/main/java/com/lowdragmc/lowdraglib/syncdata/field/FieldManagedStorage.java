@@ -1,35 +1,14 @@
 package com.lowdragmc.lowdraglib.syncdata.field;
 
-import com.lowdragmc.lowdraglib.syncdata.ManagedFieldUtils;
-import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;
-import com.lowdragmc.lowdraglib.syncdata.blockentity.IManagedBlockEntity;
+import com.lowdragmc.lowdraglib.syncdata.*;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ManagedFieldStorage {
+public class FieldManagedStorage implements IManagedStorage {
 
-    private class FieldUpdateSubscription implements IAutoSyncBlockEntity.Subscription {
-        @NotNull
-        final ManagedKey key;
-        @NotNull
-        final IAutoSyncBlockEntity.FieldUpdateListener<?> listener;
-
-        public FieldUpdateSubscription(@NotNull ManagedKey key, IAutoSyncBlockEntity.@NotNull FieldUpdateListener<?> listener) {
-            this.key = key;
-            this.listener = listener;
-        }
-
-        @Override
-        public void unsubscribe() {
-            ManagedFieldStorage.this.listeners.getOrDefault(key, new ArrayList<>()).remove(this);
-        }
-    }
-
-    private final IManagedBlockEntity blockEntity;
+    private final IManaged owner;
 
     private BitSet dirtyFields;
 
@@ -40,13 +19,17 @@ public class ManagedFieldStorage {
     private IRef[] nonLazyFields;
     private Map<ManagedKey, IRef> fieldMap;
 
-    private ReentrantLock lock = new ReentrantLock();
-
+    private final ReentrantLock lock = new ReentrantLock();
 
     private final Map<ManagedKey, List<FieldUpdateSubscription>> listeners = new HashMap<>();
 
-    public <T> IAutoSyncBlockEntity.Subscription addSyncUpdateListener(ManagedKey key, IAutoSyncBlockEntity.FieldUpdateListener<T> listener) {
-        var subscription = new FieldUpdateSubscription(key, listener);
+    public <T> ISubscription addSyncUpdateListener(ManagedKey key, IFieldUpdateListener<T> listener) {
+        var subscription = new FieldUpdateSubscription(key, listener) {
+            @Override
+            public void unsubscribe() {
+                listeners.getOrDefault(key, new ArrayList<>()).remove(this);
+            }
+        };
         listeners.computeIfAbsent(key, k -> new ArrayList<>()).add(subscription);
         return subscription;
     }
@@ -65,7 +48,7 @@ public class ManagedFieldStorage {
         if (list != null) {
             for (var sub : list) {
                 //noinspection unchecked
-                var listener = (IAutoSyncBlockEntity.FieldUpdateListener<T>) sub.listener;
+                var listener = (IFieldUpdateListener<T>) sub.listener;
                 try {
                     listener.onFieldChanged(key.getName(), newVal, oldVal);
                 } catch (Throwable t) {
@@ -77,21 +60,19 @@ public class ManagedFieldStorage {
 
     private void init() {
         lock.lock();
-
         try {
-
             if (initialized) {
                 return;
             }
-            ManagedKey[] fields = blockEntity.getFieldHolder().getFields();
+            ManagedKey[] fields = owner.getFieldHolder().getFields();
 
-            var result = ManagedFieldUtils.getFieldRefs(fields, blockEntity, (iS, iP, changed) -> {
+            var result = ManagedFieldUtils.getFieldRefs(fields, owner, (iS, iP, changed) -> {
                 if (dirtyFields != null && iS >= 0) {
                     dirtyFields.set(iS, changed);
                 }
                 if (changed) {
                     if (iP >= 0) {
-                        blockEntity.getSelf().setChanged();
+                        owner.onChanged();
                     }
                 }
             });
@@ -101,17 +82,14 @@ public class ManagedFieldStorage {
             persistedFields = result.persistedRefs();
             nonLazyFields = result.nonLazyFields();
             fieldMap = result.fieldRefMap();
-
             initialized = true;
-
         } finally {
             lock.unlock();
         }
-
     }
 
-    public ManagedFieldStorage(IAutoSyncBlockEntity blockEntity) {
-        this.blockEntity = blockEntity;
+    public FieldManagedStorage(IManaged owner) {
+        this.owner = owner;
     }
 
     public IRef[] getSyncFields() {
@@ -119,15 +97,20 @@ public class ManagedFieldStorage {
         return syncFields;
     }
 
-    @Nullable
-    public BitSet getDirtyFields() {
-        return dirtyFields;
+    @Override
+    public boolean hasDirtyFields() {
+        return !dirtyFields.isEmpty();
     }
 
 
     public IRef[] getPersistedFields() {
         init();
         return persistedFields;
+    }
+
+    @Override
+    public IManaged[] getManaged() {
+        return new IManaged[]{owner};
     }
 
     public IRef getFieldByKey(ManagedKey key) {

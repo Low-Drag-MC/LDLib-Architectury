@@ -1,13 +1,14 @@
 package com.lowdragmc.lowdraglib.syncdata.blockentity;
 
 import com.google.common.base.Strings;
+import com.lowdragmc.lowdraglib.syncdata.accessor.IManagedAccessor;
 import com.lowdragmc.lowdraglib.utils.TagUtils;
 import net.minecraft.nbt.CompoundTag;
 
 public interface IAutoPersistBlockEntity extends IManagedBlockEntity {
 
     default void saveManagedPersistentData(CompoundTag tag, boolean forDrop) {
-        var persistedFields = getSyncStorage().getPersistedFields();
+        var persistedFields = getRootStorage().getPersistedFields();
 
         for (var persistedField : persistedFields) {
             var fieldKey = persistedField.getKey();
@@ -20,9 +21,7 @@ public interface IAutoPersistBlockEntity extends IManagedBlockEntity {
             if (Strings.isNullOrEmpty(key)) {
                 key = fieldKey.getName();
             }
-
             var nbt = fieldKey.readPersistedField(persistedField);
-
             if (nbt != null) {
                 TagUtils.setTagExtended(tag, key, nbt);
             }
@@ -32,22 +31,8 @@ public interface IAutoPersistBlockEntity extends IManagedBlockEntity {
     }
 
     default void loadManagedPersistentData(CompoundTag tag) {
-        var refs = getSyncStorage().getPersistedFields();
-
-        for (var ref : refs) {
-            var fieldKey = ref.getKey();
-            String key = fieldKey.getPersistentKey();
-            if (Strings.isNullOrEmpty(key)) {
-                key = fieldKey.getName();
-            }
-
-            var nbt = TagUtils.getTagExtended(tag, key);
-            if (nbt != null) {
-                fieldKey.writePersistedField(ref, nbt);
-            }
-
-        }
-
+        var refs = getRootStorage().getPersistedFields();
+        IManagedAccessor.writePersistedFields(tag, refs);
         loadCustomPersistedData(tag);
     }
 

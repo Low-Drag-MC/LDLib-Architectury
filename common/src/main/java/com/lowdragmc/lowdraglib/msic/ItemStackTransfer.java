@@ -44,7 +44,7 @@ public class ItemStackTransfer implements IItemTransfer, ITagSerializable<Compou
     }
 
     public ItemStackTransfer(ItemStack stack) {
-        this(NonNullList.of(stack));
+        this(NonNullList.of(ItemStack.EMPTY, stack));
     }
 
     public void setSize(int size) {

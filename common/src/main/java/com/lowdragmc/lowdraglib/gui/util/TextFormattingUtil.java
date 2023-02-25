@@ -1,5 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.util;
 
+import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
+
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -43,6 +45,7 @@ public class TextFormattingUtil {
 
     public static String formatLongToCompactStringBuckets(long value, int precision) {
         if (value == 0) return value + "";
+        value = value * 1000 / FluidHelper.getBucket();
         //Long.MIN_VALUE == -Long.MIN_VALUE so we need an adjustment here
         if (value == Long.MIN_VALUE) return formatLongToCompactStringBuckets(Long.MIN_VALUE + 1, precision);
         if (value < 0) return "-" + formatLongToCompactStringBuckets(-value, precision);

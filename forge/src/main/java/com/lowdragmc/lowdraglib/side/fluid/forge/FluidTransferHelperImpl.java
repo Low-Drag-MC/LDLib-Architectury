@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.side.fluid.forge;
 
-import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
+import com.lowdragmc.lowdraglib.msic.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 
@@ -9,12 +9,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 
 import javax.annotation.Nullable;
 
@@ -29,39 +30,7 @@ public class FluidTransferHelperImpl {
         if (handler instanceof IFluidTransfer fluidTransfer) {
             return fluidTransfer;
         } else {
-            return new IFluidTransfer() {
-                @Override
-                public int getTanks() {
-                    return handler.getTanks();
-                }
-
-                @NotNull
-                @Override
-                public FluidStack getFluidInTank(int tank) {
-                    return FluidHelperImpl.toFluidStack(handler.getFluidInTank(tank));
-                }
-
-                @Override
-                public long getTankCapacity(int tank) {
-                    return handler.getTankCapacity(tank);
-                }
-
-                @Override
-                public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
-                    return handler.isFluidValid(tank, FluidHelperImpl.toFluidStack(stack));
-                }
-
-                @Override
-                public long fill(FluidStack resource, boolean simulate) {
-                    return handler.fill(FluidHelperImpl.toFluidStack(resource), simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE);
-                }
-
-                @NotNull
-                @Override
-                public FluidStack drain(FluidStack resource, boolean simulate) {
-                    return FluidHelperImpl.toFluidStack(handler.drain(FluidHelperImpl.toFluidStack(resource), simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE));
-                }
-            };
+            return new FluidTransferWrapper(handler);
         }
     }
 
@@ -113,6 +82,13 @@ public class FluidTransferHelperImpl {
             return toFluidTransfer(handler.orElse(null));
         }
         return null;
+    }
+
+    public static ItemStack getContainerItem(ItemStackTransfer copyContainer, IFluidTransfer handler) {
+        if (handler instanceof FluidTransferWrapper wrapper && wrapper.getHandler() instanceof IFluidHandlerItem fluidHandlerItem) {
+            return fluidHandlerItem.getContainer();
+        }
+        return copyContainer.getStackInSlot(0);
     }
 
 }

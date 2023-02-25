@@ -155,7 +155,7 @@ public class FluidTransferHelper {
                     handler.fill(simulatedTransfer, true);
                 }
 
-                return new FluidActionResult(itemStorage.getStackInSlot(0));
+                return new FluidActionResult(getContainerItem(itemStorage, handler));
             }
         }
         return FluidActionResult.FAILURE;
@@ -190,9 +190,14 @@ public class FluidTransferHelper {
                 player.level.playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
 
-            return new FluidActionResult(itemStorage.getStackInSlot(0));
+            return new FluidActionResult(getContainerItem(itemStorage, handler));
         }
         return FluidActionResult.FAILURE;
+    }
+
+    @ExpectPlatform
+    public static ItemStack getContainerItem(ItemStackTransfer copyContainer, IFluidTransfer handler) {
+        throw new AssertionError();
     }
 
     /**

@@ -45,7 +45,7 @@ public class AsyncThreadData extends SavedData {
     private final CopyOnWriteArrayList<IAsyncLogic> asyncLogics = new CopyOnWriteArrayList<>();
     private ScheduledExecutorService executorService;
     private final static ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder()
-            .setNameFormat("Thaumcraft Async Thread-%d")
+            .setNameFormat("LDLib Async Thread-%d")
             .setDaemon(true)
             .build();
     private static final ThreadLocal<Boolean> IN_SERVICE = ThreadLocal.withInitial(() -> false);

@@ -10,13 +10,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -35,8 +33,6 @@ import java.util.function.Consumer;
 
 
 public class IModelRenderer implements IRenderer {
-
-    protected static final Set<ResourceLocation> CACHE = new HashSet<>();
 
     public final ResourceLocation modelLocation;
     public final boolean useCustomBakedModel;
@@ -59,8 +55,7 @@ public class IModelRenderer implements IRenderer {
         this.useCustomBakedModel = useCustomBakedModel;
         if (LDLib.isClient()) {
             blockModels = new ConcurrentHashMap<>();
-            CACHE.add(modelLocation);
-            registerTextureSwitchEvent();
+            registerEvent();
         }
     }
 
@@ -73,11 +68,6 @@ public class IModelRenderer implements IRenderer {
             return IRenderer.super.getParticleTexture();
         }
         return model.getParticleIcon();
-    }
-
-    @Override
-    public boolean isRaw() {
-        return !CACHE.contains(modelLocation);
     }
 
     @Environment(EnvType.CLIENT)
@@ -102,6 +92,16 @@ public class IModelRenderer implements IRenderer {
 
     @Override
     @Environment(EnvType.CLIENT)
+    public boolean useBlockLight(ItemStack stack) {
+        var model = getItemBakedModel(stack);
+        if (model != null) {
+            return model.usesBlockLight();
+        }
+        return false;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
     public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, RandomSource rand) {
         BakedModel ibakedmodel = getBlockBakedModel(pos, level);
         if (ibakedmodel == null) return Collections.emptyList();
@@ -112,7 +112,12 @@ public class IModelRenderer implements IRenderer {
     @Nullable
     protected BakedModel getItemBakedModel() {
         if (itemModel == null) {
-            itemModel = getModel().bake(
+            var model = getModel();
+            if (model instanceof BlockModel blockModel && blockModel.getRootModel() == ModelBakery.GENERATION_MARKER) {
+                // fabric doesn't help us to fix vanilla bakery, so we have to do it ourselves
+                model = ModelFactory.ITEM_MODEL_GENERATOR.generateBlockModel(Material::sprite, blockModel);
+            }
+            itemModel = model.bake(
                     ModelFactory.getModeBakery(),
                     Material::sprite,
                     BlockModelRotation.X0_Y0,
@@ -150,14 +155,12 @@ public class IModelRenderer implements IRenderer {
         if (atlasName.equals(TextureAtlas.LOCATION_BLOCKS)) {
             itemModel = null;
             blockModels.clear();
-            if (CACHE.contains(modelLocation)) {
-                UnbakedModel model = getModel();
-                for (Material material : model.getMaterials(ModelFactory::getUnBakedModel, new HashSet<>())) {
-                    register.accept(material.texture());
-                }
-                CACHE.remove(modelLocation);
-            }
         }
     }
 
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void onAdditionalModel(Consumer<ResourceLocation> registry) {
+        registry.accept(modelLocation);
+    }
 }

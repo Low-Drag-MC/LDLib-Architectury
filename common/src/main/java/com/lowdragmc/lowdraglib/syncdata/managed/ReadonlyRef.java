@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.syncdata.managed;
 
 import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
+import com.lowdragmc.lowdraglib.syncdata.IManaged;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 
@@ -24,7 +25,10 @@ public class ReadonlyRef implements IRef {
         if (!lazy) {
             if (getReference().get() instanceof IContentChangeAware handler) {
                 replaceHandler(handler);
-            } else {
+            } else if (readRaw() instanceof IManaged) {
+
+            }
+            else {
                 throw new IllegalArgumentException("complex sync field must be an IContentChangeAware if not lazy!");
             }
         }
@@ -65,6 +69,18 @@ public class ReadonlyRef implements IRef {
     public void setChanged(boolean changed) {
         onChanged.accept(changed);
         this.changed = changed;
+    }
+
+    @Override
+    public void update() {
+        if (readRaw() instanceof IManaged managed) {
+            for (IRef field : managed.getSyncStorage().getNonLazyFields()) {
+                field.update();
+            }
+            if (managed.getSyncStorage().hasDirtyFields()) {
+                setChanged(true);
+            }
+        }
     }
 
     @Override

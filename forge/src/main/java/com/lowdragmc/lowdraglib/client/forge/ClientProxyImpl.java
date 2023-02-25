@@ -7,14 +7,15 @@ import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.forge.CommonProxyImpl;
 import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
 import com.lowdragmc.lowdraglib.forge.jei.JEIClientEventHandler;
-import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.utils.CustomResourcePack;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -58,8 +59,15 @@ public class ClientProxyImpl extends CommonProxyImpl {
 
     @SubscribeEvent
     public void registerTextures(TextureStitchEvent.Pre event) {
-        for (IRenderer renderer : IRenderer.TEXTURE_REGISTERS) {
+        for (IRenderer renderer : IRenderer.EVENT_REGISTERS) {
             renderer.onPrepareTextureAtlas(event.getAtlas().location(), event::addSprite);
+        }
+    }
+
+    @SubscribeEvent
+    public void registerTextures(ModelEvent.RegisterAdditional event) {
+        for (IRenderer renderer : IRenderer.EVENT_REGISTERS) {
+            renderer.onAdditionalModel(event::register);
         }
     }
 }

@@ -354,9 +354,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (allowClickDrained) {
             boolean performedEmptying = false;
             for (int i = 0; i < maxAttempts; i++) {
-                FluidActionResult result = FluidTransferHelper.tryEmptyContainer(currentStack, (IFluidTransfer) fluidTank, Integer.MAX_VALUE, null, false);
+                FluidActionResult result = FluidTransferHelper.tryEmptyContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, false);
                 if (!result.isSuccess()) break;
-                currentStack = FluidTransferHelper.tryEmptyContainer(currentStack, (IFluidTransfer) fluidTank, Integer.MAX_VALUE, null, true).getResult();
+                currentStack = FluidTransferHelper.tryEmptyContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, true).getResult();
                 performedEmptying = true;
             }
             var filledFluid = fluidTank.getFluid();

@@ -21,7 +21,7 @@ public abstract class MouseHandlerMixin {
 
     @Redirect(method = "m_jzgvmppg",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/Screen;mouseClicked(DDI)Z"))
+                    target = "Lnet/minecraft/client/gui/screens/Screen;mouseClicked(DDI)Z"), remap = false)
     private static boolean injectClick(Screen screen, double x, double y, int button) {
         if (screen instanceof RecipesGui recipesGui) {
             for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {
@@ -38,7 +38,7 @@ public abstract class MouseHandlerMixin {
 
     @Redirect(method = "m_acizjdos",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/Screen;mouseReleased(DDI)Z"))
+                    target = "Lnet/minecraft/client/gui/screens/Screen;mouseReleased(DDI)Z"), remap = false)
     private static boolean injectReleased(Screen screen, double x, double y, int button) {
         if (screen instanceof RecipesGui recipesGui) {
             for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {
@@ -52,7 +52,7 @@ public abstract class MouseHandlerMixin {
 
     @Redirect(method = "m_pygajgfg",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/Screen;mouseDragged(DDIDD)Z"))
+                    target = "Lnet/minecraft/client/gui/screens/Screen;mouseDragged(DDIDD)Z"), remap = false)
     private boolean injectMouseDragged(Screen screen, double x, double y, int button, double dx, double dy) {
         if (screen instanceof RecipesGui recipesGui) {
             for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {

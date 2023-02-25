@@ -464,6 +464,11 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return SlotWidget.this.isEnabled();
         }
 
+        @Override
+        public void initialize(ItemStack stack) {
+            itemHandler.setStackInSlot(this.index, stack);
+            this.setChanged();
+        }
     }
 
     @Override

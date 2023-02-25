@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
 import com.lowdragmc.lowdraglib.utils.Size;
@@ -17,7 +18,7 @@ public class SizeAccessor extends CustomObjectAccessor<Size>{
     }
 
     @Override
-    public ITypedPayload<?> serialize(Size value) {
+    public ITypedPayload<?> serialize(AccessorOp op, Size value) {
         CompoundTag tag = new CompoundTag();
         tag.putInt("width", value.width);
         tag.putInt("height", value.height);
@@ -25,7 +26,7 @@ public class SizeAccessor extends CustomObjectAccessor<Size>{
     }
 
     @Override
-    public Size deserialize(ITypedPayload<?> payload) {
+    public Size deserialize(AccessorOp op, ITypedPayload<?> payload) {
         if (payload instanceof NbtTagPayload nbtTagPayload) {
             var tag = (CompoundTag)nbtTagPayload.getPayload();
             return new Size(tag.getInt("width"), tag.getInt("height"));

@@ -1,24 +1,16 @@
 package com.lowdragmc.lowdraglib.client.model.fabric;
 
-import com.lowdragmc.lowdraglib.client.model.IRendererWrapper;
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.mojang.datafixers.util.Pair;
-import lombok.Getter;
-import lombok.Setter;
 import net.fabricmc.fabric.api.client.model.ModelProviderContext;
 import net.fabricmc.fabric.api.client.model.ModelResourceProvider;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
-import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
-import net.fabricmc.fabric.impl.client.indigo.renderer.IndigoRenderer;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.core.BlockPos;
@@ -65,9 +57,8 @@ public class LDLRendererModel implements UnbakedModel {
         return new RendererBakedModel();
     }
 
-    public static final class RendererBakedModel implements BakedModel, FabricBakedModel, IRendererWrapper {
-        @Getter @Setter
-        IRenderer renderer = IRenderer.EMPTY;
+    public static final class RendererBakedModel implements BakedModel, FabricBakedModel {
+        private IRenderer renderer = IRenderer.EMPTY;
 
         @Override
         public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction direction, RandomSource random) {
@@ -76,7 +67,7 @@ public class LDLRendererModel implements UnbakedModel {
 
         @Override
         public boolean useAmbientOcclusion() {
-            return renderer.useAO();
+            return false;
         }
 
         @Override
@@ -86,7 +77,7 @@ public class LDLRendererModel implements UnbakedModel {
 
         @Override
         public boolean usesBlockLight() {
-            return renderer.useBlockLight();
+            return false;
         }
 
         @Override
@@ -118,19 +109,49 @@ public class LDLRendererModel implements UnbakedModel {
         @Override
         public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
             if (state.getBlock() instanceof IBlockRendererProvider rendererProvider) {
-                IRenderer renderer = rendererProvider.getRenderer(state, pos, blockView);
+                IRenderer renderer = rendererProvider.getRenderer(state);
                 if (renderer != null) {
-                    for (int i = 0; i <= ModelHelper.NULL_FACE_ID; i++) {
-                        final Direction cullFace = ModelHelper.faceFromIndex(i);
-                        final List<BakedQuad> quads = renderer.renderModel(blockView, pos, state, cullFace, randomSupplier.get());
-                        final int count = quads.size();
-
-                        if (count != 0) {
-                            for (final BakedQuad quad : quads) {
-                                context.getEmitter().fromVanilla(quad, IndigoRenderer.MATERIAL_STANDARD, cullFace);
-                            }
+                    context.bakedModelConsumer().accept(new BakedModel() {
+                        @Override
+                        public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction direction, RandomSource random) {
+                            return renderer.renderModel(blockView, pos, state, direction, random);
                         }
-                    }
+
+                        @Override
+                        public boolean useAmbientOcclusion() {
+                            return renderer.useAO();
+                        }
+
+                        @Override
+                        public boolean isGui3d() {
+                            return true;
+                        }
+
+                        @Override
+                        public boolean usesBlockLight() {
+                            return renderer.useBlockLight(ItemStack.EMPTY);
+                        }
+
+                        @Override
+                        public boolean isCustomRenderer() {
+                            return false;
+                        }
+
+                        @Override
+                        public TextureAtlasSprite getParticleIcon() {
+                            return renderer.getParticleTexture();
+                        }
+
+                        @Override
+                        public ItemTransforms getTransforms() {
+                            return ItemTransforms.NO_TRANSFORMS;
+                        }
+
+                        @Override
+                        public ItemOverrides getOverrides() {
+                            return ItemOverrides.EMPTY;
+                        }
+                    });
                 }
             }
         }
@@ -149,7 +170,7 @@ public class LDLRendererModel implements UnbakedModel {
 
         @Override
         public UnbakedModel loadModelResource(ResourceLocation resourceId, ModelProviderContext context) {
-            return resourceId.equals(new ResourceLocation("ldlib:renderer_model")) ? LDLRendererModel.INSTANCE : null;
+            return resourceId.equals(new ResourceLocation("ldlib:block/renderer_model")) ? LDLRendererModel.INSTANCE : null;
         }
     }
 }

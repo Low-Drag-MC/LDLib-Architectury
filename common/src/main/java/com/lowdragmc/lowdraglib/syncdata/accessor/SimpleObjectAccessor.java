@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.managed.IManagedVar;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.ObjectTypedPayload;
@@ -52,7 +53,7 @@ public abstract class SimpleObjectAccessor extends ManagedAccessor {
     public abstract ObjectTypedPayload<?> createEmpty();
 
     @Override
-    public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
         var value = field.value();
         if (value != null) {
             //noinspection unchecked
@@ -62,7 +63,7 @@ public abstract class SimpleObjectAccessor extends ManagedAccessor {
     }
 
     @Override
-    public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
         if (payload instanceof ObjectTypedPayload<?> object) {
             //noinspection unchecked
             ((IManagedVar<Object>) field).set(object.getPayload());

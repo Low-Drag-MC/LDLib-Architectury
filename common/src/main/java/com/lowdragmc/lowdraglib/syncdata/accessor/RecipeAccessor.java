@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.syncdata.accessor;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
 import io.github.fabricators_of_create.porting_lib.util.ServerLifecycleHooks;
@@ -19,7 +20,7 @@ public class RecipeAccessor extends CustomObjectAccessor<Recipe> {
     }
 
     @Override
-    public ITypedPayload<?> serialize(Recipe value) {
+    public ITypedPayload<?> serialize(AccessorOp op, Recipe value) {
         var type = Registry.RECIPE_TYPE.getKey(value.getType());
         var id = value.getId();
         CompoundTag tag = new CompoundTag();
@@ -29,7 +30,7 @@ public class RecipeAccessor extends CustomObjectAccessor<Recipe> {
     }
 
     @Override
-    public Recipe deserialize(ITypedPayload<?> payload) {
+    public Recipe deserialize(AccessorOp op, ITypedPayload<?> payload) {
         if (payload instanceof NbtTagPayload nbtTagPayload && nbtTagPayload.getPayload() instanceof CompoundTag tag) {
             var type = Registry.RECIPE_TYPE.get(new ResourceLocation(tag.getString("type")));
             var id = new ResourceLocation(tag.getString("id"));

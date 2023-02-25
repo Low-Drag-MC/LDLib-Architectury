@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
@@ -17,7 +18,7 @@ public class ITagSerializableAccessor extends ReadonlyAccessor {
     }
 
     @Override
-    public ITypedPayload<?> readFromReadonlyField(Object obj) {
+    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj) {
         if(!(obj instanceof ITagSerializable<?> serializable)) {
             throw new IllegalArgumentException("Field %s is not ITagSerializable".formatted(obj));
         }
@@ -28,7 +29,7 @@ public class ITagSerializableAccessor extends ReadonlyAccessor {
     }
 
     @Override
-    public void writeToReadonlyField(Object obj, ITypedPayload<?> payload) {
+    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload) {
         if(!(obj instanceof ITagSerializable<?>)) {
             throw new IllegalArgumentException("Field %s is not ITagSerializable".formatted(obj));
         }

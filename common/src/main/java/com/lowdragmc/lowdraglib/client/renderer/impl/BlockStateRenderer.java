@@ -58,7 +58,7 @@ public class BlockStateRenderer implements IRenderer {
     public BlockStateRenderer(BlockInfo blockInfo) {
         this.blockInfo = blockInfo == null ? new BlockInfo(Blocks.BARRIER) : blockInfo;
         if (LDLib.isClient()) {
-            registerTextureSwitchEvent();
+            registerEvent();
         }
     }
 
@@ -112,6 +112,17 @@ public class BlockStateRenderer implements IRenderer {
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         ItemStack renderItem = getBlockInfo().getItemStackForm();
         itemRenderer.render(renderItem, transformType, leftHand, matrixStack, buffer, combinedLight, combinedOverlay, getItemModel(renderItem));
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean useBlockLight(ItemStack stack) {
+        ItemStack renderItem = getBlockInfo().getItemStackForm();
+        var model = getItemModel(renderItem);
+        if (model != null) {
+            return model.usesBlockLight();
+        }
+        return false;
     }
 
     @Override

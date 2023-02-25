@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
 import net.minecraft.nbt.CompoundTag;
@@ -18,12 +19,12 @@ public class BlockStateAccessor extends CustomObjectAccessor<BlockState>{
     }
 
     @Override
-    public ITypedPayload<?> serialize(BlockState value) {
+    public ITypedPayload<?> serialize(AccessorOp op, BlockState value) {
         return NbtTagPayload.of(NbtUtils.writeBlockState(value));
     }
 
     @Override
-    public BlockState deserialize(ITypedPayload<?> payload) {
+    public BlockState deserialize(AccessorOp op, ITypedPayload<?> payload) {
         if (payload instanceof NbtTagPayload nbtTagPayload) {
             return NbtUtils.readBlockState((CompoundTag)nbtTagPayload.getPayload());
         }

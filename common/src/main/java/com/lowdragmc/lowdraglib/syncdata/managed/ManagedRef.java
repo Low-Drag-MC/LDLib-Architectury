@@ -4,11 +4,11 @@ import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 
 public class ManagedRef implements IRef {
-    private final IManagedVar<?> field;
-    private boolean changed;
+    protected final IManagedVar<?> field;
+    protected boolean changed;
     protected boolean lazy = false;
-    private ManagedKey key;
-    private BooleanConsumer onChanged = changed -> {
+    protected ManagedKey key;
+    protected BooleanConsumer onChanged = changed -> {
     };
 
     protected ManagedRef(IManagedVar<?> field) {
@@ -32,6 +32,8 @@ public class ManagedRef implements IRef {
             return new ShortRef((IManagedVar.Short) field).setLazy(lazy);
         } else if (field instanceof IManagedVar.Char) {
             return new CharRef((IManagedVar.Char) field).setLazy(lazy);
+        } else if (field instanceof ReadOnlyManagedField) {
+            return new ReadOnlyManagedRef((ReadOnlyManagedField) field).setLazy(lazy);
         } else {
             return new SimpleObjectRef(field).setLazy(lazy);
         }

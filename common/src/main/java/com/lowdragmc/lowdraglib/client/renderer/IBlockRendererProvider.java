@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 public interface IBlockRendererProvider {
 
     @Nullable
-    IRenderer getRenderer(BlockState state, BlockPos pos, BlockAndTintGetter blockReader);
+    IRenderer getRenderer(BlockState state);
 
     default int getLightMap(BlockAndTintGetter world, BlockState state, BlockPos pos) {
         if (state.emissiveRendering(world, pos)) {

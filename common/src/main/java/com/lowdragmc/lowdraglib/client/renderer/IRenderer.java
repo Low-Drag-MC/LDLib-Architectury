@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public interface IRenderer {
-    Set<IRenderer> TEXTURE_REGISTERS = new HashSet<>();
+    Set<IRenderer> EVENT_REGISTERS = new HashSet<>();
     IRenderer EMPTY = new IRenderer() {};
 
     @Environment(EnvType.CLIENT)
@@ -52,8 +52,13 @@ public interface IRenderer {
     }
 
     @Environment(EnvType.CLIENT)
-    default void registerTextureSwitchEvent() {
-        TEXTURE_REGISTERS.add(this);
+    default void onAdditionalModel(Consumer<ResourceLocation> registry) {
+
+    }
+
+    @Environment(EnvType.CLIENT)
+    default void registerEvent() {
+        EVENT_REGISTERS.add(this);
     }
 
     default boolean isRaw() {
@@ -87,7 +92,7 @@ public interface IRenderer {
     }
 
     @Environment(EnvType.CLIENT)
-    default boolean useBlockLight() {
+    default boolean useBlockLight(ItemStack stack) {
         return false;
     }
 }

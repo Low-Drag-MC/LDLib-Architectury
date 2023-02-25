@@ -6,7 +6,6 @@ import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
 import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,11 +32,11 @@ public class FluidStorage implements IFluidStorage, IContentChangeAware, ITagSer
     @Getter
     protected long capacity;
 
-    public FluidStorage(int capacity) {
+    public FluidStorage(long capacity) {
         this(capacity, e -> true);
     }
 
-    public FluidStorage(int capacity, Predicate<FluidStack> validator) {
+    public FluidStorage(long capacity, Predicate<FluidStack> validator) {
         this.capacity = capacity;
         this.validator = validator;
     }

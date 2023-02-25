@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.networking.IHandlerContext;
 import com.lowdragmc.lowdraglib.networking.IPacket;
 import com.lowdragmc.lowdraglib.networking.both.PacketIntLocation;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
+import com.lowdragmc.lowdraglib.syncdata.accessor.IManagedAccessor;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
@@ -87,13 +88,13 @@ public class SPacketManagedPayload extends PacketIntLocation implements IPacket 
         BitSet changed = new BitSet();
 
         Map<ManagedKey, ITypedPayload<?>> payloads = new LinkedHashMap<>();
-        var syncedFields = tile.getSyncedFieldRefs();
+        var syncedFields = tile.getRootStorage().getSyncFields();
         for (int i = 0; i < syncedFields.length; i++) {
             var field = syncedFields[i];
             if (force || field.isChanged()) {
                 changed.set(i);
                 var key = field.getKey();
-                payloads.put(key, key.readSyncedField(field));
+                payloads.put(key, key.readSyncedField(field, force));
                 field.setChanged(false);
             }
         }
@@ -108,32 +109,10 @@ public class SPacketManagedPayload extends PacketIntLocation implements IPacket 
             LDLib.LOGGER.warn("Block entity type mismatch in managed payload packet!");
             return;
         }
-        var syncedFields = blockEntity.getSyncedFieldRefs();
-        var storage = blockEntity.getSyncStorage();
+        var storage = blockEntity.getRootStorage();
+        var syncedFields = storage.getSyncFields();
 
-        var changedKeys = new ManagedKey[changed.cardinality()];
-        int j = 0;
-        for (int i = 0; i < changed.length(); i++) {
-            if (changed.get(i)) {
-                var field = syncedFields[i];
-                var key = field.getKey();
-
-                boolean hasListener = storage.hasSyncListener(key);
-                Object oldValue = null;
-                if (hasListener) {
-                    oldValue = field.readRaw();
-                }
-                changedKeys[j] = key;
-                key.writeSyncedField(field, payloads[j]);
-                if(hasListener) {
-                    storage.notifyFieldUpdate(key, field.readRaw(), oldValue);
-                }
-
-                j++;
-            }
-        }
-        blockEntity.onDescUpdate(changedKeys);
-
+        IManagedAccessor.writeSyncedFields(storage, syncedFields, changed, payloads);
         blockEntity.readCustomSyncData(extra);
     }
 

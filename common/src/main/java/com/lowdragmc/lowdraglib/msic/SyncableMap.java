@@ -1,9 +1,6 @@
 package com.lowdragmc.lowdraglib.msic;
 
-import com.lowdragmc.lowdraglib.syncdata.IAccessor;
-import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
-import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
-import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
+import com.lowdragmc.lowdraglib.syncdata.*;
 import com.lowdragmc.lowdraglib.syncdata.accessor.ManagedAccessor;
 import com.lowdragmc.lowdraglib.syncdata.managed.ManagedHolder;
 import com.lowdragmc.lowdraglib.syncdata.payload.PrimitiveTypedPayload;
@@ -141,7 +138,7 @@ public abstract class SyncableMap<K, V> implements Map<K, V>, IContentChangeAwar
     }
 
     private static Tag readVal(ManagedAccessor accessor, Object val) {
-        return val == null ? PrimitiveTypedPayload.ofNull().serializeNBT() : accessor.readManagedField(ManagedHolder.of(val)).serializeNBT();
+        return val == null ? PrimitiveTypedPayload.ofNull().serializeNBT() : accessor.readManagedField(AccessorOp.PERSISTED, ManagedHolder.of(val)).serializeNBT();
     }
 
     private static Object writeVal(ManagedAccessor accessor, Tag val, Class<?> type) {
@@ -151,7 +148,7 @@ public abstract class SyncableMap<K, V> implements Map<K, V>, IContentChangeAwar
         var holder = ManagedHolder.ofType(type);
         var payload = TypedPayloadRegistries.create(accessor.getDefaultType());
         payload.deserializeNBT(val);
-        accessor.writeManagedField(holder, payload);
+        accessor.writeManagedField(AccessorOp.PERSISTED, holder, payload);
         return holder.value();
     }
 

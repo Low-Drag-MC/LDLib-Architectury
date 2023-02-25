@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.side.fluid.fabric;
 
+import com.lowdragmc.lowdraglib.msic.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import com.lowdragmc.lowdraglib.side.item.fabric.ItemTransferHelperImpl;
@@ -18,6 +19,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -165,6 +167,10 @@ public class FluidTransferHelperImpl {
         var handContext = ContainerItemContext.ofPlayerSlot(player, PlayerInventoryStorage.of(player).getSlot(slot));
         var storage = handContext.find(FluidStorage.ITEM);
         return storage == null ?  null : toFluidTransfer(storage);
+    }
+
+    public static ItemStack getContainerItem(ItemStackTransfer copyContainer, IFluidTransfer handler) {
+        return copyContainer.getStackInSlot(0);
     }
 
 }

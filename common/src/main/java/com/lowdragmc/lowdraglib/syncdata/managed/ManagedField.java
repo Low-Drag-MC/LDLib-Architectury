@@ -38,7 +38,7 @@ public class ManagedField<T> implements IManagedVar<T> {
         return new ManagedField<>(field, instance);
     }
 
-    private ManagedField(Field field, Object instance) {
+    protected ManagedField(Field field, Object instance) {
         field.setAccessible(true);
         this.type = (Class<T>) field.getType();
         this.field = field;

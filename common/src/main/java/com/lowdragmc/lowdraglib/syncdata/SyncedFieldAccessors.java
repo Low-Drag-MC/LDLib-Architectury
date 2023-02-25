@@ -19,6 +19,7 @@ public class SyncedFieldAccessors {
 
     public static final IAccessor ENUM_ACCESSOR = new EnumAccessor();
     public static final IAccessor TAG_SERIALIZABLE_ACCESSOR = new ITagSerializableAccessor();
+    public static final IAccessor MANAGED_ACCESSOR = new IManagedAccessor();
 
     public static final IAccessor BLOCK_STATE_ACCESSOR = new BlockStateAccessor();
     public static final IAccessor RECIPE_ACCESSOR = new RecipeAccessor();

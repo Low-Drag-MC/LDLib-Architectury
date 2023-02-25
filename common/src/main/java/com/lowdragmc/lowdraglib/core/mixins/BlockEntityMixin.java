@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.core.mixins;
 
+import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAsyncAutoSyncBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoPersistBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;
@@ -7,10 +8,10 @@ import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * @author KilaBash
@@ -20,7 +21,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BlockEntity.class)
 public abstract class BlockEntityMixin {
 
-    @Shadow public abstract void load(CompoundTag pTag);
+    @Inject(method = "getUpdateTag", at = @At(value = "RETURN"), cancellable = true)
+    private void injectGetUpdateTag(CallbackInfoReturnable<CompoundTag> cir) {
+        if (this instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
+            var tag = new CompoundTag();
+            tag.put("sync", SPacketManagedPayload.of(autoSyncBlockEntity, true).serializeNBT());
+            cir.setReturnValue(tag);
+        }
+    }
 
     @Inject(method = "saveAdditional", at = @At(value = "RETURN"))
     private void injectSaveAdditional(CompoundTag pTag, CallbackInfo ci) {
@@ -31,7 +39,9 @@ public abstract class BlockEntityMixin {
 
     @Inject(method = "load", at = @At(value = "RETURN"))
     private void injectLoad(CompoundTag pTag, CallbackInfo ci) {
-        if (this instanceof IAutoPersistBlockEntity autoPersistBlockEntity) {
+        if (pTag.get("sync") instanceof CompoundTag tag && this instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
+            new SPacketManagedPayload(tag).processPacket(autoSyncBlockEntity);
+        } else if (this instanceof IAutoPersistBlockEntity autoPersistBlockEntity) {
             autoPersistBlockEntity.loadManagedPersistentData(pTag);
         }
     }

@@ -22,7 +22,7 @@ public abstract class KeyBoardHandlerMixin {
 
     @Redirect(method = "m_iajqjuwx",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/Screen;keyPressed(III)Z"))
+                    target = "Lnet/minecraft/client/gui/screens/Screen;keyPressed(III)Z"), remap = false)
     private boolean injectKeyPressed(Screen screen, int keyCode, int scanCode, int modifiers) {
         if (screen instanceof RecipesGui recipesGui) {
             for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {
@@ -39,7 +39,7 @@ public abstract class KeyBoardHandlerMixin {
 
     @Redirect(method = "m_iajqjuwx",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/Screen;keyReleased(III)Z"))
+                    target = "Lnet/minecraft/client/gui/screens/Screen;keyReleased(III)Z"), remap = false)
     private boolean injectKeyReleased(Screen screen, int keyCode, int scanCode, int modifiers) {
         if (screen instanceof RecipesGui recipesGui) {
             for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {
@@ -56,7 +56,7 @@ public abstract class KeyBoardHandlerMixin {
 
     @Redirect(method = "m_lmuidjri",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/components/events/GuiEventListener;charTyped(CI)Z"))
+                    target = "Lnet/minecraft/client/gui/components/events/GuiEventListener;charTyped(CI)Z"), remap = false)
     private static boolean injectCharTyped(GuiEventListener listener, char codePoint, int modifiers) {
         if (Minecraft.getInstance().screen instanceof RecipesGui recipesGui) {
             for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {
@@ -72,7 +72,7 @@ public abstract class KeyBoardHandlerMixin {
     }
     @Redirect(method = "m_hqjebvvw",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/components/events/GuiEventListener;charTyped(CI)Z"))
+                    target = "Lnet/minecraft/client/gui/components/events/GuiEventListener;charTyped(CI)Z"), remap = false)
     private static boolean injectCharTyped2(GuiEventListener listener, char codePoint, int modifiers) {
         if (Minecraft.getInstance().screen instanceof RecipesGui recipesGui) {
             for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {

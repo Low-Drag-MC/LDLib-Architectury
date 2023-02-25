@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.IAccessor;
 import com.lowdragmc.lowdraglib.syncdata.managed.IManagedVar;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
@@ -25,12 +26,12 @@ public abstract class ManagedAccessor implements IAccessor {
         return true;
     }
 
-    public abstract ITypedPayload<?> readManagedField(IManagedVar<?> field);
+    public abstract ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field);
 
-    public abstract void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload);
+    public abstract void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload);
 
     @Override
-    public ITypedPayload<?> readField(IRef field) {
+    public ITypedPayload<?> readField(AccessorOp op, IRef field) {
         if (!(field instanceof ManagedRef syncedField)) {
             throw new IllegalArgumentException("Field %s is not a managed field".formatted(field));
         }
@@ -38,17 +39,17 @@ public abstract class ManagedAccessor implements IAccessor {
         if (!managedField.isPrimitive() && managedField.value() == null) {
             return PrimitiveTypedPayload.ofNull();
         }
-        return readManagedField(managedField);
+        return readManagedField(op, managedField);
     }
 
 
     @Override
-    public void writeField(IRef field, ITypedPayload<?> payload) {
+    public void writeField(AccessorOp op, IRef field, ITypedPayload<?> payload) {
         if (!(field instanceof ManagedRef syncedField)) {
             throw new IllegalArgumentException("Field %s is not a managed field".formatted(field));
         }
         var managedField = syncedField.getField();
-        writeManagedField(managedField, payload);
+        writeManagedField(op, managedField, payload);
     }
 
 

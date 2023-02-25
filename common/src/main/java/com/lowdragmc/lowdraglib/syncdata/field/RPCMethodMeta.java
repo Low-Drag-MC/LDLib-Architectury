@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata.field;
 
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.syncdata.accessor.ManagedAccessor;
 import com.lowdragmc.lowdraglib.syncdata.managed.ManagedHolder;
@@ -106,12 +107,12 @@ public class RPCMethodMeta {
 
     private static Object deserialize(ITypedPayload<?> payload, Class<?> type, ManagedAccessor accessor) {
         var cache = ManagedHolder.ofType(type);
-        accessor.writeManagedField(cache, payload);
+        accessor.writeManagedField(AccessorOp.PERSISTED, cache, payload);
         return cache.value();
     }
 
     private static ITypedPayload<?> serialize(Object value, ManagedAccessor accessor) {
         var cache = ManagedHolder.of(value);
-        return accessor.readManagedField(cache);
+        return accessor.readManagedField(AccessorOp.PERSISTED, cache);
     }
 }

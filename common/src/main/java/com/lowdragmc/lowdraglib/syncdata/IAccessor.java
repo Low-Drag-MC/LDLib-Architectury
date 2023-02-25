@@ -10,9 +10,10 @@ import java.util.function.Predicate;
  * Accessor is a class that can read and write a field of a specific type.
  */
 public interface IAccessor extends Predicate<Class<?>> {
-    ITypedPayload<?> readField(IRef field);
 
-    void writeField(IRef field, ITypedPayload<?> payload);
+    ITypedPayload<?> readField(AccessorOp op, IRef field);
+
+    void writeField(AccessorOp op, IRef field, ITypedPayload<?> payload);
 
     default boolean hasPredicate() {
         return false;
@@ -29,23 +30,24 @@ public interface IAccessor extends Predicate<Class<?>> {
     boolean isManaged();
 
     void setDefaultType(byte payloadType);
+
     byte getDefaultType();
 
 
-    default ITypedPayload<?> readFromReadonlyField(Object obj) {
+    default ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj) {
         throw new UnsupportedOperationException();
     }
 
-    default void writeToReadonlyField(Object obj, ITypedPayload<?> payload) {
+    default void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload) {
         throw new UnsupportedOperationException();
     }
 
-
-    default ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+    default ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
         throw new UnsupportedOperationException();
     }
 
-    default void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+    default void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
         throw new UnsupportedOperationException();
     }
+
 }

@@ -1,9 +1,11 @@
 package com.lowdragmc.lowdraglib.syncdata;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.syncdata.annotation.*;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib.syncdata.field.RPCMethodMeta;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
+import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -24,13 +26,7 @@ public class ManagedFieldUtils {
             }
             if (field.isAnnotationPresent(Persisted.class) || field.isAnnotationPresent(DescSynced.class)) {
                 var managedKey = createKey(field);
-
-                var persisted = field.getAnnotation(Persisted.class);
-                if (persisted != null) {
-                    managedKey.setPersistentKey(persisted.key());
-                }
                 managedFields.add(managedKey);
-
             }
         }
         return managedFields.toArray(ManagedKey[]::new);
@@ -54,13 +50,35 @@ public class ManagedFieldUtils {
     public static ManagedKey createKey(Field field) {
         boolean isLazy = field.isAnnotationPresent(LazyManaged.class);
         boolean isDestSync = field.isAnnotationPresent(DescSynced.class);
-        boolean isGuiSync = field.isAnnotationPresent(GuiSynced.class);
         boolean isPersist = field.isAnnotationPresent(Persisted.class);
         boolean isDrop = field.isAnnotationPresent(DropSaved.class);
+        boolean isReadOnlyManaged = field.isAnnotationPresent(ReadOnlyManaged.class);
         String name = field.getName();
         Type type = field.getGenericType();
+        var managedKey = new ManagedKey(name, isDestSync, isPersist, isDrop, isLazy, type, field);
 
-        return new ManagedKey(name, isDestSync, isGuiSync, isPersist, isDrop, isLazy, type, field);
+        if (isPersist) {
+            var persisted = field.getAnnotation(Persisted.class);
+            managedKey.setPersistentKey(persisted.key());
+        }
+
+        if (isReadOnlyManaged) {
+            var readOnlyManaged = field.getAnnotation(ReadOnlyManaged.class);
+            var clazz = field.getDeclaringClass();
+            var rawType = field.getType();
+            try {
+                var onDirtyMethod = clazz.getDeclaredMethod(readOnlyManaged.onDirtyMethod(), rawType);
+                var serializeMethod = clazz.getDeclaredMethod(readOnlyManaged.serializeMethod(), rawType);
+                var deserializeMethod = clazz.getDeclaredMethod(readOnlyManaged.deserializeMethod(), CompoundTag.class);
+                onDirtyMethod.setAccessible(true);
+                serializeMethod.setAccessible(true);
+                deserializeMethod.setAccessible(true);
+                managedKey.setRedOnlyManaged(onDirtyMethod, serializeMethod, deserializeMethod);
+            } catch (NoSuchMethodException e) {
+                LDLib.LOGGER.warn("No such methods for @ReadOnlyManaged field {}", field);
+            }
+        }
+        return managedKey;
     }
 
     public record FieldRefs(IRef[] syncedRefs, IRef[] persistedRefs, IRef[] nonLazyFields,

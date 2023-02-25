@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.networking.both;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.networking.IHandlerContext;
 import com.lowdragmc.lowdraglib.networking.IPacket;
+import com.lowdragmc.lowdraglib.syncdata.IManaged;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IRPCBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -26,25 +28,31 @@ public class PacketRPCMethodPayload extends PacketIntLocation implements IPacket
     private ITypedPayload<?>[] payloads;
 
     private String methodName;
+    private int managedId;
 
     public PacketRPCMethodPayload(FriendlyByteBuf buffer) {
         decode(buffer);
     }
 
-    public PacketRPCMethodPayload(BlockEntityType<?> type, BlockPos pos, String methodName, ITypedPayload<?>[] payloads) {
+    public PacketRPCMethodPayload(int managedId, BlockEntityType<?> type, BlockPos pos, String methodName, ITypedPayload<?>[] payloads) {
         super(pos);
+        this.managedId = managedId;
         blockEntityType = type;
         this.methodName = methodName;
         this.payloads = payloads;
     }
 
-    public static PacketRPCMethodPayload of(IRPCBlockEntity tile, String methodName, Object... args) {
-        var rpcMethod = tile.getRPCMethod(methodName);
+    public static PacketRPCMethodPayload of(IManaged managed, IRPCBlockEntity tile, String methodName, Object... args) {
+        var index = Arrays.stream(tile.getRootStorage().getManaged()).toList().indexOf(managed);
+        if (index < 0) {
+            throw new IllegalArgumentException("No such rpc managed: " + methodName);
+        }
+        var rpcMethod = tile.getRPCMethod(managed, methodName);
         if (rpcMethod == null) {
             throw new IllegalArgumentException("No such RPC method: " + methodName);
         }
         var payloads = rpcMethod.serializeArgs(args);
-        return new PacketRPCMethodPayload(tile.getBlockEntityType(), tile.getCurrentPos(), methodName, payloads);
+        return new PacketRPCMethodPayload(index, tile.getBlockEntityType(), tile.getCurrentPos(), methodName, payloads);
     }
 
     public void processPacket(@NotNull BlockEntity blockEntity, RPCSender sender) {
@@ -56,7 +64,11 @@ public class PacketRPCMethodPayload extends PacketIntLocation implements IPacket
             LDLib.LOGGER.error("Received managed payload packet for block entity that does not implement IRPCBlockEntity: " + blockEntity);
             return;
         }
-        var rpcMethod = tile.getRPCMethod(methodName);
+        if (tile.getRootStorage().getManaged().length >= managedId) {
+            LDLib.LOGGER.error("Received managed couldn't be found in IRPCBlockEntity: " + blockEntity);
+            return;
+        }
+        var rpcMethod = tile.getRPCMethod(tile.getRootStorage().getManaged()[managedId], methodName);
         if (rpcMethod == null) {
             LDLib.LOGGER.error("Cannot find RPC method: " + methodName);
             return;

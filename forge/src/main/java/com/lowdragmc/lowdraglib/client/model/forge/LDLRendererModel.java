@@ -115,14 +115,20 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
 
         @Override
         public boolean useAmbientOcclusion(BlockState state) {
-            return BakedModel.super.useAmbientOcclusion(state);
+            if (state.getBlock() instanceof IBlockRendererProvider rendererProvider) {
+                IRenderer renderer = rendererProvider.getRenderer(state);
+                if (renderer != null) {
+                    return renderer.useAO();
+                }
+            }
+            return useAmbientOcclusion();
         }
 
 
         @Override
         public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
             if (state.getBlock() instanceof IBlockRendererProvider rendererProvider) {
-                IRenderer renderer = rendererProvider.getRenderer(state, pos, level);
+                IRenderer renderer = rendererProvider.getRenderer(state);
                 if (renderer != null) {
                     modelData = ModelData.builder()
                             .with(IRENDERER, renderer)

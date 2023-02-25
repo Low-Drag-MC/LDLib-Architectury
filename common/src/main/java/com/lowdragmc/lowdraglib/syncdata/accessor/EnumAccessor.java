@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
+import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.managed.IManagedVar;
 import com.lowdragmc.lowdraglib.syncdata.payload.EnumValuePayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
@@ -59,7 +60,7 @@ public class EnumAccessor extends ManagedAccessor {
 
 
     @Override
-    public ITypedPayload<?> readManagedField(IManagedVar<?> field) {
+    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
         if (!field.getType().isEnum()) {
             throw new IllegalArgumentException("Field is not an enum");
         }
@@ -75,7 +76,7 @@ public class EnumAccessor extends ManagedAccessor {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void writeManagedField(IManagedVar<?> field, ITypedPayload<?> payload) {
+    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
         if (payload instanceof PrimitiveTypedPayload<?> primitive && primitive.isNull()) {
             field.set(null);
             return;
