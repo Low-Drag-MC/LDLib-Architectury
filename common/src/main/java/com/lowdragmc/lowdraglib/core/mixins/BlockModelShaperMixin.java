@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * @author KilaBash
  * @date 2022/05/28
- * @implNote TODO
+ * @implNote BlockModelShaperMixin
  */
 @Mixin(BlockModelShaper.class)
 public abstract class BlockModelShaperMixin {

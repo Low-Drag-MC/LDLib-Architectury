@@ -233,7 +233,7 @@ public class DummyWorld extends Level {
 
     @Override
     public List<? extends Player> players() {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override

@@ -13,12 +13,14 @@ import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IIngredientVisibility;
-import mezz.jei.common.gui.ingredients.RecipeSlot;
-import mezz.jei.common.ingredients.TypedIngredient;
 import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.library.gui.ingredients.RecipeSlot;
+import mezz.jei.library.ingredients.TypedIngredient;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -26,6 +28,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @MethodsReturnNonnullByDefault
@@ -42,7 +45,8 @@ public class RecipeSlotWrapper extends RecipeSlot {
             int xPos,
             int yPos
     ) {
-        super(((RecipeSlotAccessor) wrapperSlot).getRegisteredIngredients(), wrapperSlot.getRole(), 0, 0, 0);
+
+        super(((RecipeSlotAccessor) wrapperSlot).getIngredientManager(), wrapperSlot.getRole(), 0, 0, 0);
         this.widget = widget;
         this.wrapperSlot = wrapperSlot;
         this.area = new ImmutableRect2i(xPos, yPos, widget.getSize().width, widget.getSize().height);
@@ -111,14 +115,13 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     @Override
-    public void set(List<Optional<ITypedIngredient<?>>> ingredients, IntSet focusMatches, IIngredientVisibility ingredientVisibility) {
+    public void set(List<Optional<ITypedIngredient<?>>> ingredients, Set<Integer> focusMatches, IIngredientVisibility ingredientVisibility) {
         wrapperSlot.set(ingredients, focusMatches, ingredientVisibility);
-
     }
 
     @Override
-    public boolean isMouseOver(double mouseX, double mouseY) {
-        return this.area.contains(mouseX, mouseY) && widget.isVisible();
+    public List<Component> getTooltip() {
+        return wrapperSlot.getTooltip();
     }
 
     @Override
@@ -143,14 +146,15 @@ public class RecipeSlotWrapper extends RecipeSlot {
         wrapperSlot.draw(poseStack);
     }
 
+
     @Override
-    public void drawOverlays(PoseStack poseStack, int xOffset, int yOffset, int mouseX, int mouseY, IModIdHelper modIdHelper) {
-        wrapperSlot.drawOverlays(poseStack, xOffset, yOffset, mouseX, mouseY, modIdHelper);
+    public void drawHoverOverlays(PoseStack poseStack) {
+        wrapperSlot.drawHoverOverlays(poseStack);
     }
 
     @Override
-    public ImmutableRect2i getRect() {
-        return this.area;
+    public Rect2i getRect() {
+        return this.area.toMutable();
     }
 
     @Override
@@ -178,7 +182,7 @@ public class RecipeSlotWrapper extends RecipeSlot {
 
     private Optional<ITypedIngredient<?>> getDisplayIngredient() {
         if (widget instanceof IRecipeIngredientSlot slot && slot.getJEIIngredient() != null) {
-            return TypedIngredient.create(((RecipeSlotAccessor) this).getRegisteredIngredients(), slot.getJEIIngredient());
+            return TypedIngredient.createAndFilterInvalid(((RecipeSlotAccessor) this).getIngredientManager(), slot.getJEIIngredient());
         }
         return Optional.empty();
     }

@@ -43,12 +43,12 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
 
     public LabelWidget(int xPosition, int yPosition, String text) {
         this(xPosition, yPosition, ()->text);
-        setDropShadow(true);
-        setTextColor(-1);
     }
 
     public LabelWidget(int xPosition, int yPosition, Supplier<String> text) {
         super(new Position(xPosition, yPosition), new Size(10, 10));
+        setDropShadow(true);
+        setTextColor(-1);
         this.textSupplier = text;
         if (isRemote()) {
             lastTextValue = text.get();
@@ -74,6 +74,9 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
     @Override
     public void writeInitialData(FriendlyByteBuf buffer) {
         super.writeInitialData(buffer);
+        if (!isClientSideWidget) {
+            this.lastTextValue = textSupplier.get();
+        }
         buffer.writeUtf(lastTextValue);
     }
 

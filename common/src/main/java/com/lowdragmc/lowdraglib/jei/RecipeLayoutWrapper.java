@@ -13,15 +13,14 @@ import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IIngredientVisibility;
-import mezz.jei.common.gui.ingredients.RecipeSlot;
-import mezz.jei.common.gui.ingredients.RecipeSlotsView;
-import mezz.jei.common.gui.recipes.ShapelessIcon;
-import mezz.jei.common.gui.recipes.layout.RecipeLayout;
-import mezz.jei.common.gui.recipes.layout.RecipeLayoutBuilder;
 import mezz.jei.common.gui.textures.Textures;
-import mezz.jei.common.ingredients.RegisteredIngredients;
-import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.library.gui.ingredients.RecipeSlot;
+import mezz.jei.library.gui.ingredients.RecipeSlotsView;
+import mezz.jei.library.gui.recipes.RecipeLayout;
+import mezz.jei.library.gui.recipes.RecipeLayoutBuilder;
+import mezz.jei.library.gui.recipes.ShapelessIcon;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -46,47 +45,51 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
      */
     private final ModularWrapper<?> wrapper;
 
+
     public static <T extends ModularWrapper<?>> RecipeLayout<T> createWrapper(
-            int index,
             IRecipeCategory<T> recipeCategory,
             T recipe,
             IFocusGroup focuses,
-            RegisteredIngredients registeredIngredients,
+            IIngredientManager ingredientManager,
             IIngredientVisibility ingredientVisibility,
             IModIdHelper modIdHelper,
-            int posX,
-            int posY,
-            Textures textures
-    ) {
-        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(index, recipeCategory, recipe, registeredIngredients, ingredientVisibility, modIdHelper, posX, posY, textures);
-        if (wrapper.setRecipeLayout(recipeCategory, recipe, focuses)) {
-            recipe.setRecipeLayout(posX, posY);
-            List<RecipeSlot> recipeSlots = new ArrayList<>();
-            List<Widget> allWidgets = recipe.modularUI.getFlatWidgetCollection();
-            for (RecipeSlot slot : wrapper.getRecipeSlots().getSlots()) {
-                ImmutableRect2i rect = slot.getRect();
-                Widget widget = allWidgets.get(rect.getX());
-                Position position = widget.getPosition();
-                recipeSlots.add(new RecipeSlotWrapper(widget, slot, position.x - posX, position.y - posY));
-            }
-            String uid = recipe.getUid();
-            if (uid != null) wrapper.addOutputTooltips(recipeSlots, uid);
-            wrapper.setRecipeSlots(recipeSlots);
+            Textures textures) {
+        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(recipeCategory, recipe, ingredientManager, modIdHelper, textures);
+        if (wrapper.setRecipeLayout(recipeCategory, recipe, focuses, ingredientVisibility)) {
             return wrapper;
         }
         return null;
     }
 
+    @Override
+    public void setPosition(int posX, int posY) {
+        super.setPosition(posX, posY);
+        var recipe = getWrapper();
+        recipe.setRecipeLayout(posX, posY);
+        List<RecipeSlot> recipeSlots = new ArrayList<>();
+        List<Widget> allWidgets = recipe.modularUI.getFlatWidgetCollection();
+        for (var slot : this.getRecipeSlots().getSlots()) {
+            var rect = slot.getRect();
+            Widget widget = allWidgets.get(rect.getX());
+            Position position = widget.getPosition();
+            recipeSlots.add(new RecipeSlotWrapper(widget, slot, position.x - posX, position.y - posY));
+        }
+        String uid = recipe.getUid();
+        if (uid != null) this.addOutputTooltips(recipeSlots, uid);
+        this.setRecipeSlots(recipeSlots);
+    }
+
     private boolean setRecipeLayout(
             IRecipeCategory<R> recipeCategory,
             R recipe,
-            IFocusGroup focuses
+            IFocusGroup focuses,
+            IIngredientVisibility ingredientVisibility
     ) {
-        RecipeLayoutBuilder builder = new RecipeLayoutBuilder(accessor.getRegisteredIngredients(), accessor.getIngredientVisibility(), accessor.getIngredientCycleOffset());
+        RecipeLayoutBuilder builder = new RecipeLayoutBuilder(accessor.getIngredientManager(), accessor.getIngredientCycleOffset());
         try {
             recipeCategory.setRecipe(builder, recipe, focuses);
             if (builder.isUsed()) {
-                builder.setRecipeLayout(this, focuses);
+                builder.setRecipeLayout(this, focuses, ingredientVisibility);
                 return true;
             }
         } catch (RuntimeException | LinkageError e) {
@@ -101,17 +104,13 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
     }
 
     public RecipeLayoutWrapper(
-            int index,
             IRecipeCategory<R> recipeCategory,
             R recipe,
-            RegisteredIngredients registeredIngredients,
-            IIngredientVisibility ingredientVisibility,
+            IIngredientManager ingredientManager,
             IModIdHelper modIdHelper,
-            int posX,
-            int posY,
             Textures textures
     ) {
-        super(index, recipeCategory, recipe, registeredIngredients, ingredientVisibility, modIdHelper, posX, posY, textures);
+        super(recipeCategory, recipe, ingredientManager, modIdHelper, textures);
         this.wrapper = recipe;
     }
 
@@ -129,8 +128,8 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        int posX = getPosX();
-        int posY = getPosY();
+        int posX = accessor.getPosX();
+        int posY = accessor.getPosY();
         final int recipeMouseX = mouseX - posX;
         final int recipeMouseY = mouseY - posY;
 
@@ -161,12 +160,12 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
 
         }
         poseStack.popPose();
-
-        if (getRecipeTransferButton() != null) {
-            Minecraft minecraft = Minecraft.getInstance();
-            float partialTicks = minecraft.getFrameTime();
-            getRecipeTransferButton().render(poseStack, mouseX, mouseY, partialTicks);
-        }
+//
+//        if (getRecipeTransferButton() != null) {
+//            Minecraft minecraft = Minecraft.getInstance();
+//            float partialTicks = minecraft.getFrameTime();
+//            getRecipeTransferButton().render(poseStack, mouseX, mouseY, partialTicks);
+//        }
         RenderSystem.disableBlend();
     }
 

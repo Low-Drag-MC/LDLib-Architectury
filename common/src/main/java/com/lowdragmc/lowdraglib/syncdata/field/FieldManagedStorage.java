@@ -58,7 +58,7 @@ public class FieldManagedStorage implements IManagedStorage {
         }
     }
 
-    private void init() {
+    public void init() {
         lock.lock();
         try {
             if (initialized) {

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.utils.virtual;
 
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.*;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -28,9 +29,12 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
 
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.function.Predicate;
 
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class VirtualRenderWorld extends Level {
 	public final Map<BlockPos, BlockState> blocksAdded = new HashMap<>();
 	public final Map<BlockPos, BlockEntity> besAdded = new HashMap<>();
@@ -281,11 +285,11 @@ public class VirtualRenderWorld extends Level {
 	public void gameEvent(GameEvent p_220404_, Vec3 p_220405_, Context p_220406_) {}
 
 	@Override
-	public void playSeededSound(Player p_220363_, double p_220364_, double p_220365_, double p_220366_,
+	public void playSeededSound(@Nullable Player p_220363_, double p_220364_, double p_220365_, double p_220366_,
 			SoundEvent p_220367_, SoundSource p_220368_, float p_220369_, float p_220370_, long p_220371_) {}
 
 	@Override
-	public void playSeededSound(Player p_220372_, Entity p_220373_, SoundEvent p_220374_, SoundSource p_220375_,
+	public void playSeededSound(@Nullable Player p_220372_, Entity p_220373_, SoundEvent p_220374_, SoundSource p_220375_,
 			float p_220376_, float p_220377_, long p_220378_) {}
 
 	@Override
@@ -313,6 +317,7 @@ public class VirtualRenderWorld extends Level {
 
 	// Override Starlight's ExtendedWorld interface methods:
 
+	@Nullable
 	public LevelChunk getChunkAtImmediately(final int chunkX, final int chunkZ) {
 		return chunkSource.getChunk(chunkX, chunkZ, false);
 	}

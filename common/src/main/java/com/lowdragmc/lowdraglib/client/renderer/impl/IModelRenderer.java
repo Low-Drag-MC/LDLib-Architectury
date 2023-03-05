@@ -102,6 +102,16 @@ public class IModelRenderer implements IRenderer {
 
     @Override
     @Environment(EnvType.CLIENT)
+    public boolean useAO() {
+        var model = getItemBakedModel();
+        if (model != null) {
+            return model.useAmbientOcclusion();
+        }
+        return false;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
     public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, RandomSource rand) {
         BakedModel ibakedmodel = getBlockBakedModel(pos, level);
         if (ibakedmodel == null) return Collections.emptyList();
@@ -142,6 +152,11 @@ public class IModelRenderer implements IRenderer {
         } else if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
             frontFacing = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
         }
+        return getRotatedModel(frontFacing);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public BakedModel getRotatedModel(Direction frontFacing) {
         return blockModels.computeIfAbsent(frontFacing, facing -> getModel().bake(
                 ModelFactory.getModeBakery(),
                 Material::sprite,

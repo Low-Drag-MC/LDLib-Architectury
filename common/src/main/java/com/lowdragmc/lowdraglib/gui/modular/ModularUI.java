@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.gui.modular;
 
 import com.google.common.base.Preconditions;
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
@@ -234,4 +235,8 @@ public final class ModularUI {
         return this;
     }
 
+    public ModularUI background(IGuiTexture... textures) {
+        mainGroup.setBackground(textures);
+        return this;
+    }
 }

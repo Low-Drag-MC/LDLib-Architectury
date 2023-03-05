@@ -1,13 +1,12 @@
 package com.lowdragmc.lowdraglib.pipelike;
 
-
 import com.lowdragmc.lowdraglib.LDLib;
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.server.level.ServerLevel;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
@@ -17,20 +16,21 @@ import java.util.*;
  * <p>After creating a walker simply call {@link #traversePipeNet()} to start walking, then you can just collect the data
  * <p><b>Do not walk a walker more than once</b>
  */
-public abstract class PipeNetWalker {
-
-    private PipeNetWalker root;
-    private final Level level;
-    private final Set<Long> walked = new HashSet<>();
-    private final List<Direction> pipes = new ArrayList<>();
-    private List<PipeNetWalker> walkers;
-    private final BlockPos.MutableBlockPos currentPos;
+public abstract class PipeNetWalker<NodeDataType, Net extends PipeNet<NodeDataType>> {
+    protected PipeNetWalker<NodeDataType, Net> root;
+    protected final Net pipeNet;
+    protected final Set<Long> walked = new HashSet<>();
+    protected final List<Direction> pipes = new ArrayList<>();
+    protected List<PipeNetWalker<NodeDataType, Net>> walkers;
+    protected final BlockPos.MutableBlockPos currentPos;
+    @Getter
     private int walkedBlocks;
+    @Getter
     private boolean invalid;
     private boolean running;
 
-    protected PipeNetWalker(Level Level, BlockPos sourcePipe, int walkedBlocks) {
-        this.level = Objects.requireNonNull(Level);
+    protected PipeNetWalker(Net pipeNet, BlockPos sourcePipe, int walkedBlocks) {
+        this.pipeNet = pipeNet;
         this.walkedBlocks = walkedBlocks;
         this.currentPos = sourcePipe.mutable();
         this.root = this;
@@ -40,55 +40,42 @@ public abstract class PipeNetWalker {
      * Creates a sub walker
      * Will be called when a pipe has multiple valid pipes
      *
-     * @param Level        Level
+     * @param pipeNet      pipe net
      * @param nextPos      next pos to check
      * @param walkedBlocks distance from source in blocks
      * @return new sub walker
      */
-    protected abstract PipeNetWalker createSubWalker(Level Level, BlockPos nextPos, int walkedBlocks);
-
-    /**
-     * You can increase walking stats here. for example
-     *
-     * @param pipeTile current checking pipe
-     * @param pos      current pipe pos
-     */
-    protected abstract void checkPipe(BlockEntity pipeTile, BlockPos pos);
+    @Nonnull
+    protected abstract PipeNetWalker<NodeDataType, Net> createSubWalker(Net pipeNet, BlockPos nextPos, int walkedBlocks);
 
     /**
      * Checks the neighbour of the current pos
      *
-     * @param pipePos         current pos
+     * @param pipePos         current pos. Note!! its a mutable pos.
      * @param faceToNeighbour face to neighbour
-     * @param neighbourTile   neighbour tile
+     * @param pipeNode        pipeNode
      */
-    protected abstract void checkNeighbour(BlockEntity pipeTile, BlockPos pipePos, Direction faceToNeighbour, @Nullable BlockEntity neighbourTile);
+    protected void checkNeighbour(Node<NodeDataType> pipeNode, BlockPos pipePos, Direction faceToNeighbour) {
+
+    }
 
     /**
-     * If the pipe is valid to perform a walk on
+     * You can increase walking stats here. for example
      *
-     * @param currentPipe     current pipe
-     * @param neighbourPipe   neighbour pipe to check
-     * @param pipePos         current pos (tile.getPipePos() != pipePos)
-     * @param faceToNeighbour face to pipeTile
-     * @return if the pipe is valid
+     * @param pipeNode current checking pipe
+     * @param pos      current pipe pos
+     * @return should keep walking on this path
      */
-    protected abstract boolean isValidPipe(BlockEntity currentPipe, BlockEntity neighbourPipe, BlockPos pipePos, Direction faceToNeighbour);
-
-    /**
-     * If the pipe is connected to the side
-     * @param currentPipe current pipe
-     * @param side face to neighbour
-     * @return if is connected
-     */
-    protected abstract boolean isConnected(BlockEntity currentPipe, Direction side);
+    protected boolean checkPipe(Node<NodeDataType> pipeNode, BlockPos pos) {
+        return true;
+    }
 
     /**
      * Called when a sub walker is done walking
      *
      * @param subWalker the finished sub walker
      */
-    protected void onRemoveSubWalker(PipeNetWalker subWalker) {
+    protected void onRemoveSubWalker(PipeNetWalker<NodeDataType, Net> subWalker) {
     }
 
     public void traversePipeNet() {
@@ -106,7 +93,7 @@ public abstract class PipeNetWalker {
             throw new IllegalStateException("This walker already walked. Create a new one if you want to walk again");
         int i = 0;
         running = true;
-        while (running && !walk() && i++ < maxWalks) ;
+        while (running && !walk() && i++ < maxWalks);
         running = false;
         root.walked.clear();
         if (i >= maxWalks)
@@ -128,14 +115,15 @@ public abstract class PipeNetWalker {
 
             walkers = new ArrayList<>();
             for (Direction side : pipes) {
-                PipeNetWalker walker = Objects.requireNonNull(createSubWalker(level, currentPos.relative(side), walkedBlocks + 1), "Walker can't be null");
+                var walker = createSubWalker(pipeNet, currentPos.relative(side), walkedBlocks + 1);
                 walker.root = root;
                 walkers.add(walker);
             }
         }
-        Iterator<PipeNetWalker> iterator = walkers.iterator();
+
+        Iterator<PipeNetWalker<NodeDataType, Net>> iterator = walkers.iterator();
         while (iterator.hasNext()) {
-            PipeNetWalker walker = iterator.next();
+            PipeNetWalker<NodeDataType, Net> walker = iterator.next();
             if (walker.walk()) {
                 onRemoveSubWalker(walker);
                 iterator.remove();
@@ -147,35 +135,37 @@ public abstract class PipeNetWalker {
 
     private void checkPos() {
         pipes.clear();
-        BlockEntity pipeTile = level.getBlockEntity(currentPos);
-        if (pipeTile == null) {
-            if (walkedBlocks == 1) {
-                // if it is the first block, it wasn't already checked
-                LDLib.LOGGER.warn("First PipeTile is null during walk");
+
+        var pipeNode = pipeNet.getNodeAt(currentPos);
+
+        if (pipeNode != null) {
+            if (!checkPipe(pipeNet.getNodeAt(currentPos), currentPos)) {
                 return;
-            } else
-                throw new IllegalStateException("PipeTile was not null last walk, but now is");
-        }
-        checkPipe(pipeTile, currentPos);
-        root.walked.add(pipeTile.getBlockPos().asLong());
-
-        // check for surrounding pipes and item handlers
-        for (Direction accessSide : Direction.values()) {
-            //skip sides reported as blocked by pipe network
-            BlockEntity otherPipe = level.getBlockEntity(currentPos.immutable().relative(accessSide));
-            if (!isConnected(pipeTile, accessSide) || isWalked(otherPipe))
-                continue;
-
-            if (isValidPipe(pipeTile, otherPipe, currentPos, accessSide)) {
-                pipes.add(accessSide);
-                continue;
             }
-            checkNeighbour(pipeTile, currentPos, accessSide, otherPipe);
+
+            root.walked.add(currentPos.asLong());
+
+            // check for surrounding for next walk
+            for (Direction accessSide : Direction.values()) {
+
+                // is walked.
+                if (isWalked(currentPos.relative(accessSide)) || pipeNode.isBlocked(accessSide)) {
+                    continue;
+                }
+
+                // if neighbour is a connected node.
+                if (pipeNet.isNodeConnectedTo(currentPos, accessSide)) {
+                    pipes.add(accessSide);
+                    continue;
+                }
+
+                checkNeighbour(pipeNode, currentPos, accessSide);
+            }
         }
     }
 
-    protected boolean isWalked(BlockEntity pipe) {
-        return root.walked.contains(pipe.getBlockPos().asLong());
+    protected boolean isWalked(BlockPos pos) {
+        return root.walked.contains(pos.asLong());
     }
 
     /**
@@ -189,19 +179,12 @@ public abstract class PipeNetWalker {
         return root.running;
     }
 
-    public Level getWorld() {
-        return level;
+    public ServerLevel getLevel() {
+        return pipeNet.getLevel();
     }
 
     public BlockPos getCurrentPos() {
-        return currentPos;
+        return currentPos.immutable();
     }
 
-    public int getWalkedBlocks() {
-        return walkedBlocks;
-    }
-
-    public boolean isRoot() {
-        return this.root == this;
-    }
 }

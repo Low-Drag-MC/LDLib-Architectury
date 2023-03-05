@@ -10,8 +10,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 
 import java.util.*;
@@ -35,7 +35,11 @@ public abstract class PipeNet<NodeDataType> implements ITagSerializable<Compound
         return Collections.unmodifiableSet(ownedChunks.keySet());
     }
 
-    public Level getWorldData() {
+    public LevelPipeNet<NodeDataType, PipeNet<NodeDataType>> getWorldData() {
+        return worldData;
+    }
+
+    public ServerLevel getLevel() {
         return worldData.getWorld();
     }
 
@@ -52,6 +56,12 @@ public abstract class PipeNet<NodeDataType> implements ITagSerializable<Compound
      */
     protected void onNodeConnectionsUpdate() {
         this.lastUpdate = System.currentTimeMillis();
+    }
+
+    /**
+     * Is only called when Data changed of nodes.
+     */
+    protected void onNodeDataUpdate() {
     }
 
     /**
@@ -101,7 +111,7 @@ public abstract class PipeNet<NodeDataType> implements ITagSerializable<Compound
         return removedNode;
     }
 
-    protected void removeNode(BlockPos nodePos) {
+    public void removeNode(BlockPos nodePos) {
         if (nodeByBlockPos.containsKey(nodePos)) {
             Node<NodeDataType> selfNode = removeNodeWithoutRebuilding(nodePos);
             rebuildNetworkOnNodeRemoval(nodePos, selfNode);
@@ -127,7 +137,7 @@ public abstract class PipeNet<NodeDataType> implements ITagSerializable<Compound
         }
     }
 
-    protected void updateBlockedConnections(BlockPos nodePos, Direction facing, boolean isBlocked) {
+    public void updateBlockedConnections(BlockPos nodePos, Direction facing, boolean isBlocked) {
         if (!containsNode(nodePos)) {
             return;
         }
@@ -179,10 +189,20 @@ public abstract class PipeNet<NodeDataType> implements ITagSerializable<Compound
             }
         }
         onNodeConnectionsUpdate();
+        onPipeConnectionsUpdate();
         worldData.setDirty();
     }
 
-    protected void updateMark(BlockPos nodePos, int newMark) {
+    public void updateNodeData(BlockPos nodePos, NodeDataType data) {
+        if (containsNode(nodePos)) {
+            Node<NodeDataType> selfNode = getNodeAt(nodePos);
+            selfNode.data = data;
+            onNodeDataUpdate();
+            worldData.setDirty();
+        }
+    }
+
+    public void updateMark(BlockPos nodePos, int newMark) {
         if (!containsNode(nodePos)) {
             return;
         }
@@ -435,7 +455,7 @@ public abstract class PipeNet<NodeDataType> implements ITagSerializable<Compound
             nodeTag.putInt("x", nodePos.getX());
             nodeTag.putInt("y", nodePos.getY());
             nodeTag.putInt("z", nodePos.getZ());
-            int wirePropertiesIndex = alreadyWritten.getInt(node.data);
+            int wirePropertiesIndex = alreadyWritten.getOrDefault(node.data, -1);
             if (wirePropertiesIndex == -1) {
                 wirePropertiesIndex = currentIndex;
                 alreadyWritten.put(node.data, wirePropertiesIndex);

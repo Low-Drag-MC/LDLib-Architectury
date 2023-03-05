@@ -28,27 +28,26 @@ public abstract class ItemRendererMixin {
             IRenderer renderer =((IItemRendererProvider) stack.getItem()).getRenderer(stack);
             if (renderer != null) {
                 if (transformType == ItemTransforms.TransformType.GUI) {
-                    if (renderer.useBlockLight(stack)) {
-                        Lighting.setupFor3DItems();
-                    } else {
-                        Lighting.setupForFlatItems();
+                    if (renderer.useBlockLight(stack) != model.usesBlockLight()) {
+                        if (renderer.useBlockLight(stack)) {
+                            Lighting.setupFor3DItems();
+                        } else {
+                            Lighting.setupForFlatItems();
+                        }
                     }
                 }
                 renderer.renderItem(stack, transformType, leftHand, matrixStack, buffer, combinedLight, combinedOverlay, model);
-                ci.cancel();
-            }
-        }
-    }
-
-    @Inject(method = "renderGuiItem(Lnet/minecraft/world/item/ItemStack;IILnet/minecraft/client/resources/model/BakedModel;)V",
-            at = @At(value = "RETURN"))
-    public void injectRenderGuiItem(ItemStack stack, int x, int y, BakedModel bakedModel, CallbackInfo ci){
-        if (stack.getItem() instanceof IItemRendererProvider && !IItemRendererProvider.disabled.get()) {
-            IRenderer renderer =((IItemRendererProvider) stack.getItem()).getRenderer(stack);
-            if (renderer != null) {
-                if (!renderer.useBlockLight(stack)) {
-                    Lighting.setupFor3DItems();
+                if (transformType == ItemTransforms.TransformType.GUI) {
+                    if (buffer instanceof MultiBufferSource.BufferSource bufferSource) {
+                        bufferSource.endBatch();
+                        if (model.usesBlockLight()) {
+                            Lighting.setupFor3DItems();
+                        } else {
+                            Lighting.setupForFlatItems();
+                        }
+                    }
                 }
+                ci.cancel();
             }
         }
     }

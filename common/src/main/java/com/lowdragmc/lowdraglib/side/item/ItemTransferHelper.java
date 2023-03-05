@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.function.Predicate;
 
 /**
  * @author KilaBash
@@ -23,6 +24,16 @@ public class ItemTransferHelper {
 
     @ExpectPlatform
     public static IItemTransfer getItemTransfer(Level level, BlockPos pos, @Nullable Direction direction) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void exportToTarget(IItemTransfer source, int maxAmount, Predicate<ItemStack> predicate, Level level, BlockPos pos, @Nullable Direction direction) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void importToTarget(IItemTransfer target, int maxAmount, Predicate<ItemStack> predicate, Level level, BlockPos pos, @Nullable Direction direction) {
         throw new AssertionError();
     }
 

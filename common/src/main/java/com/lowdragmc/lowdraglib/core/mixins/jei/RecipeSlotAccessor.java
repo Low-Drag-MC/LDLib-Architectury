@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib.core.mixins.jei;
 
-import mezz.jei.common.gui.ingredients.RecipeSlot;
-import mezz.jei.common.ingredients.RegisteredIngredients;
+import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.library.gui.ingredients.RecipeSlot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -12,5 +12,5 @@ public interface RecipeSlotAccessor {
     void setArea(ImmutableRect2i rect);
 
     @Accessor
-    RegisteredIngredients getRegisteredIngredients();
+    IIngredientManager getIngredientManager();
 }

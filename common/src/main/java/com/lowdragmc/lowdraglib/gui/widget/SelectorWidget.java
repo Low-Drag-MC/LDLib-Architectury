@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @RegisterUI(name = "selector", group = "widget.basic")
 public class SelectorWidget extends WidgetGroup {
@@ -38,6 +39,7 @@ public class SelectorWidget extends WidgetGroup {
     protected boolean showUp;
     protected boolean isShow;
     protected IGuiTexture popUpTexture = new ColorRectTexture(0xAA000000);
+    private Supplier<String> supplier;
     private Consumer<String> onChanged;
     public final TextTexture textTexture;
     protected final DraggableScrollableWidgetGroup popUp;
@@ -85,7 +87,6 @@ public class SelectorWidget extends WidgetGroup {
                 if (onChanged != null) {
                     onChanged.accept(candidate);
                 }
-                setValue(candidate);
                 writeClientAction(2, buffer -> buffer.writeUtf(candidate));
                 setShow(false);
             });
@@ -174,6 +175,11 @@ public class SelectorWidget extends WidgetGroup {
         return this;
     }
 
+    public SelectorWidget setSupplier(Supplier<String> supplier) {
+        this.supplier = supplier;
+        return this;
+    }
+
     @Override
     public boolean isMouseOverElement(double mouseX, double mouseY) {
         return super.isMouseOverElement(mouseX, mouseY) || (isShow && popUp.isMouseOverElement(mouseX, mouseY));
@@ -194,12 +200,42 @@ public class SelectorWidget extends WidgetGroup {
     @Override
     public void updateScreen() {
         super.updateScreen();
+        if (isClientSideWidget && supplier != null) {
+            setValue(supplier.get());
+        }
         if (gui != null) {
             ModularUIGuiContainer container = gui.getModularUIGui();
             if (container != null && container.lastFocus != null && container.lastFocus.isParent(this)) {
                 setFocus(true);
             }
         }
+    }
+
+    @Override
+    public void detectAndSendChanges() {
+        super.detectAndSendChanges();
+        if (!isClientSideWidget && supplier != null) {
+            var last = currentValue;
+            setValue(supplier.get());
+            if (!last.equals( currentValue)) {
+                writeUpdateInfo(3, buffer -> buffer.writeUtf(currentValue));
+            }
+        }
+    }
+
+    @Override
+    public void writeInitialData(FriendlyByteBuf buffer) {
+        super.writeInitialData(buffer);
+        if (supplier != null) {
+            setValue(supplier.get());
+        }
+        buffer.writeUtf(currentValue);
+    }
+
+    @Override
+    public void readInitialData(FriendlyByteBuf buffer) {
+        super.readInitialData(buffer);
+        setValue(buffer.readUtf());
     }
 
     @Override
@@ -228,6 +264,7 @@ public class SelectorWidget extends WidgetGroup {
     }
 
     @Override
+    @Environment(EnvType.CLIENT)
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!super.mouseClicked(mouseX, mouseY, button)) {
             setFocus(false);
@@ -244,6 +281,14 @@ public class SelectorWidget extends WidgetGroup {
             if (onChanged != null) {
                onChanged.accept(getValue()); 
             }
+        }
+    }
+
+    @Override
+    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
+        super.readUpdateInfo(id, buffer);
+        if (id == 3) {
+            setValue(buffer.readUtf());
         }
     }
 

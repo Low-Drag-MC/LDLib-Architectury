@@ -34,6 +34,10 @@ public interface IFluidTransfer {
     @Nonnull
     FluidStack getFluidInTank(int tank);
 
+    default void setFluidInTank(int tank, @Nonnull FluidStack fluidStack) {
+        throw new RuntimeException("FluidTransfer %s doesn't support set fluid in tank".formatted(this));
+    }
+
     /**
      * Retrieves the maximum fluid amount for a given tank.
      *

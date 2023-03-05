@@ -89,7 +89,13 @@ public abstract class LevelPipeNet<NodeDataType, T extends PipeNet<NodeDataType>
         T pipeNet = getNetFromPos(nodePos);
         if (pipeNet != null) {
             pipeNet.updateBlockedConnections(nodePos, side, isBlocked);
-            pipeNet.onPipeConnectionsUpdate();
+        }
+    }
+
+    public void updateData(BlockPos nodePos, NodeDataType data) {
+        T pipeNet = getNetFromPos(nodePos);
+        if (pipeNet != null) {
+            pipeNet.updateNodeData(nodePos, data);
         }
     }
 
@@ -123,6 +129,7 @@ public abstract class LevelPipeNet<NodeDataType, T extends PipeNet<NodeDataType>
         this.pipeNets.remove(pipeNet);
         pipeNet.getContainedChunks().forEach(chunkPos -> removePipeNetFromChunk(chunkPos, pipeNet));
         pipeNet.isValid = false;
+        setDirty();
     }
 
     protected abstract T createNetInstance();

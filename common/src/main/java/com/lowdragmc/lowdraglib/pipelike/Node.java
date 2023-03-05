@@ -12,7 +12,7 @@ public final class Node<NodeDataType> {
     public static final int DEFAULT_MARK = 0;
     public static final int ALL_OPENED = 0b111111;
 
-    public final NodeDataType data;
+    public NodeDataType data;
     /**
      * Specifies bitmask of blocked connections
      * Node will not connect in blocked direction in any case,

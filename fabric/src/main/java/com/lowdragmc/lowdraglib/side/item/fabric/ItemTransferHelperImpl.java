@@ -5,8 +5,10 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.base.SingleStackStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
@@ -15,7 +17,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author KilaBash
@@ -23,6 +27,61 @@ import java.util.List;
  * @implNote ItemTransferHelperImpl
  */
 public class ItemTransferHelperImpl {
+
+    public static Storage<ItemVariant> toItemVariantStorage(IItemTransfer itemTransfer) {
+        return new Storage<>() {
+
+            @Override
+            public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
+                long left = maxAmount;
+                for (int i = 0; i < itemTransfer.getSlots(); i++) {
+                    left = itemTransfer.insertItem(i, (resource.toStack((int) left)), false).getCount();
+                    if (left == 0) break;
+                }
+                return maxAmount - left;
+            }
+
+            @Override
+            public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
+                long left = maxAmount;
+                for (int i = 0; i < itemTransfer.getSlots(); i++) {
+                    left -= itemTransfer.extractItem(i, (int) left, false).getCount();
+                    if (left == 0) break;
+                }
+                return maxAmount - left;
+            }
+
+            @Override
+            public long simulateInsert(ItemVariant resource, long maxAmount, @Nullable TransactionContext transaction) {
+                long left = maxAmount;
+                for (int i = 0; i < itemTransfer.getSlots(); i++) {
+                    left = itemTransfer.insertItem(i, (resource.toStack((int) left)), true).getCount();
+                    if (left == 0) break;
+                }
+                return maxAmount - left;
+            }
+
+            @Override
+            public long simulateExtract(ItemVariant resource, long maxAmount, @Nullable TransactionContext transaction) {
+                long left = maxAmount;
+                for (int i = 0; i < itemTransfer.getSlots(); i++) {
+                    left -= itemTransfer.extractItem(i, (int) left, true).getCount();
+                    if (left == 0) break;
+                }
+                return maxAmount - left;
+            }
+
+            @Override
+            public Iterator<StorageView<ItemVariant>> iterator() {
+                List<StorageView<ItemVariant>> views = new ArrayList<>();
+                for (int i = 0; i < itemTransfer.getSlots(); i++) {
+                    views.add(toSingleStackStorage(itemTransfer, i));
+                }
+                return views.iterator();
+            }
+        };
+    }
+
     public static SingleStackStorage toSingleStackStorage(IItemTransfer itemTransfer, int slot) {
         return new SingleStackStorage() {
             @Override
@@ -105,5 +164,25 @@ public class ItemTransferHelperImpl {
     public static IItemTransfer getItemTransfer(Level level, BlockPos pos, @Nullable Direction direction) {
         var storage = ItemStorage.SIDED.find(level, pos, direction);
         return storage == null ? null : toItemTransfer(storage);
+    }
+
+    public static void exportToTarget(IItemTransfer source, int maxAmount, Predicate<ItemStack> predicate, Level level, BlockPos pos, @Nullable Direction direction) {
+        var target = ItemStorage.SIDED.find(level, pos, direction);
+        if (target != null) {
+            StorageUtil.move(toItemVariantStorage(source), target, iv -> {
+                if (predicate == null) return true;
+                return predicate.test(iv.toStack());
+            }, maxAmount, null);
+        }
+    }
+
+    public static void importToTarget(IItemTransfer target, int maxAmount, Predicate<ItemStack> predicate, Level level, BlockPos pos, @Nullable Direction direction) {
+        var source = ItemStorage.SIDED.find(level, pos, direction);
+        if (source != null) {
+            StorageUtil.move(source, toItemVariantStorage(target), iv -> {
+                if (predicate == null) return true;
+                return predicate.test(iv.toStack());
+            }, maxAmount, null);
+        }
     }
 }

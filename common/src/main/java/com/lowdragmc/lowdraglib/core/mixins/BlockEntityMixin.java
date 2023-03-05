@@ -1,9 +1,11 @@
 package com.lowdragmc.lowdraglib.core.mixins;
 
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
+import com.lowdragmc.lowdraglib.syncdata.IManaged;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAsyncAutoSyncBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoPersistBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;
+import com.lowdragmc.lowdraglib.syncdata.blockentity.IManagedBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -51,18 +53,21 @@ public abstract class BlockEntityMixin {
         if (this instanceof IAsyncAutoSyncBlockEntity autoSyncBlockEntity) {
             autoSyncBlockEntity.onInValid();
         }
-        if (this instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
-            // update fields before removed
-            for (IRef field : autoSyncBlockEntity.getNonLazyFields()) {
-                field.update();
-            }
-        }
+//        if (this instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
+//            // update fields before removed
+//            for (IRef field : autoSyncBlockEntity.getNonLazyFields()) {
+//                field.update();
+//            }
+//        }
     }
 
     @Inject(method = "clearRemoved", at = @At(value = "RETURN"))
     private void injectClearRemoved(CallbackInfo ci) {
-        if (this instanceof IAsyncAutoSyncBlockEntity autoSyncBlockEntity) {
-            autoSyncBlockEntity.onValid();
+        if (this instanceof IManagedBlockEntity managed) {
+            managed.getRootStorage().init();
+            if (managed instanceof IAsyncAutoSyncBlockEntity autoSyncBlockEntity) {
+                autoSyncBlockEntity.onValid();
+            }
         }
     }
 

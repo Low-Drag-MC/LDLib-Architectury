@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 
@@ -92,6 +93,7 @@ public class LiquidBlockContainerTransfer implements IFluidTransfer {
         public FluidStack getFluidInTank(int tank) {
             return FluidStack.empty();
         }
+
 
         @Override
         public long getTankCapacity(int tank) {

@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.function.Predicate;
 
 /**
  * @author KilaBash
@@ -61,6 +62,16 @@ public class FluidTransferHelper {
 
     @ExpectPlatform
     public static IFluidTransfer getFluidTransfer(Player player, int slot) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void exportToTarget(IFluidTransfer source, int maxAmount, Predicate<FluidStack> filter, Level level, BlockPos pos, @Nullable Direction direction) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void importToTarget(IFluidTransfer target, int maxAmount, Predicate<FluidStack> filter, Level level, BlockPos pos, @Nullable Direction direction) {
         throw new AssertionError();
     }
 

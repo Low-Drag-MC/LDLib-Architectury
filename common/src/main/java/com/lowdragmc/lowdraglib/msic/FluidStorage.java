@@ -24,7 +24,7 @@ public class FluidStorage implements IFluidStorage, IContentChangeAware, ITagSer
     };
     @Setter
     protected Predicate<FluidStack> validator;
-    @Setter
+
     @Getter
     @Nonnull
     protected FluidStack fluid = FluidStack.empty();
@@ -39,6 +39,17 @@ public class FluidStorage implements IFluidStorage, IContentChangeAware, ITagSer
     public FluidStorage(long capacity, Predicate<FluidStack> validator) {
         this.capacity = capacity;
         this.validator = validator;
+    }
+
+    public FluidStorage(FluidStack fluidStack) {
+        this(fluidStack.getAmount());
+        fluid = fluidStack;
+    }
+
+    @Override
+    public void setFluid(FluidStack fluid) {
+        this.fluid = fluid;
+        onContentsChanged();
     }
 
     @Override

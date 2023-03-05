@@ -46,6 +46,11 @@ public interface IFluidStorage extends IFluidTransfer {
     }
 
     @Override
+    default void setFluidInTank(int tank, @NotNull FluidStack fluidStack) {
+        setFluid(fluidStack);
+    }
+
+    @Override
     default long getTankCapacity(int tank) {
         return getCapacity();
     }

@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.utils;
 
 import com.lowdragmc.lowdraglib.client.scene.ParticleManager;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.ColorResolver;
@@ -39,6 +40,11 @@ public class TrackedDummyWorld extends DummyWorld {
 
     public void setRenderFilter(Predicate<BlockPos> renderFilter) {
         this.renderFilter = renderFilter;
+    }
+
+    public TrackedDummyWorld(){
+        super(Minecraft.getInstance().level);
+        proxyWorld = null;
     }
 
     public TrackedDummyWorld(Level world){

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.utils.virtual;
 
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -8,9 +9,12 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class VirtualChunkSource extends ChunkSource {
 	private final VirtualRenderWorld world;
 

@@ -90,6 +90,7 @@ public class ManagedRef implements IRef {
 
         IntRef(IManagedVar.Int field) {
             super(field);
+            oldValue = this.<IManagedVar.Int>getField().intValue();
         }
 
         @Override
@@ -107,6 +108,7 @@ public class ManagedRef implements IRef {
 
         LongRef(IManagedVar.Long field) {
             super(field);
+            oldValue = this.<IManagedVar.Long>getField().longValue();
         }
 
         @Override
@@ -124,6 +126,7 @@ public class ManagedRef implements IRef {
 
         FloatRef(IManagedVar.Float field) {
             super(field);
+            oldValue = this.<IManagedVar.Float>getField().floatValue();
         }
 
         @Override
@@ -141,6 +144,7 @@ public class ManagedRef implements IRef {
 
         DoubleRef(IManagedVar.Double field) {
             super(field);
+            oldValue = this.<IManagedVar.Double>getField().doubleValue();
         }
 
         @Override
@@ -158,6 +162,7 @@ public class ManagedRef implements IRef {
 
         BooleanRef(IManagedVar.Boolean field) {
             super(field);
+            oldValue = this.<IManagedVar.Boolean>getField().booleanValue();
         }
 
         @Override
@@ -175,6 +180,7 @@ public class ManagedRef implements IRef {
 
         ByteRef(IManagedVar.Byte field) {
             super(field);
+            oldValue = this.<IManagedVar.Byte>getField().byteValue();
         }
 
         @Override
@@ -192,6 +198,7 @@ public class ManagedRef implements IRef {
 
         ShortRef(IManagedVar.Short field) {
             super(field);
+            oldValue = this.<IManagedVar.Short>getField().shortValue();
         }
 
         @Override
@@ -209,6 +216,7 @@ public class ManagedRef implements IRef {
 
         CharRef(IManagedVar.Char field) {
             super(field);
+            oldValue = this.<IManagedVar.Char>getField().charValue();
         }
 
         @Override

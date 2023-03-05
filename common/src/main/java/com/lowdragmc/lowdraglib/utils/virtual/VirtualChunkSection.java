@@ -1,9 +1,14 @@
 package com.lowdragmc.lowdraglib.utils.virtual;
 
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class VirtualChunkSection extends LevelChunkSection {
 
 	public VirtualChunk owner;

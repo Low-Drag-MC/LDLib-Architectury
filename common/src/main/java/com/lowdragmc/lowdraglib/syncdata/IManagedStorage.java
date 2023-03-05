@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.syncdata;
 
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * @author KilaBash
@@ -76,5 +77,11 @@ public interface IManagedStorage {
             syncField.setChanged(true);
         }
     }
+
+    /**
+     * it should be called when class initialization finished but field haven't been changed yet.
+     * you can call it in the {@link BlockEntity#clearRemoved()}.
+     */
+    void init();
 
 }

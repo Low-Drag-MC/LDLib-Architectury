@@ -8,9 +8,9 @@ import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author KilaBash
@@ -35,8 +36,8 @@ import java.util.List;
  */
 public class FluidTransferHelperImpl {
 
-    public static Storage<FluidVariant> toSingleStackStorage(IFluidTransfer fluidTransfer, int slot) {
-        return new Storage<FluidVariant>() {
+    public static Storage<FluidVariant> toFluidVariantStorage(IFluidTransfer fluidTransfer) {
+        return new Storage<>() {
 
             @Override
             public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
@@ -62,18 +63,29 @@ public class FluidTransferHelperImpl {
             public Iterator<StorageView<FluidVariant>> iterator() {
                 List<StorageView<FluidVariant>> views = new ArrayList<>();
                 for (int i = 0; i < fluidTransfer.getTanks(); i++) {
-                    final int index = i;
-                    var stack = fluidTransfer.getFluidInTank(index);
-                    var view = new SingleFluidStorage() {
-                        @Override
-                        protected long getCapacity(FluidVariant variant) {
-                            return fluidTransfer.getTankCapacity(index);
-                        }
-                    };
-                    view.variant = FluidVariant.of(stack.getFluid(), stack.getTag());
-                    view.amount = stack.getAmount();
+                    views.add(toSingleFluidStackStorage(fluidTransfer, i));
                 }
                 return views.iterator();
+            }
+        };
+    }
+
+    public static SingleFluidStackStorage toSingleFluidStackStorage(IFluidTransfer fluidTransfer, int index) {
+        return new SingleFluidStackStorage() {
+
+            @Override
+            protected FluidStack getStack() {
+                return fluidTransfer.getFluidInTank(index);
+            }
+
+            @Override
+            protected void setStack(FluidStack stack) {
+                fluidTransfer.setFluidInTank(index, stack);
+            }
+
+            @Override
+            protected long getCapacity(FluidVariant fluidVariant) {
+                return fluidTransfer.getTankCapacity(index);
             }
         };
     }
@@ -173,4 +185,23 @@ public class FluidTransferHelperImpl {
         return copyContainer.getStackInSlot(0);
     }
 
+    public static void exportToTarget(IFluidTransfer source, int maxAmount, Predicate<FluidStack> filter, Level level, BlockPos pos, @Nullable Direction direction) {
+        var target = FluidStorage.SIDED.find(level, pos, direction);
+        if (target != null) {
+            StorageUtil.move(toFluidVariantStorage(source), target, variant -> {
+                if (filter == null) return true;
+                return filter.test(FluidStack.create(variant.getFluid(), 1000, variant.getNbt()));
+            }, maxAmount, null);
+        }
+    }
+
+    public static void importToTarget(IFluidTransfer target, int maxAmount, Predicate<FluidStack> filter, Level level, BlockPos pos, @Nullable Direction direction) {
+        var source = FluidStorage.SIDED.find(level, pos, direction);
+        if (source != null) {
+            StorageUtil.move(source, toFluidVariantStorage(target), variant -> {
+                if (filter == null) return true;
+                return filter.test(FluidStack.create(variant.getFluid(), 1000, variant.getNbt()));
+            }, maxAmount, null);
+        }
+    }
 }

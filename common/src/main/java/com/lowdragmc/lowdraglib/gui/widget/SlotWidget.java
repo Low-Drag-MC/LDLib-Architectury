@@ -23,6 +23,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -330,8 +331,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public Object getJEIIngredient() {
         if (slotReference == null) return null;
         if (LDLib.isReiLoaded()) {
-            // TODO
-//            return EntryStacks.of(getRealStack(getHandle().getItem()));
+            return EntryStacks.of(getRealStack(getHandle().getItem()));
         }
         return getRealStack(getHandle().getItem());
     }

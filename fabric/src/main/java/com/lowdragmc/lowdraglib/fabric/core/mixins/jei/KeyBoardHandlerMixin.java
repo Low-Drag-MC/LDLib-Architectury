@@ -2,8 +2,8 @@ package com.lowdragmc.lowdraglib.fabric.core.mixins.jei;
 
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
-import mezz.jei.common.gui.recipes.RecipesGui;
-import mezz.jei.common.gui.recipes.layout.RecipeLayout;
+import mezz.jei.gui.recipes.RecipesGui;
+import mezz.jei.library.gui.recipes.RecipeLayout;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;

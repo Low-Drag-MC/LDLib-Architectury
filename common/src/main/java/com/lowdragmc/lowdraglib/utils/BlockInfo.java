@@ -2,6 +2,8 @@ package com.lowdragmc.lowdraglib.utils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -95,6 +97,11 @@ public class BlockInfo {
 
     public ItemStack getItemStackForm() {
         return itemStack == null ? new ItemStack(blockState.getBlock()) : itemStack;
+    }
+
+    public ItemStack getItemStackForm(BlockAndTintGetter level, BlockPos pos) {
+        if (itemStack != null) return itemStack;
+        return blockState.getBlock().getCloneItemStack(new FacadeBlockAndTintGetter(level, pos, blockState, null), pos, blockState);
     }
 
     public void apply(Level world, BlockPos pos) {

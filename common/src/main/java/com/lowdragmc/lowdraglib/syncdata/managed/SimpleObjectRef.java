@@ -7,6 +7,7 @@ class SimpleObjectRef extends ManagedRef {
 
     SimpleObjectRef(IManagedVar<?> field) {
         super(field);
+        oldValue = getField().value();
     }
 
     @Override

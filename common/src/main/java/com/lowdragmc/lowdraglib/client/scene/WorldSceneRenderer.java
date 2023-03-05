@@ -514,18 +514,20 @@ public abstract class WorldSceneRenderer {
         } else {
             PoseStack matrixstack = new PoseStack();
             for (int i = 0; i < layers.size(); i++) {
-                RenderType layer = layers.get(i);
+                VertexBuffer vertexbuffer = vertexBuffers[i];
+                if (vertexbuffer.isInvalid() || vertexbuffer.getFormat() == null) continue;
 
+                RenderType layer = layers.get(i);
                 if (layer == RenderType.translucent() && tileEntities != null) { // render tesr before translucent
                     renderTESR(tileEntities, matrixstack, mc.renderBuffers().bufferSource(), particleTicks);
                 }
 
                 layer.setupRenderState();
 
-                VertexBuffer vertexbuffer = vertexBuffers[i];
+
                 matrixstack.pushPose();
                 ShaderInstance shaderinstance = RenderSystem.getShader();
-                BufferUploader.reset();
+
                 // setup shader uniform
                 if (shaderinstance.MODEL_VIEW_MATRIX != null) {
                     shaderinstance.MODEL_VIEW_MATRIX.set(RenderSystem.getModelViewMatrix());
@@ -593,7 +595,7 @@ public abstract class WorldSceneRenderer {
             BlockEntity te = world.getBlockEntity(pos);
 
             if (block == Blocks.AIR) continue;
-            if (state.getRenderShape() != INVISIBLE && ItemBlockRenderTypes.getChunkRenderType(state) == layer) {
+            if (state.getRenderShape() != INVISIBLE && canRenderInLayer(state, layer)) {
                 matrixStack.pushPose();
                 matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
                 if (Platform.isForge()) {
@@ -613,8 +615,13 @@ public abstract class WorldSceneRenderer {
     }
 
     @ExpectPlatform
+    public static boolean canRenderInLayer(BlockState state, RenderType renderType) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     @PlatformOnly(PlatformOnly.FORGE)
-    private static void renderBlocksForge(BlockRenderDispatcher blockRenderDispatcher, BlockState state, BlockPos pos, BlockAndTintGetter level, PoseStack poseStack, VertexConsumer consumer, RandomSource random, RenderType renderType) {
+    public static void renderBlocksForge(BlockRenderDispatcher blockRenderDispatcher, BlockState state, BlockPos pos, BlockAndTintGetter level, PoseStack poseStack, VertexConsumer consumer, RandomSource random, RenderType renderType) {
         throw new AssertionError();
     }
 

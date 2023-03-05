@@ -6,6 +6,8 @@ import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 
+import java.util.Arrays;
+
 public class FriendlyBufPayload extends ObjectTypedPayload<FriendlyByteBuf> {
 
     public static ITypedPayload<?> of(FriendlyByteBuf buf) {
@@ -30,13 +32,13 @@ public class FriendlyBufPayload extends ObjectTypedPayload<FriendlyByteBuf> {
 
     @Override
     public Tag serializeNBT() {
-        return new ByteArrayTag(payload.readByteArray());
+        return new ByteArrayTag(Arrays.copyOfRange(payload.array(), 0, payload.writerIndex()));
     }
 
     @Override
     public void deserializeNBT(Tag buf) {
         if (buf instanceof ByteArrayTag byteTags) {
-            payload = new FriendlyByteBuf(Unpooled.wrappedBuffer(byteTags.getAsByteArray()));
+            payload = new FriendlyByteBuf(Unpooled.copiedBuffer(byteTags.getAsByteArray()));
         }
     }
 }

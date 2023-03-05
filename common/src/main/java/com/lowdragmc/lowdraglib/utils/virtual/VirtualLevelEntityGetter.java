@@ -1,14 +1,18 @@
 package com.lowdragmc.lowdraglib.utils.virtual;
 
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.phys.AABB;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class VirtualLevelEntityGetter<T extends EntityAccess> implements LevelEntityGetter<T> {
 
 	@Override

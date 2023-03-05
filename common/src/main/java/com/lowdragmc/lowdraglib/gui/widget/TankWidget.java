@@ -35,6 +35,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluids;
 
 import org.jetbrains.annotations.NotNull;
@@ -340,8 +341,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             for (int i = 0; i < maxAttempts; i++) {
                 FluidActionResult result = FluidTransferHelper.tryFillContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, false);
                 if (!result.isSuccess()) break;
-                currentStack = FluidTransferHelper.tryFillContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, true).getResult();
+                ItemStack remainingStack = FluidTransferHelper.tryFillContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, true).getResult();
+                currentStack.shrink(1);
                 performedFill = true;
+                if (!remainingStack.isEmpty() && !player.addItem(remainingStack)) {
+                    Block.popResource(player.getLevel(), player.getOnPos(), remainingStack);
+                    break;
+                }
             }
             if (performedFill) {
                 SoundEvent soundevent = FluidHelper.getFillSound(initialFluid);
@@ -356,8 +362,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             for (int i = 0; i < maxAttempts; i++) {
                 FluidActionResult result = FluidTransferHelper.tryEmptyContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, false);
                 if (!result.isSuccess()) break;
-                currentStack = FluidTransferHelper.tryEmptyContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, true).getResult();
+                ItemStack remainingStack = FluidTransferHelper.tryEmptyContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, true).getResult();
+                currentStack.shrink(1);
                 performedEmptying = true;
+                if (!remainingStack.isEmpty() && !player.getInventory().add(remainingStack)) {
+                    Block.popResource(player.getLevel(), player.getOnPos(), remainingStack);
+                    break;
+                }
             }
             var filledFluid = fluidTank.getFluid();
             if (performedEmptying) {

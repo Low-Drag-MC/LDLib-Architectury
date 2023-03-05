@@ -125,4 +125,9 @@ public class MultiManagedStorage implements IManagedStorage {
         }
     }
 
+    @Override
+    public void init() {
+        storages.forEach(IManagedStorage::init);
+    }
+
 }
