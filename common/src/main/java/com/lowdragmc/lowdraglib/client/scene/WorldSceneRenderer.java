@@ -524,49 +524,54 @@ public abstract class WorldSceneRenderer {
 
                 layer.setupRenderState();
 
-
                 matrixstack.pushPose();
-                ShaderInstance shaderinstance = RenderSystem.getShader();
+
+                ShaderInstance shaderInstance = RenderSystem.getShader();
+
+//                for(int j = 0; j < 12; ++j) {
+//                    int k = RenderSystem.getShaderTexture(j);
+//                    shaderInstance.setSampler("Sampler" + j, k);
+//                }
 
                 // setup shader uniform
-                if (shaderinstance.MODEL_VIEW_MATRIX != null) {
-                    shaderinstance.MODEL_VIEW_MATRIX.set(RenderSystem.getModelViewMatrix());
+                if (shaderInstance.MODEL_VIEW_MATRIX != null) {
+                    shaderInstance.MODEL_VIEW_MATRIX.set(RenderSystem.getModelViewMatrix());
                 }
 
-                if (shaderinstance.PROJECTION_MATRIX != null) {
-                    shaderinstance.PROJECTION_MATRIX.set(RenderSystem.getProjectionMatrix());
+                if (shaderInstance.PROJECTION_MATRIX != null) {
+                    shaderInstance.PROJECTION_MATRIX.set(RenderSystem.getProjectionMatrix());
                 }
 
-                if (shaderinstance.COLOR_MODULATOR != null) {
-                    shaderinstance.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
+                if (shaderInstance.COLOR_MODULATOR != null) {
+                    shaderInstance.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
                 }
 
-                if (shaderinstance.FOG_START != null) {
-                    shaderinstance.FOG_START.set(RenderSystem.getShaderFogStart());
+                if (shaderInstance.FOG_START != null) {
+                    shaderInstance.FOG_START.set(RenderSystem.getShaderFogStart());
                 }
 
-                if (shaderinstance.FOG_END != null) {
-                    shaderinstance.FOG_END.set(RenderSystem.getShaderFogEnd());
+                if (shaderInstance.FOG_END != null) {
+                    shaderInstance.FOG_END.set(RenderSystem.getShaderFogEnd());
                 }
 
-                if (shaderinstance.FOG_COLOR != null) {
-                    shaderinstance.FOG_COLOR.set(RenderSystem.getShaderFogColor());
+                if (shaderInstance.FOG_COLOR != null) {
+                    shaderInstance.FOG_COLOR.set(RenderSystem.getShaderFogColor());
                 }
 
-                if (shaderinstance.FOG_SHAPE != null) {
-                    shaderinstance.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
+                if (shaderInstance.FOG_SHAPE != null) {
+                    shaderInstance.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
                 }
 
-                if (shaderinstance.TEXTURE_MATRIX != null) {
-                    shaderinstance.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
+                if (shaderInstance.TEXTURE_MATRIX != null) {
+                    shaderInstance.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
                 }
 
-                if (shaderinstance.GAME_TIME != null) {
-                    shaderinstance.GAME_TIME.set(RenderSystem.getShaderGameTime());
+                if (shaderInstance.GAME_TIME != null) {
+                    shaderInstance.GAME_TIME.set(RenderSystem.getShaderGameTime());
                 }
 
-                RenderSystem.setupShaderLights(shaderinstance);
-                shaderinstance.apply();
+                RenderSystem.setupShaderLights(shaderInstance);
+                shaderInstance.apply();
 
                 setDefaultRenderLayerState(layer);
 
@@ -577,7 +582,7 @@ public abstract class WorldSceneRenderer {
 
                 matrixstack.popPose();
 
-                shaderinstance.clear();
+                shaderInstance.clear();
                 VertexBuffer.unbind();
                 layer.clearRenderState();
             }

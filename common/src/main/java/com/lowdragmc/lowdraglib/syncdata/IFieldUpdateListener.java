@@ -8,5 +8,5 @@ package com.lowdragmc.lowdraglib.syncdata;
 @FunctionalInterface
 public
 interface IFieldUpdateListener<T> {
-    void onFieldChanged(String changedField, T oldValue, T newValue);
+    void onFieldChanged(String changedField, T newValue, T oldValue);
 }

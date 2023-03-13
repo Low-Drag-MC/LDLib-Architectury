@@ -2,11 +2,14 @@ package com.lowdragmc.lowdraglib.client.forge;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.ClientCommands;
+import com.lowdragmc.lowdraglib.rei.ModularDisplay;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -26,5 +29,17 @@ public class ClientEventListener {
         var dispatcher = event.getDispatcher();
         List<LiteralArgumentBuilder<CommandSourceStack>> commands = ClientCommands.createClientCommands();
         commands.forEach(dispatcher::register);
+    }
+
+    @SubscribeEvent
+    public static void onScreenClosed(ScreenEvent.Closing event) {
+        if (LDLib.isReiLoaded()) {
+            if (event.getScreen() instanceof DisplayScreen && !ModularDisplay.CACHE_OPENED.isEmpty()) {
+                synchronized (ModularDisplay.CACHE_OPENED) {
+                    ModularDisplay.CACHE_OPENED.forEach(modular -> modular.modularUI.triggerCloseListeners());
+                    ModularDisplay.CACHE_OPENED.clear();
+                }
+            }
+        }
     }
 }

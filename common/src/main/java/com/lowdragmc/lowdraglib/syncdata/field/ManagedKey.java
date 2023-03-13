@@ -9,7 +9,7 @@ import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import lombok.Getter;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

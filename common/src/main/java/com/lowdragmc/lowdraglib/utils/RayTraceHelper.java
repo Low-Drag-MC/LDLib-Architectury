@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.utils;
 
-import com.simibubi.create.foundation.utility.RaycastHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -25,7 +24,7 @@ public class RayTraceHelper {
         return worldIn.clip(context);
     }
 
-    public static RaycastHelper.PredicateTraceResult rayTraceUntil(Player playerIn, double range, Predicate<BlockPos> predicate) {
+    public static PredicateTraceResult rayTraceUntil(Player playerIn, double range, Predicate<BlockPos> predicate) {
         Vec3 origin = getTraceOrigin(playerIn);
         Vec3 target = getTraceTarget(playerIn, range, origin);
         return rayTraceUntil(origin, target, predicate);
@@ -50,7 +49,7 @@ public class RayTraceHelper {
         return new Vec3(d0, d1, d2);
     }
 
-    public static RaycastHelper.PredicateTraceResult rayTraceUntil(Vec3 start, Vec3 end, Predicate<BlockPos> predicate) {
+    public static PredicateTraceResult rayTraceUntil(Vec3 start, Vec3 end, Predicate<BlockPos> predicate) {
         if (Double.isNaN(start.x) || Double.isNaN(start.y) || Double.isNaN(start.z))
             return null;
         if (Double.isNaN(end.x) || Double.isNaN(end.y) || Double.isNaN(end.z))
@@ -66,7 +65,7 @@ public class RayTraceHelper {
         BlockPos.MutableBlockPos currentPos = new BlockPos(x, y, z).mutable();
 
         if (predicate.test(currentPos))
-            return new RaycastHelper.PredicateTraceResult(currentPos.immutable(), Direction.getNearest(dx - x, dy - y, dz - z));
+            return new PredicateTraceResult(currentPos.immutable(), Direction.getNearest(dx - x, dy - y, dz - z));
 
         int remainingDistance = 200;
 
@@ -76,7 +75,7 @@ public class RayTraceHelper {
             }
 
             if (x == dx && y == dy && z == dz) {
-                return new RaycastHelper.PredicateTraceResult();
+                return new PredicateTraceResult();
             }
 
             boolean flag2 = true;
@@ -160,10 +159,10 @@ public class RayTraceHelper {
             currentPos.set(x, y, z);
 
             if (predicate.test(currentPos))
-                return new RaycastHelper.PredicateTraceResult(currentPos.immutable(), enumfacing);
+                return new PredicateTraceResult(currentPos.immutable(), enumfacing);
         }
 
-        return new RaycastHelper.PredicateTraceResult();
+        return new PredicateTraceResult();
     }
 
     public static class PredicateTraceResult {

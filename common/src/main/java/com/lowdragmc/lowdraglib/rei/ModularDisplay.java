@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class ModularDisplay<T extends Widget> implements Display {
+    public static final List<ModularWrapper<?>> CACHE_OPENED = new ArrayList<>();
     protected Supplier<T> widget;
     protected List<EntryIngredient> inputs;
     protected List<EntryIngredient> outputs;
@@ -77,6 +78,10 @@ public class ModularDisplay<T extends Widget> implements Display {
         var widget = this.widget.get();
         var modular = new ModularWrapper<>(widget);
         modular.setRecipeWidget(bounds.getX() + 4, bounds.getY() + 4);
+
+        synchronized (CACHE_OPENED) {
+            CACHE_OPENED.add(modular);
+        }
 
         list.add(Widgets.createRecipeBase(bounds));
         list.add(new ModularWrapperWidget(modular));

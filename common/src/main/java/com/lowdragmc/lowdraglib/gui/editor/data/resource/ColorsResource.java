@@ -15,7 +15,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.utils.ColorUtils;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import static com.lowdragmc.lowdraglib.gui.editor.data.resource.ColorsResource.RESOURCE_NAME;
 

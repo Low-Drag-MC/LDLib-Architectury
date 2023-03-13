@@ -28,7 +28,7 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         this.widget = widget;
     }
 
-    private static int lastTick;
+    private int lastTick;
     private int left, top;
 
     public T getWidget() {

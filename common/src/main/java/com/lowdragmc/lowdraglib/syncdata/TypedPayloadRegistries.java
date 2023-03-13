@@ -13,7 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;

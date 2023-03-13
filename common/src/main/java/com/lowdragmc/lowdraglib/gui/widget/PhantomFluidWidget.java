@@ -17,7 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;

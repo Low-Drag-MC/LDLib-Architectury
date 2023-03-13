@@ -13,9 +13,7 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.BlockMath;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-
 import javax.annotation.Nullable;
 
 /**

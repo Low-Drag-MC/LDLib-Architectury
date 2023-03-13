@@ -17,7 +17,6 @@ def mod_url = getConfig("mod_url")
 def minecraft_version = getConfig("minecraft_version")
 def fabric_loader_version = getConfig("fabric_loader_version")
 def fabric_api_version = getConfig("fabric_api_version")
-def create_fabric_version = getConfig("create_fabric_version")
 def jei_version = getConfig("jei_version")
 def rei_version = getConfig("rei_version")
 def lazydfu_version = getConfig("lazydfu_version")
@@ -80,23 +79,19 @@ dependencies {
     // dependencies
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_api_version}")
 
-    // Create - dependencies are added transitively
-    modImplementation("com.simibubi.create:create-fabric-${minecraft_version}:${create_fabric_version}")
-
     // Development QOL
     modLocalRuntime("maven.modrinth:lazydfu:${lazydfu_version}")
     modLocalRuntime("com.terraformersmc:modmenu:${modmenu_version}")
 
     // JEI
-    modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-    modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}")
-    modImplementation("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}")
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}") { transitive = false }
+    modImplementation("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}") { transitive = false }
 
     // REI
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}")
-
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${rei_version}") { transitive = false }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}") { transitive = false }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}") { transitive = false }
 }
 
 processResources {
@@ -111,7 +106,6 @@ processResources {
             "mod_name", mod_name,
             "mod_description", mod_description,
             "mod_url", mod_url,
-            "create_version", create_fabric_version // on fabric, use the entire version, unlike forge
     )
     properties.forEach((k, v) -> inputs.property(k, v))
 

@@ -13,7 +13,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import java.awt.*;
 import java.util.ArrayList;

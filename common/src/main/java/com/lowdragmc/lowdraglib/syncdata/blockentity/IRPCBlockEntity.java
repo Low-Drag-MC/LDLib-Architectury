@@ -7,7 +7,7 @@ import com.lowdragmc.lowdraglib.syncdata.field.RPCMethodMeta;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public interface IRPCBlockEntity extends IManagedBlockEntity {
 

@@ -22,7 +22,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.function.Function;

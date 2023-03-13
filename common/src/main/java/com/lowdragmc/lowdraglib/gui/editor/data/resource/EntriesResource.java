@@ -7,7 +7,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import static com.lowdragmc.lowdraglib.gui.editor.data.resource.EntriesResource.RESOURCE_NAME;
 

@@ -4,7 +4,7 @@ import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public class EnumValuePayload extends ObjectTypedPayload<EnumValuePayload.Payload> {
     public EnumValuePayload() {

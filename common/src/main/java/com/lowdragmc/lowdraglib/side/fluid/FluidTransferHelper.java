@@ -5,7 +5,6 @@ import com.lowdragmc.lowdraglib.msic.*;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.side.item.ItemTransferHelper;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
@@ -16,6 +15,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
@@ -496,9 +496,7 @@ public class FluidTransferHelper {
             return false;
         }
 
-        BlockPlaceContext context = new BlockPlaceContext(level, player, hand,
-                player == null ? ItemStack.EMPTY : player.getItemInHand(hand),
-                new BlockHitResult(Vec3.ZERO, Direction.UP, pos, false));
+        BlockPlaceContext context = new BlockPlaceContext(new UseOnContext(player, hand, new BlockHitResult(Vec3.ZERO, Direction.UP, pos, false)));
 
         // check that we can place the fluid at the destination
         BlockState destBlockState = level.getBlockState(pos);
@@ -564,4 +562,33 @@ public class FluidTransferHelper {
         }
     }
 
+    public static long transferFluids(@Nonnull IFluidTransfer sourceHandler, @Nonnull IFluidTransfer destHandler, long transferLimit, @Nonnull Predicate<FluidStack> fluidFilter) {
+        long fluidLeftToTransfer = transferLimit;
+        for (int i = 0; i < sourceHandler.getTanks(); i++) {
+            FluidStack currentFluid = sourceHandler.getFluidInTank(i).copy();
+            if (currentFluid.isEmpty() || !fluidFilter.test(currentFluid)) {
+                continue;
+            }
+
+            currentFluid.setAmount(fluidLeftToTransfer);
+            var drained = sourceHandler.drain(currentFluid, true);
+            if (drained.isEmpty()) {
+                continue;
+            }
+
+            var canInsertAmount = destHandler.fill(drained.copy(), true);
+            if (canInsertAmount > 0) {
+                drained.setAmount(canInsertAmount);
+                drained = sourceHandler.drain(drained, false);
+                if (!drained.isEmpty()) {
+                    destHandler.fill(drained, false);
+                    fluidLeftToTransfer -= drained.getAmount();
+                    if (fluidLeftToTransfer == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return transferLimit - fluidLeftToTransfer;
+    }
 }

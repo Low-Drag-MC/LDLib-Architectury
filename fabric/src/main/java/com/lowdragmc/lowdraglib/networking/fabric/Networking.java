@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public class Networking implements INetworking {
     @Getter

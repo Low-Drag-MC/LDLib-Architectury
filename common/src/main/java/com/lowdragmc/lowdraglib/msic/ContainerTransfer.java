@@ -1,7 +1,6 @@
 package com.lowdragmc.lowdraglib.msic;
 
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 

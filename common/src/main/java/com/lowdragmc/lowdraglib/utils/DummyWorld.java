@@ -242,12 +242,12 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public void playSeededSound(@org.jetbrains.annotations.Nullable Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch, long seed) {
+    public void playSeededSound(@javax.annotation.Nullable Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch, long seed) {
 
     }
 
     @Override
-    public void playSeededSound(@org.jetbrains.annotations.Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch, long seed) {
+    public void playSeededSound(@javax.annotation.Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch, long seed) {
 
     }
 

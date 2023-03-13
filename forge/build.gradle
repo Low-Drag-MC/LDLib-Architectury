@@ -15,10 +15,6 @@ def mod_name = getConfig("mod_name")
 def mod_description = getConfig("mod_description")
 def mod_url = getConfig("mod_url")
 def minecraft_version = getConfig("minecraft_version")
-def create_forge_version = getConfig("create_forge_version")
-def registrate_forge_version = getConfig("registrate_forge_version")
-def flywheel_forge_minecraft_version = getConfig("flywheel_forge_minecraft_version")
-def flywheel_forge_version = getConfig("flywheel_forge_version")
 def jei_version = getConfig("jei_version")
 def rei_version = getConfig("rei_version")
 
@@ -83,20 +79,15 @@ dependencies {
     common(project(path: "${parent_path}:${mod_id}-common", configuration: "namedElements")) { transitive = false }
     shadowCommon(project(path: "${parent_path}:${mod_id}-common", configuration: "transformProductionForge")) { transitive = false }
 
-    // Create and its dependencies
-    modImplementation("com.simibubi.create:create-${minecraft_version}:${create_forge_version}:slim") { transitive = false }
-    modImplementation("com.tterrag.registrate:Registrate:${registrate_forge_version}")
-    modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_forge_minecraft_version}:${flywheel_forge_version}")
-
     // JEI
     modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     modCompileOnly("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
-    modImplementation("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
     // REI
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-forge:${rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-forge:${rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
+    modImplementation("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
 
 }
 
@@ -110,8 +101,7 @@ processResources {
             "mod_license", mod_license,
             "mod_name", mod_name,
             "mod_description", mod_description,
-            "mod_url", mod_url,
-            "create_version", create_forge_version.split("-")[0] // cut off build number
+            "mod_url", mod_url
     )
     properties.forEach((k, v) -> inputs.property(k, v))
 

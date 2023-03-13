@@ -41,22 +41,22 @@ public class FluidTransferHelperImpl {
 
             @Override
             public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
-                return fluidTransfer.fill(FluidStack.create(resource.getFluid(), maxAmount), false);
+                return fluidTransfer.fill(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), false);
             }
 
             @Override
             public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
-                return fluidTransfer.drain(FluidStack.create(resource.getFluid(), maxAmount), false).getAmount();
+                return fluidTransfer.drain(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), false).getAmount();
             }
 
             @Override
-            public long simulateInsert(FluidVariant resource, long maxAmount, @org.jetbrains.annotations.Nullable TransactionContext transaction) {
-                return fluidTransfer.fill(FluidStack.create(resource.getFluid(), maxAmount), true);
+            public long simulateInsert(FluidVariant resource, long maxAmount, @javax.annotation.Nullable TransactionContext transaction) {
+                return fluidTransfer.fill(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), true);
             }
 
             @Override
-            public long simulateExtract(FluidVariant resource, long maxAmount, @org.jetbrains.annotations.Nullable TransactionContext transaction) {
-                return fluidTransfer.drain(FluidStack.create(resource.getFluid(), maxAmount), true).getAmount();
+            public long simulateExtract(FluidVariant resource, long maxAmount, @javax.annotation.Nullable TransactionContext transaction) {
+                return fluidTransfer.drain(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), true).getAmount();
             }
 
             @Override

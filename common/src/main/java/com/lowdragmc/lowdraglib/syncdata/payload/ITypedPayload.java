@@ -2,7 +2,7 @@ package com.lowdragmc.lowdraglib.syncdata.payload;
 
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 /**
  * A special payload that can be used to send serialized data to the client.

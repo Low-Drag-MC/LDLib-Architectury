@@ -12,7 +12,7 @@ import com.lowdragmc.lowdraglib.gui.texture.UIResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.function.Function;

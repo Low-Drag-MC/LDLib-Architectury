@@ -5,7 +5,6 @@ import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
-import io.github.fabricators_of_create.porting_lib.util.ServerLifecycleHooks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;

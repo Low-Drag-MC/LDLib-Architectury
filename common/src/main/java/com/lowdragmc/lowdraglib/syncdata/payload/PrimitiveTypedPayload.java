@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.syncdata.SyncedFieldAccessors;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.FriendlyByteBuf;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
 

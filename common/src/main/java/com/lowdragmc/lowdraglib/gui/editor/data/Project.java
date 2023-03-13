@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.gui.editor.IRegisterUI;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
 import net.minecraft.nbt.CompoundTag;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import java.io.File;
 

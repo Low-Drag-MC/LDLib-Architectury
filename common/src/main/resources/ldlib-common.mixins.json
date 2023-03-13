@@ -15,8 +15,7 @@
     "accessor.AbstractContainerScreenAccessor",
     "accessor.VertexFormatAccessor",
     "jei.RecipesGuiAccessor",
-    "jei.RecipeSlotAccessor",
-    "rei.AbstractDisplayViewingScreenAccessor"
+    "jei.RecipeSlotAccessor"
   ],
   "mixins": [
     "BlockEntityMixin",
