@@ -26,7 +26,7 @@ public class LDLibFabricMixinPlugin implements IMixinConfigPlugin, MixinPluginSh
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.contains("com.lowdragmc.lowdraglib.fabric.core.mixin.jei")) {
+        if (mixinClassName.contains("com.lowdragmc.lowdraglib.fabric.core.mixins.jei")) {
             return IS_JEI_LOAD;
         }
         return true;
