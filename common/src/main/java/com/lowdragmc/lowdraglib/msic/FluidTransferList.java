@@ -4,12 +4,15 @@ import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
+import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author KilaBash
@@ -18,6 +21,8 @@ import java.util.List;
  */
 public class FluidTransferList implements IFluidTransfer, ITagSerializable<CompoundTag> {
     public final IFluidTransfer[] transfers;
+    @Setter
+    protected Predicate<FluidStack> filter = fluid -> true;
 
     public FluidTransferList(IFluidTransfer... transfers) {
         this.transfers = transfers;
@@ -71,6 +76,9 @@ public class FluidTransferList implements IFluidTransfer, ITagSerializable<Compo
 
     @Override
     public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
+        if (!filter.test(stack)) {
+            return false;
+        }
         int index = 0;
         for (IFluidTransfer transfer : transfers) {
             if (tank - index < transfer.getTanks()) {
@@ -83,7 +91,7 @@ public class FluidTransferList implements IFluidTransfer, ITagSerializable<Compo
 
     @Override
     public long fill(FluidStack resource, boolean simulate) {
-        if (resource.isEmpty()) return 0;
+        if (resource.isEmpty() || !filter.test(resource)) return 0;
         var copied = resource.copy();
         for (var transfer : transfers) {
             var candidate = copied.copy();
@@ -96,7 +104,7 @@ public class FluidTransferList implements IFluidTransfer, ITagSerializable<Compo
     @NotNull
     @Override
     public FluidStack drain(FluidStack resource, boolean simulate) {
-        if (resource.isEmpty()) return FluidStack.empty();
+        if (resource.isEmpty() || !filter.test(resource)) return FluidStack.empty();
         var copied = resource.copy();
         for (var transfer : transfers) {
             var candidate = copied.copy();

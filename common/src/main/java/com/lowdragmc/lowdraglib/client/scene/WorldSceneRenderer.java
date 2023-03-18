@@ -12,6 +12,8 @@ import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.injectables.annotations.PlatformOnly;
+import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -589,7 +591,8 @@ public abstract class WorldSceneRenderer {
         }
     }
 
-    private void renderBlocks(PoseStack matrixStack, BlockRenderDispatcher blockrendererdispatcher, RenderType layer, BufferBuilder buffer, Collection<BlockPos> renderedBlocks) {
+    private void renderBlocks(PoseStack matrixStack, BlockRenderDispatcher blockrendererdispatcher, RenderType layer, VertexConsumer buffer, Collection<BlockPos> renderedBlocks) {
+        VertexConsumerWrapper wrapperBuffer = new VertexConsumerWrapper(buffer);
         for (BlockPos pos : renderedBlocks) {
             if (blocked != null && blocked.contains(pos)) {
                 continue;
@@ -604,14 +607,16 @@ public abstract class WorldSceneRenderer {
                 matrixStack.pushPose();
                 matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
                 if (Platform.isForge()) {
-                    renderBlocksForge(blockrendererdispatcher, state, pos, world, matrixStack, buffer, world.random, layer);
+                    renderBlocksForge(blockrendererdispatcher, state, pos, world, matrixStack, wrapperBuffer, world.random, layer);
                 } else {
-                    blockrendererdispatcher.renderBatched(state, pos, world, matrixStack, buffer, false, world.random);
+                    blockrendererdispatcher.renderBatched(state, pos, world, matrixStack, wrapperBuffer, false, world.random);
                 }
                 matrixStack.popPose();
             }
-            if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) {
-                blockrendererdispatcher.renderLiquid(pos, world, buffer, state, fluidState);
+            if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) { // I dont want to do this fxxk wrapper
+                wrapperBuffer.setOffset((pos.getX() - (pos.getX() & 15)), (pos.getY() - (pos.getY() & 15)), (pos.getZ() - (pos.getZ() & 15)));
+                blockrendererdispatcher.renderLiquid(pos, world, wrapperBuffer, state, fluidState);
+                wrapperBuffer.clerOffset();
             }
             if (maxProgress > 0) {
                 progress++;
@@ -795,4 +800,70 @@ public abstract class WorldSceneRenderer {
         return winPos;
     }
 
+    private class VertexConsumerWrapper implements VertexConsumer {
+        final VertexConsumer builder;
+        @Setter
+        double offsetX, offsetY, offsetZ;
+
+        public VertexConsumerWrapper(VertexConsumer builder) {
+            this.builder = builder;
+        }
+
+        public void setOffset(double offsetX, double offsetY, double offsetZ) {
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+            this.offsetZ = offsetZ;
+        }
+
+        public void clerOffset() {
+            this.offsetX = 0;
+            this.offsetY = 0;
+            this.offsetZ = 0;
+        }
+
+        @Override
+        public VertexConsumer vertex(double x, double y, double z) {
+            return builder.vertex(x + offsetX, y + offsetY, z + offsetZ);
+        }
+
+        @Override
+        public VertexConsumer color(int red, int green, int blue, int alpha) {
+            return builder.color(red, green, blue, alpha);
+        }
+
+        @Override
+        public VertexConsumer uv(float u, float v) {
+            return builder.uv(u, v);
+        }
+
+        @Override
+        public VertexConsumer overlayCoords(int u, int v) {
+            return builder.overlayCoords(u, v);
+        }
+
+        @Override
+        public VertexConsumer uv2(int u, int v) {
+            return builder.uv2(u, v);
+        }
+
+        @Override
+        public VertexConsumer normal(float x, float y, float z) {
+            return builder.normal(x, y, z);
+        }
+
+        @Override
+        public void endVertex() {
+            builder.endVertex();
+        }
+
+        @Override
+        public void defaultColor(int defaultR, int defaultG, int defaultB, int defaultA) {
+            builder.defaultColor(defaultR, defaultG, defaultB, defaultA);
+        }
+
+        @Override
+        public void unsetDefaultColor() {
+            builder.unsetDefaultColor();
+        }
+    }
 }

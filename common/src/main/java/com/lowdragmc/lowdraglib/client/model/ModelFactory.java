@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.client.model;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.math.Quaternion;
+import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
@@ -18,6 +19,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
+
+import javax.annotation.Nonnull;
 
 /**
  * Author: KilaBash
@@ -48,7 +51,7 @@ public class ModelFactory {
         };
     }
 
-    public static BlockModelRotation getRotation(Direction facing) {
+    public static ModelState getRotation(Direction facing) {
         return switch (facing) {
             case DOWN -> BlockModelRotation.X90_Y0;
             case UP -> BlockModelRotation.X270_Y0;
@@ -57,6 +60,57 @@ public class ModelFactory {
             case WEST -> BlockModelRotation.X0_Y270;
             case EAST -> BlockModelRotation.X0_Y90;
         };
+    }
+
+    public static Direction modelFacing(Direction side, Direction frontFacing) {
+        if (side == frontFacing) return Direction.NORTH;
+        if (frontFacing == Direction.NORTH) return side;
+        if (frontFacing == Direction.SOUTH) {
+            if (side.getAxis() == Direction.Axis.Y) return side;
+            return side.getOpposite();
+        }
+        if (frontFacing == Direction.EAST) {
+            if (side.getAxis() == Direction.Axis.Y) return side;
+            return side.getCounterClockWise();
+        }
+        if (frontFacing == Direction.WEST) {
+            if (side.getAxis() == Direction.Axis.Y) return side;
+            return side.getClockWise();
+        }
+        if (frontFacing == Direction.UP) {
+            if (side == Direction.DOWN) return Direction.SOUTH;
+            if (side.getAxis() == Direction.Axis.X) return side;
+            if (side == Direction.SOUTH) return Direction.UP;
+            if (side == Direction.NORTH) return Direction.DOWN;
+        }
+        if (frontFacing == Direction.DOWN) {
+            if (side == Direction.UP) return Direction.SOUTH;
+            if (side.getAxis() == Direction.Axis.X) return side;
+            if (side == Direction.SOUTH) return Direction.DOWN;
+            if (side == Direction.NORTH) return Direction.UP;
+        }
+        return side;
+    }
+
+    private record ModelStateWrapper(ModelState modelState, boolean lockedUV) implements ModelState {
+        @Override
+        @Nonnull
+        public Transformation getRotation() {
+            return modelState.getRotation();
+        }
+
+        @Override
+        public boolean isUvLocked() {
+            return lockedUV;
+        }
+    }
+
+    public static ModelState getRotation(Direction facing, boolean lockedUV) {
+        if (lockedUV) {
+            return new ModelStateWrapper(getRotation(facing), true);
+        } else {
+            return getRotation(facing);
+        }
     }
 
     public static Either<Material, String> parseTextureLocationOrReference(ResourceLocation pLocation, String pName) {

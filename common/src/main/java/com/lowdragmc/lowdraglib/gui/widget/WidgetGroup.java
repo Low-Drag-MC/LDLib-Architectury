@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
 import com.lowdragmc.lowdraglib.gui.ingredient.IIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.WidgetUIAccess;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.WidgetTexture;
@@ -206,6 +207,16 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         super.setVisible(visible);
     }
 
+    @Override
+    public void setGui(ModularUI gui) {
+        super.setGui(gui);
+        for (Widget widget : widgets) {
+            if (widget.gui != gui) {
+                widget.setGui(gui);
+            }
+        }
+    }
+
     public boolean isChild(Widget widget) {
         return widget.isParent(this);
     }
@@ -226,7 +237,9 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
             widget.setClientSideWidget();
         }
         widget.setUiAccess(groupUIAccess);
-        widget.setGui(gui);
+        if (widget.gui != gui) {
+            widget.setGui(gui);
+        }
         widget.setParent(this);
         widget.setParentPosition(getPosition());
         if (isInitialized() && !widget.isInitialized()) {
@@ -306,7 +319,9 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     public void initWidget() {
         super.initWidget();
         for (Widget widget : widgets) {
-            widget.setGui(gui);
+            if (widget.gui != gui) {
+                widget.setGui(gui);
+            }
             widget.initWidget();
         }
     }
