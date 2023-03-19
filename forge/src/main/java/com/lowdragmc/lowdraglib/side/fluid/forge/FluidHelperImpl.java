@@ -70,4 +70,8 @@ public class FluidHelperImpl {
     public static SoundEvent getFillSound(FluidStack fluidStack) {
         return fluidStack.getFluid().getFluidType().getSound(toFluidStack(fluidStack), SoundActions.BUCKET_FILL);
     }
+
+    public static Object toRealFluidStack(FluidStack fluidStack) {
+        return toFluidStack(fluidStack);
+    }
 }

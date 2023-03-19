@@ -75,6 +75,10 @@ public class FluidTransferHelper {
         throw new AssertionError();
     }
 
+    /**
+     * if you are using it, make sure you are using simulate == true
+     */
+    @Deprecated
     public static IFluidTransfer getFluidTransfer(@NotNull ItemStack itemStack) {
         return getFluidTransfer(new ItemStackTransfer(itemStack), 0);
     }
@@ -397,7 +401,7 @@ public class FluidTransferHelper {
     public static FluidStack getFluidContained(@Nonnull ItemStack container) {
         if (!container.isEmpty()) {
             container = ItemTransferHelper.copyStackWithSize(container, 1);
-            var handler = getFluidTransfer(container);
+            var handler = getFluidTransfer(new ItemStackTransfer(container), 0);
             if (handler != null) {
                 var contained = handler.drain(Integer.MAX_VALUE, true);
                 if (!contained.isEmpty()) {

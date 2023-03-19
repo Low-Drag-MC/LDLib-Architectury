@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
+import com.lowdragmc.lowdraglib.msic.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
@@ -68,7 +69,7 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
             }
         }
         if (ingredient instanceof ItemStack itemStack) {
-            var handler = FluidTransferHelper.getFluidTransfer(itemStack);
+            var handler = FluidTransferHelper.getFluidTransfer(new ItemStackTransfer(itemStack), 0);
             if (handler != null) {
                 return handler.drain(Long.MAX_VALUE, true);
             }

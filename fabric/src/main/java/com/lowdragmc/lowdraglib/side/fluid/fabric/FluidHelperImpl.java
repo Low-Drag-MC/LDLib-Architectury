@@ -77,5 +77,8 @@ public class FluidHelperImpl {
         return FluidVariantAttributes.getFillSound(toFluidVariant(fluidStack));
     }
 
+    public static Object toRealFluidStack(FluidStack fluidStack) {
+        return toFluidVariant(fluidStack);
+    }
 
 }
