@@ -10,7 +10,6 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.spongepowered.asm.util.asm.ASM;
-import org.spongepowered.include.com.google.common.collect.Maps;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -46,7 +45,7 @@ public class ReflectionUtilsImpl {
     }
 
     public static Map<Class<? extends Annotation>, Set<String>> findAnnotationCandidates(Set<Class<? extends Annotation>> annotationTypes) {
-        final Map<Class<? extends Annotation>, Set<String>> annotationCandidates = Maps.newHashMap();
+        final Map<Class<? extends Annotation>, Set<String>> annotationCandidates = new HashMap<>();
 
         for (var allMod : FabricLoader.getInstance().getAllMods()) {
             for (Path rootPath : allMod.getRootPaths()) {
