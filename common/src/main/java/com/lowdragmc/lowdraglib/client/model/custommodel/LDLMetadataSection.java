@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.client.model.custommodel;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.client.model.ModelFactory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -22,13 +23,12 @@ public class LDLMetadataSection {
     private static final Map<ResourceLocation, LDLMetadataSection> METADATA_CACHE = new HashMap<>();
 
     public final boolean emissive;
-    private final RenderType layer;
+    public final ResourceLocation connection;
 
-    public LDLMetadataSection(boolean emissive, RenderType layer) {
+    public LDLMetadataSection(boolean emissive, ResourceLocation connection) {
         this.emissive = emissive;
-        this.layer = layer;
+        this.connection = connection;
     }
-
 
     @Nullable
     public static LDLMetadataSection getMetadata(ResourceLocation res) {
@@ -48,14 +48,20 @@ public class LDLMetadataSection {
         return ret;
     }
 
+    @Nullable
+    public static LDLMetadataSection getMetadata(TextureAtlasSprite sprite) {
+        return getMetadata(spriteToAbsolute(sprite.getName()));
+    }
+
     public static boolean isEmissive(TextureAtlasSprite sprite) {
         LDLMetadataSection ret = getMetadata(spriteToAbsolute(sprite.getName()));
         return ret != null && ret.emissive;
     }
 
-    public static RenderType getLayer(TextureAtlasSprite sprite) {
+    @Nullable
+    public static TextureAtlasSprite getConnection(TextureAtlasSprite sprite) {
         LDLMetadataSection ret = getMetadata(spriteToAbsolute(sprite.getName()));
-        return ret == null ? null : ret.layer;
+        return (ret == null || ret.connection == null) ? null : ModelFactory.getBlockSprite(ret.connection);
     }
 
     public static ResourceLocation spriteToAbsolute(ResourceLocation sprite) {
@@ -81,7 +87,7 @@ public class LDLMetadataSection {
         @Nonnull
         public LDLMetadataSection fromJson(@Nonnull JsonObject json) {
             boolean emissive = false;
-            RenderType layer = null;
+            ResourceLocation connection = null;
             if (json.isJsonObject()) {
                 JsonObject obj = json.getAsJsonObject();
                 if (obj.has("emissive")) {
@@ -90,14 +96,14 @@ public class LDLMetadataSection {
                         emissive = element.getAsBoolean();
                     }
                 }
-                if (obj.has("layer")) {
-                    JsonElement element = obj.get("emissive");
+                if (obj.has("connection")) {
+                    JsonElement element = obj.get("connection");
                     if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
-                        layer = RenderType.chunkBufferLayers().stream().filter(type->type.toString().equals(element.getAsString())).findAny().orElseGet(null);
+                        connection = new ResourceLocation(element.getAsString());
                     }
                 }
             }
-            return new LDLMetadataSection(emissive, layer);
+            return new LDLMetadataSection(emissive, connection);
         }
     }
 }

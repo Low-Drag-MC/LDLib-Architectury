@@ -24,8 +24,8 @@ import javax.annotation.Nullable;
 @Environment(EnvType.CLIENT)
 public class FaceQuadBakery {
     public static final int VERTEX_INT_SIZE = 8;
-    private static final float RESCALE_22_5 = 1.0F / (float)Math.cos((double)((float)Math.PI / 8F)) - 1.0F;
-    private static final float RESCALE_45 = 1.0F / (float)Math.cos((double)((float)Math.PI / 4F)) - 1.0F;
+    private static final float RESCALE_22_5 = 1.0F / (float)Math.cos((float)Math.PI / 8F) - 1.0F;
+    private static final float RESCALE_45 = 1.0F / (float)Math.cos((float)Math.PI / 4F) - 1.0F;
     public static final int VERTEX_COUNT = 4;
     private static final int COLOR_INDEX = 3;
     public static final int UV_INDEX = 4;

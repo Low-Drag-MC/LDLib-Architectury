@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
@@ -56,7 +57,7 @@ public class FluidBlockTransfer implements IFluidTransfer {
         if (!resource.isEmpty() && resource.getFluid() == getFluid() && resource.getAmount() >= getTankCapacity(0)) {
             FluidStack drained = getFluidInTank(0).copy();
             if (!simulate) {
-                world.removeBlock(blockPos, false);
+                world.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState());
             }
             return drained;
         }

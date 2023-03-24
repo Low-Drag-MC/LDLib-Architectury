@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib.client.renderer.impl;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
-import com.lowdragmc.lowdraglib.utils.FacadeBlockAndTintGetter;
 import com.lowdragmc.lowdraglib.utils.FacadeBlockWorld;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -131,17 +130,8 @@ public class BlockStateRenderer implements IRenderer {
         state = getState(state);
         if (state.getRenderShape() != RenderShape.INVISIBLE) {
             BlockRenderDispatcher brd = Minecraft.getInstance().getBlockRenderer();
-            BlockEntity blockEntity = getBlockEntity(level, pos);
-            BlockAndTintGetter blockReader = new FacadeBlockAndTintGetter(level, pos, state, blockEntity);
-            RenderShape rendershape = state.getRenderShape();
             BakedModel model = brd.getBlockModel(state);
-            if (rendershape == RenderShape.MODEL) {
-//                if (blockEntity != null) {
-//                    modelData = blockEntity.getModelData();
-//                }
-//                modelData = model.getModelData(blockReader, pos, state,);
-                return model.getQuads(state, side, rand);
-            }
+            return model.getQuads(state, side, rand);
         }
         return Collections.emptyList();
     }
@@ -217,4 +207,13 @@ public class BlockStateRenderer implements IRenderer {
         }
     }
 
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean useAO() {
+        var state = getBlockInfo().getBlockState();
+        if (state.getRenderShape() != RenderShape.INVISIBLE) {
+            return Minecraft.getInstance().getBlockRenderer().getBlockModel(state).useAmbientOcclusion();
+        }
+        return false;
+    }
 }

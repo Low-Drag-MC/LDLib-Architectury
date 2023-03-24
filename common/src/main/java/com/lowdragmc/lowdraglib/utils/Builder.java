@@ -1,10 +1,7 @@
 package com.lowdragmc.lowdraglib.utils;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author KilaBash
@@ -13,7 +10,7 @@ import java.util.Map;
  */
 public abstract class Builder<T, B extends Builder<T, B>> {
     protected List<String[]> shape = new ArrayList<>();
-    protected Map<Character, T> symbolMap = new HashMap<>();
+    protected Map<Character, T> symbolMap = new LinkedHashMap<>();
 
     public B aisle(String... data) {
         this.shape.add(data);

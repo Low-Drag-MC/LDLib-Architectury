@@ -2,6 +2,9 @@ package com.lowdragmc.lowdraglib.client.renderer.impl;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.model.ModelFactory;
+import com.lowdragmc.lowdraglib.client.model.custommodel.Connection;
+import com.lowdragmc.lowdraglib.client.model.custommodel.Connections;
+import com.lowdragmc.lowdraglib.client.model.custommodel.CustomBakedModel;
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -22,8 +25,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -47,7 +48,7 @@ public class IModelRenderer implements IRenderer {
     }
 
     public IModelRenderer(ResourceLocation modelLocation) {
-        this(modelLocation, false);
+        this(modelLocation, true);
     }
 
     public IModelRenderer(ResourceLocation modelLocation, boolean useCustomBakedModel) {
@@ -113,8 +114,11 @@ public class IModelRenderer implements IRenderer {
     @Override
     @Environment(EnvType.CLIENT)
     public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, RandomSource rand) {
-        BakedModel ibakedmodel = getBlockBakedModel(pos, level);
+        var ibakedmodel = getBlockBakedModel(pos, level);
         if (ibakedmodel == null) return Collections.emptyList();
+        if (state != null && ibakedmodel instanceof CustomBakedModel customBakedModel) {
+            return customBakedModel.getCustomQuads(level, pos, state, side, rand);
+        }
         return ibakedmodel.getQuads(state, side, rand);
     }
 
@@ -145,23 +149,19 @@ public class IModelRenderer implements IRenderer {
     @Environment(EnvType.CLIENT)
     @Nullable
     protected BakedModel getBlockBakedModel(BlockPos pos, BlockAndTintGetter blockAccess) {
-        BlockState blockState = blockAccess.getBlockState(pos);
-        Direction frontFacing = Direction.NORTH;
-        if (blockState.hasProperty(BlockStateProperties.FACING)) {
-            frontFacing = blockState.getValue(BlockStateProperties.FACING);
-        } else if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-            frontFacing = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
-        }
-        return getRotatedModel(frontFacing);
+        return getRotatedModel(Direction.NORTH);
     }
 
     @Environment(EnvType.CLIENT)
     public BakedModel getRotatedModel(Direction frontFacing) {
-        return blockModels.computeIfAbsent(frontFacing, facing -> getModel().bake(
-                ModelFactory.getModeBakery(),
-                Material::sprite,
-                ModelFactory.getRotation(facing),
-                modelLocation));
+        return blockModels.computeIfAbsent(frontFacing, facing -> {
+            var bakedModel = getModel().bake(
+                    ModelFactory.getModeBakery(),
+                    Material::sprite,
+                    ModelFactory.getRotation(facing),
+                    modelLocation);
+            return useCustomBakedModel ? new CustomBakedModel(bakedModel) : bakedModel;
+        });
     }
 
     @Override
