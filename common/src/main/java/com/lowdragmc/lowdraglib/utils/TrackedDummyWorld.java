@@ -72,6 +72,11 @@ public class TrackedDummyWorld extends DummyWorld {
         maxPos.z = (Math.max(maxPos.z, pos.getZ()));
     }
 
+    // wth? mcp issue
+    public void setInnerBlockEntity(@Nonnull BlockEntity pBlockEntity) {
+        blockEntities.put(pBlockEntity.getBlockPos(), pBlockEntity);
+    }
+
     @Override
     public void setBlockEntity(@Nonnull BlockEntity pBlockEntity) {
         blockEntities.put(pBlockEntity.getBlockPos(), pBlockEntity);
