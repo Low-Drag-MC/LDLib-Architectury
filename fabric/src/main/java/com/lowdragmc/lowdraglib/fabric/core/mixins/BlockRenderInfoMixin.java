@@ -28,7 +28,7 @@ public class BlockRenderInfoMixin {
         if (blockState.getBlock() instanceof IBlockRendererProvider blockRendererProvider) {
             var renderer = blockRendererProvider.getRenderer(blockState);
             if (renderer != null) {
-                this.defaultAo = renderer.useAO() && Minecraft.useAmbientOcclusion() && blockState.getLightEmission() == 0;
+                this.defaultAo = renderer.useAO(blockState) && Minecraft.useAmbientOcclusion() && blockState.getLightEmission() == 0;
             }
         }
     }

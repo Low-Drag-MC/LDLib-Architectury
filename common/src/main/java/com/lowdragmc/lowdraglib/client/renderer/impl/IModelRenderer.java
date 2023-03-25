@@ -2,9 +2,6 @@ package com.lowdragmc.lowdraglib.client.renderer.impl;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.model.ModelFactory;
-import com.lowdragmc.lowdraglib.client.model.custommodel.Connection;
-import com.lowdragmc.lowdraglib.client.model.custommodel.Connections;
-import com.lowdragmc.lowdraglib.client.model.custommodel.CustomBakedModel;
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -36,7 +33,6 @@ import java.util.function.Consumer;
 public class IModelRenderer implements IRenderer {
 
     public final ResourceLocation modelLocation;
-    public final boolean useCustomBakedModel;
     @Environment(EnvType.CLIENT)
     protected BakedModel itemModel;
     @Environment(EnvType.CLIENT)
@@ -44,16 +40,10 @@ public class IModelRenderer implements IRenderer {
 
     protected IModelRenderer() {
         modelLocation = null;
-        useCustomBakedModel = false;
     }
 
     public IModelRenderer(ResourceLocation modelLocation) {
-        this(modelLocation, true);
-    }
-
-    public IModelRenderer(ResourceLocation modelLocation, boolean useCustomBakedModel) {
         this.modelLocation = modelLocation;
-        this.useCustomBakedModel = useCustomBakedModel;
         if (LDLib.isClient()) {
             blockModels = new ConcurrentHashMap<>();
             registerEvent();
@@ -116,9 +106,6 @@ public class IModelRenderer implements IRenderer {
     public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, RandomSource rand) {
         var ibakedmodel = getBlockBakedModel(pos, level);
         if (ibakedmodel == null) return Collections.emptyList();
-        if (state != null && ibakedmodel instanceof CustomBakedModel customBakedModel) {
-            return customBakedModel.getCustomQuads(level, pos, state, side, rand);
-        }
         return ibakedmodel.getQuads(state, side, rand);
     }
 
@@ -154,14 +141,11 @@ public class IModelRenderer implements IRenderer {
 
     @Environment(EnvType.CLIENT)
     public BakedModel getRotatedModel(Direction frontFacing) {
-        return blockModels.computeIfAbsent(frontFacing, facing -> {
-            var bakedModel = getModel().bake(
-                    ModelFactory.getModeBakery(),
-                    Material::sprite,
-                    ModelFactory.getRotation(facing),
-                    modelLocation);
-            return useCustomBakedModel ? new CustomBakedModel(bakedModel) : bakedModel;
-        });
+        return blockModels.computeIfAbsent(frontFacing, facing -> getModel().bake(
+                ModelFactory.getModeBakery(),
+                Material::sprite,
+                ModelFactory.getRotation(facing),
+                modelLocation));
     }
 
     @Override

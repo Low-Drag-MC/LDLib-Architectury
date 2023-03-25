@@ -1,5 +1,13 @@
 package com.lowdragmc.lowdraglib.client.model.custommodel;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * @author KilaBash
  * @date 2023/3/24
@@ -45,4 +53,24 @@ public class Connections {
         return connections;
     }
 
+    public static Connections checkConnections(BlockAndTintGetter level, BlockPos pos, @Nonnull BlockState state, @Nullable Direction side) {
+        Connections connections = Connections.of();
+        if (side != null) {
+            for (var connection : Connection.values()) {
+                var offset = connection.transform(pos, side);
+                var adjacent = level.getBlockState(offset);
+                boolean connected;
+                var predicate = ICTMPredicate.getPredicate(adjacent);
+                if (predicate != null) {
+                    connected = predicate.isConnected(level, pos, state, offset, adjacent, side);
+                } else {
+                    connected = state == adjacent;
+                }
+                if (connected) {
+                    connections.add(connection);
+                }
+            }
+        }
+        return connections;
+    }
 }

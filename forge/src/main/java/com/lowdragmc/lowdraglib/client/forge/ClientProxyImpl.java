@@ -1,15 +1,19 @@
 package com.lowdragmc.lowdraglib.client.forge;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.forge.CommonProxyImpl;
 import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
 import com.lowdragmc.lowdraglib.forge.jei.JEIClientEventHandler;
+import com.lowdragmc.lowdraglib.test.TestBlock;
 import com.lowdragmc.lowdraglib.utils.CustomResourcePack;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.server.packs.repository.PackSource;
@@ -42,7 +46,12 @@ public class ClientProxyImpl extends CommonProxyImpl {
 
     @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent e) {
-        e.enqueueWork(ClientProxy::init);
+        e.enqueueWork(() -> {
+            ClientProxy.init();
+            if (Platform.isDevEnv()) {
+                ItemBlockRenderTypes.setRenderLayer(TestBlock.BLOCK, RenderType.cutoutMipped());
+            }
+        });
     }
 
     @SubscribeEvent

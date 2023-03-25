@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.client.model.fabric;
 
+import com.lowdragmc.lowdraglib.client.model.custommodel.CustomBakedModel;
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.mojang.datafixers.util.Pair;
@@ -114,12 +115,16 @@ public class LDLRendererModel implements UnbakedModel {
                     context.bakedModelConsumer().accept(new BakedModel() {
                         @Override
                         public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction direction, RandomSource random) {
-                            return renderer.renderModel(blockView, pos, state, direction, random);
+                            var quads = renderer.renderModel(blockView, pos, state, direction, random);
+                            if (renderer.reBakeCustomQuads() && state != null) {
+                                return CustomBakedModel.reBakeCustomQuads(quads, blockView, pos, state, direction);
+                            }
+                            return quads;
                         }
 
                         @Override
                         public boolean useAmbientOcclusion() {
-                            return renderer.useAO();
+                            return renderer.useAO(state);
                         }
 
                         @Override

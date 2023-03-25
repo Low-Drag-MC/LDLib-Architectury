@@ -54,112 +54,92 @@ public class CustomBakedModel implements BakedModel {
 
     @Nonnull
     public List<BakedQuad> getCustomQuads(BlockAndTintGetter level, BlockPos pos, @Nonnull BlockState state, @Nullable Direction side, RandomSource rand) {
-        Connections connections = Connections.of();
-        if (side != null) {
-            for (var connection : Connection.values()) {
-                var offset = connection.transform(pos, side);
-                // same blockstate
-                var adjacent = level.getBlockState(offset);
-                boolean connected = adjacent == state;
-                if (!connected && adjacent.getBlock() instanceof ICTMPredicate predicate && predicate.isConnected(level, pos, state, adjacent, side)) {
-                    connected = true;
-                }
-                if (!connected && adjacent.getBlock() instanceof IBlockRendererProvider rendererProvider
-                        && rendererProvider.getRenderer(adjacent) instanceof ICTMPredicate predicate
-                        && predicate.isConnected(level, pos, state, adjacent, side)) {
-                    connected = true;
-                }
-                if (connected) {
-                    connections.add(connection);
-                }
-            }
-        }
-        return getCTMQuads(state, side, connections, rand);
-    }
-
-    @Nonnull
-    private List<BakedQuad> getCTMQuads(@Nonnull BlockState state, @Nullable Direction side, Connections connections, RandomSource rand) {
+        var connections = Connections.checkConnections(level, pos, state, side);
         if (side == null) {
             if (noSideCache.isEmpty()) {
-                List<BakedQuad> parentQuads = parent.getQuads(state, side, rand);
-                buildCustomQuads(connections, parentQuads, noSideCache);
+                noSideCache.addAll(buildCustomQuads(connections, parent.getQuads(state, null, rand)));
             }
             return noSideCache;
         }
         if (!sideCache.contains(side, connections)) {
             synchronized (sideCache) {
-                List<BakedQuad> parentQuads = parent.getQuads(state, side, rand);
-                List<BakedQuad> resultQuads = new LinkedList<>();
-                buildCustomQuads(connections, parentQuads, resultQuads);
-                sideCache.put(side, connections, resultQuads);
+                sideCache.put(side, connections, buildCustomQuads(connections, parent.getQuads(state, side, rand)));
             }
         }
         return Objects.requireNonNull(sideCache.get(side, connections));
     }
 
-    private void buildCustomQuads(Connections connections, List<BakedQuad> base, List<BakedQuad> result) {
+    public static List<BakedQuad> reBakeCustomQuads(List<BakedQuad>quads, BlockAndTintGetter level, BlockPos pos, @Nonnull BlockState state, @Nullable Direction side) {
+        return buildCustomQuads(Connections.checkConnections(level, pos, state, side), quads);
+    }
+
+    public static List<BakedQuad> buildCustomQuads(Connections connections, List<BakedQuad> base) {
+        List<BakedQuad> result = new LinkedList<>();
         for (BakedQuad quad : base) {
             var section = LDLMetadataSection.getMetadata(quad.getSprite());
+            List<Quad> quads = bakeConnectionQuads(quad, connections, section == null ? null :
+                    section.connection == null ? null :
+                            ModelFactory.getBlockSprite(section.connection));
             if (section != null) {
-                List<Quad> quads = bakeConnectionQuads(quad, connections, section.connection == null ? null : ModelFactory.getBlockSprite(section.connection));
                 if (section.emissive) {
-                    quads.forEach(q -> q.setLight(15, 15));
+                    quads = quads.stream().map(q -> q.setLight(15, 15)).toList();
                 }
-                for (Quad q : quads) {
-                    result.add(q.rebake());
-                }
-            } else {
-                result.add(quad);
+            }
+            for (Quad q : quads) {
+                result.add(q.rebake());
             }
         }
+        return result;
     }
 
     public static List<Quad> bakeConnectionQuads(BakedQuad bakedQuad, Connections connections, @Nullable TextureAtlasSprite texture) {
-        if (texture == null || !connections.isEmpty()) {
+        if (!connections.isEmpty()) {
             var quads = Quad.from(bakedQuad).derotate().subdivide(4);
-            if (connections.contains(Connection.UP) && connections.contains(Connection.LEFT) && connections.contains(Connection.UP_LEFT)) {
-                quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(texture, Submap.uvs[0]);
-            } else if (connections.contains(Connection.UP) && !connections.contains(Connection.LEFT)) {
-                quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(texture, Submap.uvs[2]);
-            } else if (!connections.contains(Connection.UP) && connections.contains(Connection.LEFT)) {
-                quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(texture, Submap.uvs[8]);
-            } else if (connections.contains(Connection.UP) && connections.contains(Connection.LEFT) && !connections.contains(Connection.UP_LEFT)) {
-                quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(texture, Submap.uvs[10]);
-            } else {
-                quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(bakedQuad.getSprite(), Submap.uvs[16]);
-            }
-            if (connections.contains(Connection.UP) && connections.contains(Connection.RIGHT) && connections.contains(Connection.UP_RIGHT)) {
-                quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(texture, Submap.uvs[1]);
-            } else if (connections.contains(Connection.UP) && !connections.contains(Connection.RIGHT)) {
-                quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(texture, Submap.uvs[3]);
-            } else if (!connections.contains(Connection.UP) && connections.contains(Connection.RIGHT)) {
-                quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(texture, Submap.uvs[9]);
-            } else if (connections.contains(Connection.UP) && connections.contains(Connection.RIGHT) && !connections.contains(Connection.UP_RIGHT)) {
-                quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(texture, Submap.uvs[11]);
-            } else {
-                quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(bakedQuad.getSprite(), Submap.uvs[17]);
-            }
-            if (connections.contains(Connection.DOWN) && connections.contains(Connection.RIGHT) && connections.contains(Connection.DOWN_RIGHT)) {
-                quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(texture, Submap.uvs[5]);
-            } else if (connections.contains(Connection.DOWN) && !connections.contains(Connection.RIGHT)) {
-                quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(texture, Submap.uvs[7]);
-            } else if (!connections.contains(Connection.DOWN) && connections.contains(Connection.RIGHT)) {
-                quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(texture, Submap.uvs[13]);
-            } else if (connections.contains(Connection.DOWN) && connections.contains(Connection.RIGHT) && !connections.contains(Connection.DOWN_RIGHT)) {
-                quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(texture, Submap.uvs[15]);
-            } else {
-                quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(bakedQuad.getSprite(), Submap.uvs[19]);
-            }
-            if (connections.contains(Connection.DOWN) && connections.contains(Connection.LEFT) && connections.contains(Connection.DOWN_LEFT)) {
-                quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(texture, Submap.uvs[4]);
-            } else if (connections.contains(Connection.DOWN) && !connections.contains(Connection.LEFT)) {
-                quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(texture, Submap.uvs[6]);
-            } else if (!connections.contains(Connection.DOWN) && connections.contains(Connection.LEFT)) {
-                quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(texture, Submap.uvs[12]);
-            } else if (connections.contains(Connection.DOWN) && connections.contains(Connection.LEFT) && !connections.contains(Connection.DOWN_LEFT)) {
-                quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(texture, Submap.uvs[14]);
-            } else {
-                quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(bakedQuad.getSprite(), Submap.uvs[18]);
+            if (texture != null) {
+                if (connections.contains(Connection.UP) && connections.contains(Connection.LEFT) && connections.contains(Connection.UP_LEFT)) {
+                    quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(texture, Submap.uvs[0]);
+                } else if (connections.contains(Connection.UP) && !connections.contains(Connection.LEFT)) {
+                    quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(texture, Submap.uvs[2]);
+                } else if (!connections.contains(Connection.UP) && connections.contains(Connection.LEFT)) {
+                    quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(texture, Submap.uvs[8]);
+                } else if (connections.contains(Connection.UP) && connections.contains(Connection.LEFT) && !connections.contains(Connection.UP_LEFT)) {
+                    quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(texture, Submap.uvs[10]);
+                } else {
+                    quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(bakedQuad.getSprite(), Submap.uvs[16]);
+                }
+                if (connections.contains(Connection.UP) && connections.contains(Connection.RIGHT) && connections.contains(Connection.UP_RIGHT)) {
+                    quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(texture, Submap.uvs[1]);
+                } else if (connections.contains(Connection.UP) && !connections.contains(Connection.RIGHT)) {
+                    quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(texture, Submap.uvs[3]);
+                } else if (!connections.contains(Connection.UP) && connections.contains(Connection.RIGHT)) {
+                    quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(texture, Submap.uvs[9]);
+                } else if (connections.contains(Connection.UP) && connections.contains(Connection.RIGHT) && !connections.contains(Connection.UP_RIGHT)) {
+                    quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(texture, Submap.uvs[11]);
+                } else {
+                    quads[3] = quads[3] == null ? null : quads[3].grow().transformUVs(bakedQuad.getSprite(), Submap.uvs[17]);
+                }
+                if (connections.contains(Connection.DOWN) && connections.contains(Connection.RIGHT) && connections.contains(Connection.DOWN_RIGHT)) {
+                    quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(texture, Submap.uvs[5]);
+                } else if (connections.contains(Connection.DOWN) && !connections.contains(Connection.RIGHT)) {
+                    quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(texture, Submap.uvs[7]);
+                } else if (!connections.contains(Connection.DOWN) && connections.contains(Connection.RIGHT)) {
+                    quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(texture, Submap.uvs[13]);
+                } else if (connections.contains(Connection.DOWN) && connections.contains(Connection.RIGHT) && !connections.contains(Connection.DOWN_RIGHT)) {
+                    quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(texture, Submap.uvs[15]);
+                } else {
+                    quads[0] = quads[0] == null ? null : quads[0].grow().transformUVs(bakedQuad.getSprite(), Submap.uvs[19]);
+                }
+                if (connections.contains(Connection.DOWN) && connections.contains(Connection.LEFT) && connections.contains(Connection.DOWN_LEFT)) {
+                    quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(texture, Submap.uvs[4]);
+                } else if (connections.contains(Connection.DOWN) && !connections.contains(Connection.LEFT)) {
+                    quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(texture, Submap.uvs[6]);
+                } else if (!connections.contains(Connection.DOWN) && connections.contains(Connection.LEFT)) {
+                    quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(texture, Submap.uvs[12]);
+                } else if (connections.contains(Connection.DOWN) && connections.contains(Connection.LEFT) && !connections.contains(Connection.DOWN_LEFT)) {
+                    quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(texture, Submap.uvs[14]);
+                } else {
+                    quads[1] = quads[1] == null ? null : quads[1].grow().transformUVs(bakedQuad.getSprite(), Submap.uvs[18]);
+                }
             }
             return Arrays.stream(quads).filter(Objects::nonNull).collect(Collectors.toList());
         }

@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -92,7 +93,20 @@ public interface IRenderer {
     }
 
     @Environment(EnvType.CLIENT)
+    default boolean useAO(BlockState state) {
+        return useAO();
+    }
+
+    @Environment(EnvType.CLIENT)
     default boolean useBlockLight(ItemStack stack) {
+        return false;
+    }
+
+    /**
+     * Should we rebake quads for mcmeta data?
+     */
+    @Environment(EnvType.CLIENT)
+    default boolean reBakeCustomQuads() {
         return false;
     }
 }

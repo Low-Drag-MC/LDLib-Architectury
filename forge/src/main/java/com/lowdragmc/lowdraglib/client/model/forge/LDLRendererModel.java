@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.client.model.forge;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.lowdragmc.lowdraglib.client.model.custommodel.CustomBakedModel;
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.mojang.datafixers.util.Pair;
@@ -108,7 +109,11 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
             BlockPos pos = data.get(POS);
 //            ModelData modelData = data.get(MODEL_DATA);
             if (renderer != null) {
-                return renderer.renderModel(world, pos, state, side, rand);
+                var quads = renderer.renderModel(world, pos, state, side, rand);
+                if (renderer.reBakeCustomQuads() && state != null && world != null && pos != null) {
+                    return CustomBakedModel.reBakeCustomQuads(quads, world, pos, state, side);
+                }
+                return quads;
             }
             return Collections.emptyList();
         }
@@ -118,7 +123,7 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
             if (state.getBlock() instanceof IBlockRendererProvider rendererProvider) {
                 IRenderer renderer = rendererProvider.getRenderer(state);
                 if (renderer != null) {
-                    return renderer.useAO();
+                    return renderer.useAO(state);
                 }
             }
             return useAmbientOcclusion();
