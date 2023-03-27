@@ -17,6 +17,8 @@ def mod_url = getConfig("mod_url")
 def minecraft_version = getConfig("minecraft_version")
 def jei_version = getConfig("jei_version")
 def rei_version = getConfig("rei_version")
+def kjs_version = getConfig("kjs_version")
+
 
 architectury {
     platformSetupLoomIde()
@@ -72,6 +74,13 @@ repositories {
             includeGroup("com.simibubi.create")
         }
     }
+    maven {
+        // saps.dev Maven (KubeJS and Rhino)
+        url = "https://maven.saps.dev/minecraft"
+        content {
+            includeGroup "dev.latvian.mods"
+        }
+    }
 }
 
 dependencies {
@@ -89,6 +98,8 @@ dependencies {
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-forge:${rei_version}")
     modImplementation("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
 
+    // KJS
+    modImplementation("dev.latvian.mods:kubejs-forge:${kjs_version}")
 }
 
 processResources {

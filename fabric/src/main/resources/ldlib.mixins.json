@@ -11,8 +11,7 @@
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "ShaderInstanceMixin",
-    "jei.KeyBoardHandlerMixin",
-    "jei.MouseHandlerMixin"
+    "jei.RecipesGuiMixin"
   ],
   "mixins": [
     "MinecraftServerMixin",

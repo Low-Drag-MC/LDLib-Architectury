@@ -59,14 +59,7 @@ public class Connections {
             for (var connection : Connection.values()) {
                 var offset = connection.transform(pos, side);
                 var adjacent = level.getBlockState(offset);
-                boolean connected;
-                var predicate = ICTMPredicate.getPredicate(adjacent);
-                if (predicate != null) {
-                    connected = predicate.isConnected(level, pos, state, offset, adjacent, side);
-                } else {
-                    connected = state == adjacent;
-                }
-                if (connected) {
+                if (ICTMPredicate.getPredicate(state).isConnected(level, state, pos, adjacent, offset, side)) {
                     connections.add(connection);
                 }
             }

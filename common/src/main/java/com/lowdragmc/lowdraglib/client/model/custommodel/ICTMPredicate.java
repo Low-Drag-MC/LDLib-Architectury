@@ -1,13 +1,13 @@
 package com.lowdragmc.lowdraglib.client.model.custommodel;
 
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
+import com.lowdragmc.lowdraglib.utils.FacadeBlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
 /**
  * @author KilaBash
@@ -15,38 +15,26 @@ import javax.annotation.Nullable;
  * @implNote ICTMPredicate
  */
 public interface ICTMPredicate {
-
-    /**
-     * If two blocks are adjacent and have same connected id, they can be regarded as connected.
-     */
-    @Nullable
-    default ResourceLocation getConnectedID() {
-        return null;
-    }
+    ICTMPredicate DEFAULT = (level, state, pos, sourceState, sourcePos, side) -> {
+        var stateAppearance = FacadeBlockAndTintGetter.getAppearance(state, level, pos, side, sourceState, sourcePos);
+        var sourceStateAppearance = FacadeBlockAndTintGetter.getAppearance(sourceState, level, sourcePos, side, state, pos);
+        return stateAppearance == sourceStateAppearance;
+    };
 
     /**
      * Can texture connected to model.
      * @param coreState core block
      * @param adjacentState checking state
      */
-    default boolean isConnected(BlockAndTintGetter level, BlockPos corePos, BlockState coreState, BlockPos adjacentPos, BlockState adjacentState, Direction side) {
-        var adjacentID = getConnectedID();
-        if (adjacentID != null) {
-            var corePredicate = getPredicate(coreState);
-            if (corePredicate != null) {
-                return adjacentID.equals(corePredicate.getConnectedID());
-            }
-        }
-        return coreState == adjacentState;
-    }
+    boolean isConnected(BlockAndTintGetter level, BlockState state, BlockPos pos, BlockState sourceState, BlockPos sourcePos, Direction side);
 
-    @Nullable
+    @Nonnull
     static ICTMPredicate getPredicate(BlockState state) {
         if (state.getBlock() instanceof ICTMPredicate predicate) {
             return predicate;
         } else if (state.getBlock() instanceof IBlockRendererProvider rendererProvider && rendererProvider.getRenderer(state) instanceof ICTMPredicate predicate) {
             return predicate;
         }
-        return null;
+        return DEFAULT;
     }
 }

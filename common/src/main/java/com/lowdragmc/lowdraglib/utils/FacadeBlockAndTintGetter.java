@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -186,4 +187,9 @@ public class FacadeBlockAndTintGetter implements BlockAndTintGetter {
 //    public @Nullable BlockEntity getExistingBlockEntity(BlockPos pos) {
 //        return pos.equals(this.pos) ? tile : BlockAndTintGetter.super.getExistingBlockEntity(pos);
 //    }
+
+    @ExpectPlatform
+    public static BlockState getAppearance(BlockState state, BlockAndTintGetter renderView, BlockPos pos, Direction side, @Nullable BlockState sourceState, @Nullable BlockPos sourcePos) {
+        throw new AssertionError();
+    }
 }

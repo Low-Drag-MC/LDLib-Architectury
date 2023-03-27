@@ -11,6 +11,7 @@ def minecraft_version = getConfig("minecraft_version")
 def fabric_loader_version = getConfig("fabric_loader_version")
 def jei_version = getConfig("jei_version")
 def rei_version = getConfig("rei_version")
+def kjs_version = getConfig("kjs_version")
 
 
 loom {
@@ -26,6 +27,13 @@ repositories {
     maven { url = "https://maven.cafeteria.dev/releases" } // Fake Player API
     maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
     maven { url = "https://jitpack.io/" } // Mixin Extras, Fabric ASM
+    maven {
+        // saps.dev Maven (KubeJS and Rhino)
+        url = "https://maven.saps.dev/minecraft"
+        content {
+            includeGroup "dev.latvian.mods"
+        }
+    }
 }
 
 dependencies {
@@ -42,6 +50,9 @@ dependencies {
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}")
+
+    // KJS
+    modCompileOnly("dev.latvian.mods:kubejs-fabric:${kjs_version}")
 }
 
 publishing {

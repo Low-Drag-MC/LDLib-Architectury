@@ -41,7 +41,6 @@ public interface IRenderer {
 
     }
 
-
     @Environment(EnvType.CLIENT)
     default List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, RandomSource rand) {
         return Collections.emptyList();
