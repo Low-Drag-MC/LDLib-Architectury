@@ -89,6 +89,6 @@ allprojects {
 
     machete {
         // disable machete locally for faster builds
-        enabled = buildNumber != null
+        enabled = false
     }
 }

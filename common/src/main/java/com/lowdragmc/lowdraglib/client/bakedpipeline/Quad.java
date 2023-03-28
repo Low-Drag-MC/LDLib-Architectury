@@ -454,6 +454,7 @@ public class Quad {
 
         private final float[][] positions = new float[4][];
         private final float[][] uvs = new float[4][];
+        private final int[][] uvs2 = new int[4][];
         private final int[][] colors = new int[4][];
 
         private Map<VertexFormatElement, int[][]> packedByElement = new HashMap<>();
@@ -482,6 +483,11 @@ public class Quad {
                         Float.intBitsToFloat(vertices[offset + UV0]),
                         Float.intBitsToFloat(vertices[offset + UV0 + 1])
                 };
+                int lightMap = vertices[offset + UV2];
+                this.uvs2[i] = new int[] {
+                        lightMap & '\uffff',
+                        (lightMap >> 16) & '\uffff'
+                };
             }
             for (var e : ELEMENT_OFFSETS.entrySet()) {
                 var offset = e.getValue();
@@ -502,8 +508,8 @@ public class Quad {
                 verts[i] = new Vector3f(this.positions[i][0], this.positions[i][1], this.positions[i][2]);
                 uvs[i] = new Vec2(this.uvs[i][0], this.uvs[i][1]);
             }
-            // TODO need to extract light data here
-            return new Quad(verts, uvs, this, getSprite());
+            // TODO pass all uv2?
+            return new Quad(verts, uvs, this, getSprite(), uvs2[0][0] >> 4, uvs2[0][1] >> 4);
         }
 
         @SuppressWarnings("unchecked")
