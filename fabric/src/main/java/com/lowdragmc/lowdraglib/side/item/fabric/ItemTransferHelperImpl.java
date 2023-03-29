@@ -117,6 +117,7 @@ public class ItemTransferHelperImpl {
             @NotNull
             @Override
             public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+                if (stack.isEmpty()) return stack;
                 var copied = stack.copy();
                 Storage<ItemVariant> handler = storage;
                 if (views.get(slot) instanceof SingleStackStorage storage) {
@@ -135,6 +136,7 @@ public class ItemTransferHelperImpl {
             @Override
             public ItemStack extractItem(int slot, int amount, boolean simulate) {
                 var item = getStackInSlot(slot);
+                if (item.isEmpty()) return ItemStack.EMPTY;
                 Storage<ItemVariant> handler = storage;
                 if (views.get(slot) instanceof SingleStackStorage storage) {
                     handler = storage;

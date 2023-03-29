@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.UIDetector;
 import net.minecraft.nbt.CompoundTag;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class Resources {
 
-    public final Map<String, Resource<?>> resources = new HashMap<>();
+    public final Map<String, Resource<?>> resources = new LinkedHashMap<>();
 
     protected Resources() {
         for (var wrapper : UIDetector.REGISTER_RESOURCES) {

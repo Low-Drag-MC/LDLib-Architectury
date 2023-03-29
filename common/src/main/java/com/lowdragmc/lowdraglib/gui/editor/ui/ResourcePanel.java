@@ -125,7 +125,7 @@ public class ResourcePanel extends WidgetGroup {
         int offset = Minecraft.getInstance().font.width(LocalizationUtils.format("ldlib.gui.editor.group.resources")) + 8;
         for (Resource<?> resource : this.resources.resources.values()) {
             tabContainer.addTab(
-                    new TabButton(offset, -15, 50, 15).setTexture(
+                    new TabButton(offset, -15, Minecraft.getInstance().font.width(LocalizationUtils.format(resource.name())) + 8, 15).setTexture(
                             new TextTexture(resource.name()),
                             new GuiTextureGroup(new TextTexture(resource.name(), ColorPattern.T_GREEN.color), ColorPattern.T_GRAY.rectTexture())
                     ),

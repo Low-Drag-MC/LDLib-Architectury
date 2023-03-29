@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * @date 2022/12/17
  * @implNote FileMenu
  */
-@RegisterUI(name = "file", group = "menu")
+@RegisterUI(name = "file", group = "menu", priority = 101)
 public class FileMenu extends MenuTab {
 
     protected TreeBuilder.Menu createMenu() {
@@ -119,10 +119,11 @@ public class FileMenu extends MenuTab {
                     if (r != null && r.isFile()) {
                         String file = r.getName().toLowerCase();
                         for (var project : UIDetector.REGISTER_PROJECTS) {
-                            if (file.endsWith(project.getSuffix())) {
+                            if (file.endsWith("." + project.getSuffix())) {
                                 var p = project.loadProject(r);
                                 if (p != null) {
                                     editor.loadProject(p);
+                                    break;
                                 }
                             }
                         }

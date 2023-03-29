@@ -33,6 +33,8 @@ public class ResourceLocationAccessor extends TypesAccessor<ResourceLocation> {
 
     @Override
     public Configurator create(String name, Supplier<ResourceLocation> supplier, Consumer<ResourceLocation> consumer, boolean forceUpdate, Field field) {
-        return new StringConfigurator(name, () -> supplier.get().toString(), s -> consumer.accept(new ResourceLocation(s)), defaultValue(field, String.class).toString(), forceUpdate);
+        var configurator = new StringConfigurator(name, () -> supplier.get().toString(), s -> consumer.accept(new ResourceLocation(s)), defaultValue(field, String.class).toString(), forceUpdate);
+        configurator.setResourceLocation(true);
+        return configurator;
     }
 }

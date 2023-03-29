@@ -125,6 +125,7 @@ public class FluidTransferHelperImpl {
 
             @Override
             public long fill(FluidStack resource, boolean simulate) {
+                if (resource.isEmpty()) return 0;
                 long filled;
                 try (Transaction transaction = Transaction.openOuter()) {
                     filled = simulate ?
@@ -138,6 +139,7 @@ public class FluidTransferHelperImpl {
             @NotNull
             @Override
             public FluidStack drain(FluidStack resource, boolean simulate) {
+                if (resource.isEmpty()) return FluidStack.empty();
                 var copied = resource.copy();
                 try (Transaction transaction = Transaction.openOuter()) {
                     var drained = simulate ?

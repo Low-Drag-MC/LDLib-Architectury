@@ -15,7 +15,7 @@ import java.util.Map;
  * @date 2022/12/17
  * @implNote ViewMenu
  */
-@RegisterUI(name = "view", group = "menu")
+@RegisterUI(name = "view", group = "menu", priority = 100)
 public class ViewMenu extends MenuTab {
     public final Map<String, FloatViewWidget> openedViews = new HashMap<>();
 

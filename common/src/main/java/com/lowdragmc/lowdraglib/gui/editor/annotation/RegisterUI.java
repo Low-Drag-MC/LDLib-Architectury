@@ -28,4 +28,6 @@ public @interface RegisterUI {
      * Register it while such mod is installed.
      */
     String modID() default "";
+
+    int priority() default 0;
 }
