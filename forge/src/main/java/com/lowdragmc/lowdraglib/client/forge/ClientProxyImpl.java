@@ -3,23 +3,18 @@ package com.lowdragmc.lowdraglib.client.forge;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
+import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.forge.CommonProxyImpl;
-import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
 import com.lowdragmc.lowdraglib.forge.jei.JEIClientEventHandler;
 import com.lowdragmc.lowdraglib.test.TestBlock;
-import com.lowdragmc.lowdraglib.utils.CustomResourcePack;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.server.packs.repository.PackSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -38,9 +33,6 @@ public class ClientProxyImpl extends CommonProxyImpl {
         // init
         if (LDLib.isJeiLoaded()) {
             MinecraftForge.EVENT_BUS.register(JEIClientEventHandler.class);
-        }
-        if (Minecraft.getInstance() != null) {
-            Minecraft.getInstance().getResourcePackRepository().addPackFinder(new CustomResourcePack(LDLib.location, PackSource.DEFAULT, LDLib.MOD_ID, "LDLib Extended Resources", 6));
         }
     }
 

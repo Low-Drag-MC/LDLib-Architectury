@@ -6,12 +6,12 @@
   "plugin": "com.lowdragmc.lowdraglib.core.mixins.LDLibMixinPlugin",
   "client": [
     "BlockEntityRendererDispatcherMixin",
-    "TextureAtlasMixin",
     "BlockModelShaperMixin",
     "ItemRendererMixin",
     "LanguageMixin",
     "ModelBakeryMixin",
     "ParticleEngineMixin",
+    "TextureAtlasMixin",
     "WorldRendererMixin",
     "accessor.AbstractContainerScreenAccessor",
     "accessor.VertexFormatAccessor",
@@ -20,6 +20,8 @@
   ],
   "mixins": [
     "BlockEntityMixin",
+    "PackConfigMixin",
+    "ReloadableResourceManagerMixin",
     "accessor.AbstractContainerMenuAccessor",
     "accessor.ServerPlayerAccessor",
     "accessor.SlotAccessor",

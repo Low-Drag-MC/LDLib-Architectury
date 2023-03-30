@@ -232,7 +232,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (isMouseOverElement(mouseX, mouseY) && gui != null) {
             gui.getModularUIGui().superMouseReleased(mouseX, mouseY, button);
-            return true;
+            return getIngredientIO() == IngredientIO.RENDER_ONLY && (canPutItems || canTakeItems);
         }
         return false;
     }
