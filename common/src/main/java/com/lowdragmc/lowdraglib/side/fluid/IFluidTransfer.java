@@ -1,5 +1,7 @@
 package com.lowdragmc.lowdraglib.side.fluid;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -8,6 +10,40 @@ import javax.annotation.Nonnull;
  * @implNote IFluidTransfer copied form forge
  */
 public interface IFluidTransfer {
+    IFluidTransfer EMPTY = new IFluidTransfer() {
+        @Override
+        public int getTanks() {
+            return 0;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+            return FluidStack.empty();
+        }
+
+        @Override
+        public long getTankCapacity(int tank) {
+            return 0;
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
+            return false;
+        }
+
+        @Override
+        public long fill(FluidStack resource, boolean simulate) {
+            return 0;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(FluidStack resource, boolean simulate) {
+            return FluidStack.empty();
+        }
+    };
+
     /**
      * Returns the number of fluid storage units ("tanks") available
      *
