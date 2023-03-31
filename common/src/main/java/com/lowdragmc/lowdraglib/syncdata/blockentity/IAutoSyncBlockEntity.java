@@ -58,4 +58,10 @@ public interface IAutoSyncBlockEntity extends IManagedBlockEntity {
     }
 
 
+    /**
+     * sync tag name
+     */
+    default String getSyncTag() {
+        return "sync";
+    }
 }

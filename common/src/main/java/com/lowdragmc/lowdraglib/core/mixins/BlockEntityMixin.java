@@ -1,12 +1,10 @@
 package com.lowdragmc.lowdraglib.core.mixins;
 
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
-import com.lowdragmc.lowdraglib.syncdata.IManaged;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAsyncAutoSyncBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoPersistBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IManagedBlockEntity;
-import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,12 +21,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BlockEntity.class)
 public abstract class BlockEntityMixin {
 
-    @Inject(method = "getUpdateTag", at = @At(value = "RETURN"), cancellable = true)
+    @Inject(method = "getUpdateTag", at = @At(value = "RETURN"))
     private void injectGetUpdateTag(CallbackInfoReturnable<CompoundTag> cir) {
         if (this instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
-            var tag = new CompoundTag();
-            tag.put("sync", SPacketManagedPayload.of(autoSyncBlockEntity, true).serializeNBT());
-            cir.setReturnValue(tag);
+            var tag = cir.getReturnValue();
+            tag.put(autoSyncBlockEntity.getSyncTag(), SPacketManagedPayload.of(autoSyncBlockEntity, true).serializeNBT());
         }
     }
 
@@ -41,7 +38,7 @@ public abstract class BlockEntityMixin {
 
     @Inject(method = "load", at = @At(value = "RETURN"))
     private void injectLoad(CompoundTag pTag, CallbackInfo ci) {
-        if (pTag.get("sync") instanceof CompoundTag tag && this instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
+        if (this instanceof IAutoSyncBlockEntity autoSyncBlockEntity && pTag.get(autoSyncBlockEntity.getSyncTag()) instanceof CompoundTag tag) {
             new SPacketManagedPayload(tag).processPacket(autoSyncBlockEntity);
         } else if (this instanceof IAutoPersistBlockEntity autoPersistBlockEntity) {
             autoPersistBlockEntity.loadManagedPersistentData(pTag);
@@ -53,12 +50,6 @@ public abstract class BlockEntityMixin {
         if (this instanceof IAsyncAutoSyncBlockEntity autoSyncBlockEntity) {
             autoSyncBlockEntity.onInValid();
         }
-//        if (this instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
-//            // update fields before removed
-//            for (IRef field : autoSyncBlockEntity.getNonLazyFields()) {
-//                field.update();
-//            }
-//        }
     }
 
     @Inject(method = "clearRemoved", at = @At(value = "RETURN"))
