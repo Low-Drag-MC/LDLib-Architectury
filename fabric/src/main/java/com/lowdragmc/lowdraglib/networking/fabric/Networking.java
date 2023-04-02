@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.networking.fabric;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.fabric.PlatformImpl;
 import com.lowdragmc.lowdraglib.networking.IHandlerContext;
 import com.lowdragmc.lowdraglib.networking.INetworking;
@@ -78,7 +79,7 @@ public class Networking implements INetworking {
                     e.printStackTrace();
                 }
             });
-        } else {
+        } else if (LDLib.isClient()){
             ClientPlayNetworking.registerGlobalReceiver(getChannel(clazz), (client, handler, buf, responseSender) -> {
                 try {
                     MSG packet = clazz.newInstance();
