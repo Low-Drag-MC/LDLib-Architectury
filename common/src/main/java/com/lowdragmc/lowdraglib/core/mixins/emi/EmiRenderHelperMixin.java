@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  */
 @Mixin(EmiRenderHelper.class)
 public abstract class EmiRenderHelperMixin {
-    @Redirect(method = "renderRecipe", at = @At(value = "INVOKE", target = "Ldev/emi/emi/api/recipe/EmiRecipe;addWidgets(Ldev/emi/emi/api/widget/WidgetHolder;)V"))
+    @Redirect(method = "renderRecipe", at = @At(value = "INVOKE", target = "Ldev/emi/emi/api/recipe/EmiRecipe;addWidgets(Ldev/emi/emi/api/widget/WidgetHolder;)V"), remap = false)
     private static void injectRenderRecipe(EmiRecipe instance, WidgetHolder widgetHolder) {
         if (instance instanceof ModularEmiRecipe<?> modularEmiRecipe) {
             modularEmiRecipe.addTempWidgets(widgetHolder);

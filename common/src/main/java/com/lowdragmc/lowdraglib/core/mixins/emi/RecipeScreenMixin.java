@@ -19,7 +19,7 @@ import java.util.List;
 @Mixin(RecipeScreen.class)
 public abstract class RecipeScreenMixin {
 
-    @Shadow private List currentPage;
+    @Shadow(remap = false) private List currentPage;
 
     @Inject(method = "mouseReleased", at = @At(value = "HEAD"), cancellable = true)
     private void initMouseReleased(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {

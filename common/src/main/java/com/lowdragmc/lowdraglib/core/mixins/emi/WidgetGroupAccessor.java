@@ -13,11 +13,11 @@ import java.util.List;
  */
 @Mixin(targets = "dev.emi.emi.screen.RecipeScreen$WidgetGroup")
 public interface WidgetGroupAccessor {
-    @Accessor
+    @Accessor(remap = false)
     List<Widget> getWidgets();
-    @Accessor("x")
+    @Accessor(value = "x", remap = false)
     int getPositionX();
 
-    @Accessor("y")
+    @Accessor(value = "y", remap = false)
     int getPositionY();
 }
