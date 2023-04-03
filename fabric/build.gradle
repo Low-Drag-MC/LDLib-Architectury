@@ -19,6 +19,7 @@ def fabric_loader_version = getConfig("fabric_loader_version")
 def fabric_api_version = getConfig("fabric_api_version")
 def jei_version = getConfig("jei_version")
 def rei_version = getConfig("rei_version")
+def emi_version = getConfig("emi_version")
 def kjs_version = getConfig("kjs_version")
 def lazydfu_version = getConfig("lazydfu_version")
 def modmenu_version = getConfig("modmenu_version")
@@ -64,19 +65,13 @@ configurations {
 repositories {
     // mavens for Fabric-exclusives
     maven { url = "https://api.modrinth.com/maven" } // LazyDFU
-    maven { url = "https://maven.terraformersmc.com/releases/" } // Mod Menu
+    maven { url = "https://maven.terraformersmc.com/releases/" } // Mod Menu, EMI
     maven { url = "https://mvn.devos.one/snapshots/" } // Create Fabric, Porting Lib, Forge Tags, Milk Lib, Registrate Fabric
     maven { url = "https://cursemaven.com" } // Forge Config API Port
     maven { url = "https://maven.cafeteria.dev/releases" } // Fake Player API
     maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
     maven { url = "https://jitpack.io/" } // Mixin Extras, Fabric ASM
-    maven {
-        // saps.dev Maven (KubeJS and Rhino)
-        url = "https://maven.saps.dev/minecraft"
-        content {
-            includeGroup "dev.latvian.mods"
-        }
-    }
+    maven { url = "https://maven.saps.dev/minecraft" } // kjs
 }
 
 dependencies {
@@ -94,12 +89,16 @@ dependencies {
     // JEI
     modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
     modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}") { transitive = false }
-    modImplementation("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}") { transitive = false }
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}") { transitive = false }
 
     // REI
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${rei_version}") { transitive = false }
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}") { transitive = false }
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}") { transitive = false }
+
+    // EMI
+    modCompileOnly("dev.emi:emi:${emi_version}:api")
+    modImplementation("dev.emi:emi:${emi_version}")
 
     // KJS
     modImplementation("dev.latvian.mods:kubejs-fabric:${kjs_version}")

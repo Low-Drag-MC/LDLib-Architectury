@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
@@ -8,8 +9,11 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
+import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.emi.emi.api.stack.FluidEmiStack;
+import dev.emi.emi.api.stack.ItemEmiStack;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,7 +24,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
@@ -96,6 +102,13 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
     @Override
     @Environment(EnvType.CLIENT)
     public List<Target> getPhantomTargets(Object ingredient) {
+        if (LDLib.isEmiLoaded() && ingredient instanceof ItemEmiStack itemEmiStack) {
+            Item item = itemEmiStack.getKeyOfType(Item.class);
+            ingredient = item == null ? null : new ItemStack(item, (int)itemEmiStack.getAmount());
+            if (ingredient instanceof ItemStack itemStack) {
+                itemStack.setTag(itemEmiStack.getNbt());
+            }
+        }
         if (!(ingredient instanceof ItemStack)) {
             return Collections.emptyList();
         }
@@ -109,16 +122,21 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
 
             @Override
             public void accept(@Nonnull Object ingredient) {
-                if (slotReference != null && ingredient instanceof ItemStack) {
-                    MouseHandler mouseHelper = Minecraft.getInstance().mouseHandler;
+                if (LDLib.isEmiLoaded() && ingredient instanceof ItemEmiStack itemEmiStack) {
+                    Item item = itemEmiStack.getKeyOfType(Item.class);
+                    ingredient = item == null ? null : new ItemStack(item, (int)itemEmiStack.getAmount());
+                    if (ingredient instanceof ItemStack itemStack) {
+                        itemStack.setTag(itemEmiStack.getNbt());
+                    }
+                }
+                if (slotReference != null && ingredient instanceof ItemStack stack) {
                     long id = Minecraft.getInstance().getWindow().getWindow();
-                    int mouseButton = mouseHelper.isLeftPressed() ? 0 : mouseHelper.isRightPressed() ? 1 : 2;
                     boolean shiftDown = InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_SHIFT);
                     ClickType clickType = shiftDown ? ClickType.QUICK_MOVE : ClickType.PICKUP;
-                    slotClickPhantom(slotReference, mouseButton, clickType, (ItemStack) ingredient);
+                    slotClickPhantom(slotReference, 0, clickType, stack);
                     writeClientAction(1, buffer -> {
-                        buffer.writeItem((ItemStack) ingredient);
-                        buffer.writeVarInt(mouseButton);
+                        buffer.writeItem(stack);
+                        buffer.writeVarInt(0);
                         buffer.writeBoolean(shiftDown);
                     });
                 }

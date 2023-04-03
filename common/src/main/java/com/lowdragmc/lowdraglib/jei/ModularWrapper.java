@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.jei;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
@@ -76,14 +77,35 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         modularUI.mainGroup.setParentPosition(displayOffset);
     }
 
+    public void setEmiRecipeWidget(int left, int top) {
+        modularUI.initWidgets();
+        this.left = left;
+        this.top = top;
+        this.width = minecraft.getWindow().getGuiScaledWidth();
+        this.height = minecraft.getWindow().getGuiScaledHeight();
+        modularUI.updateScreenSize(this.width, this.height);
+        Position displayOffset = new Position(left, top);
+        modularUI.mainGroup.setParentPosition(displayOffset);
+    }
+
     public void draw(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         if (minecraft.player.tickCount != lastTick) {
             updateScreen();
             lastTick = minecraft.player.tickCount;
         }
-        matrixStack.translate(-left, -top, 0);
-        render(matrixStack, mouseX + left, mouseY + top, partialTicks);
-        matrixStack.translate(left, top, 0);
+        if (LDLib.isEmiLoaded()) {
+            var viewStack = RenderSystem.getModelViewStack();
+            viewStack.pushPose();
+            viewStack.translate(-left, -top, 0);
+            RenderSystem.applyModelViewMatrix();
+            render(matrixStack, mouseX + left, mouseY + top, partialTicks);
+            viewStack.popPose();
+            RenderSystem.applyModelViewMatrix();
+        } else {
+            matrixStack.translate(-left, -top, 0);
+            render(matrixStack, mouseX + left, mouseY + top, partialTicks);
+            matrixStack.translate(left, top, 0);
+        }
     }
 
     public void updateScreen() {

@@ -14,6 +14,9 @@ import com.lowdragmc.lowdraglib.utils.interpolate.Interpolator;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import dev.emi.emi.api.stack.EmiIngredient;
+import dev.emi.emi.api.stack.ItemEmiStack;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -346,8 +349,10 @@ public class SceneWidget extends WidgetGroup {
         Object result = super.getIngredientOverMouse(mouseX, mouseY);
         if (result == null && hoverItem != null && !hoverItem.isEmpty()) {
             if (LDLib.isReiLoaded()) {
-                // REI
-//                return EntryStacks.of(hoverItem);
+                return EntryStacks.of(hoverItem);
+            }
+            if (LDLib.isEmiLoaded()) {
+                return new ItemEmiStack(hoverItem);
             }
             return hoverItem;
         }

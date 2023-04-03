@@ -17,6 +17,7 @@ public interface MixinPluginShared {
 	boolean IS_SODIUM_LOAD = isClassFound("me.jellysquid.mods.sodium.mixin.SodiumMixinPlugin");
 	boolean IS_JEI_LOAD = isClassFound("mezz.jei.core.config.GiveMode");
 	boolean IS_REI_LOAD = isClassFound("me.shedaniel.rei.api.common.entry.EntryStack");
+	boolean IS_MEI_LOAD = isClassFound("dev.emi.emi.api.widget.Widget");
 	boolean IS_RUBIDIUM_LOAD = IS_SODIUM_LOAD;
 
 }

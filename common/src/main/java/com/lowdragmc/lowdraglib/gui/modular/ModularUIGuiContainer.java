@@ -1,21 +1,24 @@
 package com.lowdragmc.lowdraglib.gui.modular;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.AbstractContainerScreenAccessor;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
-import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
 import com.lowdragmc.lowdraglib.side.ForgeEventHooks;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.emi.emi.screen.EmiScreenManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -114,11 +117,16 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         tooltipTexts = null;
         tooltipComponent = null;
 
-        DrawerHelper.drawGradientRect(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
+        this.renderBackground(poseStack);
         if (Platform.isForge()) ForgeEventHooks.postBackgroundRenderedEvent(this, poseStack);
 
         modularUI.mainGroup.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
         if (Platform.isForge()) ForgeEventHooks.postRenderBackgroundEvent(this, poseStack, mouseX, mouseY);
+
+        if (LDLib.isEmiLoaded()) {
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            EmiScreenManager.render(poseStack, mouseX, mouseY, partialTicks);
+        }
 
         modularUI.mainGroup.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
 
@@ -225,13 +233,26 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int pButton) {
         focused = false;
-        return modularUI.mainGroup.mouseClicked(mouseX, mouseY, pButton);
+        if (modularUI.mainGroup.mouseClicked(mouseX, mouseY, pButton)) return true;
+        for (GuiEventListener guiEventListener : this.children()) {
+            if (!guiEventListener.mouseClicked(mouseX, mouseY, pButton)) continue;
+            this.setFocused(guiEventListener);
+            if (pButton == 0) {
+                this.setDragging(true);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int pButton, double pDragX, double pDragY) {
         focused = false;
-        return modularUI.mainGroup.mouseDragged(mouseX, mouseY, pButton, pDragX, pDragY);
+        if (modularUI.mainGroup.mouseDragged(mouseX, mouseY, pButton, pDragX, pDragY)) return true;
+        if (this.getFocused() != null && this.isDragging() && pButton == 0) {
+            return this.getFocused().mouseDragged(mouseX, mouseY, pButton, pDragX, pDragY);
+        }
+        return false;
     }
 
     @Override
@@ -239,7 +260,9 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         focused = false;
         var result = modularUI.mainGroup.mouseReleased(mouseX, mouseY, pButton);
         draggingElement = null;
-        return result;
+        if (result) return true;
+        this.setDragging(false);
+        return this.getChildAt(mouseX, mouseY).filter(guiEventListener -> guiEventListener.mouseReleased(mouseX, mouseY, pButton)).isPresent();
     }
 
     @Override
@@ -254,19 +277,22 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double wheelDelta) {
         focused = false;
-        return modularUI.mainGroup.mouseWheelMove(mouseX, mouseY, wheelDelta);
+        if (modularUI.mainGroup.mouseWheelMove(mouseX, mouseY, wheelDelta)) return true;
+        return this.getChildAt(mouseX, mouseY).filter(element -> element.mouseScrolled(mouseX, mouseY, wheelDelta)).isPresent();
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         focused = false;
-        return modularUI.mainGroup.keyReleased(keyCode, scanCode, modifiers);
+        if (modularUI.mainGroup.keyReleased(keyCode, scanCode, modifiers)) return true;
+        return this.getFocused() != null && this.getFocused().keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
         focused = false;
-        return modularUI.mainGroup.charTyped(codePoint, modifiers);
+        if (modularUI.mainGroup.charTyped(codePoint, modifiers)) return true;
+        return this.getFocused() != null && this.getFocused().charTyped(codePoint, modifiers);
     }
 
     @Override

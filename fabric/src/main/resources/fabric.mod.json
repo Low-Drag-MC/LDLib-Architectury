@@ -26,6 +26,9 @@
     ],
     "jei_mod_plugin": [
       "com.lowdragmc.lowdraglib.jei.JEIPlugin"
+    ],
+    "emi": [
+      "com.lowdragmc.lowdraglib.fabric.emi.EMIPlugin"
     ]
   },
   "mixins": [

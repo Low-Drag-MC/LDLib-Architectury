@@ -20,6 +20,8 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.emi.emi.api.stack.FluidEmiStack;
+import dev.emi.emi.api.stack.ItemEmiStack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -136,7 +138,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public Object getJEIIngredient() {
         if (lastFluidInTank == null) return null;
         if (LDLib.isReiLoaded()) {
-            return lastFluidInTank.isEmpty() ? null : EntryStacks.of(lastFluidInTank.getFluid(), lastFluidInTank.getAmount());
+            return lastFluidInTank.isEmpty() ? null : EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
+        }
+        if (LDLib.isEmiLoaded()) {
+            return lastFluidInTank.isEmpty() ? null : new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount());
         }
         return lastFluidInTank.isEmpty() ? null : FluidHelper.toRealFluidStack(lastFluidInTank);
     }

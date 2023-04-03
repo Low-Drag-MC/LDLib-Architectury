@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -47,8 +48,20 @@ public class PersistedParser {
                 continue;
             }
 
-            var managedKey = ManagedFieldUtils.createKey(field);
-            Tag nbt = managedKey.readPersistedField(managedKey.createRef(object));
+            Tag nbt = null;
+            // sub configurable
+            if (field.getDeclaringClass().isAnnotationPresent(Configurable.class)) {
+                try {
+                    var value = field.get(object);
+                    if (value != null) {
+                        nbt = new CompoundTag();
+                        serializeNBT((CompoundTag)nbt, field.getDeclaringClass(), value);
+                    }
+                } catch (IllegalAccessException ignored) {}
+            } else {
+                var managedKey = ManagedFieldUtils.createKey(field);
+                nbt = managedKey.readPersistedField(managedKey.createRef(object));
+            }
             if (nbt != null) {
                 TagUtils.setTagExtended(tag, key, nbt);
             }
@@ -92,7 +105,19 @@ public class PersistedParser {
                 continue;
             }
 
-            var nbt = TagUtils.getTagExtended(tag, key);
+            Tag nbt = null;
+            // sub configurable
+            if (field.getDeclaringClass().isAnnotationPresent(Configurable.class)) {
+                try {
+                    var value = field.get(object);
+                    if (value != null) {
+                        nbt = tag.getCompound(key);
+                        deserializeNBT((CompoundTag)nbt, new HashMap<>(), field.getDeclaringClass(), value);
+                    }
+                } catch (IllegalAccessException ignored) {}
+            } else {
+                nbt = TagUtils.getTagExtended(tag, key);
+            }
             if (nbt != null) {
                 var managedKey = ManagedFieldUtils.createKey(field);
                 managedKey.writePersistedField(managedKey.createRef(object), nbt);

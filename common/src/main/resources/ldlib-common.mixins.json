@@ -15,6 +15,9 @@
     "WorldRendererMixin",
     "accessor.AbstractContainerScreenAccessor",
     "accessor.VertexFormatAccessor",
+    "emi.RecipeScreenMixin",
+    "emi.WidgetGroupAccessor",
+    "emi.WidgetGroupMixin",
     "jei.RecipesGuiAccessor",
     "jei.RecipeSlotAccessor"
   ],
@@ -25,6 +28,7 @@
     "accessor.AbstractContainerMenuAccessor",
     "accessor.ServerPlayerAccessor",
     "accessor.SlotAccessor",
+    "emi.EmiRenderHelperMixin",
     "jei.JeiRecipeLayoutMixin",
     "jei.RecipeLayoutAccessor",
     "jei.RecipeSlotsAccessor"

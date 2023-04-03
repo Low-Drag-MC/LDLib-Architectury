@@ -8,6 +8,7 @@
     "BlockModelShaperMixin",
     "BlockRenderInfoMixin",
     "GameRendererMixin",
+    "MinecraftMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "ShaderInstanceMixin",

@@ -21,6 +21,7 @@ public class LDLib {
     public static final String MODID_JEI = "jei";
     public static final String MODID_RUBIDIUM = "rubidium";
     public static final String MODID_REI = "roughlyenoughitems";
+    public static final String MODID_EMI = "emi";
     public static final Random random = new Random();
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapterFactory(IGuiTextureTypeAdapter.INSTANCE)
@@ -58,22 +59,14 @@ public class LDLib {
     }
 
     public static boolean isJeiLoaded() {
-        if (!isReiLoaded() && isModLoaded(MODID_JEI)) return true;
-        try {
-            Class.forName("mezz.jei.core.config.GiveMode");
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-        return true;
+        return !isReiLoaded() && isModLoaded(MODID_JEI);
     }
 
     public static boolean isReiLoaded() {
-        if (isModLoaded(MODID_REI)) return true;
-        try {
-            Class.forName("me.shedaniel.rei.api.common.entry.EntryStack");
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-        return true;
+        return isModLoaded(MODID_REI);
+    }
+
+    public static boolean isEmiLoaded() {
+        return isModLoaded(MODID_EMI);
     }
 }

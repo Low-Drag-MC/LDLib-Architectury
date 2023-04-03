@@ -21,6 +21,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.emi.emi.api.stack.ItemEmiStack;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -332,6 +333,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (slotReference == null) return null;
         if (LDLib.isReiLoaded()) {
             return EntryStacks.of(getRealStack(getHandle().getItem()));
+        }
+        if (LDLib.isEmiLoaded()) {
+            return new ItemEmiStack(getRealStack(getHandle().getItem()));
         }
         return getRealStack(getHandle().getItem());
     }
