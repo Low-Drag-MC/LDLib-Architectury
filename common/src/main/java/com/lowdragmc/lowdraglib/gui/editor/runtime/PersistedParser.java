@@ -50,7 +50,8 @@ public class PersistedParser {
 
             Tag nbt = null;
             // sub configurable
-            if (field.getDeclaringClass().isAnnotationPresent(Configurable.class)) {
+            var rawClass = field.getDeclaringClass();
+            if (rawClass.isAnnotationPresent(Configurable.class) && rawClass.getAnnotation(Configurable.class).subConfigurable()) {
                 try {
                     var value = field.get(object);
                     if (value != null) {
@@ -107,7 +108,8 @@ public class PersistedParser {
 
             Tag nbt = null;
             // sub configurable
-            if (field.getDeclaringClass().isAnnotationPresent(Configurable.class)) {
+            var rawClass = field.getDeclaringClass();
+            if (rawClass.isAnnotationPresent(Configurable.class) && rawClass.getAnnotation(Configurable.class).subConfigurable()) {
                 try {
                     var value = field.get(object);
                     if (value != null) {
