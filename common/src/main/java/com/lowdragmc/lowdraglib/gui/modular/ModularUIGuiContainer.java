@@ -155,6 +155,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         posestack.popPose();
         RenderSystem.applyModelViewMatrix();
         RenderSystem.enableDepthTest();
+        RenderSystem.depthMask(true);
     }
 
     public void setHoveredSlot(Slot hoveredSlot) {

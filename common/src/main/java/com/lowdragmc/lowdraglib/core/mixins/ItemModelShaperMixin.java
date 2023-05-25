@@ -1,7 +1,7 @@
-package com.gregtechceu.gtlib.core.mixins;
+package com.lowdragmc.lowdraglib.core.mixins;
 
-import com.gregtechceu.gtlib.client.renderer.IItemRendererProvider;
-import com.gregtechceu.gtlib.client.renderer.IRenderer;
+import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
+import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.block.model.BakedQuad;

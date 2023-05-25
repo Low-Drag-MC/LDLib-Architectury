@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.side.forge;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -22,14 +23,20 @@ public class ForgeEventHooksImpl {
     }
 
     public static void postBackgroundRenderedEvent(Screen screen, PoseStack poseStack) {
+        RenderSystem.depthMask(true);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new ScreenEvent.BackgroundRendered(screen, poseStack));
+        RenderSystem.depthMask(false);
     }
 
     public static void postRenderBackgroundEvent(AbstractContainerScreen<?> guiContainer, PoseStack poseStack, int mouseX, int mouseY) {
+        RenderSystem.depthMask(true);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Background(guiContainer, poseStack, mouseX, mouseY));
+        RenderSystem.depthMask(false);
     }
 
     public static void postRenderForegroundEvent(AbstractContainerScreen<?> guiContainer, PoseStack poseStack, int mouseX, int mouseY) {
+        RenderSystem.depthMask(true);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(guiContainer, poseStack, mouseX, mouseY));
+        RenderSystem.depthMask(false);
     }
 }
