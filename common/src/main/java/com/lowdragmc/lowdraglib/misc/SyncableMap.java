@@ -1,4 +1,4 @@
-package com.lowdragmc.lowdraglib.msic;
+package com.lowdragmc.lowdraglib.misc;
 
 import com.lowdragmc.lowdraglib.syncdata.*;
 import com.lowdragmc.lowdraglib.syncdata.accessor.ManagedAccessor;

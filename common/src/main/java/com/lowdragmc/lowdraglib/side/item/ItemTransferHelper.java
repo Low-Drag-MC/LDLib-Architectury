@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.side.item;
 
-import com.lowdragmc.lowdraglib.msic.ContainerTransfer;
+import com.lowdragmc.lowdraglib.misc.ContainerTransfer;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

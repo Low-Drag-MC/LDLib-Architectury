@@ -1,4 +1,4 @@
-package com.lowdragmc.lowdraglib.msic;
+package com.lowdragmc.lowdraglib.misc;
 
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.side.item.ItemTransferHelper;
@@ -6,7 +6,6 @@ import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
 import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;

@@ -1,4 +1,4 @@
-package com.lowdragmc.lowdraglib.msic;
+package com.lowdragmc.lowdraglib.misc;
 
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;

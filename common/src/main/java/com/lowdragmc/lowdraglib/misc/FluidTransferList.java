@@ -1,4 +1,4 @@
-package com.lowdragmc.lowdraglib.msic;
+package com.lowdragmc.lowdraglib.misc;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
@@ -7,7 +7,6 @@ import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

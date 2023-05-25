@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.side.fluid.fabric;
 
-import com.lowdragmc.lowdraglib.msic.ItemStackTransfer;
+import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import com.lowdragmc.lowdraglib.side.item.fabric.ItemTransferHelperImpl;
@@ -117,7 +117,7 @@ public class FluidTransferHelperImpl {
             @Override
             public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
                 boolean result;
-                try (Transaction transaction = Transaction.openOuter()) {
+                try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
                     result = storage.simulateExtract(FluidHelperImpl.toFluidVariant(stack), stack.getAmount(), transaction) > 0;
                 }
                 return result;
@@ -127,7 +127,7 @@ public class FluidTransferHelperImpl {
             public long fill(FluidStack resource, boolean simulate) {
                 if (resource.isEmpty()) return 0;
                 long filled;
-                try (Transaction transaction = Transaction.openOuter()) {
+                try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
                     filled = simulate ?
                             storage.simulateInsert(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction) :
                             storage.insert(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction);
@@ -141,7 +141,7 @@ public class FluidTransferHelperImpl {
             public FluidStack drain(FluidStack resource, boolean simulate) {
                 if (resource.isEmpty()) return FluidStack.empty();
                 var copied = resource.copy();
-                try (Transaction transaction = Transaction.openOuter()) {
+                try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
                     var drained = simulate ?
                             storage.simulateExtract(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction) :
                             storage.extract(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction);

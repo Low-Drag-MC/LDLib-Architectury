@@ -123,7 +123,7 @@ public class ItemTransferHelperImpl {
                 if (views.get(slot) instanceof SingleStackStorage storage) {
                     handler = storage;
                 }
-                try (Transaction transaction = Transaction.openOuter()) {
+                try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
                     copied.shrink(simulate ?
                             (int) handler.simulateInsert(ItemVariant.of(stack), stack.getCount(), transaction) :
                             (int) handler.insert(ItemVariant.of(stack), stack.getCount(), transaction));
@@ -142,7 +142,7 @@ public class ItemTransferHelperImpl {
                     handler = storage;
                 }
                 var copied = item.copy();
-                try (Transaction transaction = Transaction.openOuter()) {
+                try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
                     copied.setCount(simulate ?
                             (int) handler.simulateExtract(ItemVariant.of(item), amount, transaction) :
                             (int) handler.extract(ItemVariant.of(item), amount, transaction));
