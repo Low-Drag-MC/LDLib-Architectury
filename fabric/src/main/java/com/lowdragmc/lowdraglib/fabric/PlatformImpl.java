@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib.fabric;
 
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.impl.datagen.FabricDataGenHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 
@@ -21,6 +23,11 @@ public class PlatformImpl {
 
 	public static boolean isDevEnv() {
 		return FabricLoader.getInstance().isDevelopmentEnvironment();
+	}
+
+	@SuppressWarnings("UnstableApiUsage")
+	public static boolean isDatagen() {
+		return FabricDataGenHelper.ENABLED;
 	}
 
 	public static boolean isModLoaded(String modId) {

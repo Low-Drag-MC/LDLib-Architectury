@@ -26,6 +26,11 @@ public class Platform {
     }
 
     @ExpectPlatform
+    public static boolean isDatagen() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static boolean isModLoaded(String modId) {
         throw new AssertionError();
     }
