@@ -3,11 +3,9 @@ package com.lowdragmc.lowdraglib.forge;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.loading.FMLServiceProvider;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.nio.file.Path;
@@ -26,7 +24,7 @@ public class PlatformImpl {
 	}
 
     public static boolean isDatagen() {
-        return ModLoader.isDataGenRunning();
+        return FMLLoader.getLaunchHandler().isData();
     }
 
 	public static boolean isModLoaded(String modId) {
