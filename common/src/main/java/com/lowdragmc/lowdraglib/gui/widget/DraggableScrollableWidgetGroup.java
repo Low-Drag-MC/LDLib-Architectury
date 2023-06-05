@@ -5,7 +5,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
@@ -19,7 +19,7 @@ import net.minecraft.util.Mth;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@RegisterUI(name = "draggable_scrollable_group", group = "widget.group")
+@LDLRegister(name = "draggable_scrollable_group", group = "widget.group")
 public class DraggableScrollableWidgetGroup extends WidgetGroup {
     protected int scrollXOffset;
     protected int scrollYOffset;
@@ -31,6 +31,8 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     protected int yBarWidth;
     @Configurable
     protected boolean draggable;
+    @Configurable
+    protected boolean scrollable = true;
     @Configurable
     protected boolean useScissor;
     protected int maxHeight;
@@ -80,6 +82,11 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
 
     public DraggableScrollableWidgetGroup setDraggable(boolean draggable) {
         this.draggable = draggable;
+        return this;
+    }
+
+    public DraggableScrollableWidgetGroup setScrollable(boolean scrollable) {
+        this.scrollable = scrollable;
         return this;
     }
 
@@ -395,11 +402,13 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
                 setFocus(true);
                 return true;
             }
-            setFocus(true);
-            if (isFocus()) {
-                int moveDelta = (int) (-Mth.clamp(wheelDelta, -1, 1) * 13);
-                if (getMaxHeight() - getSize().height > 0 || scrollYOffset > getMaxHeight() - getSize().height) {
-                    setScrollYOffset(Mth.clamp(scrollYOffset + moveDelta, 0, getMaxHeight() - getSize().height));
+            if (scrollable) {
+                setFocus(true);
+                if (isFocus()) {
+                    int moveDelta = (int) (-Mth.clamp(wheelDelta, -1, 1) * 13);
+                    if (getMaxHeight() - getSize().height > 0 || scrollYOffset > getMaxHeight() - getSize().height) {
+                        setScrollYOffset(Mth.clamp(scrollYOffset + moveDelta, 0, getMaxHeight() - getSize().height));
+                    }
                 }
             }
             return true;

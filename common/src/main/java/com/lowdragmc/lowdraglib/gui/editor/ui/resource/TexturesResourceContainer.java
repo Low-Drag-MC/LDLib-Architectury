@@ -1,12 +1,12 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.resource;
 
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.SelectorConfigurator;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
-import com.lowdragmc.lowdraglib.gui.editor.runtime.UIDetector;
+import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.editor.ui.ConfigPanel;
 import com.lowdragmc.lowdraglib.gui.editor.ui.ResourcePanel;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
@@ -33,15 +33,15 @@ public class TexturesResourceContainer extends ResourceContainer<IGuiTexture, Im
         getPanel().getEditor().getConfigPanel().openConfigurator(ConfigPanel.Tab.RESOURCE, new IConfigurable() {
             @Override
             public void buildConfigurator(ConfiguratorGroup father) {
-                UIDetector.Wrapper<RegisterUI, IGuiTexture> defaultWrapper = null;
-                for (var wrapper : UIDetector.REGISTER_TEXTURES) {
+                AnnotationDetector.Wrapper<LDLRegister, IGuiTexture> defaultWrapper = null;
+                for (var wrapper : AnnotationDetector.REGISTER_TEXTURES) {
                     if (wrapper.clazz() == current.getClass()) {
                         defaultWrapper = wrapper;
                     }
                 }
 
-                UIDetector.Wrapper<RegisterUI, IGuiTexture> finalDefaultWrapper = defaultWrapper;
-                SelectorConfigurator<UIDetector.Wrapper<RegisterUI, IGuiTexture>> selectorConfigurator = new SelectorConfigurator<>(
+                AnnotationDetector.Wrapper<LDLRegister, IGuiTexture> finalDefaultWrapper = defaultWrapper;
+                SelectorConfigurator<AnnotationDetector.Wrapper<LDLRegister, IGuiTexture>> selectorConfigurator = new SelectorConfigurator<>(
                         "ldlib.gui.editor.name.texture_type",
                         () -> finalDefaultWrapper,
                         wrapper -> {
@@ -54,7 +54,7 @@ public class TexturesResourceContainer extends ResourceContainer<IGuiTexture, Im
                         },
                         finalDefaultWrapper,
                         false,
-                        UIDetector.REGISTER_TEXTURES,
+                        AnnotationDetector.REGISTER_TEXTURES,
                         w -> "ldlib.gui.editor.register.texture." + w.annotation().name()
                 );
                 selectorConfigurator.setTips("ldlib.gui.editor.tips.texture_type");
@@ -74,7 +74,7 @@ public class TexturesResourceContainer extends ResourceContainer<IGuiTexture, Im
                 .leaf(Icons.COPY, "ldlib.gui.editor.menu.copy", this::copy)
                 .leaf(Icons.PASTE, "ldlib.gui.editor.menu.paste", this::paste)
                 .branch(Icons.ADD_FILE, "ldlib.gui.editor.menu.add_resource", menu -> {
-                    for (UIDetector.Wrapper<RegisterUI, IGuiTexture> wrapper : UIDetector.REGISTER_TEXTURES) {
+                    for (AnnotationDetector.Wrapper<LDLRegister, IGuiTexture> wrapper : AnnotationDetector.REGISTER_TEXTURES) {
                         IGuiTexture icon = wrapper.creator().get();
                         String name = "ldlib.gui.editor.register.texture." + wrapper.annotation().name();
                         menu.leaf(icon, name, () -> {

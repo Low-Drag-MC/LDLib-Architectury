@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.widget.custom;
 
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
@@ -11,7 +11,7 @@ import com.lowdragmc.lowdraglib.utils.Position;
  * @date 2022/12/12
  * @implNote PlayerInventoryWidget
  */
-@RegisterUI(name = "player_inventory", group = "widget.custom")
+@LDLRegister(name = "player_inventory", group = "widget.custom")
 public class PlayerInventoryWidget extends WidgetGroup {
 
     public PlayerInventoryWidget() {

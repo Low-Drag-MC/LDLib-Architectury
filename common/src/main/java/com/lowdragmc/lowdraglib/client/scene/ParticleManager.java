@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib.client.scene;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
-import com.lowdragmc.lowdraglib.client.particle.LParticle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -12,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -27,9 +27,8 @@ import java.util.*;
 @Environment(EnvType.CLIENT)
 public class ParticleManager {
     private static final List<ParticleRenderType> RENDER_ORDER = ImmutableList.of(ParticleRenderType.TERRAIN_SHEET, ParticleRenderType.PARTICLE_SHEET_OPAQUE, ParticleRenderType.PARTICLE_SHEET_LIT, ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT, ParticleRenderType.CUSTOM);
-
-    private final Map<ParticleRenderType, Queue<LParticle>> particles = Maps.newTreeMap(makeParticleRenderTypeComparator(RENDER_ORDER));
-
+    private final Queue<Particle> waitToAdded = Queues.newArrayDeque();
+    private final Map<ParticleRenderType, Queue<Particle>> particles = Maps.newTreeMap(makeParticleRenderTypeComparator(RENDER_ORDER));
     private final TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
     public Level level;
@@ -38,20 +37,42 @@ public class ParticleManager {
         this.level = level;
     }
 
-    public void addParticle(LParticle particle) {
-        particle.setLevel(level);
-        particles.computeIfAbsent(particle.getRenderType(), type -> Queues.newArrayDeque()).add(particle);
+    public void clearAllParticles() {
+        synchronized (waitToAdded) {
+            waitToAdded.clear();
+            particles.clear();
+        }
+    }
+
+    public void addParticle(Particle particle) {
+        synchronized (waitToAdded) {
+            waitToAdded.add(particle);
+        }
+    }
+
+    public int getParticleAmount() {
+        int amount = waitToAdded.size();
+        amount += particles.values().stream().mapToInt(Collection::size).sum();
+        return amount;
     }
 
     public void tick() {
+        if (waitToAdded.size() > 0) {
+            synchronized (waitToAdded) {
+                for (var particle : waitToAdded) {
+                    particles.computeIfAbsent(particle.getRenderType(), type -> Queues.newArrayDeque()).add(particle);
+                }
+                waitToAdded.clear();
+            }
+        }
         this.particles.forEach((particleRenderType, particleQueue) -> this.tickParticleList(particleQueue));
     }
 
-    private void tickParticleList(Collection<LParticle> pParticles) {
+    private void tickParticleList(Collection<Particle> pParticles) {
         if (!pParticles.isEmpty()) {
-            Iterator<LParticle> iterator = pParticles.iterator();
+            var iterator = pParticles.iterator();
             while(iterator.hasNext()) {
-                LParticle particle = iterator.next();
+                var particle = iterator.next();
                 particle.tick();
                 if (!particle.isAlive()) {
                     iterator.remove();
@@ -74,7 +95,7 @@ public class ParticleManager {
 
         for(ParticleRenderType particlerendertype : this.particles.keySet()) {
             if (particlerendertype == ParticleRenderType.NO_RENDER) continue;
-            Iterable<LParticle> iterable = this.particles.get(particlerendertype);
+            var iterable = this.particles.get(particlerendertype);
             if (iterable != null) {
                 RenderSystem.setShader(GameRenderer::getParticleShader);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -82,7 +103,7 @@ public class ParticleManager {
                 BufferBuilder bufferbuilder = tesselator.getBuilder();
                 particlerendertype.begin(bufferbuilder, this.textureManager);
 
-                for(LParticle particle : iterable) {
+                for(var particle : iterable) {
                     try {
                         particle.render(bufferbuilder, pActiveRenderInfo, pPartialTicks);
                     } catch (Throwable throwable) {

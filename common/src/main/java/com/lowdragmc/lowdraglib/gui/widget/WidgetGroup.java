@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
 import com.lowdragmc.lowdraglib.gui.animation.Animation;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
 import com.lowdragmc.lowdraglib.gui.ingredient.IIngredientSlot;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-@RegisterUI(name = "group", group = "widget.group")
+@LDLRegister(name = "group", group = "widget.group")
 public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngredientSlot, IConfigurableWidgetGroup {
 
     public final List<Widget> widgets = new ArrayList<>();
@@ -675,7 +675,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         CompoundTag tag = IConfigurableWidgetGroup.super.serializeInnerNBT();
         var children = new ListTag();
         for (Widget widget : widgets) {
-            if (widget instanceof IConfigurableWidget child && child.isRegisterUI()) {
+            if (widget instanceof IConfigurableWidget child && child.isLDLRegister()) {
                 children.add(child.serializeWrapper());
             }
         }

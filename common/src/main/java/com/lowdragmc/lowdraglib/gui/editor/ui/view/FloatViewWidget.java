@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.view;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
-import com.lowdragmc.lowdraglib.gui.editor.IRegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
@@ -18,7 +18,7 @@ import net.fabricmc.api.Environment;
  * @implNote FloatViewWidget, view are some float window widgets.
  * They are technically project-independent and can be used for any project.
  */
-public class FloatViewWidget extends WidgetGroup implements IRegisterUI {
+public class FloatViewWidget extends WidgetGroup implements ILDLRegister {
     protected final Editor editor;
     protected final boolean isFixedView;
     protected WidgetGroup title, content;

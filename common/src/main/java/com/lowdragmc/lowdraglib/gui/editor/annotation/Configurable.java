@@ -15,4 +15,5 @@ public @interface Configurable {
     boolean forceUpdate() default true;
     String key() default "";
     boolean subConfigurable() default false;
+    boolean persisted() default true;
 }

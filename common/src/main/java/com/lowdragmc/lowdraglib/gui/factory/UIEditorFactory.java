@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.gui.factory;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
+import com.lowdragmc.lowdraglib.gui.editor.ui.UIEditor;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import net.minecraft.network.FriendlyByteBuf;
@@ -33,7 +34,7 @@ public class UIEditorFactory extends UIFactory<UIEditorFactory> implements IUIHo
 	@Override
 	public ModularUI createUI(Player entityPlayer) {
 		return new ModularUI(this, entityPlayer)
-				.widget(new Editor(LDLib.location));
+				.widget(new UIEditor(LDLib.location));
 	}
 
 	@Override

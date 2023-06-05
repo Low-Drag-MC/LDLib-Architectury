@@ -8,22 +8,22 @@ import com.lowdragmc.lowdraglib.utils.Vector3;
  * @date 2022/6/17
  * @implNote CubicBezierCurve3
  */
-public class CubicBezierCurve3 extends Curve{
-    public final Vector3 v0, v1, v2, v3;
+public class CubicBezierCurve3 extends Curve<Vector3> {
+    public Vector3 p0, c0, c1, p1;
 
     public CubicBezierCurve3(Vector3 start, Vector3 control1, Vector3 control2, Vector3 end) {
-        this.v0 = start;
-        this.v1 = control1;
-        this.v2 = control2;
-        this.v3 = end;
+        this.p0 = start;
+        this.c0 = control1;
+        this.c1 = control2;
+        this.p1 = end;
     }
 
     @Override
     public Vector3 getPoint(float t) {
         return new Vector3(
-                Interpolations.CubicBezier(t, v0.x, v1.x, v2.x, v3.x),
-                Interpolations.CubicBezier(t, v0.y, v1.y, v2.y, v3.y),
-                Interpolations.CubicBezier(t, v0.z, v1.z, v2.z, v3.z)
+                Interpolations.CubicBezier(t, p0.x, c0.x, c1.x, p1.x),
+                Interpolations.CubicBezier(t, p0.y, c0.y, c1.y, p1.y),
+                Interpolations.CubicBezier(t, p0.z, c0.z, c1.z, p1.z)
         );
     }
 }

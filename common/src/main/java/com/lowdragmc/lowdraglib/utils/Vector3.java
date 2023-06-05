@@ -16,6 +16,8 @@ public class Vector3 {
     public static final Vector3 X = new Vector3(1, 0, 0);
     public static final Vector3 Y = new Vector3(0, 1, 0);
     public static final Vector3 Z = new Vector3(0, 0, 1);
+    public static final Vector3 ZERO = new Vector3(0, 0, 0);
+    public static final Vector3 ONE = new Vector3(1, 1, 1);
 
     public double x;
     public double y;
@@ -72,6 +74,10 @@ public class Vector3 {
     public Vector3 rotate(double angle, Vector3 axis) {
         Quat.aroundAxis(axis.copy().normalize(), angle).rotate(this);
         return this;
+    }
+
+    public Vector3 rotateYXY(Vector3 rotation) {
+        return rotate(rotation.y, Y).rotate(rotation.x, X).rotate(rotation.z, Y);
     }
 
     public double angle(Vector3 vec) {
@@ -281,4 +287,17 @@ public class Vector3 {
         this.z = d2;
         return this;
     }
+
+    public boolean isZero() {
+        return this.x == 0 && this.y ==0 && this.z == 0;
+    }
+
+    public double min() {
+        return x < y ? Math.min(x, z) : Math.min(y, z);
+    }
+
+    public double max() {
+        return x > y ? Math.max(x, z) : Math.max(y, z);
+    }
+
 }

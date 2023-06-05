@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.modular;
 
+import com.google.common.collect.Lists;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.AbstractContainerScreenAccessor;
@@ -134,7 +135,11 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
             draggingElement.getB().draw(poseStack, mouseX, mouseY, mouseX - 20, mouseY - 20, 40, 40);
         } else if (tooltipTexts != null && tooltipTexts.size() > 0) {
             poseStack.translate(0, 0, 200);
-            renderTooltip(poseStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
+            if (tooltipComponent == null) {
+                renderTooltip(poseStack, tooltipTexts.stream().flatMap(component -> font.split(component, 200).stream()).toList(), mouseX, mouseY);
+            } else {
+                renderTooltip(poseStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
+            }
             poseStack.translate(0, 0, -200);
         }
 

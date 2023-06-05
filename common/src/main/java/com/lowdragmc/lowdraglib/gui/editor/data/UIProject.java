@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.data;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.editor.ui.MainPanel;
@@ -22,8 +22,8 @@ import java.io.IOException;
  * @date 2022/12/4
  * @implNote UIProject
  */
-@RegisterUI(name = "ui", group = "project")
-public class UIProject extends Project {
+@LDLRegister(name = "ui", group = "editor.ui")
+public class UIProject implements IProject {
 
     public Resources resources;
     public WidgetGroup root;
@@ -73,7 +73,7 @@ public class UIProject extends Project {
         }
     }
 
-    public Project loadProject(File file) {
+    public IProject loadProject(File file) {
         try {
             var tag = NbtIo.read(file);
             if (tag != null) {
@@ -85,7 +85,7 @@ public class UIProject extends Project {
 
     @Override
     public void onLoad(Editor editor) {
-        super.onLoad(editor);
+        IProject.super.onLoad(editor);
         editor.getTabPages().addTab(new TabButton(50, 16, 60, 14).setTexture(
                 new GuiTextureGroup(ColorPattern.T_GREEN.rectTexture().setBottomRadius(10).transform(0, 0.4f), new TextTexture("Main")),
                 new GuiTextureGroup(ColorPattern.T_RED.rectTexture().setBottomRadius(10).transform(0, 0.4f), new TextTexture("Main"))

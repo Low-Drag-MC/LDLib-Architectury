@@ -19,7 +19,7 @@ import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
-@RegisterUI(name = "shader_texture", group = "texture")
+@LDLRegister(name = "shader_texture", group = "texture")
 public class ShaderTexture extends TransformTexture {
 
     @Configurable(name = "ldlib.gui.editor.name.resource", tips = "ldlib.gui.editor.tips.shader_location")

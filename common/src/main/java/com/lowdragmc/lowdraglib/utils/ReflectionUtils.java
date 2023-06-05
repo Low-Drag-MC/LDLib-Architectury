@@ -26,7 +26,7 @@ public class ReflectionUtils {
     }
 
     @ExpectPlatform
-    public static <A extends Annotation> void findAnnotationClasses(Class<A> annotationClass, Consumer<Class<?>> consumer) {
+    public static <A extends Annotation> void findAnnotationClasses(Class<A> annotationClass, Consumer<Class<?>> consumer, Runnable onFinished) {
         throw new AssertionError();
     }
 }

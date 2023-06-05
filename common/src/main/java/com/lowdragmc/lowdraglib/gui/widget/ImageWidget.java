@@ -4,7 +4,7 @@ package com.lowdragmc.lowdraglib.gui.widget;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberColor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
@@ -16,9 +16,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 @Configurable(name = "ldlib.gui.editor.register.widget.image", collapse = false)
-@RegisterUI(name = "image", group = "widget.basic")
+@LDLRegister(name = "image", group = "widget.basic")
 public class ImageWidget extends Widget implements IConfigurableWidget {
 
     @Configurable(name = "ldlib.gui.editor.name.border")
@@ -27,6 +28,8 @@ public class ImageWidget extends Widget implements IConfigurableWidget {
     @Configurable(name = "ldlib.gui.editor.name.border_color")
     @NumberColor
     private int borderColor = -1;
+
+    private Supplier<IGuiTexture> textureSupplier;
 
     public ImageWidget() {
         this(0, 0, 50, 50, new ResourceTexture());
@@ -41,8 +44,21 @@ public class ImageWidget extends Widget implements IConfigurableWidget {
         setImage(area);
     }
 
+    public ImageWidget(int xPosition, int yPosition, int width, int height, Supplier<IGuiTexture> textureSupplier) {
+        this(xPosition, yPosition, width, height);
+        setImage(textureSupplier);
+    }
+
     public ImageWidget setImage(IGuiTexture area) {
         setBackground(area);
+        return this;
+    }
+
+    public ImageWidget setImage(Supplier<IGuiTexture> textureSupplier) {
+        this.textureSupplier = textureSupplier;
+        if (textureSupplier != null) {
+            setBackground(textureSupplier.get());
+        }
         return this;
     }
 
@@ -54,6 +70,15 @@ public class ImageWidget extends Widget implements IConfigurableWidget {
         this.border = border;
         this.borderColor = color;
         return this;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void updateScreen() {
+        super.updateScreen();
+        if (textureSupplier != null) {
+            setBackground(textureSupplier.get());
+        }
     }
 
     @Environment(EnvType.CLIENT)

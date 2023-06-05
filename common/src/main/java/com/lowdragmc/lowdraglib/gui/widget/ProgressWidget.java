@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.Configurator;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.GuiTextureConfigurator;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 
-@RegisterUI(name = "progress", group = "widget.basic")
+@LDLRegister(name = "progress", group = "widget.basic")
 public class ProgressWidget extends Widget implements IConfigurableWidget {
     public final static DoubleSupplier JEIProgress = () -> Math.abs(System.currentTimeMillis() % 2000) / 2000.;
 

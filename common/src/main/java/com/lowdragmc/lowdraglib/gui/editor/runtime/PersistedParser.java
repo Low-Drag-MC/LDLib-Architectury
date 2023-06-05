@@ -3,8 +3,10 @@ package com.lowdragmc.lowdraglib.gui.editor.runtime;
 import com.google.common.base.Strings;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
+import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 import com.lowdragmc.lowdraglib.syncdata.ManagedFieldUtils;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
+import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
 import com.lowdragmc.lowdraglib.utils.TagUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -36,7 +38,9 @@ public class PersistedParser {
 
             if (field.isAnnotationPresent(Configurable.class)) {
                 Configurable configurable = field.getAnnotation(Configurable.class);
-                if (!Strings.isNullOrEmpty(configurable.key())) {
+                if (!configurable.persisted()) {
+                    continue;
+                } else if (!Strings.isNullOrEmpty(configurable.key())) {
                     key = configurable.key();
                 }
             } else if (field.isAnnotationPresent(Persisted.class)) {
@@ -50,13 +54,17 @@ public class PersistedParser {
 
             Tag nbt = null;
             // sub configurable
-            var rawClass = field.getDeclaringClass();
-            if (rawClass.isAnnotationPresent(Configurable.class) && rawClass.getAnnotation(Configurable.class).subConfigurable()) {
+            if ((field.isAnnotationPresent(Configurable.class) && field.getAnnotation(Configurable.class).subConfigurable()) || (field.isAnnotationPresent(Persisted.class) && field.getAnnotation(Persisted.class).subPersisted())) {
                 try {
+                    field.setAccessible(true);
                     var value = field.get(object);
                     if (value != null) {
-                        nbt = new CompoundTag();
-                        serializeNBT((CompoundTag)nbt, field.getDeclaringClass(), value);
+                        if (value instanceof ITagSerializable<?> serializable) {
+                            nbt = serializable.serializeNBT();
+                        } else {
+                            nbt = new CompoundTag();
+                            serializeNBT((CompoundTag)nbt, ReflectionUtils.getRawType(field.getGenericType()), value);
+                        }
                     }
                 } catch (IllegalAccessException ignored) {}
             } else {
@@ -94,7 +102,9 @@ public class PersistedParser {
 
             if (field.isAnnotationPresent(Configurable.class)) {
                 Configurable configurable = field.getAnnotation(Configurable.class);
-                if (!Strings.isNullOrEmpty(configurable.key())) {
+                if (!configurable.persisted()) {
+                    continue;
+                } else if (!Strings.isNullOrEmpty(configurable.key())) {
                     key = configurable.key();
                 }
             } else if (field.isAnnotationPresent(Persisted.class)) {
@@ -108,29 +118,33 @@ public class PersistedParser {
 
             Tag nbt = null;
             // sub configurable
-            var rawClass = field.getDeclaringClass();
-            if (rawClass.isAnnotationPresent(Configurable.class) && rawClass.getAnnotation(Configurable.class).subConfigurable()) {
+            if ((field.isAnnotationPresent(Configurable.class) && field.getAnnotation(Configurable.class).subConfigurable()) || (field.isAnnotationPresent(Persisted.class) && field.getAnnotation(Persisted.class).subPersisted())) {
                 try {
+                    field.setAccessible(true);
                     var value = field.get(object);
                     if (value != null) {
-                        nbt = tag.getCompound(key);
-                        deserializeNBT((CompoundTag)nbt, new HashMap<>(), field.getDeclaringClass(), value);
+                        if (value instanceof ITagSerializable serializable) {
+                            serializable.deserializeNBT(nbt = tag.get(key));
+                        } else {
+                            nbt = tag.getCompound(key);
+                            deserializeNBT((CompoundTag)nbt, new HashMap<>(), ReflectionUtils.getRawType(field.getGenericType()), value);
+                        }
                     }
                 } catch (IllegalAccessException ignored) {}
             } else {
                 nbt = TagUtils.getTagExtended(tag, key);
-            }
-            if (nbt != null) {
-                var managedKey = ManagedFieldUtils.createKey(field);
-                managedKey.writePersistedField(managedKey.createRef(object), nbt);
-                Method setter = setters.get(field.getName());
+                if (nbt != null) {
+                    var managedKey = ManagedFieldUtils.createKey(field);
+                    managedKey.writePersistedField(managedKey.createRef(object), nbt);
+                    Method setter = setters.get(field.getName());
 
-                if (setter != null) {
-                    field.setAccessible(true);
-                    try {
-                        setter.invoke(object, field.get(object));
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
+                    if (setter != null) {
+                        field.setAccessible(true);
+                        try {
+                            setter.invoke(object, field.get(object));
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }

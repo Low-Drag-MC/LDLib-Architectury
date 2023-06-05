@@ -131,8 +131,8 @@
 
   "ldlib.gui.editor.register.view.history_view": "History View",
 
-  "ldlib.gui.editor.register.project.ui": "UI Project",
+  "ldlib.gui.editor.register.editor.ui.ui": "UI Project",
 
-  "ldlib.gui.editor.register.menu.file": "file",
-  "ldlib.gui.editor.register.menu.view": "view"
+  "ldlib.gui.editor.register.editor.file": "file",
+  "ldlib.gui.editor.register.editor.view": "view"
 }

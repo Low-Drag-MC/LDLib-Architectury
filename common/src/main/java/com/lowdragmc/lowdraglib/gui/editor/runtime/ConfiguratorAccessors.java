@@ -54,7 +54,7 @@ public class ConfiguratorAccessors {
 
     public static IConfiguratorAccessor<?> findByClass(Class<?> clazz) {
         return ACCESSOR_MAP.computeIfAbsent(clazz, c -> {
-            for (IConfiguratorAccessor<?> accessor : UIDetector.CONFIGURATOR_ACCESSORS) {
+            for (IConfiguratorAccessor<?> accessor : AnnotationDetector.CONFIGURATOR_ACCESSORS) {
                 if (accessor.test(c)) {
                     return accessor;
                 }

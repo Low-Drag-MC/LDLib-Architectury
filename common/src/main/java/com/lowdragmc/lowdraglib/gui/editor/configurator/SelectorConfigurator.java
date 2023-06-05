@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.gui.editor.configurator;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
+import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
@@ -22,10 +23,13 @@ public class SelectorConfigurator<T> extends ValueConfigurator<T>{
     protected List<T> candidates;
     protected Function<T, String> mapping;
     protected Map<String, T> nameMap;
+    @Getter
     protected SelectorWidget selector;
 
     @Setter
     protected int max;
+    @Setter
+    protected boolean isUp = true;
 
     public SelectorConfigurator(String name, Supplier<T> supplier, Consumer<T> onUpdate, @Nonnull T defaultValue, boolean forceUpdate, List<T> candidates, Function<T, String> mapping) {
         super(name, supplier, onUpdate, defaultValue, forceUpdate);
@@ -53,6 +57,7 @@ public class SelectorConfigurator<T> extends ValueConfigurator<T>{
                     value = nameMap.get(s);
                     updateValue();
                 })
+                .setIsUp(isUp)
                 .setButtonBackground(ColorPattern.T_GRAY.rectTexture().setRadius(5))
                 .setBackground(ColorPattern.BLACK.rectTexture())
                 .setValue(mapping.apply(value))

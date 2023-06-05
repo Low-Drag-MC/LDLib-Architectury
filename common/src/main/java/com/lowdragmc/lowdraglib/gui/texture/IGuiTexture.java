@@ -1,13 +1,13 @@
 package com.lowdragmc.lowdraglib.gui.texture;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.WrapperConfigurator;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
+import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.PersistedParser;
-import com.lowdragmc.lowdraglib.gui.editor.runtime.UIDetector;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -86,8 +86,8 @@ public interface IGuiTexture extends IConfigurable {
 
     // ***************** EDITOR  ***************** //
 
-    Function<String, UIDetector.Wrapper<RegisterUI, IGuiTexture>> CACHE = Util.memoize(type -> {
-        for (var wrapper : UIDetector.REGISTER_TEXTURES) {
+    Function<String, AnnotationDetector.Wrapper<LDLRegister, IGuiTexture>> CACHE = Util.memoize(type -> {
+        for (var wrapper : AnnotationDetector.REGISTER_TEXTURES) {
             if (wrapper.annotation().name().equals(type)) {
                 return wrapper;
             }
@@ -109,7 +109,7 @@ public interface IGuiTexture extends IConfigurable {
 
     @Nullable
     static CompoundTag serializeWrapper(IGuiTexture texture) {
-        if (texture.isRegisterUI()) {
+        if (texture.isLDLRegister()) {
             CompoundTag tag = new CompoundTag();
             tag.putString("type", texture.name());
             CompoundTag data = new CompoundTag();

@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.data;
 
-import com.lowdragmc.lowdraglib.gui.editor.IRegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
 import net.minecraft.nbt.CompoundTag;
@@ -11,42 +11,42 @@ import java.io.File;
 /**
  * @author KilaBash
  * @date 2022/12/9
- * @implNote Project
+ * @implNote IProject
  */
-public abstract class Project implements IRegisterUI {
+public interface IProject extends ILDLRegister {
 
-    public abstract Resources getResources();
+    Resources getResources();
 
     /**
      * Save project
      */
-    public abstract void saveProject(File file);
+    void saveProject(File file);
 
     /**
      * Load project from file. return null if loading failed
      */
     @Nullable
-    public abstract Project loadProject(File file);
+    IProject loadProject(File file);
 
-    public abstract Project newEmptyProject();
+    IProject newEmptyProject();
 
     /**
      * Suffix name of this project
      */
-    public String getSuffix() {
+    default String getSuffix() {
         return name();
     }
 
     /**
      * Fired when project is closed
      */
-    public void onClosed(Editor editor) {
+    default void onClosed(Editor editor) {
     }
 
     /**
      * Fired when project is opened
      */
-    public void onLoad(Editor editor) {
+    default void onLoad(Editor editor) {
         editor.getResourcePanel().loadResource(getResources(), false);
     }
 
@@ -55,14 +55,14 @@ public abstract class Project implements IRegisterUI {
      * @param name menu name
      * @param menu current menu
      */
-    public void attachMenu(Editor editor, String name, TreeBuilder.Menu menu) {
+    default void attachMenu(Editor editor, String name, TreeBuilder.Menu menu) {
 
     }
 
     /**
      * Load resource from nbt data
      */
-    public Resources loadResources(CompoundTag tag) {
+    default Resources loadResources(CompoundTag tag) {
         return Resources.fromNBT(tag);
     }
 

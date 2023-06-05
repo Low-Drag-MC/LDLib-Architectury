@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-public @interface RegisterUI {
+public @interface LDLRegister {
     /**
      * Should be unique in the same type of ui element
      */

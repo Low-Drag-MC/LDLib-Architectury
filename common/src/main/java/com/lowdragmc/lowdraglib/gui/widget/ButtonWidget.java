@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
@@ -10,7 +10,7 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.function.Consumer;
 
-@RegisterUI(name = "button", group = "widget.basic")
+@LDLRegister(name = "button", group = "widget.basic")
 public class ButtonWidget extends Widget implements IConfigurableWidget {
 
     protected Consumer<ClickData> onPressCallback;

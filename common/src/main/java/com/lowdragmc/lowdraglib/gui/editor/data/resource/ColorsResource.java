@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.data.resource;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.NumberConfigurator;
@@ -24,7 +24,7 @@ import static com.lowdragmc.lowdraglib.gui.editor.data.resource.ColorsResource.R
  * @date 2022/12/3
  * @implNote TextureResource
  */
-@RegisterUI(name = RESOURCE_NAME, group = "resource")
+@LDLRegister(name = RESOURCE_NAME, group = "resource")
 public class ColorsResource extends Resource<Integer> {
 
     public final static String RESOURCE_NAME = "ldlib.gui.editor.group.colors";

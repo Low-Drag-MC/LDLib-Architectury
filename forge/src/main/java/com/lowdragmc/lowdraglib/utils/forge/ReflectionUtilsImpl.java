@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.utils.forge;
 import com.lowdragmc.lowdraglib.LDLib;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.ModFileScanData;
+import org.checkerframework.checker.units.qual.A;
 
 import java.lang.annotation.Annotation;
 import java.util.function.Consumer;
@@ -10,7 +11,7 @@ import java.util.function.Consumer;
 public class ReflectionUtilsImpl {
 
 
-    public static <A extends Annotation> void findAnnotationClasses(Class<A> annotationClass, Consumer<Class<?>> consumer) {
+    public static <A extends Annotation> void findAnnotationClasses(Class<A> annotationClass, Consumer<Class<?>> consumer, Runnable onFinished) {
         org.objectweb.asm.Type annotationType = org.objectweb.asm.Type.getType(annotationClass);
         for (ModFileScanData data : ModList.get().getAllScanData()) {
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
@@ -23,5 +24,7 @@ public class ReflectionUtilsImpl {
                 }
             }
         }
+        onFinished.run();
     }
+
 }

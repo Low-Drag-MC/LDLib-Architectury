@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.utils.fabric;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.commons.io.file.AccumulatorPathVisitor;
 import org.apache.commons.io.file.Counters;
@@ -20,10 +21,10 @@ import java.util.function.Consumer;
 
 public class ReflectionUtilsImpl {
 
-    private static final Map<Class<? extends Annotation>, List<Consumer<Class<?>>>> QUEUE = new HashMap<>();
+    private static final Map<Class<? extends Annotation>, List<Pair<Consumer<Class<?>>, Runnable>>> QUEUE = new HashMap<>();
 
-    public static <A extends Annotation> void findAnnotationClasses(Class<A> annotationClass, Consumer<Class<?>> consumer) {
-        QUEUE.computeIfAbsent(annotationClass, a -> new ArrayList<>()).add(consumer);
+    public static <A extends Annotation> void findAnnotationClasses(Class<A> annotationClass, Consumer<Class<?>> consumer, Runnable onFinished) {
+        QUEUE.computeIfAbsent(annotationClass, a -> new ArrayList<>()).add(Pair.of(consumer, onFinished));
     }
 
     public static void execute() {
@@ -32,14 +33,19 @@ public class ReflectionUtilsImpl {
             for (String name : names) {
                 try {
                     var clazz = Class.forName(name.replace("/", "."), false, ReflectionUtilsImpl.class.getClassLoader());
-                    for (Consumer<Class<?>> consumer : QUEUE.get(annotation)) {
-                        consumer.accept(clazz);
+                    for (var consumer : QUEUE.get(annotation)) {
+                        consumer.left().accept(clazz);
                     }
                 } catch (Throwable throwable) {
                     LDLib.LOGGER.error("Failed to load class {} for notation {} ", name, annotation.getName(), throwable);
                 }
             }
         });
+        for (var pairs : QUEUE.values()) {
+            for (var pair : pairs) {
+                pair.right().run();
+            }
+        }
         QUEUE.clear();
         LDLib.LOGGER.info("Finish searching for notation");
     }

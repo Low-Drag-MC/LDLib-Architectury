@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-@RegisterUI(name = "selector", group = "widget.basic")
+@LDLRegister(name = "selector", group = "widget.basic")
 public class SelectorWidget extends WidgetGroup {
     protected List<SelectableWidgetGroup> selectables;
     @Configurable

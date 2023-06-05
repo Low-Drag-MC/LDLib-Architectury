@@ -2,8 +2,8 @@ package com.lowdragmc.lowdraglib.gui.editor.ui;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
-import com.lowdragmc.lowdraglib.gui.editor.runtime.UIDetector;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
+import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.editor.ui.menu.MenuTab;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
@@ -41,17 +41,24 @@ public class MenuPanel extends WidgetGroup {
         this.setBackground(ColorPattern.T_RED.rectTexture());
         this.addWidget(new ImageWidget(2, 2, 12, 12, new ResourceTexture()));
         if (isRemote()) {
-            int x = 20;
-            var tag = new CompoundTag();
-            try {
-                tag = NbtIo.read(new File(editor.getWorkSpace(), "settings/menu.cfg"));
-                if (tag == null) {
-                    tag = new CompoundTag();
-                }
-            } catch (IOException e) {
-                LDLib.LOGGER.error(e.getMessage());
+            initTabs();
+        }
+        super.initWidget();
+    }
+
+    protected void initTabs() {
+        int x = 20;
+        var tag = new CompoundTag();
+        try {
+            tag = NbtIo.read(new File(editor.getWorkSpace(), "settings/menu.cfg"));
+            if (tag == null) {
+                tag = new CompoundTag();
             }
-            for (UIDetector.Wrapper<RegisterUI, MenuTab> wrapper : UIDetector.REGISTER_MENU_TABS) {
+        } catch (IOException e) {
+            LDLib.LOGGER.error(e.getMessage());
+        }
+        for (AnnotationDetector.Wrapper<LDLRegister, MenuTab> wrapper : AnnotationDetector.REGISTER_MENU_TABS) {
+            if (editor.name().startsWith(wrapper.annotation().group())) {
                 var tab = wrapper.creator().get();
                 tabs.put(wrapper.annotation().name(), tab);
                 var button = tab.createTabWidget();
@@ -63,7 +70,6 @@ public class MenuPanel extends WidgetGroup {
                 }
             }
         }
-        super.initWidget();
     }
 
     public void saveMenuData() {

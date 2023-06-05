@@ -87,7 +87,8 @@ public class ColorConfigurator extends ValueConfigurator<Number> {
         addWidget(new ButtonWidget(leftWidth, 2, width - leftWidth - 3 - rightWidth, 10, null, cd -> {
             if (Editor.INSTANCE != null) {
                 var position = image.getPosition();
-                var dialog = Editor.INSTANCE.openDialog(new DialogWidget(position.x, position.y - 110, 110, 110));
+                var rightPlace = getGui().getScreenWidth() - 110;
+                var dialog = Editor.INSTANCE.openDialog(new DialogWidget(Math.min(position.x, rightPlace), position.y - 110, 110, 110));
                 dialog.setClickClose(true);
                 dialog.addWidget(new HsbColorWidget(5, 5, 100, 100)
                                 .setOnChanged(newColor -> {

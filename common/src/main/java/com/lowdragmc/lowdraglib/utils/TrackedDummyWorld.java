@@ -52,6 +52,11 @@ public class TrackedDummyWorld extends DummyWorld {
         proxyWorld = world;
     }
 
+    public void clear() {
+        renderedBlocks.clear();
+        blockEntities.clear();
+    }
+
     public Map<BlockPos, BlockInfo> getRenderedBlocks() {
         return renderedBlocks;
     }

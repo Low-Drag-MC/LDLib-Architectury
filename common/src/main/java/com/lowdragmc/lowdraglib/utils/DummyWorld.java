@@ -7,8 +7,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.data.worldgen.biome.Biomes;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -17,11 +15,13 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.lighting.LevelLightEngine;
@@ -30,6 +30,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.WritableLevelData;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.LevelTickAccess;
@@ -39,6 +40,8 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * Author: KilaBash
@@ -50,10 +53,15 @@ import java.util.List;
 public class DummyWorld extends Level {
 
     protected DummyChunkSource chunkProvider = new DummyChunkSource(this);
+    protected Level level;
+    protected final LevelLightEngine lighter;
+    private final BlockPos.MutableBlockPos scratch = new BlockPos.MutableBlockPos();
 
     public DummyWorld(Level level) {
         super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionTypeRegistration(), level::getProfiler,
                 true, false, 0, 0);
+        this.level = level;
+        this.lighter = new LevelLightEngine(chunkProvider, true, false);
     }
 
     @Override
@@ -97,19 +105,11 @@ public class DummyWorld extends Level {
 
     @Override
     public float getShade(Direction direction, boolean b) {
-        switch (direction) {
-            case DOWN:
-            case UP:
-                return 0.9F;
-            case NORTH:
-            case SOUTH:
-                return 0.8F;
-            case WEST:
-            case EAST:
-                return 0.6F;
-            default:
-                return 1.0F;
-        }
+        return switch (direction) {
+            case DOWN, UP -> 0.9F;
+            case NORTH, SOUTH -> 0.8F;
+            case WEST, EAST -> 0.6F;
+        };
     }
 
     @Override
@@ -146,10 +146,49 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
-        return Biomes.bootstrap(BuiltinRegistries.BIOME);
+    public Holder<Biome> getUncachedNoiseBiome(int pX, int pY, int pZ) {
+        return level.getUncachedNoiseBiome(pX, pY, pZ);
     }
 
+    @Override
+    public Holder<Biome> getNoiseBiome(int pX, int pY, int pZ) {
+        return level.getNoiseBiome(pX, pY, pZ);
+    }
+
+    @Override
+    public BiomeManager getBiomeManager() {
+        return level.getBiomeManager();
+    }
+
+    @Override
+    public RegistryAccess registryAccess() {
+        return level.registryAccess();
+    }
+
+    @Override
+    public LevelTickAccess<Block> getBlockTicks() {
+        return level.getBlockTicks();
+    }
+
+    @Override
+    public LevelTickAccess<Fluid> getFluidTicks() {
+        return level.getFluidTicks();
+    }
+
+    @Override
+    public RecipeManager getRecipeManager() {
+        return level.getRecipeManager();
+    }
+
+    @Override
+    public int getFreeMapId() {
+        return level.getFreeMapId();
+    }
+
+    @Override
+    public Scoreboard getScoreboard() {
+        return level.getScoreboard();
+    }
 
     @Override
     public Entity getEntity(int id) {
@@ -167,38 +206,45 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public int getFreeMapId() {
-        return 0;
-    }
-
-    @Override
     public void destroyBlockProgress(int breakerId, BlockPos pos, int progress) {
 
     }
 
     @Override
-    public Scoreboard getScoreboard() {
-        return null;
-    }
-
-    @Override
-    public RecipeManager getRecipeManager() {
-        return null;
-    }
-
-    @Override
     protected LevelEntityGetter<Entity> getEntities() {
-        return null;
-    }
+        return new LevelEntityGetter<>() {
+            @Nullable
+            @Override
+            public Entity get(int id) {
+                return null;
+            }
 
-    @Override
-    public LevelTickAccess<Block> getBlockTicks() {
-        return null;
-    }
+            @Nullable
+            @Override
+            public Entity get(UUID uuid) {
+                return null;
+            }
 
-    @Override
-    public LevelTickAccess<Fluid> getFluidTicks() {
-        return null;
+            @Override
+            public Iterable<Entity> getAll() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public <U extends Entity> void get(EntityTypeTest<Entity, U> test, Consumer<U> consumer) {
+
+            }
+
+            @Override
+            public void get(AABB boundingBox, Consumer<Entity> consumer) {
+
+            }
+
+            @Override
+            public <U extends Entity> void get(EntityTypeTest<Entity, U> test, AABB bounds, Consumer<U> consumer) {
+
+            }
+        };
     }
 
     @Override
@@ -224,11 +270,6 @@ public class DummyWorld extends Level {
     @Override
     public void gameEvent(@Nullable Entity pEntity, GameEvent pEvent, BlockPos pPos) {
 
-    }
-
-    @Override
-    public RegistryAccess registryAccess() {
-        return null;
     }
 
     @Override
@@ -263,5 +304,9 @@ public class DummyWorld extends Level {
     @Nullable
     public ParticleManager getParticleManager() {
         return particleManager;
+    }
+
+    public BlockState getBlockState(int x, int y, int z) {
+        return getBlockState(scratch.set(x, y, z));
     }
 }

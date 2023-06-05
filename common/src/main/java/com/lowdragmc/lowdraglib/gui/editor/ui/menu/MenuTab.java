@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.menu;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
-import com.lowdragmc.lowdraglib.gui.editor.IRegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
@@ -21,7 +21,7 @@ import java.util.function.BiConsumer;
  * @date 2022/12/17
  * @implNote MenuTab
  */
-public abstract class MenuTab implements IRegisterUI {
+public abstract class MenuTab implements ILDLRegister {
     private final static Map<String, List<BiConsumer<MenuTab, TreeBuilder.Menu>>> HOOKS = new LinkedHashMap<>();
 
     protected Editor editor;

@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  * @implNote ConfigPanel
  */
 public class ConfigPanel extends WidgetGroup {
-    public static final int WIDTH = 202;
+    public static final int WIDTH = 252;
     public static class Tab {
         public static List<Tab> TABS = new ArrayList<>();
         public static final Tab WIDGET = registerTab(Icons.WIDGET_SETTING);
@@ -103,7 +103,7 @@ public class ConfigPanel extends WidgetGroup {
         configurable.buildConfigurator(group);
         for (Configurator configurator : group.getConfigurators()) {
             configurator.setConfigPanel(this, tab);
-            configurator.init(200);
+            configurator.init(WIDTH - 2);
             this.configurators.get(tab).add(configurator);
             configuratorGroup.get(tab).addWidget(configurator);
         }

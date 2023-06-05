@@ -5,6 +5,8 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.Configurator;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
+import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -38,6 +40,7 @@ public class ConfiguratorParser {
             String name = configurable.name().isEmpty() ? clazz.getSimpleName() : configurable.name();
             ConfiguratorGroup newGroup = new ConfiguratorGroup(name, configurable.collapse());
             newGroup.setCanCollapse(configurable.canCollapse());
+            newGroup.setTips(configurable.tips());
             father.addConfigurators(newGroup);
             father = newGroup;
         }
@@ -47,43 +50,53 @@ public class ConfiguratorParser {
                 continue;
             }
             if (field.isAnnotationPresent(Configurable.class)) {
+                Configurable configurable = field.getAnnotation(Configurable.class);
                 // sub configurable
-                var rawClass = field.getDeclaringClass();
-                if (rawClass.isAnnotationPresent(Configurable.class) && rawClass.getAnnotation(Configurable.class).subConfigurable()) {
+                if (configurable.subConfigurable()) {
+                    var rawClass = ReflectionUtils.getRawType(field.getGenericType());
                     try {
+                        field.setAccessible(true);
                         var value = field.get(object);
                         if (value != null) {
-                            createConfigurators(father, new HashMap<>(), field.getDeclaringClass(), value);
-                            continue;
+                            String name = configurable.name().isEmpty() ? clazz.getSimpleName() : configurable.name();
+                            ConfiguratorGroup newGroup = new ConfiguratorGroup(name, configurable.collapse());
+                            newGroup.setCanCollapse(configurable.canCollapse());
+                            newGroup.setTips(configurable.tips());
+                            if (value instanceof IConfigurable subConfigurable) {
+                                subConfigurable.buildConfigurator(newGroup);
+                            } else {
+                                createConfigurators(newGroup, new HashMap<>(), rawClass, value);
+                            }
+                            father.addConfigurators(newGroup);
                         }
                     } catch (IllegalAccessException ignored) {}
-                }
-                Configurable configurable = field.getAnnotation(Configurable.class);
-                IConfiguratorAccessor accessor = ConfiguratorAccessors.findByType(field.getGenericType());
-                field.setAccessible(true);
-                String name = configurable.name().isEmpty() ? field.getName() : configurable.name();
-                Method setter = setters.get(field.getName());
+                } else {
+                    IConfiguratorAccessor accessor = ConfiguratorAccessors.findByType(field.getGenericType());
+                    field.setAccessible(true);
+                    String name = configurable.name().isEmpty() ? field.getName() : configurable.name();
+                    Method setter = setters.get(field.getName());
 
-                Configurator configurator = accessor.create(name, () -> {
-                    try {
-                        return field.get(object);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                }, value -> {
-                    try {
-                        if (setter == null) {
-                            field.set(object, value);
-                        } else {
-                            setter.invoke(object, value);
+                    Configurator configurator = accessor.create(name, () -> {
+                        try {
+                            return field.get(object);
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
                         }
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }, configurable.forceUpdate(), field);
+                    }, value -> {
+                        try {
+                            if (setter == null) {
+                                field.set(object, value);
+                            } else {
+                                setter.invoke(object, value);
+                            }
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }, configurable.forceUpdate(), field);
 
-                configurator.setTips(configurable.tips());
-                father.addConfigurators(configurator);
+                    configurator.setTips(configurable.tips());
+                    father.addConfigurators(configurator);
+                }
             }
         }
     }
