@@ -51,7 +51,12 @@ public abstract class MenuTab implements ILDLRegister {
                 .setHoverTexture(ColorPattern.T_WHITE.rectTexture(), new TextTexture(getTranslateKey()));
         button.setOnPressCallback(cd -> {
             var pos = button.getPosition();
-            editor.openMenu(pos.x, pos.y + 14, appendMenu(createMenu()));
+            var view = createMenu();
+            var currentProject = editor.getCurrentProject();
+            if (currentProject != null) {
+                currentProject.attachMenu(editor, this.name(), view);
+            }
+            editor.openMenu(pos.x, pos.y + 14, appendMenu(view));
         });
         return button.setClientSideWidget();
     }

@@ -25,7 +25,7 @@ public class FileMenu extends MenuTab {
     protected Predicate<IProject> projectFilter = project -> project.group().startsWith(editor.name());
 
     protected TreeBuilder.Menu createMenu() {
-        var fileMenu = TreeBuilder.Menu.start()
+        return TreeBuilder.Menu.start()
                 .branch("ldlib.gui.editor.menu.new", this::newProject)
                 .crossLine()
                 .leaf(Icons.OPEN_FILE, "ldlib.gui.editor.menu.open", this::openProject)
@@ -37,11 +37,6 @@ public class FileMenu extends MenuTab {
                 .branch(Icons.EXPORT, "ldlib.gui.editor.menu.export", menu -> {
                     menu.leaf("ldlib.gui.editor.menu.resource", this::exportResource);
                 });
-        var currentProject = editor.getCurrentProject();
-        if (currentProject != null) {
-            currentProject.attachMenu(editor, "file", fileMenu);
-        }
-        return fileMenu;
     }
 
 
