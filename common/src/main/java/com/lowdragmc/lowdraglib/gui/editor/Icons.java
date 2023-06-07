@@ -1,6 +1,9 @@
 package com.lowdragmc.lowdraglib.gui.editor;
 
 import com.lowdragmc.lowdraglib.gui.texture.*;
+import net.minecraft.Util;
+
+import java.util.function.BiFunction;
 
 /**
  * @author KilaBash
@@ -8,6 +11,7 @@ import com.lowdragmc.lowdraglib.gui.texture.*;
  * @implNote Icons
  */
 public class Icons {
+    private static final BiFunction<String, String, ResourceTexture> CACHE = Util.memoize((modID, name) -> new ResourceTexture("%s:textures/gui/icon/%s.png".formatted(modID, name)));
     public static ResourceTexture LEFT = new ResourceTexture("ldlib:textures/gui/left.png");
     public static ResourceTexture UP = new ResourceTexture("ldlib:textures/gui/up.png");
     public static ResourceTexture DOWN = new ResourceTexture("ldlib:textures/gui/down.png");
@@ -36,6 +40,11 @@ public class Icons {
     public static ResourceTexture REMOVE_FILE = icon("remove_file");
     public static ResourceTexture CHECK = icon("check");
     public static ResourceTexture HISTORY = icon("history");
+    public static ResourceTexture INFORMATION = icon("information");
+    public static ResourceTexture MESH = icon("mesh");
+    public static ResourceTexture EYE = icon("eye");
+    public static ResourceTexture EYE_OFF = icon("eye_off");
+    public static ResourceTexture FOLDER = icon("folder");
 
     //align
     public static ResourceTexture ALIGN_H_C = icon("align_horizontal_center");
@@ -49,7 +58,11 @@ public class Icons {
 
 
     private static ResourceTexture icon(String name) {
-        return new ResourceTexture("ldlib:textures/gui/icon/%s.png".formatted(name));
+        return CACHE.apply("ldlib", name);
+    }
+
+    private static ResourceTexture icon(String modId, String name) {
+        return CACHE.apply(modId, name);
     }
 
     public static IGuiTexture borderText(int border, String text, int color) {

@@ -117,7 +117,7 @@ public record UIWrapper(MainPanel panel, IConfigurableWidget inner) implements I
 
     @Override
     public void buildConfigurator(ConfiguratorGroup father) {
-        if (inner.isRegisterUI()) {
+        if (inner.isLDLRegister()) {
             ConfiguratorGroup common = new ConfiguratorGroup(inner.getTranslateKey(), false);
             common.setCanCollapse(false);
             father.addConfigurators(common);

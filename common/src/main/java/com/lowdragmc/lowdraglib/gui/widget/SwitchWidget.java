@@ -2,7 +2,7 @@ package com.lowdragmc.lowdraglib.gui.widget;
 
 
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
@@ -18,7 +18,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @Configurable(name = "ldlib.gui.editor.register.widget.switch", collapse = false)
-@RegisterUI(name = "switch", group = "widget.container")
+@LDLRegister(name = "switch", group = "widget.container")
 public class SwitchWidget extends Widget implements IConfigurableWidget {
 
     @Configurable

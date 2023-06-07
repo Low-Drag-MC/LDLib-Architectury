@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.data.resource;
 
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.ui.ResourcePanel;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.EntriesResourceContainer;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.ResourceContainer;
@@ -17,7 +17,7 @@ import static com.lowdragmc.lowdraglib.gui.editor.data.resource.EntriesResource.
  * @date 2022/12/3
  * @implNote TextureResource
  */
-@RegisterUI(name = RESOURCE_NAME, group = "resource")
+@LDLRegister(name = RESOURCE_NAME, group = "resource")
 public class EntriesResource extends Resource<String> {
 
     public final static String RESOURCE_NAME = "ldlib.gui.editor.group.entries";

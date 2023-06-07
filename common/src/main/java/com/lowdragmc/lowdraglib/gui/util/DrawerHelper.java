@@ -292,7 +292,7 @@ public class DrawerHelper {
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+        RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 

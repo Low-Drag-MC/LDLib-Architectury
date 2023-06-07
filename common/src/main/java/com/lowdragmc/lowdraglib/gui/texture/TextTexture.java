@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.gui.texture;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.*;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@RegisterUI(name = "text_texture", group = "texture")
+@LDLRegister(name = "text_texture", group = "texture")
 public class TextTexture extends TransformTexture{
 
     @Configurable
@@ -155,29 +156,19 @@ public class TextTexture extends TransformTexture{
                 }
             }
         } else if (type == TextType.HIDE) {
-            String resultText = texts.get(0) + (texts.size() > 1 ? ".." : "");
-            int textW = fontRenderer.width(resultText);
-            float _x = x + (width - textW) / 2f;
-            float _y = y + (height - textH) / 2f;
-            if (dropShadow) {
-                fontRenderer.drawShadow(stack, resultText, _x, _y, color);
-            } else {
-                fontRenderer.draw(stack, resultText, _x, _y, color);
+            int i = -1;
+            if (Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY)) {
+                i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
             }
+            String resultText = i >= 0 ? texts.get(i) : (texts.get(0) + (texts.size() > 1 ? ".." : ""));
+            drawTextLine(stack, x, y, width, height, fontRenderer, textH, resultText);
         } else if (type == TextType.ROLL || type == TextType.ROLL_ALWAYS) {
             int i = 0;
-            if (type == TextType.ROLL_ALWAYS || (mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height)) {
+            if (type == TextType.ROLL_ALWAYS || Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY)) {
                 i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
             }
             String resultText = texts.get(i);
-            int textW = fontRenderer.width(resultText);
-            float _x = x + (width - textW) / 2f;
-            float _y = y + (height - textH) / 2f;
-            if (dropShadow) {
-                fontRenderer.drawShadow(stack, resultText, _x, _y, color);
-            } else {
-                fontRenderer.draw(stack, resultText, _x, _y, color);
-            }
+            drawTextLine(stack, x, y, width, height, fontRenderer, textH, resultText);
         } else if (type == TextType.LEFT) {
             textH *= texts.size();
             for (int i = 0; i < texts.size(); i++) {
@@ -204,6 +195,17 @@ public class TextTexture extends TransformTexture{
         }
         stack.popPose();
         RenderSystem.setShaderColor(1, 1, 1, 1);
+    }
+
+    private void drawTextLine(PoseStack stack, float x, float y, int width, int height, Font fontRenderer, int textH, String resultText) {
+        int textW = fontRenderer.width(resultText);
+        float _x = x + (width - textW) / 2f;
+        float _y = y + (height - textH) / 2f;
+        if (dropShadow) {
+            fontRenderer.drawShadow(stack, resultText, _x, _y, color);
+        } else {
+            fontRenderer.draw(stack, resultText, _x, _y, color);
+        }
     }
 
     public enum TextType{

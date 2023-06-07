@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.data;
 
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
-import com.lowdragmc.lowdraglib.gui.editor.runtime.UIDetector;
+import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.LinkedHashMap;
@@ -14,17 +14,22 @@ import java.util.Map;
  */
 public class Resources {
 
-    public final Map<String, Resource<?>> resources = new LinkedHashMap<>();
+    public final Map<String, Resource<?>> resources;
 
     protected Resources() {
-        for (var wrapper : UIDetector.REGISTER_RESOURCES) {
+        this.resources = new LinkedHashMap<>();
+        for (var wrapper : AnnotationDetector.REGISTER_RESOURCES) {
             var resource =  wrapper.creator().get();
             resources.put(resource.name(), resource);
         }
     }
 
+    public Resources(Map<String, Resource<?>> resources) {
+        this.resources = resources;
+    }
+
     public static Resources emptyResource() {
-        return new Resources();
+        return new Resources(new LinkedHashMap<>());
     }
 
     public static Resources fromNBT(CompoundTag tag) {

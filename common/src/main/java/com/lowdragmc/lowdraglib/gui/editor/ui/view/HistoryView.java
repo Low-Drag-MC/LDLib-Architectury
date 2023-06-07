@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.view;
 
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 
 /**
@@ -9,7 +9,6 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
  * @date 2022/12/17
  * @implNote HistoryView
  */
-@RegisterUI(name = "history_view", group = "view")
 public class HistoryView extends FloatViewWidget {
 
     public HistoryView() {

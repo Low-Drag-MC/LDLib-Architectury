@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.configurator;
 
-import com.lowdragmc.lowdraglib.gui.editor.IRegisterUI;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.ConfiguratorParser;
 
 import java.util.HashMap;
@@ -11,11 +11,11 @@ import java.util.HashMap;
  * @date 2022/12/3
  * @implNote IConfigurable
  *
- * You may need to register it as a {@link RegisterUI}.
+ * You may need to register it as a {@link LDLRegister}.
  * <br>
  * to de/serialize it.
  */
-public interface IConfigurable extends IRegisterUI {
+public interface IConfigurable extends ILDLRegister {
 
     /**
      * Add configurators into given group

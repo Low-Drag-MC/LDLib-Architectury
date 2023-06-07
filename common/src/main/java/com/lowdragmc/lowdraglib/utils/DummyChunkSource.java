@@ -1,9 +1,8 @@
 package com.lowdragmc.lowdraglib.utils;
 
-import com.lowdragmc.lowdraglib.LDLib;
-import net.minecraft.client.Minecraft;
+import com.lowdragmc.lowdraglib.utils.virtual.VirtualChunk;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -11,13 +10,15 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 
 public class DummyChunkSource extends ChunkSource {
 
-    private final Level world;
+    private final DummyWorld world;
+    public final HashMap<Long, VirtualChunk> chunks = new HashMap<>();
 
-    public DummyChunkSource(Level world) {
+    public DummyChunkSource(DummyWorld world) {
         this.world = world;
     }
 
@@ -26,10 +27,21 @@ public class DummyChunkSource extends ChunkSource {
 
     }
 
+    @Override
+    public BlockGetter getChunkForLighting(int x, int z) {
+        return getChunk(x, z);
+    }
+
     @Nullable
     @Override
     public ChunkAccess getChunk(int pChunkX, int pChunkZ, ChunkStatus pRequiredStatus, boolean pLoad) {
-        return null;
+        return getChunk(pChunkX, pChunkZ);
+    }
+
+    public ChunkAccess getChunk(int x, int z) {
+        long pos = ChunkPos.asLong(x, z);
+
+        return chunks.computeIfAbsent(pos, $ -> new VirtualChunk(world, x, z));
     }
 
     @Override
@@ -46,10 +58,7 @@ public class DummyChunkSource extends ChunkSource {
     @Override
     @Nonnull
     public LevelLightEngine getLightEngine() {
-        if (LDLib.isClient()) {
-            return Minecraft.getInstance().level.getLightEngine();
-        }
-        return null;
+        return world.getLightEngine();
     }
 
     @Override

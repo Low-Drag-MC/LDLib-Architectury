@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.utils.ColorUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
@@ -77,6 +78,9 @@ public class HsbColorWidget extends Widget {
 	private IntSupplier colorSupplier;
 	@Setter
 	private IntConsumer onChanged;
+	@Setter
+	@Getter
+	private boolean showRGB = true, showAlpha = true;
 
 	public HsbColorWidget(int x, int y, int width, int height) {
 		super(x, y, width, height);
@@ -116,11 +120,16 @@ public class HsbColorWidget extends Widget {
 		int width = getSize().width;
 		int height = getSize().height;
 
-		BufferBuilder builder = Tesselator.getInstance().getBuilder();
-		drawHsbContext(pose, builder, x, y, width - barWidth - gap, height - barWidth - gap);
+		if (showRGB) {
+			BufferBuilder builder = Tesselator.getInstance().getBuilder();
+			drawHsbContext(pose, builder, x, y, width - barWidth - gap, height - barWidth - gap);
+		}
 
-		// alpha bar
-		DrawerHelper.drawGradientRect(poseStack, x, y + height - barWidth, width - barWidth - gap, barWidth, argb & 0x00ffffff, argb | 0xff000000, true);
+		if (showAlpha) {
+			// alpha bar
+			DrawerHelper.drawGradientRect(poseStack, x, y + height - barWidth, width - barWidth - gap, barWidth, argb & 0x00ffffff, argb | 0xff000000, true);
+		}
+
 		// preview
 		DrawerHelper.drawSolidRect(poseStack, x + width - barWidth, y + height - barWidth, barWidth, barWidth, argb);
 
@@ -144,17 +153,21 @@ public class HsbColorWidget extends Widget {
 			}
 		}
 
-		// main indicator
-		DrawerHelper.drawSolidRect(poseStack, (int) (x + mainX * (width - barWidth - gap)) - 1, (int) (y + mainY * (height - barWidth - gap)) - 1, 3, 3, 0xffff0000);
-		// color indicator
-		DrawerHelper.drawSolidRect(poseStack, x + width - barWidth - 2, (int) (y + color * (height - barWidth - gap)), barWidth + 4, 1, 0xffff0000);
-		// alpha indicator
-		DrawerHelper.drawSolidRect(poseStack, (int) (x + alpha * (width - barWidth - gap)), y + height - barWidth - 2, 1, barWidth + 4, 0xffff0000);
+		if (showRGB) {
+			// main indicator
+			DrawerHelper.drawSolidRect(poseStack, (int) (x + mainX * (width - barWidth - gap)) - 1, (int) (y + mainY * (height - barWidth - gap)) - 1, 3, 3, 0xffff0000);
+			// color indicator
+			DrawerHelper.drawSolidRect(poseStack, x + width - barWidth - 2, (int) (y + color * (height - barWidth - gap)), barWidth + 4, 1, 0xffff0000);
+			// color info
+			renderInfo(poseStack, x, y, width - barWidth - gap, height - barWidth - gap);
+			// border
+			DrawerHelper.drawBorder(poseStack, x, y, width - barWidth - gap, height - barWidth - gap, ColorPattern.WHITE.color, 2);
+		}
+		if (showAlpha) {
+			// alpha indicator
+			DrawerHelper.drawSolidRect(poseStack, (int) (x + alpha * (width - barWidth - gap)), y + height - barWidth - 2, 1, barWidth + 4, 0xffff0000);
+		}
 
-		renderInfo(poseStack, x, y, width - barWidth - gap, height - barWidth - gap);
-
-		// border
-		DrawerHelper.drawBorder(poseStack, x, y, width - barWidth - gap, height - barWidth - gap, ColorPattern.WHITE.color, 2);
 	}
 
 	/**
@@ -402,7 +415,7 @@ public class HsbColorWidget extends Widget {
 		isDraggingMain = false;
 		isDraggingColorSlider = false;
 		isDraggingAlphaSlider = false;
-		if (isMouseOverMain(mouseX, mouseY)) {
+		if (isMouseOverMain(mouseX, mouseY) && showRGB) {
 			if (button == 0) {
 				isDraggingMain = true;
 			} else if (button == 1) {
@@ -413,11 +426,11 @@ public class HsbColorWidget extends Widget {
 				};
 				return true;
 			}
-		} else if (isMouseOverColorSlider(mouseX, mouseY)) {
+		} else if (isMouseOverColorSlider(mouseX, mouseY) && showRGB) {
 			if (button == 0) {
 				isDraggingColorSlider = true;
 			}
-		} else if (isMouseOverAlphaSlider(mouseX, mouseY)) {
+		} else if (isMouseOverAlphaSlider(mouseX, mouseY) && showAlpha) {
 			if (button == 0) {
 				isDraggingAlphaSlider = true;
 			}

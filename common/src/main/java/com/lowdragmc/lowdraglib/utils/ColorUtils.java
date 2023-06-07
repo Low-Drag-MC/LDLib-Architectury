@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.utils;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import net.minecraft.util.Mth;
 
 /**
  * @author KilaBash
@@ -17,10 +18,17 @@ public class ColorUtils {
     }
 
     public static int randomColor(int minA, int maxA, int minR, int maxR, int minG, int maxG, int minB, int maxB) {
-        return  ((minR + LDLib.random.nextInt(minA + 1 - maxA)) << 24) |
+        return  ((minR + LDLib.random.nextInt(maxA + 1 - minA)) << 24) |
                 ((minR + LDLib.random.nextInt(maxR + 1 - minR)) << 16) |
                 ((minG + LDLib.random.nextInt(maxG + 1 - minG)) << 8) |
                 ((minB + LDLib.random.nextInt(maxB + 1 - minB))) ;
+    }
+
+    public static int randomColor(int colorA, int colorB) {
+        return randomColor(Math.min(alphaI(colorA), alphaI(colorB)), Math.max(alphaI(colorA), alphaI(colorB)),
+                Math.min(redI(colorA), redI(colorB)), Math.max(redI(colorA), redI(colorB)),
+                Math.min(greenI(colorA), greenI(colorB)), Math.max(greenI(colorA), greenI(colorB)),
+                Math.min(blueI(colorA), blueI(colorB)), Math.max(blueI(colorA), blueI(colorB)));
     }
 
     public static int randomColor() {
@@ -66,6 +74,22 @@ public class ColorUtils {
 
     public static float blue(int color) {
         return ((color) & 0xff) / 255f;
+    }
+
+    public static int alphaI(int color) {
+        return ((color >> 24) & 0xff);
+    }
+
+    public static int redI(int color) {
+        return ((color >> 16) & 0xff);
+    }
+
+    public static int greenI(int color) {
+        return ((color >> 8) & 0xff);
+    }
+
+    public static int blueI(int color) {
+        return ((color) & 0xff);
     }
 
     public static int color(int alpha, int red, int green, int blue) {
@@ -163,5 +187,14 @@ public class ColorUtils {
                 hue = hue + 1.0f;
         }
         return new float[]{hue, saturation, brightness};
+    }
+
+    public static int blendColor(int color0, int color1, float lerp) {
+        return ColorUtils.color(
+                Mth.lerp(lerp, alpha(color0), alpha(color1)),
+                Mth.lerp(lerp, red(color0), red(color1)),
+                Mth.lerp(lerp, green(color0), green(color1)),
+                Mth.lerp(lerp, blue(color0), blue(color1))
+        );
     }
 }

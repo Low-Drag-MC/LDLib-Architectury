@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.test;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
+import com.lowdragmc.lowdraglib.gui.editor.ui.UIEditor;
 import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
@@ -37,7 +38,7 @@ public class TestBlockEntity extends BlockEntity implements IUIHolder {
 
     @Override
     public ModularUI createUI(Player entityPlayer) {
-        return new ModularUI(this, entityPlayer).widget(new Editor(LDLib.location));
+        return new ModularUI(this, entityPlayer).widget(new UIEditor(LDLib.location));
     }
 
     @Override

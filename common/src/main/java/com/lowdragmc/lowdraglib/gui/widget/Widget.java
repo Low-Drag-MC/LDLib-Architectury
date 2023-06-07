@@ -71,6 +71,7 @@ public class Widget {
     @Configurable(name = "ldlib.gui.editor.name.hover_texture")
     protected IGuiTexture hoverTexture;
     protected WidgetGroup parent;
+    @Getter
     protected Animation animation;
     protected boolean initialized;
     protected boolean tryToDrag = false;
@@ -163,7 +164,7 @@ public class Widget {
         }
     }
 
-    protected boolean inAnimate() {
+    public boolean inAnimate() {
         return animation != null && !animation.isFinish();
     }
 

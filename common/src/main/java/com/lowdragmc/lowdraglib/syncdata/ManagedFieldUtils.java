@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.*;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib.syncdata.field.RPCMethodMeta;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
+import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
 import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.Field;
@@ -64,7 +65,7 @@ public class ManagedFieldUtils {
 
         if (isReadOnlyManaged) {
             var readOnlyManaged = field.getAnnotation(ReadOnlyManaged.class);
-            var clazz = field.getDeclaringClass();
+            var clazz = ReflectionUtils.getRawType(field.getGenericType());
             var rawType = field.getType();
             try {
                 var onDirtyMethod = clazz.getDeclaredMethod(readOnlyManaged.onDirtyMethod(), rawType);

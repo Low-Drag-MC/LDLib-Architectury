@@ -3,9 +3,9 @@ package com.lowdragmc.lowdraglib.gui.texture;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberColor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.WrapperConfigurator;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
@@ -31,7 +31,7 @@ import java.io.File;
 
 import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR;
 
-@RegisterUI(name = "resource_texture", group = "texture")
+@LDLRegister(name = "resource_texture", group = "texture")
 @NoArgsConstructor
 public class ResourceTexture extends TransformTexture {
 
@@ -132,8 +132,7 @@ public class ResourceTexture extends TransformTexture {
     public void createPreview(ConfiguratorGroup father) {
         super.createPreview(father);
         WidgetGroup widgetGroup = new WidgetGroup(0, 0, 100, 100);
-        ImageWidget imageWidget;
-        widgetGroup.addWidget(imageWidget = new ImageWidget(0, 0, 100, 100, new GuiTextureGroup(new ResourceTexture(imageLocation.toString()), this::drawGuides)).setBorder(2, ColorPattern.T_WHITE.color));
+        widgetGroup.addWidget(new ImageWidget(0, 0, 100, 100, () -> new GuiTextureGroup(new ResourceTexture(imageLocation.toString()), this::drawGuides)).setBorder(2, ColorPattern.T_WHITE.color));
         widgetGroup.addWidget(new ButtonWidget(0, 0, 100, 100, IGuiTexture.EMPTY, cd -> {
             if (Editor.INSTANCE == null) return;
             File path = new File(Editor.INSTANCE.getWorkSpace(), "assets/ldlib/textures");
@@ -145,7 +144,6 @@ public class ResourceTexture extends TransformTexture {
                             offsetY = 0;
                             imageWidth = 1;
                             imageHeight = 1;
-                            imageWidget.setImage(new GuiTextureGroup(new ResourceTexture(imageLocation.toString()), this::drawGuides));
                         }
                     });
         }));

@@ -27,6 +27,7 @@ import java.util.List;
 public class ConfiguratorGroup extends Configurator {
     @Setter
     protected boolean canCollapse = true;
+    @Getter
     protected boolean isCollapse;
     @Getter
     protected List<Configurator> configurators = new ArrayList<>();
@@ -50,12 +51,41 @@ public class ConfiguratorGroup extends Configurator {
 
     protected void clickName(ClickData clickData) {
         if (!canCollapse) return;
-        isCollapse = !isCollapse;
+        setCollapse(!isCollapse);
+    }
+
+    public void setCollapse(boolean collapse) {
+        isCollapse = collapse;
         for (Configurator configurator : configurators) {
             configurator.setActive(!isCollapse);
             configurator.setVisible(!isCollapse);
         }
         computeLayout();
+    }
+
+    public void addConfigurator(int index, Configurator configurator) {
+        configurator.setConfigPanel(configPanel, tab);
+        configurator.setActive(!isCollapse);
+        configurator.setVisible(!isCollapse);
+        this.configurators.add(index, configurator);
+        addWidget(index, configurator);
+        if (isInit()) {
+            configurator.init(Math.max(0, width - 5));
+            computeLayout();
+        }
+    }
+
+    public void removeConfigurator(Configurator configurator) {
+        if (configurators.remove(configurator)) {
+            removeWidget(configurator);
+        }
+    }
+
+    public void removeAllConfigurators() {
+        for (Configurator configurator : configurators) {
+            removeWidget(configurator);
+        }
+        configurators.clear();
     }
 
     public void addConfigurators(Configurator... configurators) {

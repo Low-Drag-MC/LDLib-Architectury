@@ -2,9 +2,9 @@ package com.lowdragmc.lowdraglib.gui.editor.ui.tool;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
-import com.lowdragmc.lowdraglib.gui.editor.runtime.UIDetector;
+import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.editor.ui.ToolPanel;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.WidgetTexture;
@@ -53,7 +53,7 @@ public class WidgetToolBox extends DraggableScrollableWidgetGroup {
         super(0, 0, ToolPanel.WIDTH, 100);
         int yOffset = 3;
         setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(2).transform(-0.5f, 0));
-        for (UIDetector.Wrapper<RegisterUI, IConfigurableWidget> wrapper : UIDetector.REGISTER_WIDGETS) {
+        for (AnnotationDetector.Wrapper<LDLRegister, IConfigurableWidget> wrapper : AnnotationDetector.REGISTER_WIDGETS) {
             String group = wrapper.annotation().group().isEmpty() ? "widget.basic" : wrapper.annotation().group();
             if (group.equals(groupName)) {
                 var widget = wrapper.creator().get();

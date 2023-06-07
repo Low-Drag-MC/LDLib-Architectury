@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.utils.virtual;
 
+import com.lowdragmc.lowdraglib.utils.DummyWorld;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.shorts.ShortList;
@@ -37,14 +38,14 @@ import java.util.stream.Stream;
 @MethodsReturnNonnullByDefault
 public class VirtualChunk extends ChunkAccess {
 
-	final VirtualRenderWorld world;
+	final DummyWorld world;
 	boolean needsLight;
 	final int x;
 	final int z;
 
 	private final LevelChunkSection[] sections;
 
-	public VirtualChunk(VirtualRenderWorld world, int x, int z) {
+	public VirtualChunk(DummyWorld world, int x, int z) {
 		super(new ChunkPos(x, z), UpgradeData.EMPTY, world, world.registryAccess()
 			.registry(Registry.BIOME_REGISTRY)
 			.orElseThrow(), 0L, null, null);
@@ -70,15 +71,7 @@ public class VirtualChunk extends ChunkAccess {
 
 	@Override
 	public Stream<BlockPos> getLights() {
-		return world.blocksAdded.entrySet()
-			.stream()
-			.filter(it -> {
-				BlockPos blockPos = it.getKey();
-				boolean chunkContains = blockPos.getX() >> 4 == x && blockPos.getZ() >> 4 == z;
-				return chunkContains && it.getValue()
-					.getLightEmission() != 0;
-			})
-			.map(Map.Entry::getKey);
+		return Stream.empty();
 	}
 
 	@Override
@@ -105,12 +98,12 @@ public class VirtualChunk extends ChunkAccess {
 
 	@Override
 	public Set<BlockPos> getBlockEntitiesPos() {
-		return null;
+		return Set.of();
 	}
 
 	@Override
 	public Collection<Map.Entry<Heightmap.Types, Heightmap>> getHeightmaps() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override

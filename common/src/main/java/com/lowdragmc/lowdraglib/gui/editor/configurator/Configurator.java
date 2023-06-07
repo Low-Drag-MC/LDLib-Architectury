@@ -9,6 +9,7 @@ import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author KilaBash
@@ -16,19 +17,25 @@ import net.minecraft.client.Minecraft;
  * @implNote Configurator
  */
 public class Configurator extends WidgetGroup {
+    @Getter
     protected ConfigPanel configPanel;
+    @Getter
     protected ConfigPanel.Tab tab;
     protected String[] tips = new String[0];
     @Getter
     protected String name;
+    @Getter
     protected int leftWidth, rightWidth, width = -1;
+    @Getter
+    @Nullable
+    protected LabelWidget nameWidget;
 
     public Configurator(String name) {
         super(0, 0, 200, 15);
         this.name = name;
         setClientSideWidget();
         if (!name.isEmpty()) {
-            this.addWidget(new LabelWidget(3, 3, name));
+            this.addWidget(nameWidget = new LabelWidget(3, 3, name));
             leftWidth = Minecraft.getInstance().font.width(LocalizationUtils.format(name)) + 6;
         } else {
             leftWidth = 3;
@@ -44,8 +51,10 @@ public class Configurator extends WidgetGroup {
         this.tab = tab;
     }
 
-    protected void computeLayout() {
-        configPanel.computeLayout(tab);
+    public void computeLayout() {
+        if (configPanel != null) {
+            configPanel.computeLayout(tab);
+        }
     }
 
     public void setTips(String... tips) {

@@ -1,8 +1,9 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
-import com.lowdragmc.lowdraglib.gui.editor.data.Project;
+import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
@@ -28,13 +29,13 @@ import java.util.function.Consumer;
  * @date 2022/11/30
  * @implNote MainPage
  */
-public class Editor extends WidgetGroup {
+public abstract class Editor extends WidgetGroup implements ILDLRegister {
     @Environment(EnvType.CLIENT)
     public static Editor INSTANCE;
     @Getter
     protected final File workSpace;
     @Getter
-    protected Project currentProject;
+    protected IProject currentProject;
     @Getter
     protected MenuPanel menuPanel;
     @Getter
@@ -77,15 +78,17 @@ public class Editor extends WidgetGroup {
         setSize(new Size(screenWidth, screenHeight));
         super.onScreenSizeUpdate(screenWidth, screenHeight);
         this.clearAllWidgets();
+        initEditorViews();
+        loadProject(currentProject);
+    }
 
-        addWidget(tabPages = new TabContainer(0, 0, screenWidth, screenHeight));
+    public void initEditorViews() {
+        addWidget(tabPages = new TabContainer(0, 0, getSize().width, getSize().height));
         addWidget(toolPanel = new ToolPanel(this));
         addWidget(configPanel = new ConfigPanel(this));
         addWidget(resourcePanel = new ResourcePanel(this));
         addWidget(menuPanel = new MenuPanel(this));
-        addWidget(floatView = new WidgetGroup(0, 0, screenWidth, screenHeight));
-
-        loadProject(currentProject);
+        addWidget(floatView = new WidgetGroup(0, 0, getSize().width, getSize().height));
     }
 
     public DialogWidget openDialog(DialogWidget dialog) {
@@ -133,7 +136,7 @@ public class Editor extends WidgetGroup {
                 .setOnNodeClicked(TreeBuilder.Menu::handle);
     }
 
-    public void loadProject(Project project) {
+    public void loadProject(IProject project) {
         if (currentProject != null) {
             currentProject.onClosed(this);
         }

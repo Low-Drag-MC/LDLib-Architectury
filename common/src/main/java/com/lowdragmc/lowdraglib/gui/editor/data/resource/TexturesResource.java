@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.data.resource;
 
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
-import com.lowdragmc.lowdraglib.gui.editor.runtime.UIDetector;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
+import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.editor.ui.ResourcePanel;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.TexturesResourceContainer;
@@ -20,7 +20,7 @@ import static com.lowdragmc.lowdraglib.gui.widget.TabContainer.TABS_LEFT;
  * @date 2022/12/3
  * @implNote TextureResource
  */
-@RegisterUI(name = RESOURCE_NAME, group = "resource")
+@LDLRegister(name = RESOURCE_NAME, group = "resource")
 public class TexturesResource extends Resource<IGuiTexture> {
 
     public final static String RESOURCE_NAME = "ldlib.gui.editor.group.textures";
@@ -37,7 +37,7 @@ public class TexturesResource extends Resource<IGuiTexture> {
         data.put("fluid slot", new ResourceTexture("ldlib:textures/gui/fluid_slot.png"));
         data.put("tab", TABS_LEFT.getSubTexture(0, 0, 0.5f, 1f / 3));
         data.put("tab pressed", TABS_LEFT.getSubTexture(0.5f, 0, 0.5f, 1f / 3));
-        for (var wrapper : UIDetector.REGISTER_TEXTURES) {
+        for (var wrapper : AnnotationDetector.REGISTER_TEXTURES) {
             data.put("ldlib.gui.editor.register.texture." + wrapper.annotation().name(), wrapper.creator().get());
         }
     }

@@ -1,13 +1,13 @@
 package com.lowdragmc.lowdraglib.gui.texture;
 
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-@RegisterUI(name = "group_texture", group = "texture")
+@LDLRegister(name = "group_texture", group = "texture")
 public class GuiTextureGroup extends TransformTexture{
 
     @Configurable(collapse = false)

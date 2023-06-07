@@ -1,15 +1,17 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.menu;
 
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
-import com.lowdragmc.lowdraglib.gui.editor.data.Project;
-import com.lowdragmc.lowdraglib.gui.editor.runtime.UIDetector;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
+import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
+import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
 import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
+import lombok.Setter;
 import net.minecraft.nbt.NbtIo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -17,11 +19,13 @@ import java.util.stream.Collectors;
  * @date 2022/12/17
  * @implNote FileMenu
  */
-@RegisterUI(name = "file", group = "menu", priority = 101)
+@LDLRegister(name = "file", group = "editor", priority = 101)
 public class FileMenu extends MenuTab {
+    @Setter
+    protected Predicate<IProject> projectFilter = project -> project.group().startsWith(editor.name());
 
     protected TreeBuilder.Menu createMenu() {
-        var fileMenu = TreeBuilder.Menu.start()
+        return TreeBuilder.Menu.start()
                 .branch("ldlib.gui.editor.menu.new", this::newProject)
                 .crossLine()
                 .leaf(Icons.OPEN_FILE, "ldlib.gui.editor.menu.open", this::openProject)
@@ -33,11 +37,6 @@ public class FileMenu extends MenuTab {
                 .branch(Icons.EXPORT, "ldlib.gui.editor.menu.export", menu -> {
                     menu.leaf("ldlib.gui.editor.menu.resource", this::exportResource);
                 });
-        var currentProject = editor.getCurrentProject();
-        if (currentProject != null) {
-            currentProject.attachMenu(editor, "file", fileMenu);
-        }
-        return fileMenu;
     }
 
 
@@ -79,8 +78,12 @@ public class FileMenu extends MenuTab {
         }
     }
 
+    protected Predicate<IProject> getProjectPredicate() {
+        return projectFilter;
+    }
+
     private void newProject(TreeBuilder.Menu menu) {
-        for (var project : UIDetector.REGISTER_PROJECTS) {
+        for (var project : AnnotationDetector.REGISTER_PROJECTS.stream().filter(getProjectPredicate()).toList()) {
             menu = menu.leaf(project.getTranslateKey(), () -> editor.loadProject(project.newEmptyProject()));
         }
     }
@@ -102,7 +105,7 @@ public class FileMenu extends MenuTab {
     }
 
     private void openProject() {
-        var suffixes = UIDetector.REGISTER_PROJECTS.stream().map(Project::getSuffix).collect(Collectors.toSet());
+        var suffixes = AnnotationDetector.REGISTER_PROJECTS.stream().filter(getProjectPredicate()).map(IProject::getSuffix).collect(Collectors.toSet());
         DialogWidget.showFileDialog(editor, "ldlib.gui.editor.tips.load_project", editor.getWorkSpace(), true,
                 node -> {
                     if (node.isLeaf() && node.getContent().isFile()) {
@@ -118,7 +121,7 @@ public class FileMenu extends MenuTab {
                 }, r -> {
                     if (r != null && r.isFile()) {
                         String file = r.getName().toLowerCase();
-                        for (var project : UIDetector.REGISTER_PROJECTS) {
+                        for (var project : AnnotationDetector.REGISTER_PROJECTS.stream().filter(getProjectPredicate()).toList()) {
                             if (file.endsWith("." + project.getSuffix())) {
                                 var p = project.loadProject(r);
                                 if (p != null) {

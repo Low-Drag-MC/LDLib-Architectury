@@ -1,35 +1,35 @@
 package com.lowdragmc.lowdraglib.gui.editor;
 
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import net.minecraft.network.chat.Component;
 
 /**
  * @author KilaBash
  * @date 2022/12/17
- * @implNote IRegisterUI
+ * @implNote ILDLRegister
  */
-public interface IRegisterUI {
+public interface ILDLRegister {
 
     /**
      * Whether element is registered
      */
-    default boolean isRegisterUI() {
-        return getClass().isAnnotationPresent(RegisterUI.class);
+    default boolean isLDLRegister() {
+        return getClass().isAnnotationPresent(LDLRegister.class);
     }
 
-    default RegisterUI getRegisterUI() {
-        return getClass().getAnnotation(RegisterUI.class);
+    default LDLRegister getRegisterUI() {
+        return getClass().getAnnotation(LDLRegister.class);
     }
 
     default String name() {
-        if (isRegisterUI()) {
+        if (isLDLRegister()) {
             return getRegisterUI().name();
         }
         throw new RuntimeException("not registered ui %s".formatted(getClass()));
     }
 
     default String group() {
-        if (isRegisterUI()) {
+        if (isLDLRegister()) {
             return getRegisterUI().group();
         }
         throw new RuntimeException("not registered ui %s".formatted(getClass()));

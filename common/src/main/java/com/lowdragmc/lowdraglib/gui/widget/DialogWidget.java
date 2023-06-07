@@ -174,6 +174,8 @@ public class DialogWidget extends WidgetGroup {
         selected.set(dir);
         dialog.addWidget(new TreeListWidget<>(0, 0, 130, size.height, new FileNode(dir).setValid(valid), node -> selected.set(node.getKey()))
                 .setNodeTexture(ResourceBorderTexture.BORDERED_BACKGROUND)
+                .setKeyIconSupplier(file -> file.isDirectory() ? IGuiTexture.EMPTY : new TextTexture("├"))
+                .setContentIconSupplier(file -> file.isDirectory() ? IGuiTexture.EMPTY : new TextTexture("├"))
                 .canSelectNode(true)
                 .setLeafTexture(new ResourceTexture("ldlib:textures/gui/darkened_slot.png")));
         int x = 130 + (size.width - 133 - WIDTH) / 2;

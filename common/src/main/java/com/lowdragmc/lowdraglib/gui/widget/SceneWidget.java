@@ -164,6 +164,11 @@ public class SceneWidget extends WidgetGroup {
     }
 
     @Environment(EnvType.CLIENT)
+    protected ParticleManager createParticleManager() {
+        return new ParticleManager();
+    }
+
+    @Environment(EnvType.CLIENT)
     public final void createScene(Level world, boolean useFBOSceneRenderer) {
         if (world == null) return;
         core = new HashSet<>();
@@ -183,7 +188,7 @@ public class SceneWidget extends WidgetGroup {
         renderer.setAfterWorldRender(this::renderBlockOverLay);
         renderer.setCameraLookAt(center, camZoom(), Math.toRadians(rotationPitch), Math.toRadians(rotationYaw));
         renderer.useCacheBuffer(useCache);
-        renderer.setParticleManager(new ParticleManager());
+        renderer.setParticleManager(createParticleManager());
         clickPosFace = null;
         hoverPosFace = null;
         hoverItem = null;

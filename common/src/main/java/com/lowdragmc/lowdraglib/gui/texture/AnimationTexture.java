@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberColor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.WrapperConfigurator;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
@@ -33,7 +33,7 @@ import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR;
  * @date 2022/9/14
  * @implNote AnimationTexture
  */
-@RegisterUI(name = "animation_texture", group = "texture")
+@LDLRegister(name = "animation_texture", group = "texture")
 public class AnimationTexture extends TransformTexture {
 
     @Configurable(name = "ldlib.gui.editor.name.resource")

@@ -2,7 +2,7 @@ package com.lowdragmc.lowdraglib.gui.widget;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.WrapperConfigurator;
@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-@RegisterUI(name = "fluid_slot", group = "widget.container")
+@LDLRegister(name = "fluid_slot", group = "widget.container")
 @Accessors(chain = true)
 public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfigurableWidget {
 

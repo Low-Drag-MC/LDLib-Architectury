@@ -1,8 +1,10 @@
 package com.lowdragmc.lowdraglib.gui.editor.data.resource;
 
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.ui.ResourcePanel;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 
@@ -15,11 +17,11 @@ import java.util.Set;
  * @author KilaBash
  * @date 2022/12/3
  * @implNote Resource
- * You can register a new global resource (available for all projects) using {@link com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI},
+ * You can register a new global resource (available for all projects) using {@link LDLRegister},
  * or you can add a resource dynamically to the project
  */
 public abstract class Resource<T> {
-
+    @Getter
     protected final Map<String, T> data = new LinkedHashMap<>();
 
     public void buildDefault() {

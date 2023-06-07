@@ -3,7 +3,7 @@ package com.lowdragmc.lowdraglib.gui.widget;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberColor;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.RegisterUI;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configurable(name = "ldlib.gui.editor.register.widget.text_box", collapse = false)
-@RegisterUI(name = "text_box", group = "widget.basic")
+@LDLRegister(name = "text_box", group = "widget.basic")
 public class TextBoxWidget extends Widget implements IConfigurableWidget {
 
     // config
