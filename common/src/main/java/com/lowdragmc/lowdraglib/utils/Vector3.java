@@ -233,6 +233,17 @@ public class Vector3 {
         return this;
     }
 
+    @Override
+    public int hashCode() {
+        long l = Double.doubleToLongBits(this.x);
+        int i = (int)(l ^ l >>> 32);
+        l = Double.doubleToLongBits(this.y);
+        i = 31 * i + (int)(l ^ l >>> 32);
+        l = Double.doubleToLongBits(this.z);
+        i = 31 * i + (int)(l ^ l >>> 32);
+        return i;
+    }
+
     public boolean equals(Object o) {
         if (!(o instanceof Vector3)) {
             return false;
