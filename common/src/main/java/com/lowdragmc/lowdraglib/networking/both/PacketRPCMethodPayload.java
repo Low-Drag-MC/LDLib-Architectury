@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.syncdata.rpc.RPCSender;
 import lombok.NoArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -81,7 +82,7 @@ public class PacketRPCMethodPayload extends PacketIntLocation implements IPacket
     @Override
     public void encode(FriendlyByteBuf buf) {
         super.encode(buf);
-        buf.writeResourceLocation(Objects.requireNonNull(Registry.BLOCK_ENTITY_TYPE.getKey(blockEntityType)));
+        buf.writeResourceLocation(Objects.requireNonNull(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType)));
         buf.writeUtf(methodName);
         buf.writeVarInt(payloads.length);
         for (ITypedPayload<?> payload : payloads) {
@@ -93,7 +94,7 @@ public class PacketRPCMethodPayload extends PacketIntLocation implements IPacket
     @Override
     public void decode(FriendlyByteBuf buffer) {
         super.decode(buffer);
-        blockEntityType = Registry.BLOCK_ENTITY_TYPE.get(buffer.readResourceLocation());
+        blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(buffer.readResourceLocation());
         methodName = buffer.readUtf();
         payloads = new ITypedPayload<?>[buffer.readVarInt()];
         for (int i = 0; i < payloads.length; i++) {

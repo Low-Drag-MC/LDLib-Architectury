@@ -20,11 +20,17 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.emi.emi.api.stack.FluidEmiStack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.helpers.IPlatformFluidHelper;
+import mezz.jei.common.input.ClickableIngredient;
+import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.library.ingredients.TypedIngredient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -136,6 +142,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Override
     public Object getJEIIngredient() {
         if (lastFluidInTank == null) return null;
+        if (LDLib.isJeiLoaded()) {
+            return getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
+        }
         if (LDLib.isReiLoaded()) {
             return lastFluidInTank.isEmpty() ? null : EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
         }
@@ -143,6 +152,11 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return lastFluidInTank.isEmpty() ? null : new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount());
         }
         return lastFluidInTank.isEmpty() ? null : FluidHelper.toRealFluidStack(lastFluidInTank);
+    }
+
+    @ExpectPlatform
+    public static Object getPlatformFluidTypeForJEI(FluidStack fluidStack, Position pos, Size size) {
+        throw new  AssertionError();
     }
 
     @Override

@@ -112,7 +112,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
     @Override
     public void onFocusChanged(@Nullable Widget lastFocus, Widget focus) {
         if (!isFocus()) {
-            this.textField.setFocus(false);
+            this.textField.setFocused(false);
         }
     }
 
@@ -121,8 +121,8 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
         if (isRemote() && textField != null) {
             Position position = getPosition();
             Size size = getSize();
-            this.textField.x = isBordered ? position.x : position.x + 2;
-            this.textField.y = isBordered ? position.y : position.y + (size.height - Minecraft.getInstance().font.lineHeight) / 2 + 1;
+            this.textField.setX(isBordered ? position.x : position.x + 2);
+            this.textField.setY(isBordered ? position.y : position.y + (size.height - Minecraft.getInstance().font.lineHeight) / 2 + 1);
         }
     }
 
@@ -133,7 +133,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
             Size size = getSize();
             this.textField.setWidth(isBordered ? size.width : size.width - 2);
 //            this.textField.setHeight( size.height);
-            this.textField.y = isBordered ? position.y : position.y + (getSize().height -  Minecraft.getInstance().font.lineHeight) / 2 + 1;
+            this.textField.setY(isBordered ? position.y : position.y + (getSize().height -  Minecraft.getInstance().font.lineHeight) / 2 + 1);
         }
     }
 

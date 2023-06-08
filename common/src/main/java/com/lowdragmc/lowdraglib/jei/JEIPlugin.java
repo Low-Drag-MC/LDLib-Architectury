@@ -6,15 +6,21 @@ import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIJeiHandler;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
+import mezz.jei.common.input.ClickableIngredient;
+import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.gui.recipes.RecipesGui;
 import mezz.jei.library.gui.recipes.RecipeLayout;
+import mezz.jei.library.ingredients.TypedIngredient;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @author KilaBash
@@ -29,6 +35,14 @@ public class JEIPlugin implements IModPlugin {
 
     public JEIPlugin() {
         LDLib.LOGGER.debug("LDLib JEI Plugin created");
+    }
+
+    public static Object getItemIngredient(ItemStack itemStack, int x, int y, int width, int height) {
+        Supplier<Object> supplier = () -> {
+            return new ClickableIngredient<>(TypedIngredient.createUnvalidated(VanillaTypes.ITEM_STACK, itemStack),
+                    new ImmutableRect2i(x, y, width, height));
+        };
+        return supplier.get();
     }
 
     @Nonnull

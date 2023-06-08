@@ -50,4 +50,5 @@ public class Platform {
     public static Path getGamePath() {
         throw new AssertionError();
     }
+
 }

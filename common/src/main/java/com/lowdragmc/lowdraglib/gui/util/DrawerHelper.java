@@ -12,8 +12,6 @@ import com.lowdragmc.lowdraglib.utils.Rect;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -28,6 +26,8 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.phys.Vec2;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -70,7 +70,7 @@ public class DrawerHelper {
         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        Matrix4f mat = poseStack.last().pose();
+        var mat = poseStack.last().pose();
         buffer.vertex(mat, xCoord, yCoord + 16, zLevel).uv(uMin, vMax).color(fluidColor).endVertex();
         buffer.vertex(mat, xCoord + 16 - maskRight, yCoord + 16, zLevel).uv(uMax, vMax).color(fluidColor).endVertex();
         buffer.vertex(mat, xCoord + 16 - maskRight, yCoord + maskTop, zLevel).uv(uMax, vMin).color(fluidColor).endVertex();
@@ -189,10 +189,11 @@ public class DrawerHelper {
         Minecraft mc = Minecraft.getInstance();
         ItemRenderer itemRenderer = mc.getItemRenderer();
 
-        itemRenderer.blitOffset = 200.0F;
-        itemRenderer.renderAndDecorateItem(itemStack, x, y);
-        itemRenderer.renderGuiItemDecorations(mc.font, itemStack, x, y, altTxt);
-        itemRenderer.blitOffset = 0.0F;
+        poseStack.pushPose();
+        poseStack.translate(0, 0, 200);
+        itemRenderer.renderAndDecorateItem(poseStack, itemStack, x, y);
+        itemRenderer.renderGuiItemDecorations(poseStack, mc.font, itemStack, x, y, altTxt);
+        poseStack.popPose();
 
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
@@ -226,7 +227,6 @@ public class DrawerHelper {
         drawGradientRect(poseStack, x + width, y + distance, distance, height - distance, 0x4f000000, 0, true);
 
         float startAlpha = (float) (0x4f) / 255.0F;
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         Tesselator tesselator = Tesselator.getInstance();
@@ -244,7 +244,6 @@ public class DrawerHelper {
         buffer.vertex(mat, x + distance, y + distance, 0).color(0, 0, 0, 0).endVertex();
         buffer.vertex(mat, x + distance, y, 0).color(0, 0, 0, 0).endVertex();
         tesselator.end();
-        RenderSystem.enableTexture();
     }
 
     @Environment(EnvType.CLIENT)
@@ -262,7 +261,6 @@ public class DrawerHelper {
         float endRed     = (float)(endColor   >> 16 & 255) / 255.0F;
         float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
         float endBlue    = (float)(endColor         & 255) / 255.0F;
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         Matrix4f mat = poseStack.last().pose();
@@ -283,7 +281,6 @@ public class DrawerHelper {
             buffer.vertex(mat,x + width, y + height, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
             tesselator.end();
         }
-        RenderSystem.enableTexture();
     }
 
     @Environment(EnvType.CLIENT)
@@ -291,7 +288,6 @@ public class DrawerHelper {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
@@ -299,7 +295,6 @@ public class DrawerHelper {
         RenderBufferUtils.drawColorLines(poseStack, bufferbuilder, points, startColor, endColor, width);
 
         tesselator.end();
-        RenderSystem.enableTexture();
         RenderSystem.defaultBlendFunc();
     }
 

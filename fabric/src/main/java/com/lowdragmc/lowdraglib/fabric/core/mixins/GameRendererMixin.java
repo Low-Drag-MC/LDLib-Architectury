@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,12 +29,12 @@ public abstract class GameRendererMixin {
 
     /* Replacement for RegisterShadersEvent, as fabric has no equivalent event  */
     @Inject(method = "reloadShaders", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;shutdownShaders()V", shift = At.Shift.AFTER))
-    private void reloadShaders(ResourceManager resourceManager, CallbackInfo ci) {
-        this.setupShader(Shaders::registerShaders, resourceManager);
+    private void reloadShaders(ResourceProvider resourceProvider, CallbackInfo ci) {
+        this.setupShader(Shaders::registerShaders, resourceProvider);
     }
 
-	private void setupShader(Function<ResourceManager, List<Pair<ShaderInstance, Consumer<ShaderInstance>>>> function, ResourceManager manager){
-		var shaders = function.apply(manager);
+	private void setupShader(Function<ResourceProvider, List<Pair<ShaderInstance, Consumer<ShaderInstance>>>> function, ResourceProvider resourceProvider){
+		var shaders = function.apply(resourceProvider);
         for (Pair<ShaderInstance, Consumer<ShaderInstance>> shader : shaders) {
             this.shaders.put(shader.getFirst().getName(),shader.getFirst());
             shader.getSecond().accept(shader.getFirst());

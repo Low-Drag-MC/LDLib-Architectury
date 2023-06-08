@@ -14,6 +14,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -97,16 +98,16 @@ public class Shaders {
 					.put("HSB_ALPHA", HSB_Alpha)
 					.build());
 
-    public static List<Pair<ShaderInstance, Consumer<ShaderInstance>>> registerShaders(ResourceManager resourceManager) {
+    public static List<Pair<ShaderInstance, Consumer<ShaderInstance>>> registerShaders(ResourceProvider resourceProvider) {
 		try {
 			return List.of(
-					Pair.of(new ShaderInstance(resourceManager,
+					Pair.of(new ShaderInstance(resourceProvider,
 									new ResourceLocation(LDLib.MOD_ID, "particle").toString(), DefaultVertexFormat.PARTICLE),
 							shaderInstance -> particleShader = shaderInstance),
-					Pair.of(new ShaderInstance(resourceManager,
+					Pair.of(new ShaderInstance(resourceProvider,
 									new ResourceLocation(LDLib.MOD_ID, "fast_blit").toString(), DefaultVertexFormat.POSITION),
 							shaderInstance -> blitShader = shaderInstance),
-					Pair.of(new ShaderInstance(resourceManager,
+					Pair.of(new ShaderInstance(resourceProvider,
 									new ResourceLocation(LDLib.MOD_ID, "hsb_block").toString(), HSB_VERTEX_FORMAT),
 							shaderInstance -> hsbShader = shaderInstance)
 			);

@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.material.FluidState;
+import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,8 +36,8 @@ public class TrackedDummyWorld extends DummyWorld {
     public final Map<BlockPos, BlockInfo> renderedBlocks = new HashMap<>();
     public final Map<BlockPos, BlockEntity> blockEntities = new HashMap<>();
 
-    public final Vector3 minPos = new Vector3(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
-    public final Vector3 maxPos = new Vector3(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+    public final Vector3f minPos = new Vector3f(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+    public final Vector3f maxPos = new Vector3f(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 
     public void setRenderFilter(Predicate<BlockPos> renderFilter) {
         this.renderFilter = renderFilter;
@@ -107,15 +108,15 @@ public class TrackedDummyWorld extends DummyWorld {
         return proxyWorld != null ? proxyWorld.getBlockState(pos) : renderedBlocks.getOrDefault(pos, BlockInfo.EMPTY).getBlockState();
     }
 
-    public Vector3 getSize() {
-        return new Vector3(maxPos.x - minPos.x + 1, maxPos.y - minPos.y + 1, maxPos.z - minPos.z + 1);
+    public Vector3f getSize() {
+        return new Vector3f(maxPos.x - minPos.x + 1, maxPos.y - minPos.y + 1, maxPos.z - minPos.z + 1);
     }
 
-    public Vector3 getMinPos() {
+    public Vector3f getMinPos() {
         return minPos;
     }
 
-    public Vector3 getMaxPos() {
+    public Vector3f getMaxPos() {
         return maxPos;
     }
 

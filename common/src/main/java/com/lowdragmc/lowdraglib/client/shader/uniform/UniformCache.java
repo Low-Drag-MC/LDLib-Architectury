@@ -1,14 +1,13 @@
 package com.lowdragmc.lowdraglib.client.shader.uniform;
 
-import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
-import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.util.FastColor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryStack;
 
@@ -103,7 +102,7 @@ public class UniformCache {
 		glUniform(location, UniformEntry.IS_MATRIX4F, UniformEntry.Matrix4FUniformEntry.NEW, (loc) -> {
 			try(MemoryStack stack = MemoryStack.stackPush()) {
 				FloatBuffer buffer = stack.mallocFloat(16);
-				matrix4f.store(buffer);
+				matrix4f.get(buffer);
 				buffer.rewind();
 				GL20.glUniformMatrix4fv(loc, false, buffer);
 			}

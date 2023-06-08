@@ -3,8 +3,7 @@ package com.lowdragmc.lowdraglib.syncdata.accessor;
 import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
-import com.lowdragmc.lowdraglib.utils.Position;
-import com.lowdragmc.lowdraglib.utils.Vector3;
+import org.joml.Vector3f;
 import net.minecraft.nbt.CompoundTag;
 
 /**
@@ -12,26 +11,26 @@ import net.minecraft.nbt.CompoundTag;
  * @date 2022/9/7
  * @implNote Vector3Accessor
  */
-public class Vector3Accessor extends CustomObjectAccessor<Vector3>{
+public class Vector3fAccessor extends CustomObjectAccessor<Vector3f>{
 
-    public Vector3Accessor() {
-        super(Vector3.class, true);
+    public Vector3fAccessor() {
+        super(Vector3f.class, true);
     }
 
     @Override
-    public ITypedPayload<?> serialize(AccessorOp op, Vector3 value) {
+    public ITypedPayload<?> serialize(AccessorOp op, Vector3f value) {
         CompoundTag tag = new CompoundTag();
-        tag.putDouble("x", value.x);
-        tag.putDouble("y", value.y);
-        tag.putDouble("z", value.z);
+        tag.putFloat("x", value.x);
+        tag.putFloat("y", value.y);
+        tag.putFloat("z", value.z);
         return NbtTagPayload.of(tag);
     }
 
     @Override
-    public Vector3 deserialize(AccessorOp op, ITypedPayload<?> payload) {
+    public Vector3f deserialize(AccessorOp op, ITypedPayload<?> payload) {
         if (payload instanceof NbtTagPayload nbtTagPayload) {
             var tag = (CompoundTag)nbtTagPayload.getPayload();
-            return new Vector3(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"));
+            return new Vector3f(tag.getFloat("x"), tag.getFloat("y"), tag.getFloat("z"));
         }
         return null;
     }

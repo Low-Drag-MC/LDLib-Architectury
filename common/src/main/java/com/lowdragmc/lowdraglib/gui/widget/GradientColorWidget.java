@@ -11,7 +11,6 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,6 +18,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
 
 import java.util.function.Consumer;
 
@@ -234,12 +234,10 @@ public class GradientColorWidget extends WidgetGroup {
         for (int i = 0; i < gradientColor.getRP().size(); i++) {
             Icons.UP.copy().setColor(i == selectedRGBPoint ? ColorPattern.GREEN.color : -1).draw(poseStack, mouseX, mouseY, getXPosition(gradientColor.getRP().get(i).x) - 5, pos.y + 3 + 10 + 15, 10, 10);
         }
-
         // render grid
         var width = size.width - 6;
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
@@ -259,10 +257,8 @@ public class GradientColorWidget extends WidgetGroup {
             }
         }
         BufferUploader.drawWithShader(bufferBuilder.end());
-        RenderSystem.enableTexture();
 
         // render color bar
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         Matrix4f mat = poseStack.last().pose();
@@ -294,7 +290,6 @@ public class GradientColorWidget extends WidgetGroup {
         }
 
         tesselator.end();
-        RenderSystem.enableTexture();
 
         // render children
         for (Widget widget : widgets) {

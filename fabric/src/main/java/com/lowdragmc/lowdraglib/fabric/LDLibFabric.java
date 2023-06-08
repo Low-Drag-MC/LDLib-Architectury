@@ -16,16 +16,17 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class LDLibFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         LDLib.init();
         if (Platform.isDevEnv()) {
-            Registry.register(Registry.BLOCK, LDLib.location("test"), TestBlock.BLOCK);
-            Registry.register(Registry.ITEM, LDLib.location("test"), TestItem.ITEM);
+            Registry.register(BuiltInRegistries.BLOCK, LDLib.location("test"), TestBlock.BLOCK);
+            Registry.register(BuiltInRegistries.ITEM, LDLib.location("test"), TestItem.ITEM);
             TestBlockEntityImpl.TYPE = Registry.register(
-                    Registry.BLOCK_ENTITY_TYPE,
+                    BuiltInRegistries.BLOCK_ENTITY_TYPE,
                     LDLib.location("test"),
                     FabricBlockEntityTypeBuilder.create(TestBlockEntity::new, TestBlock.BLOCK).build()
             );

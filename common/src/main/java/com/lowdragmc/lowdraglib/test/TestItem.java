@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib.test;
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -16,7 +15,7 @@ public class TestItem extends BlockItem implements IItemRendererProvider {
     public static final TestItem ITEM = new TestItem();
 
     private TestItem() {
-        super(TestBlock.BLOCK, new Properties().tab(CreativeModeTab.TAB_REDSTONE));
+        super(TestBlock.BLOCK, new Properties());
     }
 
     @Override

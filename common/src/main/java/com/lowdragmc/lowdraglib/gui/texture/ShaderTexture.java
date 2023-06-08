@@ -10,7 +10,6 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.*;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -200,7 +199,7 @@ public class ShaderTexture extends TransformTexture {
 
             Tesselator tessellator = Tesselator.getInstance();
             BufferBuilder buffer = tessellator.getBuilder();
-            Matrix4f mat = stack.last().pose();
+            var mat = stack.last().pose();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
             buffer.vertex(mat, x, y + height, 0).color(color).uv(0, 0).endVertex();
             buffer.vertex(mat, x + width, y + height, 0).color(color).uv(1, 0).endVertex();

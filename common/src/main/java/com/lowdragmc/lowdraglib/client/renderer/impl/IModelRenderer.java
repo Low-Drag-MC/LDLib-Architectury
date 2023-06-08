@@ -11,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
@@ -19,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
@@ -69,7 +69,7 @@ public class IModelRenderer implements IRenderer {
     @Override
     @Environment(EnvType.CLIENT)
     public void renderItem(ItemStack stack,
-                           ItemTransforms.TransformType transformType,
+                           ItemDisplayContext transformType,
                            boolean leftHand, PoseStack matrixStack,
                            MultiBufferSource buffer, int combinedLight,
                            int combinedOverlay, BakedModel model) {
@@ -119,7 +119,7 @@ public class IModelRenderer implements IRenderer {
                 model = ModelFactory.ITEM_MODEL_GENERATOR.generateBlockModel(Material::sprite, blockModel);
             }
             itemModel = model.bake(
-                    ModelFactory.getModeBakery(),
+                    ModelFactory.getModeBaker(),
                     Material::sprite,
                     BlockModelRotation.X0_Y0,
                     modelLocation);
@@ -142,7 +142,7 @@ public class IModelRenderer implements IRenderer {
     @Environment(EnvType.CLIENT)
     public BakedModel getRotatedModel(Direction frontFacing) {
         return blockModels.computeIfAbsent(frontFacing, facing -> getModel().bake(
-                ModelFactory.getModeBakery(),
+                ModelFactory.getModeBaker(),
                 Material::sprite,
                 ModelFactory.getRotation(facing),
                 modelLocation));

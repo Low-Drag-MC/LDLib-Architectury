@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 
@@ -33,7 +34,7 @@ public class BlockTypeAdapterFactory implements TypeAdapterFactory {
                 return;
             }
             final JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("id", Registry.BLOCK.getKey(value).toString());
+            jsonObject.addProperty("id", BuiltInRegistries.BLOCK.getKey(value).toString());
             gson.toJson(jsonObject, out);
         }
 
@@ -41,7 +42,7 @@ public class BlockTypeAdapterFactory implements TypeAdapterFactory {
         public Block read(final JsonReader in) {
             final JsonElement jsonElement = gson.fromJson(in, JsonElement.class);
             if (jsonElement.isJsonNull()) return null;
-            return Registry.BLOCK.get(new ResourceLocation(jsonElement.getAsJsonObject().get("id").getAsString()));
+            return BuiltInRegistries.BLOCK.get(new ResourceLocation(jsonElement.getAsJsonObject().get("id").getAsString()));
         }
 
     }

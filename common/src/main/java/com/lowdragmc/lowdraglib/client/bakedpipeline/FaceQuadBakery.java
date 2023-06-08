@@ -14,7 +14,10 @@ import net.minecraft.core.BlockMath;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
+import org.joml.*;
+
 import javax.annotation.Nullable;
+import java.lang.Math;
 
 /**
  * @author KilaBash
@@ -63,13 +66,13 @@ public class FaceQuadBakery {
         float f = pUv.getU(pUv.getReverseIndex(0));
         float f1 = pUv.getV(pUv.getReverseIndex(0));
         Vector4f vector4f = new Vector4f(f / 16.0F, f1 / 16.0F, 0.0F, 1.0F);
-        vector4f.transform(matrix4f);
+        vector4f = matrix4f.transform(vector4f);
         float f2 = 16.0F * vector4f.x();
         float f3 = 16.0F * vector4f.y();
         float f4 = pUv.getU(pUv.getReverseIndex(2));
         float f5 = pUv.getV(pUv.getReverseIndex(2));
         Vector4f vector4f1 = new Vector4f(f4 / 16.0F, f5 / 16.0F, 0.0F, 1.0F);
-        vector4f1.transform(matrix4f);
+        vector4f1 = matrix4f.transform(vector4f1);
         float f6 = 16.0F * vector4f1.x();
         float f7 = 16.0F * vector4f1.y();
         float f8;
@@ -95,7 +98,7 @@ public class FaceQuadBakery {
         float f12 = (float)Math.toRadians((double)pUv.rotation);
         Vector3f vector3f = new Vector3f(Mth.cos(f12), Mth.sin(f12), 0.0F);
         Matrix3f matrix3f = new Matrix3f(matrix4f);
-        vector3f.transform(matrix3f);
+        vector3f = matrix3f.transform(vector3f);
         int i = Math.floorMod(-((int)Math.round(Math.toDegrees(Math.atan2((double)vector3f.y(), (double)vector3f.x())) / 90.0D)) * 90, 360);
         return new BlockFaceUV(new float[]{f8, f10, f9, f11}, i);
     }
@@ -143,25 +146,25 @@ public class FaceQuadBakery {
         if (pPartRotation != null) {
             Vector3f vector3f;
             Vector3f vector3f1;
-            switch (pPartRotation.axis) {
+            switch (pPartRotation.axis()) {
                 case X -> {
-                    vector3f = Vector3f.XP;
+                    vector3f = new Vector3f(1, 0 ,0);
                     vector3f1 = new Vector3f(0.0F, 1.0F, 1.0F);
                 }
                 case Y -> {
-                    vector3f = Vector3f.YP;
+                    vector3f = new Vector3f(0, 1, 0);
                     vector3f1 = new Vector3f(1.0F, 0.0F, 1.0F);
                 }
                 case Z -> {
-                    vector3f = Vector3f.ZP;
+                    vector3f = new Vector3f(0, 0, 1);
                     vector3f1 = new Vector3f(1.0F, 1.0F, 0.0F);
                 }
                 default -> throw new IllegalArgumentException("There are only 3 axes");
             }
 
-            Quaternion quaternion = vector3f.rotationDegrees(pPartRotation.angle);
-            if (pPartRotation.rescale) {
-                if (Math.abs(pPartRotation.angle) == 22.5F) {
+            var quaternion = new Quaternionf().rotateAxis((float) Math.toRadians(pPartRotation.angle()), vector3f);
+            if (pPartRotation.rescale()) {
+                if (Math.abs(pPartRotation.angle()) == 22.5F) {
                     vector3f1.mul(RESCALE_22_5);
                 } else {
                     vector3f1.mul(RESCALE_45);
@@ -172,7 +175,7 @@ public class FaceQuadBakery {
                 vector3f1.set(1.0F, 1.0F, 1.0F);
             }
 
-            this.rotateVertexBy(pVec, pPartRotation.origin.copy(), new Matrix4f(quaternion), vector3f1);
+            this.rotateVertexBy(pVec, new Vector3f(pPartRotation.origin()), new Matrix4f().rotate(quaternion), vector3f1);
         }
     }
 
@@ -183,9 +186,9 @@ public class FaceQuadBakery {
     }
 
     private void rotateVertexBy(Vector3f pPos, Vector3f pOrigin, Matrix4f pTransform, Vector3f pScale) {
-        Vector4f vector4f = new Vector4f(pPos.x() - pOrigin.x(), pPos.y() - pOrigin.y(), pPos.z() - pOrigin.z(), 1.0F);
-        vector4f.transform(pTransform);
-        vector4f.mul(pScale);
+        var vector4f = new Vector4f(pPos.x() - pOrigin.x(), pPos.y() - pOrigin.y(), pPos.z() - pOrigin.z(), 1.0F);
+        vector4f = pTransform.transform(vector4f);
+        vector4f.mul(pScale.x, pScale.y, pScale.z, 1);
         pPos.set(vector4f.x() + pOrigin.x(), vector4f.y() + pOrigin.y(), vector4f.z() + pOrigin.z());
     }
 
@@ -193,11 +196,11 @@ public class FaceQuadBakery {
         Vector3f vector3f = new Vector3f(Float.intBitsToFloat(pFaceData[0]), Float.intBitsToFloat(pFaceData[1]), Float.intBitsToFloat(pFaceData[2]));
         Vector3f vector3f1 = new Vector3f(Float.intBitsToFloat(pFaceData[8]), Float.intBitsToFloat(pFaceData[9]), Float.intBitsToFloat(pFaceData[10]));
         Vector3f vector3f2 = new Vector3f(Float.intBitsToFloat(pFaceData[16]), Float.intBitsToFloat(pFaceData[17]), Float.intBitsToFloat(pFaceData[18]));
-        Vector3f vector3f3 = vector3f.copy();
+        Vector3f vector3f3 = new Vector3f(vector3f);
         vector3f3.sub(vector3f1);
-        Vector3f vector3f4 = vector3f2.copy();
+        Vector3f vector3f4 = new Vector3f(vector3f2);
         vector3f4.sub(vector3f1);
-        Vector3f vector3f5 = vector3f4.copy();
+        Vector3f vector3f5 = new Vector3f(vector3f4);
         vector3f5.cross(vector3f3);
         vector3f5.normalize();
         Direction direction = null;

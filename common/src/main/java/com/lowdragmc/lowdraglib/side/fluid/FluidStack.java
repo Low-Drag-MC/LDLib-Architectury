@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.side.fluid;
 
 import lombok.Setter;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -61,7 +62,7 @@ public class FluidStack {
         }
 
         ResourceLocation fluidName = new ResourceLocation(nbt.getString("FluidName"));
-        Fluid fluid = Registry.FLUID.get(fluidName);
+        Fluid fluid = BuiltInRegistries.FLUID.get(fluidName);
         if (fluid == Fluids.EMPTY) {
             return EMPTY;
         }
@@ -74,7 +75,7 @@ public class FluidStack {
     }
 
     public static FluidStack readFromBuf(FriendlyByteBuf buf) {
-        Fluid fluid = Registry.FLUID.get(new ResourceLocation(buf.readUtf()));
+        Fluid fluid = BuiltInRegistries.FLUID.get(new ResourceLocation(buf.readUtf()));
         int amount = buf.readVarInt();
         CompoundTag tag = buf.readNbt();
         if (fluid == Fluids.EMPTY) return EMPTY;
@@ -86,7 +87,7 @@ public class FluidStack {
     }
 
     public CompoundTag saveToTag(CompoundTag nbt) {
-        nbt.putString("FluidName", Registry.FLUID.getKey(fluid).toString());
+        nbt.putString("FluidName", BuiltInRegistries.FLUID.getKey(fluid).toString());
         nbt.putLong("Amount", amount);
 
         if (tag != null) {
@@ -96,7 +97,7 @@ public class FluidStack {
     }
 
     public void writeToBuf(FriendlyByteBuf buf) {
-        buf.writeUtf(Registry.FLUID.getKey(fluid).toString());
+        buf.writeUtf(BuiltInRegistries.FLUID.getKey(fluid).toString());
         buf.writeVarLong(getAmount());
         buf.writeNbt(tag);
     }

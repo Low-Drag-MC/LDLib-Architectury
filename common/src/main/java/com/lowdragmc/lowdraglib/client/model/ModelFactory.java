@@ -2,13 +2,13 @@ package com.lowdragmc.lowdraglib.client.model;
 
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Either;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector3f;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemModelGenerator;
 import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -19,8 +19,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * Author: KilaBash
@@ -28,6 +31,8 @@ import javax.annotation.Nonnull;
  * Description:
  */
 @Environment(EnvType.CLIENT)
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class ModelFactory {
     public static final ItemModelGenerator ITEM_MODEL_GENERATOR = new ItemModelGenerator();
 
@@ -36,18 +41,38 @@ public class ModelFactory {
         throw new AssertionError();
     }
 
+    public static ModelBaker getModeBaker() {
+        return new ModelBaker() {
+            @Override
+            public UnbakedModel getModel(ResourceLocation location) {
+                return getUnBakedModel(location);
+            }
+
+            @Override
+            public BakedModel bake(ResourceLocation location, ModelState transform) {
+                UnbakedModel unbakedmodel = this.getModel(location);
+                if (unbakedmodel instanceof BlockModel blockmodel) {
+                    if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
+                        return ITEM_MODEL_GENERATOR.generateBlockModel(Material::sprite, blockmodel).bake(this, blockmodel, Material::sprite, transform, location, false);
+                    }
+                }
+                return unbakedmodel.bake(this, Material::sprite, transform, location);
+            }
+        };
+    }
+
     public static UnbakedModel getUnBakedModel(ResourceLocation modelLocation) {
         return getModeBakery().getModel(modelLocation);
     }
 
-    public static Quaternion getQuaternion(Direction facing) {
+    public static Quaternionf getQuaternion(Direction facing) {
         return switch (facing) {
-            case UP -> new Quaternion(Mth.HALF_PI, 0, 0, false);
-            case DOWN -> new Quaternion(-Mth.HALF_PI, 0, 0, false);
-            case EAST -> new Quaternion(0, -Mth.HALF_PI, 0, false);
-            case WEST -> new Quaternion(0, Mth.HALF_PI, 0, false);
-            case SOUTH -> new Quaternion(0, Mth.PI, 0, false);
-            case NORTH -> Quaternion.ONE;
+            case UP -> new Quaternionf().rotateXYZ(Mth.HALF_PI, 0, 0);
+            case DOWN -> new Quaternionf().rotateXYZ(-Mth.HALF_PI, 0, 0);
+            case EAST -> new Quaternionf().rotateXYZ(0, -Mth.HALF_PI, 0);
+            case WEST -> new Quaternionf().rotateXYZ(0, Mth.HALF_PI, 0);
+            case SOUTH -> new Quaternionf().rotateXYZ(0, Mth.PI, 0);
+            case NORTH -> new Quaternionf();
         };
     }
 
@@ -152,9 +177,9 @@ public class ModelFactory {
     }
 
     public static ItemTransform makeTransform(float rotationX, float rotationY, float rotationZ, float translationX, float translationY, float translationZ, float scaleX, float scaleY, float scaleZ) {
-        Vector3f translation = new Vector3f(translationX, translationY, translationZ);
+        var translation = new Vector3f(translationX, translationY, translationZ);
         translation.mul(0.0625f);
-        translation.clamp(-5.0F, 5.0F);
+        translation.set(Mth.clamp(translation.x, -5.0F, 5.0F), Mth.clamp(translation.y, -5.0F, 5.0F), Mth.clamp(translation.z, -5.0F, 5.0F));
         return new ItemTransform(new Vector3f(rotationX, rotationY, rotationZ), translation, new Vector3f(scaleX, scaleY, scaleZ));
     }
 

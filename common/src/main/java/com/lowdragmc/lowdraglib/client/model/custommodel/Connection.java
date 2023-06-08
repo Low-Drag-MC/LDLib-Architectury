@@ -36,7 +36,7 @@ public enum Connection {
                 pos = pos.relative(dir);
             }
             var rotated = ShapeUtils.rotate(new AABB(pos), normal);
-            offsets[normal.ordinal()] = new BlockPos((rotated.minX + rotated.maxX) / 2, (rotated.minY + rotated.maxY) / 2, (rotated.minZ + rotated.maxZ) / 2);
+            offsets[normal.ordinal()] = new BlockPos((int) ((rotated.minX + rotated.maxX) / 2), (int) ((rotated.minY + rotated.maxY) / 2), (int) ((rotated.minZ + rotated.maxZ) / 2));
         }
     }
 

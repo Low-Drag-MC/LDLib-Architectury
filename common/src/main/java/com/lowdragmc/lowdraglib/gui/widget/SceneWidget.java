@@ -6,15 +6,20 @@ import com.lowdragmc.lowdraglib.client.utils.RenderUtils;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
+import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.utils.BlockPosFace;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
-import com.lowdragmc.lowdraglib.utils.Vector3;
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.runtime.IClickableIngredient;
+import mezz.jei.common.input.ClickableIngredient;
+import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.library.ingredients.TypedIngredient;
+import org.joml.Vector3f;
 import com.lowdragmc.lowdraglib.utils.interpolate.Eases;
 import com.lowdragmc.lowdraglib.utils.interpolate.Interpolator;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
-import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.ItemEmiStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
@@ -32,10 +37,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class SceneWidget extends WidgetGroup {
     @Environment(EnvType.CLIENT)
@@ -182,7 +189,7 @@ public class SceneWidget extends WidgetGroup {
         } else {
             renderer = new ImmediateWorldSceneRenderer(dummyWorld);
         }
-        center = new Vector3f();
+        center = new Vector3f(0, 0, 0);
         renderer.useOrtho(useOrtho);
         renderer.setOnLookingAt(ray -> {});
         renderer.setAfterWorldRender(this::renderBlockOverLay);
@@ -289,10 +296,10 @@ public class SceneWidget extends WidgetGroup {
                 if (core.contains(hit.getBlockPos())) {
                     hoverPosFace = new BlockPosFace(hit.getBlockPos(), hit.getDirection());
                 } else {
-                    Vector3 hitPos = new Vector3(hit.getLocation());
+                    Vector3f hitPos = hit.getLocation().toVector3f();
                     Level world = renderer.world;
                     Vec3 eyePos = new Vec3(renderer.getEyePos());
-                    hitPos.multiply(2); // Double view range to ensure pos can be seen.
+                    hitPos.mul(2); // Double view range to ensure pos can be seen.
                     Vec3 endPos = new Vec3((hitPos.x - eyePos.x), (hitPos.y - eyePos.y), (hitPos.z - eyePos.z));
                     double min = Float.MAX_VALUE;
                     for (BlockPos pos : core) {
@@ -353,6 +360,9 @@ public class SceneWidget extends WidgetGroup {
     public Object getIngredientOverMouse(double mouseX, double mouseY) {
         Object result = super.getIngredientOverMouse(mouseX, mouseY);
         if (result == null && hoverItem != null && !hoverItem.isEmpty()) {
+            if (LDLib.isJeiLoaded()) {
+                return JEIPlugin.getItemIngredient(hoverItem, (int) mouseX, (int) mouseY, 1, 1);
+            }
             if (LDLib.isReiLoaded()) {
                 return EntryStacks.of(hoverItem);
             }

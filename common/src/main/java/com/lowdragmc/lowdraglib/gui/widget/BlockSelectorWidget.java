@@ -8,6 +8,7 @@ import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +34,7 @@ public class BlockSelectorWidget extends WidgetGroup {
         properties = new HashMap<>();
         blockField = (TextFieldWidget) new TextFieldWidget(22, 0, width - (isState ?  46 : 26), 20, null, s -> {
             if (s != null && !s.isEmpty()) {
-                Block block = Registry.BLOCK.get(new ResourceLocation(s));
+                Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s));
                 if (this.block != block) {
                     this.block = block;
                     onUpdate();
@@ -113,7 +114,7 @@ public class BlockSelectorWidget extends WidgetGroup {
             block = blockState.getBlock();
             new ItemStack(block);
             handler.setStackInSlot(0, new ItemStack(block));
-            blockField.setCurrentString(Registry.BLOCK.getKey(block));
+            blockField.setCurrentString(BuiltInRegistries.BLOCK.getKey(block));
             for (Property<?> property : blockState.getBlock().getStateDefinition().getProperties()) {
                 properties.put(property, blockState.getValue(property));
             }

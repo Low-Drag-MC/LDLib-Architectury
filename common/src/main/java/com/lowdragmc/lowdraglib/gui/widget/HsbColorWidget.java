@@ -6,7 +6,6 @@ import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.utils.ColorUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -16,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
 
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
@@ -114,7 +114,7 @@ public class HsbColorWidget extends Widget {
 	@Environment(EnvType.CLIENT)
 	public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
 		super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
-		Matrix4f pose = poseStack.last().pose();
+		var pose = poseStack.last().pose();
 		int x = getPosition().x;
 		int y = getPosition().y;
 		int width = getSize().width;

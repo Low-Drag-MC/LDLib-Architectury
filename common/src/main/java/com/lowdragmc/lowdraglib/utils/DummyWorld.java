@@ -9,8 +9,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -58,7 +60,7 @@ public class DummyWorld extends Level {
     private final BlockPos.MutableBlockPos scratch = new BlockPos.MutableBlockPos();
 
     public DummyWorld(Level level) {
-        super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionTypeRegistration(), level::getProfiler,
+        super((WritableLevelData) level.getLevelData(), level.dimension(), level.registryAccess(), level.dimensionTypeRegistration(), level::getProfiler,
                 true, false, 0, 0);
         this.level = level;
         this.lighter = new LevelLightEngine(chunkProvider, true, false);
@@ -166,6 +168,11 @@ public class DummyWorld extends Level {
     }
 
     @Override
+    public FeatureFlagSet enabledFeatures() {
+        return null;
+    }
+
+    @Override
     public LevelTickAccess<Block> getBlockTicks() {
         return level.getBlockTicks();
     }
@@ -231,7 +238,7 @@ public class DummyWorld extends Level {
             }
 
             @Override
-            public <U extends Entity> void get(EntityTypeTest<Entity, U> test, Consumer<U> consumer) {
+            public <U extends Entity> void get(EntityTypeTest<Entity, U> test, AbortableIterationConsumer<U> consumer) {
 
             }
 
@@ -241,7 +248,7 @@ public class DummyWorld extends Level {
             }
 
             @Override
-            public <U extends Entity> void get(EntityTypeTest<Entity, U> test, AABB bounds, Consumer<U> consumer) {
+            public <U extends Entity> void get(EntityTypeTest<Entity, U> test, AABB bounds, AbortableIterationConsumer<U> consumer) {
 
             }
         };
@@ -283,12 +290,17 @@ public class DummyWorld extends Level {
     }
 
     @Override
+    public void playSeededSound(@org.jetbrains.annotations.Nullable Player player, double x, double y, double z, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch, long seed) {
+
+    }
+
+    @Override
     public void playSeededSound(@javax.annotation.Nullable Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch, long seed) {
 
     }
 
     @Override
-    public void playSeededSound(@javax.annotation.Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch, long seed) {
+    public void playSeededSound(@org.jetbrains.annotations.Nullable Player player, Entity entity, Holder<SoundEvent> sound, SoundSource category, float volume, float pitch, long seed) {
 
     }
 

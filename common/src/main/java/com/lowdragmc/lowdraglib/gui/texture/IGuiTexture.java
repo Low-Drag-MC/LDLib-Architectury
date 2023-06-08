@@ -14,7 +14,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -69,7 +68,7 @@ public interface IGuiTexture extends IConfigurable {
             BufferBuilder bufferbuilder = tessellator.getBuilder();
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, TextureManager.INTENTIONAL_MISSING_TEXTURE);
-            Matrix4f matrix4f = stack.last().pose();
+            var matrix4f = stack.last().pose();
             bufferbuilder.begin(VertexFormat.Mode.QUADS, POSITION_TEX);
             bufferbuilder.vertex(matrix4f, x, y + height, 0).uv(0, 1).endVertex();
             bufferbuilder.vertex(matrix4f, x + width, y + height, 0).uv(1, 1).endVertex();

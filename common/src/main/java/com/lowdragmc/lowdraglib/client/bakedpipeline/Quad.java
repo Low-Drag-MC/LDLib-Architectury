@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib.client.bakedpipeline;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.VertexFormatAccessor;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import com.mojang.math.Vector3f;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.*;
 import net.minecraft.Util;
@@ -14,6 +13,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec2;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -208,7 +208,7 @@ public class Quad {
     }
 
     public Vector3f getVert(int index) {
-        return vertPos[index % 4].copy();
+        return new Vector3f(vertPos[index % 4]);
     }
 
     public Quad withVert(int index, Vector3f vert) {
@@ -289,8 +289,8 @@ public class Quad {
             Vector3f[] secondQuad = new Vector3f[4];
             for (int i = 0; i < 4; i++) {
                 int idx = (firstIndex + i) % 4;
-                firstQuad[i] = vertPos[idx].copy();
-                secondQuad[i] = vertPos[idx].copy();
+                firstQuad[i] = new Vector3f(vertPos[idx]);
+                secondQuad[i] = new Vector3f(vertPos[idx]);
             }
 
             int i1 = 0;

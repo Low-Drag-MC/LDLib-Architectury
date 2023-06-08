@@ -8,6 +8,7 @@ import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
@@ -26,7 +27,7 @@ public class FluidStackSelectorWidget extends WidgetGroup {
         setClientSideWidget();
         fluidField = (TextFieldWidget) new TextFieldWidget(22, 0, width - 46, 20, null, s -> {
             if (s != null && !s.isEmpty()) {
-                Fluid fluid = Registry.FLUID.get(new ResourceLocation(s));
+                Fluid fluid = BuiltInRegistries.FLUID.get(new ResourceLocation(s));
                 if (fluid == null) {
                     fluid = FluidStack.empty().getFluid();
                 }
@@ -75,7 +76,7 @@ public class FluidStackSelectorWidget extends WidgetGroup {
             fluid.setAmount(1000);
         }
         handler.setFluid(fluid);
-        fluidField.setCurrentString(Registry.FLUID.getKey(fluid.getFluid()));
+        fluidField.setCurrentString(BuiltInRegistries.FLUID.getKey(fluid.getFluid()));
         return this;
     }
 

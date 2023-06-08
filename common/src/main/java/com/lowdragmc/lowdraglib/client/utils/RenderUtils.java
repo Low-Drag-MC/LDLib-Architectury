@@ -3,15 +3,17 @@ package com.lowdragmc.lowdraglib.client.utils;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -43,10 +45,8 @@ public class RenderUtils {
      */
     public static void useScissor(PoseStack poseStack, int x, int y, int width, int height, Runnable codeBlock) {
         var pose = poseStack.last().pose();
-        Vector4f pos = new Vector4f(x, y, 0, 1.0F);
-        pos.transform(pose);
-        Vector4f size = new Vector4f(x + width, y + height, 0, 1.0F);
-        size.transform(pose);
+        Vector4f pos = pose.transform(new Vector4f(x, y, 0, 1.0F));
+        Vector4f size = pose.transform(new Vector4f(x + width, y + height, 0, 1.0F));
 
         x = (int) pos.x();
         y = (int) pos.y();
@@ -174,7 +174,6 @@ public class RenderUtils {
         poseStack.scale(scale, scale, scale);
 
         Tesselator tessellator = Tesselator.getInstance();
-        RenderSystem.disableTexture();
         BufferBuilder buffer = tessellator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
@@ -183,7 +182,6 @@ public class RenderUtils {
 
         poseStack.popPose();
 
-        RenderSystem.enableTexture();
         RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         RenderSystem.setShaderColor(1, 1, 1, 1);
     }
@@ -226,39 +224,39 @@ public class RenderUtils {
     }
 
     public static void rotateToFace(PoseStack matrixStack, Direction face, @Nullable Direction spin) {
-        int angle = spin == Direction.EAST ? 90 : spin == Direction.SOUTH ? 180 : spin == Direction.WEST ? -90 : 0;
+        float angle = spin == Direction.EAST ? Mth.HALF_PI : spin == Direction.SOUTH ? Mth.PI : spin == Direction.WEST ? -Mth.HALF_PI : 0;
         switch (face) {
-            case UP:
+            case UP -> {
                 matrixStack.scale(1.0f, -1.0f, 1.0f);
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(angle));
-                break;
-            case DOWN:
+                matrixStack.mulPose(new Quaternionf().rotateAxis(Mth.HALF_PI, new Vector3f(1, 0, 0)));
+                matrixStack.mulPose(new Quaternionf().rotateAxis(angle, new Vector3f(0, 0, 1)));
+            }
+            case DOWN -> {
                 matrixStack.scale(1.0f, -1.0f, 1.0f);
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
-                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(spin == Direction.EAST ? 90 : spin == Direction.NORTH ? 180 : spin == Direction.WEST ? -90 : 0));
-                break;
-            case EAST:
+                matrixStack.mulPose(new Quaternionf().rotateAxis(-Mth.HALF_PI, new Vector3f(1, 0, 0)));
+                matrixStack.mulPose(new Quaternionf().rotateAxis(spin == Direction.EAST ? Mth.HALF_PI : spin == Direction.NORTH ? Mth.PI : spin == Direction.WEST ? -Mth.HALF_PI : 0, new Vector3f(0, 0, 1)));
+            }
+            case EAST -> {
                 matrixStack.scale(-1.0f, -1.0f, -1.0f);
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
-                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(angle));
-                break;
-            case WEST:
+                matrixStack.mulPose(new Quaternionf().rotateAxis(-Mth.HALF_PI, new Vector3f(0, 1, 0)));
+                matrixStack.mulPose(new Quaternionf().rotateAxis(angle, new Vector3f(0, 0, 1)));
+            }
+            case WEST -> {
                 matrixStack.scale(-1.0f, -1.0f, -1.0f);
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(angle));
-                break;
-            case NORTH:
+                matrixStack.mulPose(new Quaternionf().rotateAxis(Mth.HALF_PI, new Vector3f(0, 1, 0)));
+                matrixStack.mulPose(new Quaternionf().rotateAxis(angle, new Vector3f(0, 0, 1)));
+            }
+            case NORTH -> {
                 matrixStack.scale(-1.0f, -1.0f, -1.0f);
-                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(angle));
-                break;
-            case SOUTH:
+                matrixStack.mulPose(new Quaternionf().rotateAxis(angle, new Vector3f(0, 0, 1)));
+            }
+            case SOUTH -> {
                 matrixStack.scale(-1.0f, -1.0f, -1.0f);
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
-                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(angle));
-                break;
-            default:
-                break;
+                matrixStack.mulPose(new Quaternionf().rotateAxis(Mth.PI, new Vector3f(0, 1, 0)));
+                matrixStack.mulPose(new Quaternionf().rotateAxis(angle, new Vector3f(0, 0, 1)));
+            }
+            default -> {
+            }
         }
     }
 }

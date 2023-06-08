@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -26,7 +27,7 @@ public class ItemStackSelectorWidget extends WidgetGroup {
         setClientSideWidget();
         itemField = (TextFieldWidget) new TextFieldWidget(22, 0, width - 46, 20, null, s -> {
             if (s != null && !s.isEmpty()) {
-                Item item = Registry.ITEM.get(new ResourceLocation(s));
+                Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(s));
                 if (!ItemStack.isSameItemSameTags(item.getDefaultInstance(), this.item)) {
                     this.item = item.getDefaultInstance();
                     onUpdate();
@@ -70,7 +71,7 @@ public class ItemStackSelectorWidget extends WidgetGroup {
     public ItemStackSelectorWidget setItemStack(ItemStack itemStack) {
         item = Objects.requireNonNullElse(itemStack, ItemStack.EMPTY).copy();
         handler.setStackInSlot(0, item);
-        itemField.setCurrentString(Registry.ITEM.getKey(item.getItem()).toString());
+        itemField.setCurrentString(BuiltInRegistries.ITEM.getKey(item.getItem()).toString());
         return this;
     }
 

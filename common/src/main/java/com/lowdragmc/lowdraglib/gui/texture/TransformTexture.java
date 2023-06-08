@@ -3,9 +3,9 @@ package com.lowdragmc.lowdraglib.gui.texture;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Quaternion;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.joml.Quaternionf;
 
 /**
  * @author KilaBash
@@ -53,9 +53,10 @@ public abstract class TransformTexture implements IGuiTexture{
 
         stack.translate(x + width / 2f, y + height / 2f, 0);
         stack.scale(scale, scale, 1);
-        stack.mulPose(new Quaternion(0, 0, rotation, true));
+        stack.mulPose(new Quaternionf().rotationXYZ(0, 0, (float) Math.toRadians(rotation)));
         stack.translate(-x + -width / 2f, -y + -height / 2f, 0);
     }
+
 
     @Environment(EnvType.CLIENT)
     protected void postDraw(PoseStack stack, float x, float y, int width, int height) {

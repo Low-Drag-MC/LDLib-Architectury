@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,10 +36,10 @@ public class BlockStateTypeAdapterFactory implements TypeAdapterFactory {
                 gson.toJson(JsonNull.INSTANCE, out);
                 return;
             } else {
-                Registry.BLOCK.getKey(value.getBlock());
+                BuiltInRegistries.BLOCK.getKey(value.getBlock());
             }
             final JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("id", Registry.BLOCK.getKey(value.getBlock()).toString());
+            jsonObject.addProperty("id", BuiltInRegistries.BLOCK.getKey(value.getBlock()).toString());
             jsonObject.addProperty("meta", value.getBlock().getStateDefinition().getPossibleStates().indexOf(value));
             gson.toJson(jsonObject, out);
         }
@@ -48,7 +49,7 @@ public class BlockStateTypeAdapterFactory implements TypeAdapterFactory {
             final JsonElement jsonElement = gson.fromJson(in, JsonElement.class);
             if (jsonElement.isJsonNull()) return null;
             final var id = new ResourceLocation(jsonElement.getAsJsonObject().get("id").getAsString());
-            final var block = Registry.BLOCK.get(id);
+            final var block = BuiltInRegistries.BLOCK.get(id);
             if (block == Blocks.AIR && !id.equals(new ResourceLocation("air"))) return null;
             if (jsonElement.getAsJsonObject().has("meta")) {
                 final int meta = jsonElement.getAsJsonObject().get("meta").getAsInt();

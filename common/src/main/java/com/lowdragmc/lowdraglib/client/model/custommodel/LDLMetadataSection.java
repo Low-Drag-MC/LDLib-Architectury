@@ -50,17 +50,17 @@ public class LDLMetadataSection {
 
     @Nullable
     public static LDLMetadataSection getMetadata(TextureAtlasSprite sprite) {
-        return getMetadata(spriteToAbsolute(sprite.getName()));
+        return getMetadata(spriteToAbsolute(sprite.contents().name()));
     }
 
     public static boolean isEmissive(TextureAtlasSprite sprite) {
-        LDLMetadataSection ret = getMetadata(spriteToAbsolute(sprite.getName()));
+        LDLMetadataSection ret = getMetadata(spriteToAbsolute(sprite.contents().name()));
         return ret != null && ret.emissive;
     }
 
     @Nullable
     public static TextureAtlasSprite getConnection(TextureAtlasSprite sprite) {
-        LDLMetadataSection ret = getMetadata(spriteToAbsolute(sprite.getName()));
+        LDLMetadataSection ret = getMetadata(spriteToAbsolute(sprite.contents().name()));
         return (ret == null || ret.connection == null) ? null : ModelFactory.getBlockSprite(ret.connection);
     }
 

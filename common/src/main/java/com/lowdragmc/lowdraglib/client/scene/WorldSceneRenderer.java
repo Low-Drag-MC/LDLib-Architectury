@@ -7,12 +7,8 @@ import com.lowdragmc.lowdraglib.client.utils.glu.Project;
 import com.lowdragmc.lowdraglib.utils.*;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.injectables.annotations.PlatformOnly;
-import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,6 +18,7 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -35,6 +32,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
@@ -217,9 +217,9 @@ public abstract class WorldSceneRenderer {
         // setupCamera
         var pose = poseStack.last().pose();
         Vector4f pos = new Vector4f(x, y, 0, 1.0F);
-        pos.transform(pose);
+        pos = pose.transform(pos);
         Vector4f size = new Vector4f(x + width, y + height, 0, 1.0F);
-        size.transform(pose);
+        size = pose.transform(size);
         x = pos.x();
         y = pos.y();
         width = size.x() - x;
@@ -264,12 +264,12 @@ public abstract class WorldSceneRenderer {
         this.lookAt = lookAt;
         this.worldUp = worldUp;
         if (camera != null) {
-            Vector3 xzProduct = new Vector3(lookAt.x() - eyePos.x(), 0, lookAt.z() - eyePos.z());
-            double angleYaw = Math.toDegrees(xzProduct.angle(Vector3.Z));
-            if (xzProduct.angle(Vector3.X) < Math.PI / 2) {
+            Vector3f xzProduct = new Vector3f(lookAt.x() - eyePos.x(), 0, lookAt.z() - eyePos.z());
+            double angleYaw = Math.toDegrees(xzProduct.angle(new Vector3f(0, 0, 1)));
+            if (xzProduct.angle(new Vector3f(1, 0, 0)) < Math.PI / 2) {
                 angleYaw = -angleYaw;
             }
-            double anglePitch = Math.toDegrees(new Vector3(lookAt).subtract(new Vector3(eyePos)).angle(Vector3.Y)) - 90;
+            double anglePitch = Math.toDegrees(new Vector3f(lookAt).sub(new Vector3f(eyePos)).angle(new Vector3f(0, 1, 0))) - 90;
             cameraEntity.setPos(eyePos.x(), eyePos.y() - cameraEntity.getEyeHeight(), eyePos.z());
             cameraEntity.xo = cameraEntity.getX();
             cameraEntity.yo = cameraEntity.getY();
@@ -282,10 +282,10 @@ public abstract class WorldSceneRenderer {
     }
 
     public void setCameraLookAt(Vector3f lookAt, double radius, double rotationPitch, double rotationYaw) {
-        Vector3 vecX = new Vector3(Math.cos(rotationPitch), 0, Math.sin(rotationPitch));
-        Vector3 vecY = new Vector3(0, Math.tan(rotationYaw) * vecX.mag(),0);
-        Vector3 pos = vecX.copy().add(vecY).normalize().multiply(radius);
-        setCameraLookAt(pos.add(lookAt.x(), lookAt.y(), lookAt.z()).vector3f(), lookAt, worldUp);
+        Vector3f vecX = new Vector3f((float) Math.cos(rotationPitch), (float) 0, (float) Math.sin(rotationPitch));
+        Vector3f vecY = new Vector3f(0, (float) (Math.tan(rotationYaw) * vecX.length()),0);
+        Vector3f pos = new Vector3f(vecX).add(vecY).normalize().mul((float) radius);
+        setCameraLookAt(pos.add(lookAt.x(), lookAt.y(), lookAt.z()), lookAt, worldUp);
     }
 
     public void setFov(float fov) {
@@ -334,9 +334,9 @@ public abstract class WorldSceneRenderer {
 
         float aspectRatio = width / (height * 1.0f);
         if (ortho) {
-            RenderSystem.setProjectionMatrix(Matrix4f.orthographic(minX, maxX, maxY / aspectRatio, minY / aspectRatio, minZ, maxZ));
+            RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(minX, maxX, maxY / aspectRatio, minY / aspectRatio, minZ, maxZ));
         } else {
-            RenderSystem.setProjectionMatrix(Matrix4f.perspective(fov, aspectRatio, 0.1f, 10000.0f));
+            RenderSystem.setProjectionMatrix(new Matrix4f().perspective(fov, aspectRatio, 0.1f, 10000.0f));
         }
 
         //setup modelview matrix
@@ -346,7 +346,7 @@ public abstract class WorldSceneRenderer {
         Project.gluLookAt(posesStack, eyePos.x(), eyePos.y(), eyePos.z(), lookAt.x(), lookAt.y(), lookAt.z(), worldUp.x(), worldUp.y(), worldUp.z());
         RenderSystem.applyModelViewMatrix();
 
-        RenderSystem.enableTexture();
+        RenderSystem.activeTexture(org.lwjgl.opengl.GL13.GL_TEXTURE0);
 
         Minecraft mc = Minecraft.getInstance();
         RenderSystem.enableCull();
@@ -684,8 +684,8 @@ public abstract class WorldSceneRenderer {
 
     public Vector3f project(BlockPos pos) {
         //read current rendering parameters
-        RenderSystem.getModelViewMatrix().store(MODELVIEW_MATRIX_BUFFER);
-        RenderSystem.getProjectionMatrix().store(PROJECTION_MATRIX_BUFFER);
+        RenderSystem.getModelViewMatrix().get(MODELVIEW_MATRIX_BUFFER);
+        RenderSystem.getProjectionMatrix().get(PROJECTION_MATRIX_BUFFER);
         GL11.glGetIntegerv(GL11.GL_VIEWPORT, VIEWPORT_BUFFER);
 
         //rewind buffers after write by OpenGL glGet calls
@@ -729,8 +729,8 @@ public abstract class WorldSceneRenderer {
         PIXEL_DEPTH_BUFFER.rewind();
 
         //read current rendering parameters
-        RenderSystem.getModelViewMatrix().store(MODELVIEW_MATRIX_BUFFER);
-        RenderSystem.getProjectionMatrix().store(PROJECTION_MATRIX_BUFFER);
+        RenderSystem.getModelViewMatrix().get(MODELVIEW_MATRIX_BUFFER);
+        RenderSystem.getProjectionMatrix().get(PROJECTION_MATRIX_BUFFER);
         GL11.glGetIntegerv(GL11.GL_VIEWPORT, VIEWPORT_BUFFER);
 
         //rewind buffers after write by OpenGL glGet calls

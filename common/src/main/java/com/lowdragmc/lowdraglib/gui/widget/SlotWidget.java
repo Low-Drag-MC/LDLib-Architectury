@@ -14,6 +14,7 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
+import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.utils.Position;
@@ -25,6 +26,10 @@ import dev.emi.emi.api.stack.ItemEmiStack;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.common.input.ClickableIngredient;
+import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.library.ingredients.TypedIngredient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -46,6 +51,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @LDLRegister(name = "item_slot", group = "widget.container")
 @Accessors(chain = true)
@@ -331,6 +337,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Override
     public Object getJEIIngredient() {
         if (slotReference == null) return null;
+        if (LDLib.isJeiLoaded()) {
+            return JEIPlugin.getItemIngredient(getHandle().getItem(), getPosition().x, getPosition().y, getSize().width, getSize().height);
+        }
         if (LDLib.isReiLoaded()) {
             return EntryStacks.of(getRealStack(getHandle().getItem()));
         }
@@ -468,11 +477,6 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return SlotWidget.this.isEnabled();
         }
 
-        @Override
-        public void initialize(ItemStack stack) {
-            itemHandler.setStackInSlot(this.index, stack);
-            this.setChanged();
-        }
     }
 
     @Override

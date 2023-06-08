@@ -1,8 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.configurator;
 
-import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
-import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
-import com.lowdragmc.lowdraglib.utils.Vector3;
+import org.joml.Vector3f;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -13,11 +11,11 @@ import java.util.function.Supplier;
  * @date 2023/5/27
  * @implNote Vector3Configurator
  */
-public class Vector3Configurator extends ValueConfigurator<Vector3>{
+public class Vector3Configurator extends ValueConfigurator<Vector3f>{
 
     protected Number min, max, wheel;
 
-    public Vector3Configurator(String name, Supplier<Vector3> supplier, Consumer<Vector3> onUpdate, @NotNull Vector3 defaultValue, boolean forceUpdate) {
+    public Vector3Configurator(String name, Supplier<Vector3f> supplier, Consumer<Vector3f> onUpdate, @NotNull Vector3f defaultValue, boolean forceUpdate) {
         super(name, supplier, onUpdate, defaultValue, forceUpdate);
         if (value == null) {
             value = defaultValue;
@@ -38,7 +36,7 @@ public class Vector3Configurator extends ValueConfigurator<Vector3>{
     }
 
     @Override
-    protected void onValueUpdate(Vector3 newValue) {
+    protected void onValueUpdate(Vector3f newValue) {
         if (newValue == null) newValue = defaultValue;
         if (newValue.equals(value)) return;
         super.onValueUpdate(newValue);
@@ -50,7 +48,7 @@ public class Vector3Configurator extends ValueConfigurator<Vector3>{
         assert value != null;
         var w = (width - leftWidth - rightWidth) / 3;
         var x = new NumberConfigurator("x", () -> this.value.x, number -> {
-            this.value.x = number.doubleValue();
+            this.value.x = (float) number.doubleValue();
             updateValue();
         }, defaultValue.x, forceUpdate);
         x.setRange(min, max);
@@ -61,7 +59,7 @@ public class Vector3Configurator extends ValueConfigurator<Vector3>{
         addWidget(x);
 
         var y = new NumberConfigurator("y", () -> this.value.y, number -> {
-            this.value.y = number.doubleValue();
+            this.value.y = (float) number.doubleValue();
             updateValue();
         }, defaultValue.y, forceUpdate);
         y.setRange(min, max);
@@ -72,7 +70,7 @@ public class Vector3Configurator extends ValueConfigurator<Vector3>{
         addWidget(y);
 
         var z = new NumberConfigurator("z", () -> this.value.z, number -> {
-            this.value.z = number.doubleValue();
+            this.value.z = (float) number.doubleValue();
             updateValue();
         }, defaultValue.z, forceUpdate);
         z.setRange(min, max);

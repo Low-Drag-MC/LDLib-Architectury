@@ -1,5 +1,7 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import org.joml.Vector3f;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -54,7 +56,7 @@ public class Quat {
         return new Quat().setAroundAxis(ax, ay, az, angle);
     }
 
-    public static Quat aroundAxis(Vector3 axis, double angle) {
+    public static Quat aroundAxis(Vector3f axis, double angle) {
         return aroundAxis(axis.x, axis.y, axis.z, angle);
     }
 
@@ -64,7 +66,7 @@ public class Quat {
         return set(Math.cos(angle), ax * d4, ay * d4, az * d4);
     }
 
-    public Quat setAroundAxis(Vector3 axis, double angle) {
+    public Quat setAroundAxis(Vector3f axis, double angle) {
         return setAroundAxis(axis.x, axis.y, axis.z, angle);
     }
 
@@ -115,14 +117,14 @@ public class Quat {
         return new Quat(this);
     }
 
-    public void rotate(Vector3 vec) {
-        double d = -x * vec.x - y * vec.y - z * vec.z;
-        double d1 = s * vec.x + y * vec.z - z * vec.y;
-        double d2 = s * vec.y - x * vec.z + z * vec.x;
-        double d3 = s * vec.z + x * vec.y - y * vec.x;
-        vec.x = d1 * s - d * x - d2 * z + d3 * y;
-        vec.y = d2 * s - d * y + d1 * z - d3 * x;
-        vec.z = d3 * s - d * z - d1 * y + d2 * x;
+    public void rotate(Vector3f vec) {
+        var d = -x * vec.x - y * vec.y - z * vec.z;
+        var d1 = s * vec.x + y * vec.z - z * vec.y;
+        var d2 = s * vec.y - x * vec.z + z * vec.x;
+        var d3 = s * vec.z + x * vec.y - y * vec.x;
+        vec.x = (float) (d1 * s - d * x - d2 * z + d3 * y);
+        vec.y = (float) (d2 * s - d * y + d1 * z - d3 * x);
+        vec.z = (float) (d3 * s - d * z - d1 * y + d2 * x);
     }
 
     public String toString() {

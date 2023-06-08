@@ -88,7 +88,6 @@ public class ShaderProgram {
 			int i = 0;
 			for (Map.Entry<String, Integer> entry : samplers.entrySet()) {
 				RenderSystem.activeTexture(GL13.GL_TEXTURE0 + i);
-				RenderSystem.enableTexture();
 				RenderSystem.bindTexture(entry.getValue());
 				uniformCache.glUniform1I(entry.getKey(), i);
 				i++;

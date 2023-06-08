@@ -47,13 +47,8 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
     private LDLRendererModel() {}
 
     @Override
-    public BakedModel bake(IGeometryBakingContext iGeometryBakingContext, ModelBakery arg, Function<Material, TextureAtlasSprite> function, ModelState arg2, ItemOverrides arg3, ResourceLocation arg4) {
+    public BakedModel bake(IGeometryBakingContext iGeometryBakingContext, ModelBaker arg, Function<Material, TextureAtlasSprite> function, ModelState arg2, ItemOverrides arg3, ResourceLocation arg4) {
         return new RendererBakedModel();
-    }
-
-    @Override
-    public Collection<Material> getMaterials(IGeometryBakingContext iGeometryBakingContext, Function<ResourceLocation, UnbakedModel> function, Set<Pair<String, String>> set) {
-        return Collections.emptyList();
     }
 
     public static final class RendererBakedModel implements BakedModel {

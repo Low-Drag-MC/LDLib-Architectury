@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.syncdata.accessor;
 import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,7 +27,7 @@ public class BlockStateAccessor extends CustomObjectAccessor<BlockState>{
     @Override
     public BlockState deserialize(AccessorOp op, ITypedPayload<?> payload) {
         if (payload instanceof NbtTagPayload nbtTagPayload) {
-            return NbtUtils.readBlockState((CompoundTag)nbtTagPayload.getPayload());
+            return NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), (CompoundTag)nbtTagPayload.getPayload());
         }
         return null;
     }

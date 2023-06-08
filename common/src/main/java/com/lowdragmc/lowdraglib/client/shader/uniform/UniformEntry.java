@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.client.shader.uniform;
 
-import com.mojang.math.Matrix4f;
 import org.apache.commons.lang3.tuple.Pair;
+import org.joml.Matrix4f;
 
 import java.nio.FloatBuffer;
 import java.util.function.Function;
@@ -90,7 +90,7 @@ public abstract class UniformEntry<T> {
 		private final Matrix4f matrix;
 
 		public Matrix4FUniformEntry(Matrix4f other) {
-			this.matrix = other.copy();
+			this.matrix = new Matrix4f(other);
 		}
 
 		@Override

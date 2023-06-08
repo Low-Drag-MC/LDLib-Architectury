@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.client.bakedpipeline;
 
-import com.mojang.math.Vector3f;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
@@ -14,6 +13,7 @@ import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
+import org.joml.Vector3f;
 
 /**
  * @author KilaBash
@@ -65,7 +65,7 @@ public class FaceQuad {
     @Accessors(chain = true, fluent = true)
     public static class Builder {
         @Setter
-        Vector3f from = Vector3f.ZERO;
+        Vector3f from = new Vector3f(0, 0, 0);
         @Setter
         Vector3f to = new Vector3f(16, 16, 16);
         @Setter

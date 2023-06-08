@@ -1,11 +1,12 @@
 package com.lowdragmc.lowdraglib.client.utils;
 
-import com.lowdragmc.lowdraglib.utils.Vector3;
+import net.minecraft.util.Mth;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -18,7 +19,7 @@ import java.util.List;
 public class RenderBufferUtils {
 
     public static void renderCubeFrame(PoseStack matrixStack, BufferBuilder buffer, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float r, float g, float b, float a) {
-        Matrix4f mat = matrixStack.last().pose();
+        var mat = matrixStack.last().pose();
         buffer.vertex(mat, minX, minY, minZ).color(r, g, b, a).normal(1,0,0).endVertex();
         buffer.vertex(mat, maxX, minY, minZ).color(r, g, b, a).normal(1,0,0).endVertex();
 
@@ -157,7 +158,7 @@ public class RenderBufferUtils {
         Matrix4f mat = poseStack.last().pose();
         Vec2 lastPoint = points.get(0);
         Vec2 point = points.get(1);
-        Vector3 vec = null;
+        Vector3f vec = null;
         int sa = (colorStart >> 24) & 0xff, sr = (colorStart >> 16) & 0xff, sg = (colorStart >> 8) & 0xff, sb = colorStart & 0xff;
         int ea = (colorEnd >> 24) & 0xff, er = (colorEnd >> 16) & 0xff, eg = (colorEnd >> 8) & 0xff, eb = colorEnd & 0xff;
         ea = (ea - sa);
@@ -168,22 +169,22 @@ public class RenderBufferUtils {
             float s = (i - 1f) / points.size();
             float e = i * 1f / points.size();
             point = points.get(i);
-            vec = new Vector3(point.x - lastPoint.x, point.y - lastPoint.y, 0).rotate(Math.toRadians(90), Vector3.Z).normalize().multiply(-width);
-            builder.vertex(mat, lastPoint.x + (float) vec.x, lastPoint.y + (float) vec.y, 0)
+            vec = new Vector3f(point.x - lastPoint.x, point.y - lastPoint.y, 0).rotateZ(Mth.HALF_PI).normalize().mul(-width);
+            builder.vertex(mat, lastPoint.x + vec.x, lastPoint.y + vec.y, 0)
                     .color((sr + er * s) / 255, (sg + eg * s) / 255, (sb + eb * s) / 255, (sa + ea * s) / 255)
                     .endVertex();
-            vec.multiply(-1);
-            builder.vertex(mat, lastPoint.x + (float) vec.x, lastPoint.y + (float) vec.y, 0)
+            vec.mul(-1);
+            builder.vertex(mat, lastPoint.x + vec.x, lastPoint.y + vec.y, 0)
                     .color((sr + er * e) / 255, (sg + eg * e) / 255, (sb + eb * e) / 255, (sa + ea * e) / 255)
                     .endVertex();
             lastPoint = point;
         }
-        vec.multiply(-1);
-        builder.vertex(mat, point.x + (float) vec.x, point.y + (float) vec.y, 0)
+        vec.mul(-1);
+        builder.vertex(mat, point.x + vec.x, point.y + vec.y, 0)
                 .color(sr + er, sg + eg, sb + eb, sa + ea)
                 .endVertex();
-        vec.multiply(-1);
-        builder.vertex(mat, point.x + (float) vec.x, point.y + (float) vec.y, 0)
+        vec.mul(-1);
+        builder.vertex(mat, point.x + vec.x, point.y + vec.y, 0)
                 .color(sr + er, sg + eg, sb + eb, sa + ea)
                 .endVertex();
     }
@@ -193,7 +194,7 @@ public class RenderBufferUtils {
         Matrix4f mat = poseStack.last().pose();
         Vec2 lastPoint = points.get(0);
         Vec2 point = points.get(1);
-        Vector3 vec = null;
+        Vector3f vec = null;
         int sa = (colorStart >> 24) & 0xff, sr = (colorStart >> 16) & 0xff, sg = (colorStart >> 8) & 0xff, sb = colorStart & 0xff;
         int ea = (colorEnd >> 24) & 0xff, er = (colorEnd >> 16) & 0xff, eg = (colorEnd >> 8) & 0xff, eb = colorEnd & 0xff;
         ea = (ea - sa);
@@ -205,21 +206,21 @@ public class RenderBufferUtils {
             float e = i * 1f / points.size();
             point = points.get(i);
             float u = (i - 1f) / points.size();
-            vec = new Vector3(point.x - lastPoint.x, point.y - lastPoint.y, 0).rotate(Math.toRadians(90), Vector3.Z).normalize().multiply(-width);
-            builder.vertex(mat, lastPoint.x + (float) vec.x, lastPoint.y + (float) vec.y, 0).uv(u,0)
+            vec = new Vector3f(point.x - lastPoint.x, point.y - lastPoint.y, 0).rotateZ(Mth.HALF_PI).normalize().mul(-width);
+            builder.vertex(mat, lastPoint.x + vec.x, lastPoint.y + vec.y, 0).uv(u,0)
                     .color((sr + er * s) / 255, (sg + eg * s) / 255, (sb + eb * s) / 255, (sa + ea * s) / 255)
                     .endVertex();
-            vec.multiply(-1);
-            builder.vertex(mat, lastPoint.x + (float) vec.x, lastPoint.y + (float) vec.y, 0).uv(u,1)
+            vec.mul(-1);
+            builder.vertex(mat, lastPoint.x + vec.x, lastPoint.y + vec.y, 0).uv(u,1)
                     .color((sr + er * e) / 255, (sg + eg * e) / 255, (sb + eb * e) / 255, (sa + ea * e) / 255)
                     .endVertex();
             lastPoint = point;
         }
-        builder.vertex(mat, point.x + (float) vec.x, point.y + (float) vec.y, 0).uv(1,0)
+        builder.vertex(mat, point.x + vec.x, point.y + vec.y, 0).uv(1,0)
                 .color(sr + er, sg + eg, sb + eb, sa + ea)
                 .endVertex();
-        vec.multiply(-1);
-        builder.vertex(mat, point.x + (float) vec.x, point.y + (float) vec.y, 0).uv(1,1)
+        vec.mul(-1);
+        builder.vertex(mat, point.x + vec.x, point.y + vec.y, 0).uv(1,1)
                 .color(sr + er, sg + eg, sb + eb, sa + ea)
                 .endVertex();
     }

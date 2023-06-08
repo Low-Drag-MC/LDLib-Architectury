@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.gui.modular;
 
-import com.google.common.collect.Lists;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.AbstractContainerScreenAccessor;
@@ -78,7 +77,6 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
 
     @Override
     public void init() {
-        Minecraft.getInstance().keyboardHandler.setSendRepeatsToGui(true);
         this.imageWidth = modularUI.getWidth();
         this.imageHeight = modularUI.getHeight();
         super.init();
@@ -88,7 +86,6 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
     @Override
     public void removed() {
         super.removed();
-        Minecraft.getInstance().keyboardHandler.setSendRepeatsToGui(false);
     }
 
     @Override
@@ -154,8 +151,8 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
 
         if (Platform.isForge()) ForgeEventHooks.postRenderForegroundEvent(this, poseStack, mouseX, mouseY);
 
-        renderItemStackOnMouse(mouseX, mouseY);
-        renderReturningItemStack();
+        renderItemStackOnMouse(poseStack, mouseX, mouseY);
+        renderReturningItemStack(poseStack);
 
         posestack.popPose();
         RenderSystem.applyModelViewMatrix();
@@ -167,7 +164,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         this.hoveredSlot = hoveredSlot;
     }
 
-    private void renderItemStackOnMouse(int mouseX, int mouseY) {
+    private void renderItemStackOnMouse(PoseStack poseStack, int mouseX, int mouseY) {
         if (minecraft == null || minecraft.player == null) return;
         ItemStack draggedStack = ((AbstractContainerScreenAccessor)this).getDraggingItem();
         ItemStack itemstack = draggedStack.isEmpty() ? getMenu().getCarried() : draggedStack;
@@ -184,25 +181,21 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
                     s = "" + ChatFormatting.YELLOW + "0";
                 }
             }
-            this.renderFloatingItem(itemstack, mouseX - leftPos - 8, mouseY - topPos - k2, s);
+            this.renderFloatingItem(poseStack, itemstack, mouseX - leftPos - 8, mouseY - topPos - k2, s);
         }
-        
+
     }
 
-    public void renderFloatingItem(ItemStack stack, int pX, int pY, @Nullable String text) {
-        PoseStack posestack = RenderSystem.getModelViewStack();
-        posestack.translate(0.0D, 0.0D, 232.0D);
+    public void renderFloatingItem(PoseStack poseStack, ItemStack stack, int pX, int pY, @Nullable String text) {
+        poseStack.translate(0.0D, 0.0D, 232.0D);
         RenderSystem.applyModelViewMatrix();
-        this.setBlitOffset(200);
-        this.itemRenderer.blitOffset = 200.0F;
         Font font = Minecraft.getInstance().font;
-        this.itemRenderer.renderAndDecorateItem(stack, pX, pY);
-        this.itemRenderer.renderGuiItemDecorations(font, stack, pX, pY - (((AbstractContainerScreenAccessor)this).getDraggingItem().isEmpty() ? 0 : 8), text);
-        this.setBlitOffset(0);
-        this.itemRenderer.blitOffset = 0.0F;
+        this.itemRenderer.renderAndDecorateItem(poseStack, stack, pX, pY);
+        this.itemRenderer.renderGuiItemDecorations(poseStack, font, stack, pX, pY - (((AbstractContainerScreenAccessor)this).getDraggingItem().isEmpty() ? 0 : 8), text);
+        poseStack.popPose();
     }
 
-    private void renderReturningItemStack() {
+    private void renderReturningItemStack(PoseStack poseStack) {
         if (!((AbstractContainerScreenAccessor)this).getSnapbackItem().isEmpty()) {
             float f = (float)(Util.getMillis() - ((AbstractContainerScreenAccessor)this).getSnapbackTime()) / 100.0F;
             if (f >= 1.0F) {
@@ -214,7 +207,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
             int i3 = ((AbstractContainerScreenAccessor)this).getSnapbackEnd().y - ((AbstractContainerScreenAccessor)this).getSnapbackStartY();
             int l1 = ((AbstractContainerScreenAccessor)this).getSnapbackStartX() + (int)((float)l2 * f);
             int i2 = ((AbstractContainerScreenAccessor)this).getSnapbackStartY() + (int)((float)i3 * f);
-            this.renderFloatingItem(((AbstractContainerScreenAccessor)this).getSnapbackItem(), l1, i2, null);
+            this.renderFloatingItem(poseStack, ((AbstractContainerScreenAccessor)this).getSnapbackItem(), l1, i2, null);
         }
     }
 

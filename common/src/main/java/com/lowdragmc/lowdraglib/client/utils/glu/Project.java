@@ -32,8 +32,8 @@
 package com.lowdragmc.lowdraglib.client.utils.glu;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -321,20 +321,21 @@ public class Project extends Util {
 		cross(side, forward, up);
 
 		__gluMakeIdentityf(matrix);
-		matrix.put(0 * 4 + 0, side[0]);
-		matrix.put(1 * 4 + 0, side[1]);
-		matrix.put(2 * 4 + 0, side[2]);
+		matrix.put(0, side[0]);
+		matrix.put(4, side[1]);
+		matrix.put(2 * 4, side[2]);
 
-		matrix.put(0 * 4 + 1, up[0]);
-		matrix.put(1 * 4 + 1, up[1]);
+		matrix.put(1, up[0]);
+		matrix.put(4 + 1, up[1]);
 		matrix.put(2 * 4 + 1, up[2]);
 
-		matrix.put(0 * 4 + 2, -forward[0]);
-		matrix.put(1 * 4 + 2, -forward[1]);
+		matrix.put(2, -forward[0]);
+		matrix.put(4 + 2, -forward[1]);
 		matrix.put(2 * 4 + 2, -forward[2]);
 
-		Matrix4f matrix4f = new Matrix4f();
-		matrix4f.load(matrix);
+		matrix.rewind();
+
+		var matrix4f = new Matrix4f(matrix);
 		poseStack.mulPoseMatrix(matrix4f);
 		poseStack.translate(-eyex, -eyey, -eyez);
 	}

@@ -11,9 +11,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class LanguageMixin {
 
     @Inject(method = "getOrDefault", at = @At(value = "HEAD"), cancellable = true)
-    private void injectGet(String pId, CallbackInfoReturnable<String> cir) {
-        if (LocalizationUtils.RESOURCE != null && LocalizationUtils.RESOURCE.hasResource(pId)) {
-            cir.setReturnValue(LocalizationUtils.RESOURCE.getResource(pId));
+    private void injectGet(String key, String defaultText, CallbackInfoReturnable<String> cir) {
+        if (LocalizationUtils.RESOURCE != null && LocalizationUtils.RESOURCE.hasResource(key)) {
+            cir.setReturnValue(LocalizationUtils.RESOURCE.getResource(key));
         }
     }
 

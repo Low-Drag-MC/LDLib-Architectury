@@ -15,6 +15,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -48,7 +49,7 @@ public class SPacketManagedPayload extends PacketIntLocation implements IPacket 
 
     public SPacketManagedPayload(CompoundTag tag) {
         super(BlockPos.of(tag.getLong("p")));
-        blockEntityType = Registry.BLOCK_ENTITY_TYPE.get(new ResourceLocation(tag.getString("t")));
+        blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(new ResourceLocation(tag.getString("t")));
         changed = BitSet.valueOf(tag.getByteArray("c"));
         ListTag list = tag.getList("l", 10);
         payloads = new ITypedPayload<?>[list.size()];
@@ -66,7 +67,7 @@ public class SPacketManagedPayload extends PacketIntLocation implements IPacket 
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putLong("p", pos.asLong());
-        tag.putString("t", Objects.requireNonNull(Registry.BLOCK_ENTITY_TYPE.getKey(blockEntityType)).toString());
+        tag.putString("t", Objects.requireNonNull(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType)).toString());
         tag.putByteArray("c", changed.toByteArray());
         ListTag list = new ListTag();
         for (ITypedPayload<?> payload : payloads) {
@@ -119,7 +120,7 @@ public class SPacketManagedPayload extends PacketIntLocation implements IPacket 
     @Override
     public void encode(FriendlyByteBuf buf) {
         super.encode(buf);
-        buf.writeResourceLocation(Objects.requireNonNull(Registry.BLOCK_ENTITY_TYPE.getKey(blockEntityType)));
+        buf.writeResourceLocation(Objects.requireNonNull(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType)));
         buf.writeByteArray(changed.toByteArray());
         for (ITypedPayload<?> payload : payloads) {
             buf.writeByte(payload.getType());
@@ -131,7 +132,7 @@ public class SPacketManagedPayload extends PacketIntLocation implements IPacket 
     @Override
     public void decode(FriendlyByteBuf buffer) {
         super.decode(buffer);
-        blockEntityType = Registry.BLOCK_ENTITY_TYPE.get(buffer.readResourceLocation());
+        blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(buffer.readResourceLocation());
         changed = BitSet.valueOf(buffer.readByteArray());
         payloads = new ITypedPayload<?>[changed.cardinality()];
         for (int i = 0; i < payloads.length; i++) {

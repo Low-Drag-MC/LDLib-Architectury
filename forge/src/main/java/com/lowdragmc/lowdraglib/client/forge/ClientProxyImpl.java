@@ -17,6 +17,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
+import net.minecraftforge.client.event.RegisterTextureAtlasSpriteLoadersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -53,17 +54,17 @@ public class ClientProxyImpl extends CommonProxyImpl {
 
     @SubscribeEvent
     public void shaderRegistry(RegisterShadersEvent event) {
-        for (Pair<ShaderInstance, Consumer<ShaderInstance>> pair : Shaders.registerShaders(event.getResourceManager())) {
+        for (Pair<ShaderInstance, Consumer<ShaderInstance>> pair : Shaders.registerShaders(event.getResourceProvider())) {
             event.registerShader(pair.getFirst(), pair.getSecond());
         }
     }
 
-    @SubscribeEvent
-    public void registerTextures(TextureStitchEvent.Pre event) {
-        for (IRenderer renderer : IRenderer.EVENT_REGISTERS) {
-            renderer.onPrepareTextureAtlas(event.getAtlas().location(), event::addSprite);
-        }
-    }
+//    @SubscribeEvent
+//    public void registerTextures(RegisterTextureAtlasSpriteLoadersEvent event) {
+//        for (IRenderer renderer : IRenderer.EVENT_REGISTERS) {
+//            renderer.onPrepareTextureAtlas(event.getAtlas().location(), location -> event.getAtlas().);
+//        }
+//    }
 
     @SubscribeEvent
     public void registerTextures(ModelEvent.RegisterAdditional event) {
