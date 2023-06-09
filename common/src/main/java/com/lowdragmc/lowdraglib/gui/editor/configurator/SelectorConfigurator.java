@@ -27,7 +27,7 @@ public class SelectorConfigurator<T> extends ValueConfigurator<T>{
     protected SelectorWidget selector;
 
     @Setter
-    protected int max;
+    protected int max = 5;
     @Setter
     protected boolean isUp = true;
 
@@ -57,6 +57,7 @@ public class SelectorConfigurator<T> extends ValueConfigurator<T>{
                     value = nameMap.get(s);
                     updateValue();
                 })
+                .setMaxCount(max)
                 .setIsUp(isUp)
                 .setButtonBackground(ColorPattern.T_GRAY.rectTexture().setRadius(5))
                 .setBackground(ColorPattern.BLACK.rectTexture())
