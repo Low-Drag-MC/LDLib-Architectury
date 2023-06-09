@@ -149,9 +149,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
     @Environment(EnvType.CLIENT)
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         setFocus(isMouseOverElement(mouseX, mouseY));
-        if (!isMouseOverElement(mouseX, mouseY)) {
-            this.textField.setFocused(false);
-        }
+        this.textField.setFocused(isMouseOverElement(mouseX, mouseY));
         return this.textField.mouseClicked(mouseX, mouseY, button);
     }
 
