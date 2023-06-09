@@ -336,7 +336,7 @@ public abstract class WorldSceneRenderer {
         if (ortho) {
             RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(minX, maxX, maxY / aspectRatio, minY / aspectRatio, minZ, maxZ));
         } else {
-            RenderSystem.setProjectionMatrix(new Matrix4f().perspective(fov, aspectRatio, 0.1f, 10000.0f));
+            RenderSystem.setProjectionMatrix(new Matrix4f().setPerspective(fov * 0.01745329238474369F, aspectRatio, 0.1f, 10000.0f));
         }
 
         //setup modelview matrix
