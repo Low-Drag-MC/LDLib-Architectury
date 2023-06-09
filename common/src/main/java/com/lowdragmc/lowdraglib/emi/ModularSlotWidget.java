@@ -10,6 +10,9 @@ import dev.emi.emi.bom.BoM;
 import dev.emi.emi.runtime.EmiHistory;
 import dev.emi.emi.screen.EmiScreenManager;
 import dev.emi.emi.screen.RecipeScreen;
+import net.minecraft.client.gui.GuiGraphics;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author KilaBash
@@ -37,7 +40,12 @@ public class ModularSlotWidget extends Widget {
     }
 
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void method_25394(PoseStack matrices, int mouseX, int mouseY, float delta) {
+
+    }
+
+    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 
     }
 

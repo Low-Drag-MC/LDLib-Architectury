@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 
 /**
@@ -63,16 +64,16 @@ public class ProgressTexture extends TransformTexture {
 
     @Override
     @Environment(EnvType.CLIENT)
-    protected void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+    protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         if (emptyBarArea != null) {
-            emptyBarArea.draw(stack, mouseX, mouseY, x, y, width, height);
+            emptyBarArea.draw(graphics, mouseX, mouseY, x, y, width, height);
         }
         if (filledBarArea != null) {
             float drawnU = (float) fillDirection.getDrawnU(progress);
             float drawnV = (float) fillDirection.getDrawnV(progress);
             float drawnWidth = (float) fillDirection.getDrawnWidth(progress);
             float drawnHeight = (float) fillDirection.getDrawnHeight(progress);
-            filledBarArea.drawSubArea(stack, x + drawnU * width, y + drawnV * height, ((int) (width * drawnWidth)), ((int) (height * drawnHeight)),
+            filledBarArea.drawSubArea(graphics, x + drawnU * width, y + drawnV * height, ((int) (width * drawnWidth)), ((int) (height * drawnHeight)),
                     drawnU, drawnV,((int) (drawnWidth * width)) / (width * 1.0f), ((int) (drawnHeight * height)) / (height * 1.0f));
         }
     }

@@ -20,6 +20,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 
@@ -126,7 +127,7 @@ public class AnimationTexture extends TransformTexture {
 
     @Override
     @Environment(EnvType.CLIENT)
-    protected void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+    protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         float cell = 1f / this.cellSize;
         int X = currentFrame % cellSize;
         int Y = currentFrame / cellSize;
@@ -138,7 +139,7 @@ public class AnimationTexture extends TransformTexture {
         BufferBuilder bufferbuilder = tessellator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, imageLocation);
-        var matrix4f = stack.last().pose();
+        var matrix4f = graphics.pose().last().pose();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
         bufferbuilder.vertex(matrix4f, x, y + height, 0).uv(imageU, imageV + cell).color(color).endVertex();
         bufferbuilder.vertex(matrix4f, x + width, y + height, 0).uv(imageU + cell, imageV + cell).color(color).endVertex();
@@ -178,7 +179,7 @@ public class AnimationTexture extends TransformTexture {
     }
 
     @Environment(EnvType.CLIENT)
-    protected void drawGuides(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+    protected void drawGuides(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         float cell = 1f / this.cellSize;
         int X = from % cellSize;
         int Y = from / cellSize;
@@ -186,7 +187,7 @@ public class AnimationTexture extends TransformTexture {
         float imageU = X * cell;
         float imageV = Y * cell;
 
-        new ColorBorderTexture(-1, 0xff00ff00).draw(stack, 0, 0,
+        new ColorBorderTexture(-1, 0xff00ff00).draw(graphics, 0, 0,
                 x + width * imageU, y + height * imageV,
                 (int) (width * (cell)), (int) (height * (cell)));
 
@@ -196,7 +197,7 @@ public class AnimationTexture extends TransformTexture {
         imageU = X * cell;
         imageV = Y * cell;
 
-        new ColorBorderTexture(-1, 0xffff0000).draw(stack, 0, 0,
+        new ColorBorderTexture(-1, 0xffff0000).draw(graphics, 0, 0,
                 x + width * imageU, y + height * imageV,
                 (int) (width * (cell)), (int) (height * (cell)));
     }

@@ -14,7 +14,9 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 /**
@@ -37,7 +39,7 @@ public record UIWrapper(MainPanel panel, IConfigurableWidget inner) implements I
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         Position pos = inner.widget().getPosition();
         Size size = inner.widget().getSize();
         // render border
@@ -65,7 +67,7 @@ public record UIWrapper(MainPanel panel, IConfigurableWidget inner) implements I
             }
         }
         if (borderColor != 0) {
-            new ColorBorderTexture(1, borderColor).draw(poseStack, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
+            new ColorBorderTexture(1, borderColor).draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
         }
     }
 

@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
 
@@ -52,11 +53,13 @@ public abstract class MenuTab implements ILDLRegister {
         button.setOnPressCallback(cd -> {
             var pos = button.getPosition();
             var view = createMenu();
-            var currentProject = editor.getCurrentProject();
-            if (currentProject != null) {
-                currentProject.attachMenu(editor, this.name(), view);
+            if (view != null) {
+                var currentProject = editor.getCurrentProject();
+                if (currentProject != null) {
+                    currentProject.attachMenu(editor, this.name(), view);
+                }
+                editor.openMenu(pos.x, pos.y + 14, appendMenu(view));
             }
-            editor.openMenu(pos.x, pos.y + 14, appendMenu(view));
         });
         return button.setClientSideWidget();
     }
@@ -69,5 +72,6 @@ public abstract class MenuTab implements ILDLRegister {
 
     }
 
+    @Nullable
     abstract protected TreeBuilder.Menu createMenu();
 }

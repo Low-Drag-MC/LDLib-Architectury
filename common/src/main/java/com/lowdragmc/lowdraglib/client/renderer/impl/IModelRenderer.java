@@ -70,13 +70,13 @@ public class IModelRenderer implements IRenderer {
     @Environment(EnvType.CLIENT)
     public void renderItem(ItemStack stack,
                            ItemDisplayContext transformType,
-                           boolean leftHand, PoseStack matrixStack,
+                           boolean leftHand, PoseStack poseStack,
                            MultiBufferSource buffer, int combinedLight,
                            int combinedOverlay, BakedModel model) {
         IItemRendererProvider.disabled.set(true);
         model = getItemBakedModel(stack);
         if (model != null) {
-            Minecraft.getInstance().getItemRenderer().render(stack, transformType, leftHand, matrixStack, buffer, combinedLight, combinedOverlay, model);
+            Minecraft.getInstance().getItemRenderer().render(stack, transformType, leftHand, poseStack, buffer, combinedLight, combinedOverlay, model);
         }
         IItemRendererProvider.disabled.set(false);
     }

@@ -6,11 +6,11 @@ import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 
@@ -134,12 +134,12 @@ public class TextTexture extends TransformTexture{
 
     @Environment(EnvType.CLIENT)
     @Override
-    protected void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+    protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         if (backgroundColor != 0) {
-            DrawerHelper.drawSolidRect(stack, (int) x, (int) y, width, height, backgroundColor);
+            DrawerHelper.drawSolidRect(graphics, (int) x, (int) y, width, height, backgroundColor);
         }
-        stack.pushPose();
-        stack.translate(0, 0, 400);
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 400);
         Font fontRenderer = Minecraft.getInstance().font;
         int textH = fontRenderer.lineHeight;
         if (type == TextType.NORMAL) {
@@ -149,11 +149,7 @@ public class TextTexture extends TransformTexture{
                 int textW = fontRenderer.width(resultText);
                 float _x = x + (width - textW) / 2f;
                 float _y = y + (height - textH) / 2f + i * fontRenderer.lineHeight;
-                if (dropShadow) {
-                    fontRenderer.drawShadow(stack, resultText, _x, _y, color);
-                } else {
-                    fontRenderer.draw(stack, resultText, _x, _y, color);
-                }
+                graphics.drawString(fontRenderer, resultText, (int) _x, (int) _y, color, dropShadow);
             }
         } else if (type == TextType.HIDE) {
             int i = -1;
@@ -161,24 +157,20 @@ public class TextTexture extends TransformTexture{
                 i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
             }
             String resultText = i >= 0 ? texts.get(i) : (texts.get(0) + (texts.size() > 1 ? ".." : ""));
-            drawTextLine(stack, x, y, width, height, fontRenderer, textH, resultText);
+            drawTextLine(graphics, x, y, width, height, fontRenderer, textH, resultText);
         } else if (type == TextType.ROLL || type == TextType.ROLL_ALWAYS) {
             int i = 0;
             if (type == TextType.ROLL_ALWAYS || Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY)) {
                 i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
             }
             String resultText = texts.get(i);
-            drawTextLine(stack, x, y, width, height, fontRenderer, textH, resultText);
+            drawTextLine(graphics, x, y, width, height, fontRenderer, textH, resultText);
         } else if (type == TextType.LEFT) {
             textH *= texts.size();
             for (int i = 0; i < texts.size(); i++) {
                 String resultText = texts.get(i);
                 float _y = y + (height - textH) / 2f + i * fontRenderer.lineHeight;
-                if (dropShadow) {
-                    fontRenderer.drawShadow(stack, resultText, x, _y, color);
-                } else {
-                    fontRenderer.draw(stack, resultText, x, _y, color);
-                }
+                graphics.drawString(fontRenderer, resultText, (int) x, (int) _y, color, dropShadow);
             }
         } else if (type == TextType.RIGHT) {
             textH *= texts.size();
@@ -186,26 +178,18 @@ public class TextTexture extends TransformTexture{
                 String resultText = texts.get(i);
                 int textW = fontRenderer.width(resultText);
                 float _y = y + (height - textH) / 2f + i * fontRenderer.lineHeight;
-                if (dropShadow) {
-                    fontRenderer.drawShadow(stack, resultText, x + width - textW, _y, color);
-                } else {
-                    fontRenderer.draw(stack, resultText, x + width - textW, _y, color);
-                }
+                graphics.drawString(fontRenderer, resultText, (int) (x + width - textW), (int) _y, color, dropShadow);
             }
         }
-        stack.popPose();
+        graphics.pose().popPose();
         RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 
-    private void drawTextLine(PoseStack stack, float x, float y, int width, int height, Font fontRenderer, int textH, String resultText) {
+    private void drawTextLine(GuiGraphics graphics, float x, float y, int width, int height, Font fontRenderer, int textH, String resultText) {
         int textW = fontRenderer.width(resultText);
         float _x = x + (width - textW) / 2f;
         float _y = y + (height - textH) / 2f;
-        if (dropShadow) {
-            fontRenderer.drawShadow(stack, resultText, _x, _y, color);
-        } else {
-            fontRenderer.draw(stack, resultText, _x, _y, color);
-        }
+        graphics.drawString(fontRenderer, resultText, (int) _x, (int) _y, color, dropShadow);
     }
 
     public enum TextType{

@@ -16,6 +16,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -393,8 +394,8 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
+    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
         DialogWidget dialogWidget = null;
         for (int i = widgets.size() - 1; i >= 0; i--) {
             if (widgets.get(i) instanceof DialogWidget dialog) {
@@ -407,9 +408,9 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
                 RenderSystem.setShaderColor(1, 1, 1, 1);
                 RenderSystem.enableBlend();
                 if (widget.inAnimate()) {
-                    widget.animation.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
+                    widget.animation.drawInForeground(graphics, mouseX, mouseY, partialTicks);
                 } else {
-                    widget.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
+                    widget.drawInForeground(graphics, mouseX, mouseY, partialTicks);
                 }
 
             }
@@ -418,16 +419,16 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         for (Widget widget : widgets) {
             if (widget.isVisible()) {
                 RenderSystem.setShaderColor(1, 1, 1, 1);
                 RenderSystem.enableBlend();
                 if (widget.inAnimate()) {
-                    widget.animation.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+                    widget.animation.drawInBackground(graphics, mouseX, mouseY, partialTicks);
                 } else {
-                    widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+                    widget.drawInBackground(graphics, mouseX, mouseY, partialTicks);
                 }
             }
         }

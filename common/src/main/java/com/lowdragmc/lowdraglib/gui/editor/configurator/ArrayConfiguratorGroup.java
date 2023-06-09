@@ -10,12 +10,12 @@ import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.client.gui.GuiGraphics;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -208,17 +208,17 @@ public class ArrayConfiguratorGroup<T> extends ConfiguratorGroup{
 
         @Override
         @Environment(EnvType.CLIENT)
-        public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-            super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+        public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+            super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
             if (isMouseOverElement(mouseX, mouseY) && onReorder != null) {
                 var object = getGui().getModularUIGui().getDraggingElement();
                 Position pos = getPosition();
                 Size size = getSize();
                 if (object != null && object.getClass() == this.getClass() && object != this) {
                     if (mouseY > pos.y + size.height / 2) { // down
-                        ColorPattern.T_GREEN.rectTexture().draw(poseStack, 0, 0, pos.x, pos.y + size.height, size.width, 2);
+                        ColorPattern.T_GREEN.rectTexture().draw(graphics, 0, 0, pos.x, pos.y + size.height, size.width, 2);
                     } else { // up
-                        ColorPattern.T_GREEN.rectTexture().draw(poseStack, 0, 0, pos.x, pos.y - 1, size.width, 2);
+                        ColorPattern.T_GREEN.rectTexture().draw(graphics, 0, 0, pos.x, pos.y - 1, size.width, 2);
                     }
                 }
             }

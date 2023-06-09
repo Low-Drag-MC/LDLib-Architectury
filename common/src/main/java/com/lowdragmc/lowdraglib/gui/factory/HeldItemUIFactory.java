@@ -67,7 +67,7 @@ public class HeldItemUIFactory extends UIFactory<HeldItemUIFactory.HeldItemHolde
 
         @Override
         public boolean isRemote() {
-            return player.level.isClientSide;
+            return player.level().isClientSide;
         }
 
         @Override

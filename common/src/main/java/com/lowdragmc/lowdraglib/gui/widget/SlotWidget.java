@@ -33,6 +33,8 @@ import mezz.jei.library.ingredients.TypedIngredient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -158,30 +160,30 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@Nonnull PoseStack mStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (slotReference != null && drawHoverTips && isMouseOverElement(mouseX, mouseY)) {
             ItemStack stack = slotReference.getItem();
             if (!stack.isEmpty() && gui != null) {
-                List<Component> tips = new ArrayList<>(getToolTips(gui.getModularUIGui().getTooltipFromItem(stack)));
+                List<Component> tips = new ArrayList<>(getToolTips(Screen.getTooltipFromItem(Minecraft.getInstance(), stack)));
                 tips.addAll(tooltipTexts);
                 gui.getModularUIGui().setHoverTooltip(tips, stack, null, stack.getTooltipImage().orElse(null));
             } else {
-                super.drawInForeground(mStack, mouseX, mouseY, partialTicks);
+                super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
             }
         } else {
-            super.drawInForeground(mStack, mouseX, mouseY, partialTicks);
+            super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
         }
         if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY)) {
             RenderSystem.colorMask(true, true, true, false);
-            DrawerHelper.drawSolidRect(mStack,getPosition().x + 1, getPosition().y + 1, 16, 16, 0x80FFFFFF);
+            DrawerHelper.drawSolidRect(graphics,getPosition().x + 1, getPosition().y + 1, 16, 16, 0x80FFFFFF);
             RenderSystem.colorMask(true, true, true, true);
         }
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack mStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(mStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         Position pos = getPosition();
         if (slotReference != null)  {
             ItemStack itemStack = getRealStack(slotReference.getItem());
@@ -191,7 +193,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 itemStack = gui.getModularUIContainer().getCarried();
                 if (!itemStack.isEmpty() && splitSize > 1 && AbstractContainerMenu.canItemQuickReplace(slotReference, itemStack, true)) {
                     itemStack = itemStack.copy();
-                    AbstractContainerMenu.getQuickCraftSlotCount(modularUIGui.getQuickCraftSlots(), modularUIGui.dragSplittingLimit, itemStack, slotReference.getItem().isEmpty() ? 0 : slotReference.getItem().getCount());
+                    itemStack.grow(AbstractContainerMenu.getQuickCraftPlaceCount(modularUIGui.getQuickCraftSlots(), modularUIGui.dragSplittingLimit, itemStack));
                     int k = Math.min(itemStack.getMaxStackSize(), slotReference.getMaxStackSize(itemStack));
                     if (itemStack.getCount() > k) {
                         itemStack.setCount(k);
@@ -199,11 +201,11 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 }
             }
             if (!itemStack.isEmpty()) {
-                DrawerHelper.drawItemStack(mStack, itemStack, pos.x+ 1, pos.y + 1, -1, null);
+                DrawerHelper.drawItemStack(graphics, itemStack, pos.x+ 1, pos.y + 1, -1, null);
             }
         }
         if (overlay != null) {
-            overlay.draw(mStack, mouseX, mouseY, pos.x, pos.y, 18, 18);
+            overlay.draw(graphics, mouseX, mouseY, pos.x, pos.y, 18, 18);
         }
     }
 

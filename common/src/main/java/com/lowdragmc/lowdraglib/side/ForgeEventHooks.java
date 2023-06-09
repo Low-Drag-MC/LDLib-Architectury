@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.side;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.injectables.annotations.PlatformOnly;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Player;
@@ -24,19 +25,19 @@ public class ForgeEventHooks {
 
     @ExpectPlatform
     @PlatformOnly(FORGE)
-    public static void postBackgroundRenderedEvent(Screen screen, PoseStack poseStack) {
+    public static void postBackgroundRenderedEvent(Screen screen, GuiGraphics poseStack) {
         throw new AssertionError();
     }
 
     @ExpectPlatform
     @PlatformOnly(FORGE)
-    public static void postRenderBackgroundEvent(AbstractContainerScreen<?> guiContainer, PoseStack poseStack, int mouseX, int mouseY) {
+    public static void postRenderBackgroundEvent(AbstractContainerScreen<?> guiContainer, GuiGraphics poseStack, int mouseX, int mouseY) {
         throw new AssertionError();
     }
 
     @ExpectPlatform
     @PlatformOnly(FORGE)
-    public static void postRenderForegroundEvent(AbstractContainerScreen<?> guiContainer, PoseStack poseStack, int mouseX, int mouseY) {
+    public static void postRenderForegroundEvent(AbstractContainerScreen<?> guiContainer, GuiGraphics poseStack, int mouseX, int mouseY) {
         throw new AssertionError();
     }
 }

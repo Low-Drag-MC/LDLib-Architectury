@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -16,6 +17,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;
+
+import javax.annotation.Nonnull;
 
 /**
  * Created with IntelliJ IDEA.
@@ -80,7 +83,7 @@ public class FBOWorldSceneRenderer extends WorldSceneRenderer {
         return winPos;
     }
 
-    public void render(PoseStack poseStack, float x, float y, float width, float height, float mouseX, float mouseY) {
+    public void render(@Nonnull PoseStack poseStack, float x, float y, float width, float height, float mouseX, float mouseY) {
         // bind to FBO
         int lastID = bindFBO();
         super.render(new PoseStack(), 0, 0, this.resolutionWidth, this.resolutionHeight, (int) (this.resolutionWidth * (mouseX - x) / width), (int) (this.resolutionHeight * (1 - (mouseY - y) / height)));
@@ -111,7 +114,7 @@ public class FBOWorldSceneRenderer extends WorldSceneRenderer {
 //        RenderSystem.bindTexture(lastID);
     }
 
-    public void render(PoseStack poseStack, float x, float y, float width, float height, int mouseX, int mouseY) {
+    public void render(@Nonnull PoseStack poseStack, float x, float y, float width, float height, int mouseX, int mouseY) {
         render(poseStack, x, y, width, height, (float) mouseX, (float) mouseY);
     }
 

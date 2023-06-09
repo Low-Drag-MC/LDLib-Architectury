@@ -120,10 +120,10 @@ package com.lowdragmc.lowdraglib.gui.util;//package com.lowdragmc.lowdraglib.gui
 //
 //    protected abstract void updateCurrentColor();
 //
-//    public static void update(PoseStack matrixStack) {
+//    public static void update(PoseStack poseStack) {
 //        if (enable) {
 //            mode.updateCurrentColor();
-//            mode.renderIndicator(matrixStack);
+//            mode.renderIndicator(poseStack);
 //
 //            if (ShimmerConstants.recordScreenColor.isDown() && readyForRecord) {
 //                eyedropperColor[0] = currentColor[0];
@@ -160,7 +160,7 @@ package com.lowdragmc.lowdraglib.gui.util;//package com.lowdragmc.lowdraglib.gui
 //        return str.toString();
 //    }
 //
-//    private void renderIndicator(PoseStack poseStack) {
+//    private void renderIndicator(@Nonnull GuiGraphics graphics) {
 //
 //        var window = Minecraft.getInstance().getWindow();
 //        var scale = window.getGuiScale();

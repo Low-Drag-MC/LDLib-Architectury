@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
 
 import javax.annotation.Nonnull;
@@ -131,18 +132,18 @@ public class SwitchWidget extends Widget implements IConfigurableWidget {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         Position position = getPosition();
         Size size = getSize();
         if (baseTexture != null && !isPressed) {
-            baseTexture.draw(matrixStack, mouseX, mouseY, position.x, position.y, size.width, size.height);
+            baseTexture.draw(graphics, mouseX, mouseY, position.x, position.y, size.width, size.height);
 
         } else if (pressedTexture != null && isPressed) {
-            pressedTexture.draw(matrixStack, mouseX, mouseY, position.x, position.y, size.width, size.height);
+            pressedTexture.draw(graphics, mouseX, mouseY, position.x, position.y, size.width, size.height);
 
         }
         if (isMouseOverElement(mouseX, mouseY) && hoverTexture != null) {
-            hoverTexture.draw(matrixStack, mouseX, mouseY, position.x, position.y, size.width, size.height);
+            hoverTexture.draw(graphics, mouseX, mouseY, position.x, position.y, size.width, size.height);
         }
     }
 

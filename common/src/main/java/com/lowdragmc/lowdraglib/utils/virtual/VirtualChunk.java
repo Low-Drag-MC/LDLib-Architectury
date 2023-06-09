@@ -69,11 +69,6 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public Stream<BlockPos> getLights() {
-		return Stream.empty();
-	}
-
-	@Override
 	public LevelChunkSection[] getSections() {
 		return sections;
 	}

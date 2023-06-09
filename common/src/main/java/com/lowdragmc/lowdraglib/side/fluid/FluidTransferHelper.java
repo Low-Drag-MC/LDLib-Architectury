@@ -24,7 +24,6 @@ import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -164,7 +163,7 @@ public class FluidTransferHelper {
                     tryFluidTransfer(handler, fluidSource, maxAmount, true);
                     if (player != null) {
                         SoundEvent soundevent = FluidHelper.getFillSound(simulatedTransfer);
-                        player.level.playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                        player.level().playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
                 } else {
                     handler.fill(simulatedTransfer, true);
@@ -202,7 +201,7 @@ public class FluidTransferHelper {
 
             if (doDrain && player != null) {
                 SoundEvent soundevent = FluidHelper.getEmptySound(transfer);
-                player.level.playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                player.level().playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
 
             return new FluidActionResult(getContainerItem(itemStorage, handler));
@@ -504,11 +503,9 @@ public class FluidTransferHelper {
 
         // check that we can place the fluid at the destination
         BlockState destBlockState = level.getBlockState(pos);
-        Material destMaterial = destBlockState.getMaterial();
-        boolean isDestNonSolid = !destMaterial.isSolid();
         boolean isDestReplaceable = destBlockState.canBeReplaced(context);
         boolean canDestContainFluid = destBlockState.getBlock() instanceof LiquidBlockContainer && ((LiquidBlockContainer) destBlockState.getBlock()).canPlaceLiquid(level, pos, destBlockState, fluid);
-        if (!level.isEmptyBlock(pos) && !isDestNonSolid && !isDestReplaceable && !canDestContainFluid) {
+        if (!level.isEmptyBlock(pos) && !isDestReplaceable && !canDestContainFluid) {
             return false; // Non-air, solid, unreplacable block. We can't put fluid here.
         }
 
@@ -556,13 +553,7 @@ public class FluidTransferHelper {
      */
     public static void destroyBlockOnFluidPlacement(Level level, BlockPos pos) {
         if (!level.isClientSide) {
-            BlockState destBlockState = level.getBlockState(pos);
-            Material destMaterial = destBlockState.getMaterial();
-            boolean isDestNonSolid = !destMaterial.isSolid();
-            boolean isDestReplaceable = false; //TODO: Needs BlockItemUseContext destBlockState.getBlock().isReplaceable(level, pos);
-            if ((isDestNonSolid || isDestReplaceable) && !destMaterial.isLiquid()) {
-                level.destroyBlock(pos, true);
-            }
+            level.destroyBlock(pos, true);
         }
     }
 

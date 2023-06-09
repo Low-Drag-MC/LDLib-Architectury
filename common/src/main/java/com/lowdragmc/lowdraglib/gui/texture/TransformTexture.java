@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Quaternionf;
 
 /**
@@ -47,44 +48,44 @@ public abstract class TransformTexture implements IGuiTexture{
     }
 
     @Environment(EnvType.CLIENT)
-    protected void preDraw(PoseStack stack, float x, float y, int width, int height) {
-        stack.pushPose();
-        stack.translate(xOffset, yOffset, 0);
+    protected void preDraw(GuiGraphics graphics, float x, float y, int width, int height) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(xOffset, yOffset, 0);
 
-        stack.translate(x + width / 2f, y + height / 2f, 0);
-        stack.scale(scale, scale, 1);
-        stack.mulPose(new Quaternionf().rotationXYZ(0, 0, (float) Math.toRadians(rotation)));
-        stack.translate(-x + -width / 2f, -y + -height / 2f, 0);
+        graphics.pose().translate(x + width / 2f, y + height / 2f, 0);
+        graphics.pose().scale(scale, scale, 1);
+        graphics.pose().mulPose(new Quaternionf().rotationXYZ(0, 0, (float) Math.toRadians(rotation)));
+        graphics.pose().translate(-x + -width / 2f, -y + -height / 2f, 0);
     }
 
 
     @Environment(EnvType.CLIENT)
-    protected void postDraw(PoseStack stack, float x, float y, int width, int height) {
-        stack.popPose();
-    }
-
-    @Override
-    @Environment(EnvType.CLIENT)
-    public final void draw(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
-        preDraw(stack, x, y, width, height);
-        drawInternal(stack, mouseX, mouseY, x, y, width, height);
-        postDraw(stack, x, y, width, height);
+    protected void postDraw(GuiGraphics graphics, float x, float y, int width, int height) {
+        graphics.pose().popPose();
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public final void drawSubArea(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
-        preDraw(stack, x, y, width, height);
-        drawSubAreaInternal(stack, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
-        postDraw(stack, x, y, width, height);
+    public final void draw(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
+        preDraw(graphics, x, y, width, height);
+        drawInternal(graphics, mouseX, mouseY, x, y, width, height);
+        postDraw(graphics, x, y, width, height);
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public final void drawSubArea(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+        preDraw(graphics, x, y, width, height);
+        drawSubAreaInternal(graphics, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
+        postDraw(graphics, x, y, width, height);
     }
 
     @Environment(EnvType.CLIENT)
-    protected abstract void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height);
+    protected abstract void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height);
 
     @Environment(EnvType.CLIENT)
-    protected void drawSubAreaInternal(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
-        drawInternal(stack, 0, 0, x, y, width, height);
+    protected void drawSubAreaInternal(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+        drawInternal(graphics, 0, 0, x, y, width, height);
     }
 
 }

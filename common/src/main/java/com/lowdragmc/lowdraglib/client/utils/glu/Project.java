@@ -36,6 +36,7 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 
+import javax.annotation.Nonnull;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -277,19 +278,9 @@ public class Project extends Util {
 	/**
 	 * Method gluLookAt
 	 *
-	 * @param poseStack
-	 * @param eyex
-	 * @param eyey
-	 * @param eyez
-	 * @param centerx
-	 * @param centery
-	 * @param centerz
-	 * @param upx
-	 * @param upy
-	 * @param upz
 	 */
 	public static void gluLookAt(
-			PoseStack poseStack,
+			@Nonnull PoseStack poseStack,
 			float eyex,
 			float eyey,
 			float eyez,

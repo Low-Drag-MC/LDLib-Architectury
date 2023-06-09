@@ -6,6 +6,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
 import javax.annotation.Nonnull;
@@ -28,7 +29,7 @@ public class DummyChunkSource extends ChunkSource {
     }
 
     @Override
-    public BlockGetter getChunkForLighting(int x, int z) {
+    public LightChunk getChunkForLighting(int x, int z) {
         return getChunk(x, z);
     }
 

@@ -72,7 +72,7 @@ public class Networking implements INetworking {
 
                         @Override
                         public Level getLevel() {
-                            return player.getLevel();
+                            return player.level();
                         }
                     }));
                 } catch (InstantiationException | IllegalAccessException e) {

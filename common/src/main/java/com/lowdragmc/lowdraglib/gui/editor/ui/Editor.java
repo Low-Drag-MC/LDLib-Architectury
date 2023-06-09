@@ -19,6 +19,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.io.File;
 import java.util.Objects;
@@ -112,9 +113,9 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
         IGuiTexture nodeTexture = new IGuiTexture() {
             @Override
             @Environment(EnvType.CLIENT)
-            public void draw(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
-                ColorPattern.BLACK.rectTexture().draw(stack, mouseX, mouseY, x, y, width, height);
-                Icons.RIGHT.draw(stack, mouseX, mouseY, x + width - height + 3, y + 3, height - 6, height - 6);
+            public void draw(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
+                ColorPattern.BLACK.rectTexture().draw(graphics, mouseX, mouseY, x, y, width, height);
+                Icons.RIGHT.draw(graphics, mouseX, mouseY, x + width - height + 3, y + 3, height - 6, height - 6);
             }
         };
 

@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Vector4f;
 
 import java.awt.*;
@@ -90,14 +91,14 @@ public class ColorRectTexture extends TransformTexture{
 
     @Environment(EnvType.CLIENT)
     @Override
-    protected void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+    protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         if (width == 0 || height == 0) return;
         if (radiusLT > 0 || radiusLB > 0 || radiusRT > 0 || radiusRB > 0) {
             float radius = Math.min(width, height) / 2f;
-            DrawerHelper.drawRoundBox(stack, Rect.ofRelative((int) x, width, (int) y, height),
+            DrawerHelper.drawRoundBox(graphics, Rect.ofRelative((int) x, width, (int) y, height),
                     new Vector4f(Math.min(radius, radiusRT), Math.min(radiusRB, radius), Math.min(radius, radiusLT), Math.min(radius, radiusLB)), color);
         } else {
-            DrawerHelper.drawSolidRect(stack, (int) x, (int) y, width, height, color);
+            DrawerHelper.drawSolidRect(graphics, (int) x, (int) y, width, height, color);
         }
     }
 }

@@ -87,7 +87,7 @@ dependencies {
     // JEI
     modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
     modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}") { transitive = false }
-    modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}") { transitive = false }
+    modImplementation("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}") { transitive = false }
 
     // REI
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${rei_version}") { transitive = false }
@@ -96,7 +96,7 @@ dependencies {
 
     // EMI
     modCompileOnly("dev.emi:emi-fabric:${emi_version}:api")
-    modImplementation("dev.emi:emi-fabric:${emi_version}")
+    modCompileOnly("dev.emi:emi-fabric:${emi_version}")
 
     // KJS
 //    modImplementation("dev.latvian.mods:kubejs-fabric:${kjs_version}")

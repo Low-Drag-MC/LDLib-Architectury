@@ -4,22 +4,18 @@ import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeSlotAccessor;
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
-import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IIngredientVisibility;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.ingredients.RecipeSlot;
 import mezz.jei.library.ingredients.TypedIngredient;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Unmodifiable;
@@ -93,14 +89,14 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     @Override
-    public void drawHighlight(PoseStack poseStack, int color) {
+    public void drawHighlight(GuiGraphics guiGraphics, int color) {
         int x = this.area.getX();
         int y = this.area.getY();
         int width = this.area.getWidth();
         int height = this.area.getHeight();
 
         RenderSystem.disableDepthTest();
-        GuiComponent.fill(poseStack, x, y, x + width, y + height, color);
+        guiGraphics.fill(x, y, x + width, y + height , color);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
@@ -142,14 +138,13 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     @Override
-    public void draw(PoseStack poseStack) {
-        wrapperSlot.draw(poseStack);
+    public void draw(GuiGraphics guiGraphics) {
+        wrapperSlot.draw(guiGraphics);
     }
 
-
     @Override
-    public void drawHoverOverlays(PoseStack poseStack) {
-        wrapperSlot.drawHoverOverlays(poseStack);
+    public void drawHoverOverlays(GuiGraphics guiGraphics) {
+        wrapperSlot.drawHoverOverlays(guiGraphics);
     }
 
     @Override

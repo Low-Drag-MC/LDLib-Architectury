@@ -13,6 +13,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
@@ -169,7 +170,7 @@ public class ShaderTexture extends TransformTexture {
 
     @Override
     @Environment(EnvType.CLIENT)
-    protected void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+    protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         if (program != null) {
             try {
                 program.use(cache->{
@@ -199,7 +200,7 @@ public class ShaderTexture extends TransformTexture {
 
             Tesselator tessellator = Tesselator.getInstance();
             BufferBuilder buffer = tessellator.getBuilder();
-            var mat = stack.last().pose();
+            var mat = graphics.pose().last().pose();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
             buffer.vertex(mat, x, y + height, 0).color(color).uv(0, 0).endVertex();
             buffer.vertex(mat, x + width, y + height, 0).color(color).uv(1, 0).endVertex();
@@ -209,7 +210,7 @@ public class ShaderTexture extends TransformTexture {
 
             program.release();
         } else {
-            DrawerHelper.drawText(stack, "Error compiling shader", x + 2, y + 2, 1, 0xffff0000);
+            DrawerHelper.drawText(graphics, "Error compiling shader", x + 2, y + 2, 1, 0xffff0000);
         }
     }
 }

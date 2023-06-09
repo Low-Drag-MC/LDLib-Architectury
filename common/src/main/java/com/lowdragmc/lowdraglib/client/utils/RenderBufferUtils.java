@@ -13,13 +13,14 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.phys.Vec2;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class RenderBufferUtils {
 
-    public static void renderCubeFrame(PoseStack matrixStack, BufferBuilder buffer, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float r, float g, float b, float a) {
-        var mat = matrixStack.last().pose();
+    public static void renderCubeFrame(PoseStack poseStack, BufferBuilder buffer, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float r, float g, float b, float a) {
+        var mat = poseStack.last().pose();
         buffer.vertex(mat, minX, minY, minZ).color(r, g, b, a).normal(1,0,0).endVertex();
         buffer.vertex(mat, maxX, minY, minZ).color(r, g, b, a).normal(1,0,0).endVertex();
 
@@ -57,8 +58,8 @@ public class RenderBufferUtils {
         buffer.vertex(mat, minX, maxY, maxZ).color(r, g, b, a).normal(0,1,0).endVertex();
     }
 
-    public static void renderCubeFace(PoseStack matrixStack, BufferBuilder buffer, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float red, float green, float blue, float a, boolean shade) {
-        Matrix4f mat = matrixStack.last().pose();
+    public static void renderCubeFace(PoseStack poseStack, BufferBuilder buffer, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float red, float green, float blue, float a, boolean shade) {
+        Matrix4f mat = poseStack.last().pose();
         float r = red, g = green, b = blue;
 
         if (shade) {
@@ -112,9 +113,9 @@ public class RenderBufferUtils {
         buffer.vertex(mat, minX, maxY, maxZ).color(r, g, b, a).endVertex();
     }
 
-    public static void renderCubeFace(PoseStack matrixStack, VertexConsumer buffer, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, int color, int combinedLight, TextureAtlasSprite textureSprite) {
-        Matrix4f mat = matrixStack.last().pose();
-        Matrix3f normal = matrixStack.last().normal();
+    public static void renderCubeFace(PoseStack poseStack, VertexConsumer buffer, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, int color, int combinedLight, TextureAtlasSprite textureSprite) {
+        Matrix4f mat = poseStack.last().pose();
+        Matrix3f normal = poseStack.last().normal();
         float uMin = textureSprite.getU0();
         float uMax = textureSprite.getU1();
         float vMin = textureSprite.getV0();
@@ -153,7 +154,7 @@ public class RenderBufferUtils {
         buffer.vertex(mat, minX, maxY, maxZ).color(color).uv(uMin, vMin).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(combinedLight).normal(normal, 0, 0, 1).endVertex();
     }
 
-    public static void drawColorLines(PoseStack poseStack, VertexConsumer builder, List<Vec2> points, int colorStart, int colorEnd, float width) {
+    public static void drawColorLines(@Nonnull PoseStack poseStack, VertexConsumer builder, List<Vec2> points, int colorStart, int colorEnd, float width) {
         if (points.size() < 2) return;
         Matrix4f mat = poseStack.last().pose();
         Vec2 lastPoint = points.get(0);
@@ -189,7 +190,7 @@ public class RenderBufferUtils {
                 .endVertex();
     }
 
-    public static void drawColorTexLines(PoseStack poseStack, VertexConsumer builder, List<Vec2> points, int colorStart, int colorEnd, float width) {
+    public static void drawColorTexLines(@Nonnull PoseStack poseStack, VertexConsumer builder, List<Vec2> points, int colorStart, int colorEnd, float width) {
         if (points.size() < 2) return;
         Matrix4f mat = poseStack.last().pose();
         Vec2 lastPoint = points.get(0);

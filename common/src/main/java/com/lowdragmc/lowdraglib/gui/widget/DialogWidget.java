@@ -9,6 +9,7 @@ import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
 import org.lwjgl.glfw.GLFW;
 
@@ -73,8 +74,8 @@ public class DialogWidget extends WidgetGroup {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override

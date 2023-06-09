@@ -14,8 +14,10 @@ import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,17 +130,17 @@ public class ConfiguratorGroup extends Configurator {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         Position pos = getPosition();
         Size size = getSize();
         if (isCollapse) {
-            Icons.RIGHT.setColor(-1).draw(poseStack, mouseX, mouseY, pos.x + leftWidth, pos.y + 3, 9, 9);
+            Icons.RIGHT.setColor(-1).draw(graphics, mouseX, mouseY, pos.x + leftWidth, pos.y + 3, 9, 9);
         } else {
-            Icons.DOWN.setColor(-1).draw(poseStack, mouseX, mouseY, pos.x + leftWidth, pos.y + 3, 9, 9);
+            Icons.DOWN.setColor(-1).draw(graphics, mouseX, mouseY, pos.x + leftWidth, pos.y + 3, 9, 9);
             if (configurators.size() > 0) {
-                DrawerHelper.drawSolidRect(poseStack, pos.x + 2, pos.y + 17, 1, size.height - 19, ColorPattern.T_WHITE.color);
+                DrawerHelper.drawSolidRect(graphics, pos.x + 2, pos.y + 17, 1, size.height - 19, ColorPattern.T_WHITE.color);
             }
         }
-        super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
     }
 }

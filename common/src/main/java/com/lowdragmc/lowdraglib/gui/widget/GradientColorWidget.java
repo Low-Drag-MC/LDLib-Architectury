@@ -14,12 +14,14 @@ import com.mojang.blaze3d.vertex.*;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 /**
@@ -100,9 +102,9 @@ public class GradientColorWidget extends WidgetGroup {
                     .setNodeTexture(new IGuiTexture() {
                         @Override
                         @Environment(EnvType.CLIENT)
-                        public void draw(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
-                            ColorPattern.BLACK.rectTexture().draw(stack, mouseX, mouseY, x, y, width, height);
-                            Icons.RIGHT.draw(stack, mouseX, mouseY, x + width - height + 3, y + 3, height - 6, height - 6);
+                        public void draw(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
+                            ColorPattern.BLACK.rectTexture().draw(graphics, mouseX, mouseY, x, y, width, height);
+                            Icons.RIGHT.draw(graphics, mouseX, mouseY, x + width - height + 3, y + 3, height - 6, height - 6);
                         }
                     })
                     .setLeafTexture(ColorPattern.BLACK.rectTexture())
@@ -210,17 +212,17 @@ public class GradientColorWidget extends WidgetGroup {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         // render background
         if (backgroundTexture != null) {
             Position pos = getPosition();
             Size size = getSize();
-            backgroundTexture.draw(poseStack, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
+            backgroundTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
         }
         if (hoverTexture != null && isMouseOverElement(mouseX, mouseY)) {
             Position pos = getPosition();
             Size size = getSize();
-            hoverTexture.draw(poseStack, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
+            hoverTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
         }
 
         var size = getSize();
@@ -228,11 +230,11 @@ public class GradientColorWidget extends WidgetGroup {
 
         // render point
         for (int i = 0; i < gradientColor.getAP().size(); i++) {
-            Icons.DOWN.copy().setColor(i == selectedAlphaPoint ? ColorPattern.GREEN.color : -1).draw(poseStack, mouseX, mouseY, getXPosition(gradientColor.getAP().get(i).x) - 5, pos.y + 3, 10, 10);
+            Icons.DOWN.copy().setColor(i == selectedAlphaPoint ? ColorPattern.GREEN.color : -1).draw(graphics, mouseX, mouseY, getXPosition(gradientColor.getAP().get(i).x) - 5, pos.y + 3, 10, 10);
         }
 
         for (int i = 0; i < gradientColor.getRP().size(); i++) {
-            Icons.UP.copy().setColor(i == selectedRGBPoint ? ColorPattern.GREEN.color : -1).draw(poseStack, mouseX, mouseY, getXPosition(gradientColor.getRP().get(i).x) - 5, pos.y + 3 + 10 + 15, 10, 10);
+            Icons.UP.copy().setColor(i == selectedRGBPoint ? ColorPattern.GREEN.color : -1).draw(graphics, mouseX, mouseY, getXPosition(gradientColor.getRP().get(i).x) - 5, pos.y + 3 + 10 + 15, 10, 10);
         }
         // render grid
         var width = size.width - 6;
@@ -241,7 +243,7 @@ public class GradientColorWidget extends WidgetGroup {
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        var matrix = poseStack.last().pose();
+        var matrix = graphics.pose().last().pose();
         int p = 0;
         for (int x = 0; x < width; x += 3) {
             for (int y = 0; y < 15; y += 3) {
@@ -261,7 +263,7 @@ public class GradientColorWidget extends WidgetGroup {
         // render color bar
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        Matrix4f mat = poseStack.last().pose();
+        Matrix4f mat = graphics.pose().last().pose();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -297,9 +299,9 @@ public class GradientColorWidget extends WidgetGroup {
                 RenderSystem.setShaderColor(1, 1, 1, 1);
                 RenderSystem.enableBlend();
                 if (widget.inAnimate()) {
-                    widget.getAnimation().drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+                    widget.getAnimation().drawInBackground(graphics, mouseX, mouseY, partialTicks);
                 } else {
-                    widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+                    widget.drawInBackground(graphics, mouseX, mouseY, partialTicks);
                 }
             }
         }

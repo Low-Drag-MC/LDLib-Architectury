@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * @author KilaBash
@@ -39,7 +40,7 @@ public class WidgetTexture extends TransformTexture{
 
     @Override
     @Environment(EnvType.CLIENT)
-    protected void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+    protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         int xOffset;
         int yOffset;
         float scale  = 1;
@@ -58,16 +59,16 @@ public class WidgetTexture extends TransformTexture{
             scale = Math.min(scaleW, scaleH);
         }
         float particleTick = Minecraft.getInstance().getFrameTime();
-        stack.pushPose();
+        graphics.pose().pushPose();
 
-        stack.translate(x + width / 2f, y + height / 2f, 0);
-        stack.scale(scale, scale, 1);
-        stack.translate(-x + -width / 2f, -y + -height / 2f, 0);
+        graphics.pose().translate(x + width / 2f, y + height / 2f, 0);
+        graphics.pose().scale(scale, scale, 1);
+        graphics.pose().translate(-x + -width / 2f, -y + -height / 2f, 0);
 
-        stack.translate(xOffset, yOffset, 0 );
-        widget.drawInBackground(stack, this.centerX, this.centerY, particleTick);
-        widget.drawInForeground(stack, this.centerX, this.centerY, particleTick);
-        stack.popPose();
+        graphics.pose().translate(xOffset, yOffset, 0 );
+        widget.drawInBackground(graphics, this.centerX, this.centerY, particleTick);
+        widget.drawInForeground(graphics, this.centerX, this.centerY, particleTick);
+        graphics.pose().popPose();
 
     }
 

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * @author KilaBash
@@ -69,8 +70,8 @@ public class UIResourceTexture implements IGuiTexture {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void draw(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
-        getTexture().draw(stack, mouseX, mouseY, x, y, width, height);
+    public void draw(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
+        getTexture().draw(graphics, mouseX, mouseY, x, y, width, height);
     }
 
     @Override
@@ -81,8 +82,8 @@ public class UIResourceTexture implements IGuiTexture {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawSubArea(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
-        getTexture().drawSubArea(stack, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
+    public void drawSubArea(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+        getTexture().drawSubArea(graphics, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
     }
 
     @Override

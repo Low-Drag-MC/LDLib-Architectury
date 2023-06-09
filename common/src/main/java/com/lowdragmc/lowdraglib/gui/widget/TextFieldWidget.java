@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -139,9 +140,9 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
-        this.textField.render(matrixStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+        this.textField.render(graphics, mouseX, mouseY, partialTicks);
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(1,1,1,1);
     }
@@ -369,7 +370,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (isMouseOverElement(mouseX, mouseY) && gui != null &&  gui.getModularUIGui() != null) {
             List<Component> tips = new ArrayList<>();
             if (tooltipTexts != null) {

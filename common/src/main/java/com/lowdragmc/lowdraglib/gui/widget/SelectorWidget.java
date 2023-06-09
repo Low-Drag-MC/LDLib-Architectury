@@ -13,6 +13,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
 
 import javax.annotation.Nonnull;
@@ -240,26 +241,26 @@ public class SelectorWidget extends WidgetGroup {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         boolean lastVisible = popUp.isVisible();
         popUp.setVisible(false);
-        super.drawInForeground(matrixStack, mouseX, mouseY, partialTicks);
+        super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
         popUp.setVisible(lastVisible);
 
         if(isShow) {
-            matrixStack.translate(0, 0, 200);
-            popUp.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
-            popUp.drawInForeground(matrixStack, mouseX, mouseY, partialTicks);
-            matrixStack.translate(0, 0, -200);
+            graphics.pose().translate(0, 0, 200);
+            popUp.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+            popUp.drawInForeground(graphics, mouseX, mouseY, partialTicks);
+            graphics.pose().translate(0, 0, -200);
         }
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         boolean lastVisible = popUp.isVisible();
         popUp.setVisible(false);
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         popUp.setVisible(lastVisible);
     }
 

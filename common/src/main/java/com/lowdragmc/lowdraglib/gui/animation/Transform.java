@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -29,29 +30,29 @@ public class Transform extends Animation {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void pre(@NotNull PoseStack poseStack) {
-        poseStack.pushPose();
+    public void pre(@NotNull GuiGraphics graphics) {
+        graphics.pose().pushPose();
         Position position = widget.getPosition();
         Size size = widget.getSize();
         float oX = position.x + size.width / 2f;
         float oY = position.y + size.height / 2f;
         if (isIn()) {
-            poseStack.translate(xOffset * (1 - getTime()), yOffset * (1 - getTime()), 0);
+            graphics.pose().translate(xOffset * (1 - getTime()), yOffset * (1 - getTime()), 0);
         } else {
-            poseStack.translate(xOffset * getTime(), yOffset * getTime(), 0);
+            graphics.pose().translate(xOffset * getTime(), yOffset * getTime(), 0);
         }
-        poseStack.translate(oX, oY,0);
+        graphics.pose().translate(oX, oY,0);
         if (isIn()) {
-            poseStack.scale(scale + (1 - scale) * getTime(), scale + (1 - scale) * getTime(), 1);
+            graphics.pose().scale(scale + (1 - scale) * getTime(), scale + (1 - scale) * getTime(), 1);
         } else {
-            poseStack.scale(scale + (1 - scale) * (1- getTime()), scale + (1 - scale) * (1- getTime()), 1);
+            graphics.pose().scale(scale + (1 - scale) * (1- getTime()), scale + (1 - scale) * (1- getTime()), 1);
         }
-        poseStack.translate(-oX, -oY,0);
+        graphics.pose().translate(-oX, -oY,0);
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void post(@NotNull PoseStack poseStack) {
-        poseStack.popPose();
+    public void post(@NotNull GuiGraphics graphics) {
+        graphics.pose().popPose();
     }
 }

@@ -8,11 +8,11 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 
@@ -128,16 +128,16 @@ public class TextBoxWidget extends Widget implements IConfigurableWidget {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         if (!textLines.isEmpty()) {
             Position position = getPosition();
             Size size = getSize();
             Font font = Minecraft.getInstance().font;
             float scale = fontSize * 1.0f / font.lineHeight;
-            matrixStack.pushPose();
-            matrixStack.scale(scale, scale, 1);
-            matrixStack.translate(position.x / scale, position.y / scale, 0);
+            graphics.pose().pushPose();
+            graphics.pose().scale(scale, scale, 1);
+            graphics.pose().translate(position.x / scale, position.y / scale, 0);
             float x = 0;
             float y = 0;
             float ySpace = font.lineHeight + space / scale;
@@ -145,14 +145,10 @@ public class TextBoxWidget extends Widget implements IConfigurableWidget {
                 if (isCenter) {
                     x = (size.width / scale - font.width(textLine)) / 2;
                 }
-                if (!isShadow) {
-                    font.draw(matrixStack, textLine, x, y, fontColor);
-                } else {
-                    font.drawShadow(matrixStack, textLine, x, y, fontColor);
-                }
+                graphics.drawString(font, textLine, (int) x, (int) y, fontColor, isShadow);
                 y += ySpace;
             }
-            matrixStack.popPose();
+            graphics.pose().popPose();
         }
     }
 

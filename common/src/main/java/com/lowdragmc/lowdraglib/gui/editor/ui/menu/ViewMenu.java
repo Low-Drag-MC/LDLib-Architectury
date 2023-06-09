@@ -21,6 +21,7 @@ public class ViewMenu extends MenuTab {
 
     protected TreeBuilder.Menu createMenu() {
         var viewMenu = TreeBuilder.Menu.start();
+        var added = false;
         for (AnnotationDetector.Wrapper<LDLRegister, FloatViewWidget> wrapper : AnnotationDetector.REGISTER_FLOAT_VIEWS) {
             if (editor.name().startsWith(wrapper.annotation().group())) {
                 String translateKey = "ldlib.gui.editor.register.%s.%s".formatted(wrapper.annotation().group(), wrapper.annotation().name());
@@ -33,9 +34,10 @@ public class ViewMenu extends MenuTab {
                         openView(view);
                     });
                 }
+                added = true;
             }
         }
-        return viewMenu;
+        return added ? viewMenu : null;
     }
 
     public void openView(FloatViewWidget view) {

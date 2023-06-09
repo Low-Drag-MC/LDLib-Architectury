@@ -17,6 +17,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -29,6 +30,7 @@ import net.minecraft.world.phys.Vec2;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
@@ -59,7 +61,7 @@ public class DrawerHelper {
 
 
     @Environment(EnvType.CLIENT)
-    public static void drawFluidTexture(PoseStack poseStack, float xCoord, float yCoord, TextureAtlasSprite textureSprite, int maskTop, int maskRight, float zLevel, int fluidColor) {
+    public static void drawFluidTexture(@Nonnull GuiGraphics graphics, float xCoord, float yCoord, TextureAtlasSprite textureSprite, int maskTop, int maskRight, float zLevel, int fluidColor) {
         float uMin = textureSprite.getU0();
         float uMax = textureSprite.getU1();
         float vMin = textureSprite.getV0();
@@ -70,7 +72,7 @@ public class DrawerHelper {
         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        var mat = poseStack.last().pose();
+        var mat = graphics.pose().last().pose();
         buffer.vertex(mat, xCoord, yCoord + 16, zLevel).uv(uMin, vMax).color(fluidColor).endVertex();
         buffer.vertex(mat, xCoord + 16 - maskRight, yCoord + 16, zLevel).uv(uMax, vMax).color(fluidColor).endVertex();
         buffer.vertex(mat, xCoord + 16 - maskRight, yCoord + maskTop, zLevel).uv(uMax, vMin).color(fluidColor).endVertex();
@@ -80,7 +82,7 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawFluidForGui(PoseStack poseStack, FluidStack contents, long tankCapacity, int startX, int startY, int widthT, int heightT) {
+    public static void drawFluidForGui(@Nonnull GuiGraphics graphics, FluidStack contents, long tankCapacity, int startX, int startY, int widthT, int heightT) {
         ResourceLocation LOCATION_BLOCKS_TEXTURE = InventoryMenu.BLOCK_ATLAS;
         TextureAtlasSprite fluidStillSprite = FluidHelper.getStillTexture(contents);
         int fluidColor = FluidHelper.getColor(contents) | 0xff000000;
@@ -110,7 +112,7 @@ public class DrawerHelper {
                 if (width > 0 && height > 0) {
                     int maskTop = 16 - height;
                     int maskRight = 16 - width;
-                    drawFluidTexture(poseStack, x, y, fluidStillSprite, maskTop, maskRight, 0, fluidColor);
+                    drawFluidTexture(graphics, x, y, fluidStillSprite, maskTop, maskRight, 0, fluidColor);
                 }
             }
         }
@@ -118,62 +120,56 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, int color, int border) {
-        drawSolidRect(poseStack,x - border, y - border, width + 2 * border, border, color);
-        drawSolidRect(poseStack,x - border, y + height, width + 2 * border, border, color);
-        drawSolidRect(poseStack,x - border, y, border, height, color);
-        drawSolidRect(poseStack,x + width, y, border, height, color);
+    public static void drawBorder(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int color, int border) {
+        graphics.drawManaged(() -> {
+            drawSolidRect(graphics,x - border, y - border, width + 2 * border, border, color);
+            drawSolidRect(graphics,x - border, y + height, width + 2 * border, border, color);
+            drawSolidRect(graphics,x - border, y, border, height, color);
+            drawSolidRect(graphics,x + width, y, border, height, color);
+        });
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawStringSized(PoseStack poseStack, String text, float x, float y, int color, boolean dropShadow, float scale, boolean center) {
-        poseStack.pushPose();
+    public static void drawStringSized(@Nonnull GuiGraphics graphics, String text, float x, float y, int color, boolean dropShadow, float scale, boolean center) {
+        graphics.pose().pushPose();
         Font fontRenderer = Minecraft.getInstance().font;
         double scaledTextWidth = center ? fontRenderer.width(text) * scale : 0.0;
-        poseStack.translate(x - scaledTextWidth / 2.0, y, 0.0f);
-        poseStack.scale(scale, scale, scale);
-        if (dropShadow) {
-            fontRenderer.drawShadow(poseStack, text, 0, 0, color);
-        } else {
-            fontRenderer.draw(poseStack, text, 0, 0, color);
-        }
-        poseStack.popPose();
+        graphics.pose().translate(x - scaledTextWidth / 2.0, y, 0.0f);
+        graphics.pose().scale(scale, scale, scale);
+        graphics.drawString(fontRenderer, text, 0, 0, color, dropShadow);
+        graphics.pose().popPose();
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawStringFixedCorner(PoseStack poseStack, String text, float x, float y, int color, boolean dropShadow, float scale) {
+    public static void drawStringFixedCorner(@Nonnull GuiGraphics graphics, String text, float x, float y, int color, boolean dropShadow, float scale) {
         Font fontRenderer = Minecraft.getInstance().font;
         float scaledWidth = fontRenderer.width(text) * scale;
         float scaledHeight = fontRenderer.lineHeight * scale;
-        drawStringSized(poseStack, text, x - scaledWidth, y - scaledHeight, color, dropShadow, scale, false);
+        drawStringSized(graphics, text, x - scaledWidth, y - scaledHeight, color, dropShadow, scale, false);
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawText(PoseStack poseStack, String text, float x, float y, float scale, int color) {
-        drawText(poseStack, text, x, y, scale, color, false);
+    public static void drawText(@Nonnull GuiGraphics graphics, String text, float x, float y, float scale, int color) {
+        drawText(graphics, text, x, y, scale, color, false);
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawText(PoseStack poseStack, String text, float x, float y, float scale, int color, boolean shadow) {
+    public static void drawText(@Nonnull GuiGraphics graphics, String text, float x, float y, float scale, int color, boolean shadow) {
         Font fontRenderer = Minecraft.getInstance().font;
         RenderSystem.disableBlend();
-        poseStack.pushPose();
-        poseStack.scale(scale, scale, 0f);
+        graphics.pose().pushPose();
+        graphics.pose().scale(scale, scale, 0f);
         float sf = 1 / scale;
-        if (shadow) {
-            fontRenderer.drawShadow(poseStack, text, x * sf, y * sf, color);
-        } else {
-            fontRenderer.draw(poseStack, text, x * sf, y * sf, color);
-        }
-        poseStack.popPose();
+        graphics.drawString(fontRenderer, text, (int) (x * sf), (int) (y * sf), color, shadow);
+        graphics.pose().popPose();
         RenderSystem.enableBlend();
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawItemStack(PoseStack poseStack, ItemStack itemStack, int x, int y, int color, @Nullable String altTxt) {
+    public static void drawItemStack(@Nonnull GuiGraphics graphics, ItemStack itemStack, int x, int y, int color, @Nullable String altTxt) {
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
-        posestack.mulPoseMatrix(poseStack.last().pose());
+        posestack.mulPoseMatrix(graphics.pose().last().pose());
         posestack.translate(0.0D, 0.0D, 32.0D);
         RenderSystem.applyModelViewMatrix();
         float a = (float)(color >> 24 & 255) / 255.0F;
@@ -187,13 +183,12 @@ public class DrawerHelper {
         RenderSystem.depthMask(true);
 
         Minecraft mc = Minecraft.getInstance();
-        ItemRenderer itemRenderer = mc.getItemRenderer();
 
-        poseStack.pushPose();
-        poseStack.translate(0, 0, 200);
-        itemRenderer.renderAndDecorateItem(poseStack, itemStack, x, y);
-        itemRenderer.renderGuiItemDecorations(poseStack, mc.font, itemStack, x, y, altTxt);
-        poseStack.popPose();
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 232);
+        graphics.renderItem(itemStack, x, y);
+        graphics.renderItemDecorations(mc.font, itemStack, x, y, altTxt);
+        graphics.pose().popPose();
 
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
@@ -211,20 +206,20 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawSolidRect(PoseStack poseStack, int x, int y, int width, int height, int color) {
-        Gui.fill(poseStack, x, y, x + width, y + height, color);
+    public static void drawSolidRect(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int color) {
+        graphics.fill(x, y, x + width, y + height, color);
         RenderSystem.enableBlend();
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawSolidRect(PoseStack poseStack, Rect rect, int color) {
-        drawSolidRect(poseStack, rect.left, rect.up, rect.right, rect.down, color);
+    public static void drawSolidRect(@Nonnull GuiGraphics graphics, Rect rect, int color) {
+        drawSolidRect(graphics, rect.left, rect.up, rect.right, rect.down, color);
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawRectShadow(PoseStack poseStack, int x, int y, int width, int height, int distance) {
-        drawGradientRect(poseStack, x + distance, y + height, width - distance, distance, 0x4f000000, 0, false);
-        drawGradientRect(poseStack, x + width, y + distance, distance, height - distance, 0x4f000000, 0, true);
+    public static void drawRectShadow(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int distance) {
+        drawGradientRect(graphics, x + distance, y + height, width - distance, distance, 0x4f000000, 0, false);
+        drawGradientRect(graphics, x + width, y + distance, distance, height - distance, 0x4f000000, 0, true);
 
         float startAlpha = (float) (0x4f) / 255.0F;
         RenderSystem.enableBlend();
@@ -235,7 +230,7 @@ public class DrawerHelper {
         buffer.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
         x += width;
         y += height;
-        Matrix4f mat = poseStack.last().pose();
+        Matrix4f mat = graphics.pose().last().pose();
         buffer.vertex(mat, x, y, 0).color(0, 0, 0, startAlpha).endVertex();
         buffer.vertex(mat, x, y + distance, 0).color(0, 0, 0, 0).endVertex();
         buffer.vertex(mat, x + distance, y + distance, 0).color(0, 0, 0, 0).endVertex();
@@ -247,12 +242,12 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawGradientRect(PoseStack poseStack, int x, int y, int width, int height, int startColor, int endColor) {
-        drawGradientRect(poseStack, x, y, width, height, startColor, endColor, false);
+    public static void drawGradientRect(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int startColor, int endColor) {
+        drawGradientRect(graphics, x, y, width, height, startColor, endColor, false);
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawGradientRect(PoseStack poseStack, float x, float y, float width, float height, int startColor, int endColor, boolean horizontal) {
+    public static void drawGradientRect(@Nonnull GuiGraphics graphics, float x, float y, float width, float height, int startColor, int endColor, boolean horizontal) {
         float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
         float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
         float startGreen = (float)(startColor >>  8 & 255) / 255.0F;
@@ -263,7 +258,7 @@ public class DrawerHelper {
         float endBlue    = (float)(endColor         & 255) / 255.0F;
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        Matrix4f mat = poseStack.last().pose();
+        Matrix4f mat = graphics.pose().last().pose();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -284,7 +279,7 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawLines(PoseStack poseStack, List<Vec2> points, int startColor, int endColor, float width) {
+    public static void drawLines(@Nonnull GuiGraphics graphics, List<Vec2> points, int startColor, int endColor, float width) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         RenderSystem.enableBlend();
@@ -292,17 +287,17 @@ public class DrawerHelper {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
-        RenderBufferUtils.drawColorLines(poseStack, bufferbuilder, points, startColor, endColor, width);
+        RenderBufferUtils.drawColorLines(graphics.pose(), bufferbuilder, points, startColor, endColor, width);
 
         tesselator.end();
         RenderSystem.defaultBlendFunc();
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawTextureRect(PoseStack poseStack, float x, float y, float width, float height) {
+    public static void drawTextureRect(@Nonnull GuiGraphics graphics, float x, float y, float width, float height) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
-        Matrix4f mat = poseStack.last().pose();
+        Matrix4f mat = graphics.pose().last().pose();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         buffer.vertex(mat, x, y + height, 0).uv(0, 0).endVertex();
@@ -312,20 +307,20 @@ public class DrawerHelper {
         tesselator.end();
     }
 
-    public static void updateScreenVshUniform(PoseStack poseStack, UniformCache uniform) {
+    public static void updateScreenVshUniform(@Nonnull GuiGraphics graphics, UniformCache uniform) {
         var window = Minecraft.getInstance().getWindow();
 
         uniform.glUniform1F("GuiScale", (float) window.getGuiScale());
         uniform.glUniform2F("ScreenSize", (float) window.getWidth(), (float) window.getHeight());
-        uniform.glUniformMatrix4F("PoseStack",poseStack.last().pose());
+        uniform.glUniformMatrix4F("PoseStack",graphics.pose().last().pose());
         uniform.glUniformMatrix4F("ProjMat", RenderSystem.getProjectionMatrix());
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawRound(PoseStack poseStack, int color, float radius, Position centerPos) {
+    public static void drawRound(@Nonnull GuiGraphics graphics, int color, float radius, Position centerPos) {
         DrawerHelper.ROUND.use(uniform -> {
 
-            DrawerHelper.updateScreenVshUniform(poseStack, uniform);
+            DrawerHelper.updateScreenVshUniform(graphics, uniform);
 
             uniform.fillRGBAColor("Color", color);
 
@@ -339,10 +334,10 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawPanelBg(PoseStack poseStack) {
+    public static void drawPanelBg(@Nonnull GuiGraphics graphics) {
         DrawerHelper.PANEL_BG.use(uniform -> {
 
-            DrawerHelper.updateScreenVshUniform(poseStack, uniform);
+            DrawerHelper.updateScreenVshUniform(graphics, uniform);
 
             uniform.glUniform1F("Density", 5);
             uniform.glUniform1F("SquareSize", 0.1f);
@@ -357,9 +352,9 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawRoundBox(PoseStack poseStack, Rect square, Vector4f radius, int color) {
+    public static void drawRoundBox(@Nonnull GuiGraphics graphics, Rect square, Vector4f radius, int color) {
         DrawerHelper.ROUND_BOX.use(uniform -> {
-            DrawerHelper.updateScreenVshUniform(poseStack, uniform);
+            DrawerHelper.updateScreenVshUniform(graphics, uniform);
 
             uniform.glUniform4F("SquareVertex", square.left - 1f, square.up - 1f, square.right - 1f, square.down - 1f);
             uniform.glUniform4F("RoundRadius", radius.x(), radius.y(), radius.z(), radius.w());
@@ -372,9 +367,9 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawProgressRoundBox(PoseStack poseStack, Rect square, Vector4f radius, int color1, int color2, float progress) {
+    public static void drawProgressRoundBox(@Nonnull GuiGraphics graphics, Rect square, Vector4f radius, int color1, int color2, float progress) {
         DrawerHelper.PROGRESS_ROUND_BOX.use(uniform -> {
-            DrawerHelper.updateScreenVshUniform(poseStack, uniform);
+            DrawerHelper.updateScreenVshUniform(graphics, uniform);
 
             uniform.glUniform4F("SquareVertex", square.left, square.up, square.right, square.down);
             uniform.glUniform4F("RoundRadius", radius.x(), radius.y(), radius.z(), radius.w());
@@ -389,9 +384,9 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawFrameRoundBox(PoseStack poseStack, Rect square, float thickness, Vector4f radius1, Vector4f radius2, int color) {
+    public static void drawFrameRoundBox(@Nonnull GuiGraphics graphics, Rect square, float thickness, Vector4f radius1, Vector4f radius2, int color) {
         DrawerHelper.FRAME_ROUND_BOX.use(uniform -> {
-            DrawerHelper.updateScreenVshUniform(poseStack, uniform);
+            DrawerHelper.updateScreenVshUniform(graphics, uniform);
 
             uniform.glUniform4F("SquareVertex", square.left - 1, square.up - 1, square.right - 1, square.down - 1);
             uniform.glUniform4F("RoundRadius1", radius1.x(), radius1.y(), radius1.z(), radius1.w());
@@ -406,9 +401,9 @@ public class DrawerHelper {
     }
 
     @Environment(EnvType.CLIENT)
-    public static void drawRoundLine(PoseStack poseStack, Position begin, Position end, int width, int color1, int color2) {
+    public static void drawRoundLine(@Nonnull GuiGraphics graphics, Position begin, Position end, int width, int color1, int color2) {
         DrawerHelper.ROUND_LINE.use(uniform -> {
-            DrawerHelper.updateScreenVshUniform(poseStack, uniform);
+            DrawerHelper.updateScreenVshUniform(graphics, uniform);
 
             uniform.glUniform1F("Width", width);
             uniform.glUniform2F("Point1", begin.x, begin.y);

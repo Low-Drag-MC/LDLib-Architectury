@@ -109,10 +109,10 @@ public class BlockStateRenderer implements IRenderer {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void renderItem(ItemStack stack, ItemDisplayContext transformType, boolean leftHand, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, BakedModel model) {
+    public void renderItem(ItemStack stack, ItemDisplayContext transformType, boolean leftHand, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, BakedModel model) {
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         ItemStack renderItem = getBlockInfo().getItemStackForm();
-        itemRenderer.render(renderItem, transformType, leftHand, matrixStack, buffer, combinedLight, combinedOverlay, getItemModel(renderItem));
+        itemRenderer.render(renderItem, transformType, leftHand, poseStack, buffer, combinedLight, combinedOverlay, getItemModel(renderItem));
     }
 
     @Override

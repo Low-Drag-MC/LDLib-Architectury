@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.jei;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.drawable.IDrawable;
+import net.minecraft.client.gui.GuiGraphics;
 
 import javax.annotation.Nonnull;
 
@@ -25,9 +26,9 @@ public interface IGui2IDrawable {
             }
 
             @Override
-            public void draw(@Nonnull PoseStack matrixStack, int x, int y) {
+            public void draw(@Nonnull GuiGraphics graphics, int x, int y) {
                 if (guiTexture == null) return;
-                guiTexture.draw(matrixStack, 0, 0, x, y, width, height);
+                guiTexture.draw(graphics, 0, 0, x, y, width, height);
             }
         };
     }

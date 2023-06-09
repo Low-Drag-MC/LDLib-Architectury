@@ -15,11 +15,13 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
@@ -292,8 +294,8 @@ public class MainPanel extends WidgetGroup {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
 
         int minX = Integer.MAX_VALUE;
         int minY = Integer.MAX_VALUE;
@@ -301,7 +303,7 @@ public class MainPanel extends WidgetGroup {
         int maxY = Integer.MIN_VALUE;
 
         for (UIWrapper selectedUI : selectedUIs) {
-            selectedUI.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+            selectedUI.drawInBackground(graphics, mouseX, mouseY, partialTicks);
             var pos = selectedUI.inner().widget().getPosition();
             var size = selectedUI.inner().widget().getSize();
             minX = Math.min(minX, pos.x);
@@ -311,7 +313,7 @@ public class MainPanel extends WidgetGroup {
         }
 
         if (hoverUI != null) {
-            hoverUI.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+            hoverUI.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         }
 
         if (!selectedUIs.isEmpty() && Widget.isAltDown()) {
@@ -322,12 +324,12 @@ public class MainPanel extends WidgetGroup {
             float middleX = pos.x + (size.width - 16) / 2f;
             float middleY = pos.y + (size.height - 16) / 2f;
             if (isDragPosition) {
-                Icons.UP.copy().setColor(-1).draw(poseStack, mouseX, mouseY, middleX, pos.y - 10 - 16, 16, 16);
-                Icons.LEFT.copy().setColor(-1).draw(poseStack, mouseX, mouseY, pos.x - 10 - 16, middleY, 16, 16);
+                Icons.UP.copy().setColor(-1).draw(graphics, mouseX, mouseY, middleX, pos.y - 10 - 16, 16, 16);
+                Icons.LEFT.copy().setColor(-1).draw(graphics, mouseX, mouseY, pos.x - 10 - 16, middleY, 16, 16);
             }
             if (isDragPosition || isDragSize) {
-                Icons.DOWN.copy().setColor(-1).draw(poseStack, mouseX, mouseY, middleX, pos.y + size.height + 10, 16, 16);
-                Icons.RIGHT.copy().setColor(-1).draw(poseStack, mouseX, mouseY, pos.x + size.width + 10, middleY, 16, 16);
+                Icons.DOWN.copy().setColor(-1).draw(graphics, mouseX, mouseY, middleX, pos.y + size.height + 10, 16, 16);
+                Icons.RIGHT.copy().setColor(-1).draw(graphics, mouseX, mouseY, pos.x + size.width + 10, middleY, 16, 16);
             }
         }
     }

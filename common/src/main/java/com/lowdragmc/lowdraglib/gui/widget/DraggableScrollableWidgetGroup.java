@@ -1,17 +1,16 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
-import com.lowdragmc.lowdraglib.client.utils.RenderUtils;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
-import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
@@ -280,53 +279,53 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     }
 
     @Environment(EnvType.CLIENT)
-    protected boolean hookDrawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    protected boolean hookDrawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         return false;
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (isMouseOverElement(mouseX, mouseY)) {
-            super.drawInForeground(matrixStack, mouseX, mouseY, partialTicks);
+            super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
         }
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         int x = getPosition().x;
         int y = getPosition().y;
         int width = getSize().width;
         int height = getSize().height;
         if (useScissor) {
-            RenderUtils.useScissor(matrixStack, x, y, width, height, ()->{
-                if(!hookDrawInBackground(matrixStack, mouseX, mouseY, partialTicks)) {
-                    super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
-                }
-            });
+            graphics.enableScissor(x, y, x + width, y + height);
+            if(!hookDrawInBackground(graphics, mouseX, mouseY, partialTicks)) {
+                super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+            }
+            graphics.disableScissor();
         } else {
-            if(!hookDrawInBackground(matrixStack, mouseX, mouseY, partialTicks)) {
-                super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+            if(!hookDrawInBackground(graphics, mouseX, mouseY, partialTicks)) {
+                super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
             }
         }
 
         if (xBarHeight > 0) {
             if (xBarB != null) {
-                xBarB.draw(matrixStack, mouseX, mouseY, x, y + height - xBarHeight, width, xBarHeight);
+                xBarB.draw(graphics, mouseX, mouseY, x, y + height - xBarHeight, width, xBarHeight);
             }
             if (xBarF != null) {
                 int barWidth = (int) (width * 1.0f / getMaxWidth() * width);
-                xBarF.draw(matrixStack, mouseX, mouseY, x + scrollXOffset * width * 1.0f / getMaxWidth(), y + height - xBarHeight, barWidth, xBarHeight);
+                xBarF.draw(graphics, mouseX, mouseY, x + scrollXOffset * width * 1.0f / getMaxWidth(), y + height - xBarHeight, barWidth, xBarHeight);
             }
         }
         if (yBarWidth > 0) {
             if (yBarB != null) {
-                yBarB.draw(matrixStack, mouseX, mouseY, x + width  - yBarWidth, y, yBarWidth, height);
+                yBarB.draw(graphics, mouseX, mouseY, x + width  - yBarWidth, y, yBarWidth, height);
             }
             if (yBarF != null) {
                 int barHeight = (int) (height * 1.0f / getMaxHeight() * height);
-                yBarF.draw(matrixStack, mouseX, mouseY, x + width  - yBarWidth, y + scrollYOffset * height * 1.0f / getMaxHeight(), yBarWidth, barHeight);
+                yBarF.draw(graphics, mouseX, mouseY, x + width  - yBarWidth, y + scrollYOffset * height * 1.0f / getMaxHeight(), yBarWidth, barHeight);
             }
         }
     }

@@ -13,10 +13,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
+import javax.annotation.Nonnull;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
@@ -112,9 +114,9 @@ public class HsbColorWidget extends Widget {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-		super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
-		var pose = poseStack.last().pose();
+	public void drawInBackground(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+		var pose = graphics.pose().last().pose();
 		int x = getPosition().x;
 		int y = getPosition().y;
 		int width = getSize().width;
@@ -127,11 +129,11 @@ public class HsbColorWidget extends Widget {
 
 		if (showAlpha) {
 			// alpha bar
-			DrawerHelper.drawGradientRect(poseStack, x, y + height - barWidth, width - barWidth - gap, barWidth, argb & 0x00ffffff, argb | 0xff000000, true);
+			DrawerHelper.drawGradientRect(graphics, x, y + height - barWidth, width - barWidth - gap, barWidth, argb & 0x00ffffff, argb | 0xff000000, true);
 		}
 
 		// preview
-		DrawerHelper.drawSolidRect(poseStack, x + width - barWidth, y + height - barWidth, barWidth, barWidth, argb);
+		DrawerHelper.drawSolidRect(graphics, x + width - barWidth, y + height - barWidth, barWidth, barWidth, argb);
 
 		float color = 0;
 		float mainX = 0, mainY = 0;
@@ -155,17 +157,17 @@ public class HsbColorWidget extends Widget {
 
 		if (showRGB) {
 			// main indicator
-			DrawerHelper.drawSolidRect(poseStack, (int) (x + mainX * (width - barWidth - gap)) - 1, (int) (y + mainY * (height - barWidth - gap)) - 1, 3, 3, 0xffff0000);
+			DrawerHelper.drawSolidRect(graphics, (int) (x + mainX * (width - barWidth - gap)) - 1, (int) (y + mainY * (height - barWidth - gap)) - 1, 3, 3, 0xffff0000);
 			// color indicator
-			DrawerHelper.drawSolidRect(poseStack, x + width - barWidth - 2, (int) (y + color * (height - barWidth - gap)), barWidth + 4, 1, 0xffff0000);
+			DrawerHelper.drawSolidRect(graphics, x + width - barWidth - 2, (int) (y + color * (height - barWidth - gap)), barWidth + 4, 1, 0xffff0000);
 			// color info
-			renderInfo(poseStack, x, y, width - barWidth - gap, height - barWidth - gap);
+			renderInfo(graphics, x, y, width - barWidth - gap, height - barWidth - gap);
 			// border
-			DrawerHelper.drawBorder(poseStack, x, y, width - barWidth - gap, height - barWidth - gap, ColorPattern.WHITE.color, 2);
+			DrawerHelper.drawBorder(graphics, x, y, width - barWidth - gap, height - barWidth - gap, ColorPattern.WHITE.color, 2);
 		}
 		if (showAlpha) {
 			// alpha indicator
-			DrawerHelper.drawSolidRect(poseStack, (int) (x + alpha * (width - barWidth - gap)), y + height - barWidth - 2, 1, barWidth + 4, 0xffff0000);
+			DrawerHelper.drawSolidRect(graphics, (int) (x + alpha * (width - barWidth - gap)), y + height - barWidth - 2, 1, barWidth + 4, 0xffff0000);
 		}
 
 	}
@@ -355,18 +357,18 @@ public class HsbColorWidget extends Widget {
 	 * render hsb/rgb/mode info
 	 */
 	@Environment(EnvType.CLIENT)
-	private void renderInfo(PoseStack poseStack, int x, int y, int width, int height) {
+	private void renderInfo(@Nonnull GuiGraphics graphics, int x, int y, int width, int height) {
 		Font font = Minecraft.getInstance().font;
 		y += 2;
 		var strX = x + 10;
 		var strGapY = (int) Math.max(0, (height - 7f * font.lineHeight) / 6f) + font.lineHeight;
-		DrawerHelper.drawText(poseStack,"h:" + (int) h + "°", strX, y, 1f, -1, true);
-		DrawerHelper.drawText(poseStack, "s:" + (int) (s * 100) + "%", strX, y + strGapY, 1f, -1, true);
-		DrawerHelper.drawText(poseStack, "b:" + (int) (b * 100) + "%", strX, y + strGapY * 2, 1f, -1, true);
-		DrawerHelper.drawText(poseStack, "r:" + ((argb >> 16) & 0xff), strX, y + strGapY * 3, 1f, -1, true);
-		DrawerHelper.drawText(poseStack, "g:" + ((argb >> 8) & 0xff), strX, y + strGapY * 4, 1f, -1, true);
-		DrawerHelper.drawText(poseStack, "b:" + (argb & 0xff), strX, y + strGapY * 5, 1f, -1, true);
-		DrawerHelper.drawText(poseStack, "a:" + ((argb >> 24) & 0xff), strX, y + strGapY * 6, 1f, -1, true);
+		DrawerHelper.drawText(graphics,"h:" + (int) h + "°", strX, y, 1f, -1, true);
+		DrawerHelper.drawText(graphics, "s:" + (int) (s * 100) + "%", strX, y + strGapY, 1f, -1, true);
+		DrawerHelper.drawText(graphics, "b:" + (int) (b * 100) + "%", strX, y + strGapY * 2, 1f, -1, true);
+		DrawerHelper.drawText(graphics, "r:" + ((argb >> 16) & 0xff), strX, y + strGapY * 3, 1f, -1, true);
+		DrawerHelper.drawText(graphics, "g:" + ((argb >> 8) & 0xff), strX, y + strGapY * 4, 1f, -1, true);
+		DrawerHelper.drawText(graphics, "b:" + (argb & 0xff), strX, y + strGapY * 5, 1f, -1, true);
+		DrawerHelper.drawText(graphics, "a:" + ((argb >> 24) & 0xff), strX, y + strGapY * 6, 1f, -1, true);
 //		DrawerHelper.drawText(poseStack, "mode:" + mode, strX, y + strGapY * 6, 1f, 0xffffffff);
 	}
 

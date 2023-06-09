@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 
 @LDLRegister(name = "group_texture", group = "texture")
 public class GuiTextureGroup extends TransformTexture{
@@ -36,9 +37,9 @@ public class GuiTextureGroup extends TransformTexture{
 
     @Override
     @Environment(EnvType.CLIENT)
-    protected void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+    protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         for (IGuiTexture texture : textures) {
-            texture.draw(stack, mouseX,mouseY,  x, y, width, height);
+            texture.draw(graphics, mouseX,mouseY,  x, y, width, height);
         }
     }
 
@@ -52,9 +53,9 @@ public class GuiTextureGroup extends TransformTexture{
 
     @Environment(EnvType.CLIENT)
     @Override
-    protected void drawSubAreaInternal(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+    protected void drawSubAreaInternal(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
         for (IGuiTexture texture : textures) {
-            texture.drawSubArea(stack, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
+            texture.drawSubArea(graphics, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
         }
     }
 

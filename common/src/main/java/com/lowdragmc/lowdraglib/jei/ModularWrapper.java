@@ -7,8 +7,8 @@ import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,7 +24,6 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         super(new ModularUI(widget.getSize().width, widget.getSize().height, IUIHolder.EMPTY, Minecraft.getInstance().player).widget(widget), -1);
         modularUI.initWidgets();
         this.minecraft = Minecraft.getInstance();
-        this.itemRenderer = minecraft.getItemRenderer();
         this.font = minecraft.font;
         this.widget = widget;
     }
@@ -88,7 +87,7 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         modularUI.mainGroup.setParentPosition(displayOffset);
     }
 
-    public void draw(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void draw(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (minecraft.player.tickCount != lastTick) {
             updateScreen();
             lastTick = minecraft.player.tickCount;
@@ -98,13 +97,13 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
             viewStack.pushPose();
             viewStack.translate(-left, -top, 0);
             RenderSystem.applyModelViewMatrix();
-            render(matrixStack, mouseX + left, mouseY + top, partialTicks);
+            render(graphics, mouseX + left, mouseY + top, partialTicks);
             viewStack.popPose();
             RenderSystem.applyModelViewMatrix();
         } else {
-            matrixStack.translate(-left, -top, 0);
-            render(matrixStack, mouseX + left, mouseY + top, partialTicks);
-            matrixStack.translate(left, top, 0);
+            graphics.pose().translate(-left, -top, 0);
+            render(graphics, mouseX + left, mouseY + top, partialTicks);
+            graphics.pose().translate(left, top, 0);
         }
     }
 
@@ -113,7 +112,7 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
     }
 
     @Override
-    public void render(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         this.hoveredSlot = null;
 
         RenderSystem.disableDepthTest();
@@ -124,13 +123,13 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         tooltipStack = ItemStack.EMPTY;
         tooltipComponent = null;
 
-        modularUI.mainGroup.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
-        modularUI.mainGroup.drawInForeground(matrixStack, mouseX, mouseY, partialTicks);
+        modularUI.mainGroup.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+        modularUI.mainGroup.drawInForeground(graphics, mouseX, mouseY, partialTicks);
 
         if (tooltipTexts != null && tooltipTexts.size() > 0) {
-            matrixStack.translate(0, 0, 200);
-            renderTooltip(matrixStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
-            matrixStack.translate(0, 0, -200);
+            graphics.pose().translate(0, 0, 200);
+            graphics.renderTooltip(font, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
+            graphics.pose().translate(0, 0, -200);
         }
 
         RenderSystem.depthMask(true);

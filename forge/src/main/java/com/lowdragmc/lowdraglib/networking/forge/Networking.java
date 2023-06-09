@@ -80,7 +80,7 @@ public class Networking implements INetworking {
                     if (isClient()) {
                         return LogicalSidedProvider.CLIENTWORLD.get(context.getDirection().getReceptionSide()).orElse(null);
                     } else {
-                        return getPlayer() instanceof ServerPlayer serverPlayer ? serverPlayer.getLevel() : null;
+                        return getPlayer() instanceof ServerPlayer serverPlayer ? serverPlayer.level() : null;
                     }
                 }
             }));

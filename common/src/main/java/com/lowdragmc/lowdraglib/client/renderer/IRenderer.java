@@ -34,7 +34,7 @@ public interface IRenderer {
     @Environment(EnvType.CLIENT)
     default void renderItem(ItemStack stack,
                     ItemDisplayContext transformType,
-                    boolean leftHand, PoseStack matrixStack,
+                    boolean leftHand, PoseStack poseStack,
                     MultiBufferSource buffer, int combinedLight,
                     int combinedOverlay, BakedModel model) {
 

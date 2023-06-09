@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.utils.interpolate.Interpolator;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 
 import javax.annotation.Nonnull;
 
@@ -120,46 +121,46 @@ public abstract class Animation {
     }
 
     @Environment(EnvType.CLIENT)
-    public void pre(@Nonnull PoseStack poseStack) {
+    public void pre(@Nonnull GuiGraphics graphics) {
 
     }
 
     @Environment(EnvType.CLIENT)
-    public void post(@Nonnull PoseStack poseStack) {
+    public void post(@Nonnull GuiGraphics graphics) {
 
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         float tickTime = getTick();
         if (tickTime >= delay) {
             if (interpolator != null) {
                 interpolator.update(tickTime);
             }
             if (widget != null) {
-                pre(poseStack);
-                widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
-                post(poseStack);
+                pre(graphics);
+                widget.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+                post(graphics);
             }
         } else if (isOut()) {
-            widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+            widget.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         }
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         float tickTime = getTick();
         if (tickTime >= delay) {
             if (interpolator != null) {
                 interpolator.update(tickTime);
             }
             if (widget != null) {
-                pre(poseStack);
-                widget.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
-                post(poseStack);
+                pre(graphics);
+                widget.drawInForeground(graphics, mouseX, mouseY, partialTicks);
+                post(graphics);
             }
         } else if (isOut()) {
-            widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+            widget.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         }
     }
 

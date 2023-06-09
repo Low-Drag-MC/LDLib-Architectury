@@ -9,17 +9,24 @@ import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.utils.BlockPosFace;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
+import com.mojang.blaze3d.vertex.*;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.runtime.IClickableIngredient;
 import mezz.jei.common.input.ClickableIngredient;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.ingredients.TypedIngredient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.util.FastColor;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import com.lowdragmc.lowdraglib.utils.interpolate.Eases;
 import com.lowdragmc.lowdraglib.utils.interpolate.Interpolator;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.emi.emi.api.stack.ItemEmiStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
@@ -287,7 +294,7 @@ public class SceneWidget extends WidgetGroup {
 
     @Environment(EnvType.CLIENT)
     public void renderBlockOverLay(WorldSceneRenderer renderer) {
-        PoseStack matrixStack = new PoseStack();
+        PoseStack poseStack = new PoseStack();
         hoverPosFace = null;
         hoverItem = null;
         if (isMouseOverElement(currentMouseX, currentMouseY)) {
@@ -326,34 +333,80 @@ public class SceneWidget extends WidgetGroup {
         BlockPosFace tmp = dragging ? clickPosFace : hoverPosFace;
         if (selectedPosFace != null || tmp != null) {
             if (selectedPosFace != null && renderFacing) {
-                drawFacingBorder(matrixStack, selectedPosFace, 0xff00ff00);
+                drawFacingBorder(poseStack, selectedPosFace, 0xff00ff00);
             }
             if (tmp != null && !tmp.equals(selectedPosFace) && renderFacing) {
-                drawFacingBorder(matrixStack, tmp, 0xffffffff);
+                drawFacingBorder(poseStack, tmp, 0xffffffff);
             }
         }
         if (selectedPosFace == null) return;
         if (renderSelect) {
-            RenderUtils.renderBlockOverLay(matrixStack, selectedPosFace.pos, 0.6f, 0, 0, 1.01f);
+            RenderUtils.renderBlockOverLay(poseStack, selectedPosFace.pos, 0.6f, 0, 0, 1.01f);
         }
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawFacingBorder(PoseStack matrixStack, BlockPosFace posFace, int color) {
-        drawFacingBorder(matrixStack, posFace, color, 0);
+    public void drawFacingBorder(PoseStack poseStack, BlockPosFace posFace, int color) {
+        drawFacingBorder(poseStack, posFace, color, 0);
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawFacingBorder(PoseStack matrixStack, BlockPosFace posFace, int color, int inner) {
-        matrixStack.pushPose();
+    public void drawFacingBorder(PoseStack poseStack, BlockPosFace posFace, int color, int inner) {
+        poseStack.pushPose();
         RenderSystem.disableDepthTest();
-        RenderUtils.moveToFace(matrixStack, posFace.pos.getX(), posFace.pos.getY(), posFace.pos.getZ(), posFace.facing);
-        RenderUtils.rotateToFace(matrixStack, posFace.facing, null);
-        matrixStack.scale(1f / 16, 1f / 16, 0);
-        matrixStack.translate(-8, -8, 0);
-        DrawerHelper.drawBorder(matrixStack, 1 + inner * 2, 1 + inner * 2, 14 - 4 * inner, 14 - 4 * inner, color, 1);
+        RenderUtils.moveToFace(poseStack, posFace.pos.getX(), posFace.pos.getY(), posFace.pos.getZ(), posFace.facing);
+        RenderUtils.rotateToFace(poseStack, posFace.facing, null);
+        poseStack.scale(1f / 16, 1f / 16, 0);
+        poseStack.translate(-8, -8, 0);
+        drawBorder(poseStack, 1 + inner * 2, 1 + inner * 2, 14 - 4 * inner, 14 - 4 * inner, color, 1);
         RenderSystem.enableDepthTest();
-        matrixStack.popPose();
+        poseStack.popPose();
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, int color, int border) {
+        drawSolidRect(poseStack,x - border, y - border, width + 2 * border, border, color);
+        drawSolidRect(poseStack,x - border, y + height, width + 2 * border, border, color);
+        drawSolidRect(poseStack,x - border, y, border, height, color);
+        drawSolidRect(poseStack,x + width, y, border, height, color);
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static void drawSolidRect(PoseStack poseStack, int x, int y, int width, int height, int color) {
+        fill(poseStack, x, y, x + width, y + height, 0, color);
+        RenderSystem.enableBlend();
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static void fill(PoseStack matrices, int x1, int y1, int x2, int y2, int z, int color) {
+        Matrix4f matrix4f = matrices.last().pose();
+        int i;
+        if (x1 < x2) {
+            i = x1;
+            x1 = x2;
+            x2 = i;
+        }
+
+        if (y1 < y2) {
+            i = y1;
+            y1 = y2;
+            y2 = i;
+        }
+
+        float f = (float) FastColor.ARGB32.alpha(color) / 255.0F;
+        float g = (float) FastColor.ARGB32.red(color) / 255.0F;
+        float h = (float) FastColor.ARGB32.green(color) / 255.0F;
+        float j = (float) FastColor.ARGB32.blue(color) / 255.0F;
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        RenderSystem.enableBlend();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.vertex(matrix4f, (float)x1, (float)y1, (float)z).color(g, h, j, f).endVertex();
+        bufferBuilder.vertex(matrix4f, (float)x1, (float)y2, (float)z).color(g, h, j, f).endVertex();
+        bufferBuilder.vertex(matrix4f, (float)x2, (float)y2, (float)z).color(g, h, j, f).endVertex();
+        bufferBuilder.vertex(matrix4f, (float)x2, (float)y1, (float)z).color(g, h, j, f).endVertex();
+        BufferUploader.drawWithShader(bufferBuilder.end());
+        RenderSystem.disableBlend();
     }
 
     @Override
@@ -455,19 +508,19 @@ public class SceneWidget extends WidgetGroup {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (hoverTips && isMouseOverElement(mouseX, mouseY)) {
             if (hoverItem != null && !hoverItem.isEmpty()) {
-                gui.getModularUIGui().setHoverTooltip(getToolTips(gui.getModularUIGui().getTooltipFromItem(hoverItem)), hoverItem, null, hoverItem.getTooltipImage().orElse(null));
+                gui.getModularUIGui().setHoverTooltip(getToolTips(Screen.getTooltipFromItem(Minecraft.getInstance(), hoverItem)), hoverItem, null, hoverItem.getTooltipImage().orElse(null));
             }
             gui.getModularUIGui().setHoverTooltip(getToolTips(new ArrayList<>()), hoverItem, null, null);
         }
-        super.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
+        super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         int x = getPosition().x;
         int y = getPosition().y;
         int width = getSize().width;
@@ -476,17 +529,17 @@ public class SceneWidget extends WidgetGroup {
             interpolator.update(gui.getTickCount() + partialTicks);
         }
         if (renderer != null) {
-            renderer.render(matrixStack, x, y, width, height, mouseX, mouseY);
+            renderer.render(graphics.pose(), x, y, width, height, mouseX, mouseY);
             if (renderer.isCompiling()) {
                 double progress = renderer.getCompileProgress();
                 if (progress > 0) {
-                    new TextTexture("Renderer is compiling! " + String.format("%.1f", progress * 100) + "%%").setWidth(width).draw(matrixStack, mouseX, mouseY, x, y, width, height);
+                    new TextTexture("Renderer is compiling! " + String.format("%.1f", progress * 100) + "%%").setWidth(width).draw(graphics, mouseX, mouseY, x, y, width, height);
                 }
             }
         }
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         currentMouseX = mouseX;
         currentMouseY = mouseY;
     }

@@ -2,15 +2,16 @@ package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,8 +37,13 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
     }
 
     @Override
-    public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        modular.draw(pPoseStack, pMouseX, pMouseY, pPartialTick);
+    public void method_25394(PoseStack matrices, int mouseX, int mouseY, float delta) {
+
+    }
+
+    @Override
+    public void render(@Nonnull GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
+        modular.draw(graphics, pMouseX, pMouseY, pPartialTick);
     }
 
     @Override

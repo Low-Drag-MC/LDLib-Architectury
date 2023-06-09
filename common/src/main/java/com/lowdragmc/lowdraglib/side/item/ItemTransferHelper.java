@@ -38,7 +38,7 @@ public class ItemTransferHelper {
     }
 
     public static boolean canItemStacksStack(ItemStack first, ItemStack second) {
-        if (!first.isEmpty() && first.sameItem(second) && first.hasTag() == second.hasTag()) {
+        if (!first.isEmpty() && ItemStack.isSameItem(first, second) && first.hasTag() == second.hasTag()) {
             return !first.hasTag() || first.getTag().equals(second.getTag());
         } else {
             return false;
@@ -149,7 +149,7 @@ public class ItemTransferHelper {
         if (stack.isEmpty()) return;
 
         IItemTransfer inventory = new ContainerTransfer(player.getInventory());
-        Level level = player.level;
+        Level level = player.level();
 
         // try adding it into the inventory
         ItemStack remainder = stack;

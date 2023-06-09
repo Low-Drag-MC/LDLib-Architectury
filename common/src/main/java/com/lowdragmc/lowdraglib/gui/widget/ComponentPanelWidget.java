@@ -3,13 +3,13 @@ package com.lowdragmc.lowdraglib.gui.widget;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -213,7 +214,7 @@ public class ComponentPanelWidget extends Widget {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         var style = getStyleUnderMouse(mouseX, mouseY);
         if (style != null) {
             if (style.getHoverEvent() != null) {
@@ -225,17 +226,17 @@ public class ComponentPanelWidget extends Widget {
                 }
             }
         }
-        super.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
+        super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         var fontRenderer = Minecraft.getInstance().font;
         Position position = getPosition();
         for (int i = 0; i < cacheLines.size(); i++) {
-            fontRenderer.draw(poseStack, cacheLines.get(i), position.x, position.y + i * (fontRenderer.lineHeight + 2), -1);
+            graphics.drawString(fontRenderer, cacheLines.get(i), position.x, position.y + i * (fontRenderer.lineHeight + 2), -1);
         }
     }
 }

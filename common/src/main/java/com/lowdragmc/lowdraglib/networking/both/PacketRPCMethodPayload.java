@@ -113,7 +113,7 @@ public class PacketRPCMethodPayload extends PacketIntLocation implements IPacket
                 LDLib.LOGGER.error("Received rpc payload packet from client with no player!");
                 return;
             }
-            var level = player.getLevel();
+            var level = player.level();
             if (!level.isLoaded(pos)) return;
             BlockEntity tile = level.getBlockEntity(pos);
             if (tile == null) {

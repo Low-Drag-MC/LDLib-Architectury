@@ -7,6 +7,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import net.minecraft.client.gui.GuiGraphics;
 
 public class ModularSlotEntryWidget extends EntryWidget {
 
@@ -32,12 +33,12 @@ public class ModularSlotEntryWidget extends EntryWidget {
 
 
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 
     }
 
     @Override
-    protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 
     }
 

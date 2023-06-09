@@ -15,26 +15,20 @@ import com.lowdragmc.lowdraglib.gui.util.TextFormattingUtil;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.*;
-import com.lowdragmc.lowdraglib.side.fluid.FluidActionResult;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.emi.emi.api.stack.FluidEmiStack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.helpers.IPlatformFluidHelper;
-import mezz.jei.common.input.ClickableIngredient;
-import mezz.jei.common.util.ImmutableRect2i;
-import mezz.jei.library.ingredients.TypedIngredient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -44,7 +38,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluids;
-
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -187,8 +180,8 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         if (isClientSideWidget && fluidTank != null) {
             FluidStack fluidStack = fluidTank.getFluid();
             if (fluidTank.getCapacity() != lastTankCapacity) {
@@ -214,29 +207,29 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 int height = size.height - 2;
                 int x = pos.x + 1;
                 int y = pos.y + 1;
-                DrawerHelper.drawFluidForGui(matrixStack, lastFluidInTank, lastFluidInTank.getAmount(), (int) (x + drawnU * width), (int) (y + drawnV * height), ((int) (width * drawnWidth)), ((int) (height * drawnHeight)));
+                DrawerHelper.drawFluidForGui(graphics, lastFluidInTank, lastFluidInTank.getAmount(), (int) (x + drawnU * width), (int) (y + drawnV * height), ((int) (width * drawnWidth)), ((int) (height * drawnHeight)));
             }
 
             if (showAmount && !lastFluidInTank.isEmpty()) {
-                matrixStack.pushPose();
-                matrixStack.scale(0.5F, 0.5F, 1);
+                graphics.pose().pushPose();
+                graphics.pose().scale(0.5F, 0.5F, 1);
                 String s = TextFormattingUtil.formatLongToCompactStringBuckets(lastFluidInTank.getAmount(), 3) + "B";
                 Font fontRenderer = Minecraft.getInstance().font;
-                fontRenderer.drawShadow(matrixStack, s, (pos.x + (size.width / 3f)) * 2 - fontRenderer.width(s) + 21, (pos.y + (size.height / 3f) + 6) * 2, 0xFFFFFF);
-                matrixStack.popPose();
+                graphics.drawString(fontRenderer, s, (int) ((pos.x + (size.width / 3f)) * 2 - fontRenderer.width(s) + 21), (int) ((pos.y + (size.height / 3f) + 6) * 2), 0xFFFFFF, true);
+                graphics.pose().popPose();
             }
 
             RenderSystem.enableBlend();
             RenderSystem.setShaderColor(1, 1, 1, 1);
         }
         if (overlay != null) {
-            overlay.draw(matrixStack, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
+            overlay.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
         }
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (drawHoverTips && isMouseOverElement(mouseX, mouseY)) {
             List<Component> tooltips = new ArrayList<>();
             if (lastFluidInTank != null && !lastFluidInTank.isEmpty()) {
@@ -255,11 +248,11 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             }
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1f);
         } else {
-            super.drawInForeground(matrixStack, mouseX, mouseY, partialTicks);
+            super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
         }
         if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY)) {
             RenderSystem.colorMask(true, true, true, false);
-            DrawerHelper.drawSolidRect(matrixStack, getPosition().x + 1, getPosition().y + 1, getSize().width - 2, getSize().height - 2, 0x80FFFFFF);
+            DrawerHelper.drawSolidRect(graphics, getPosition().x + 1, getPosition().y + 1, getSize().width - 2, getSize().height - 2, 0x80FFFFFF);
             RenderSystem.colorMask(true, true, true, true);
         }
     }
@@ -363,13 +356,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 currentStack.shrink(1);
                 performedFill = true;
                 if (!remainingStack.isEmpty() && !player.addItem(remainingStack)) {
-                    Block.popResource(player.getLevel(), player.getOnPos(), remainingStack);
+                    Block.popResource(player.level(), player.getOnPos(), remainingStack);
                     break;
                 }
             }
             if (performedFill) {
                 SoundEvent soundevent = FluidHelper.getFillSound(initialFluid);
-                player.level.playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                player.level().playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                 gui.getModularUIContainer().setCarried(currentStack);
                 return currentStack.getCount();
             }
@@ -384,14 +377,14 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 currentStack.shrink(1);
                 performedEmptying = true;
                 if (!remainingStack.isEmpty() && !player.getInventory().add(remainingStack)) {
-                    Block.popResource(player.getLevel(), player.getOnPos(), remainingStack);
+                    Block.popResource(player.level(), player.getOnPos(), remainingStack);
                     break;
                 }
             }
             var filledFluid = fluidTank.getFluid();
             if (performedEmptying) {
                 SoundEvent soundevent = FluidHelper.getEmptySound(filledFluid);
-                player.level.playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                player.level().playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
                 gui.getModularUIContainer().setCarried(currentStack);
                 return currentStack.getCount();
             }

@@ -14,6 +14,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
 
 import javax.annotation.Nonnull;
@@ -130,19 +131,15 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         String suppliedText = LocalizationUtils.format(lastTextValue);
         String[] split = suppliedText.split("\n");
         Font fontRenderer = Minecraft.getInstance().font;
         Position position = getPosition();
         for (int i = 0; i < split.length; i++) {
             int y = position.y + (i * (fontRenderer.lineHeight + 2));
-            if (dropShadow) {
-                fontRenderer.drawShadow(poseStack, split[i], position.x, y, color);
-            } else {
-                fontRenderer.draw(poseStack, split[i], position.x, y, color);
-            }
+            graphics.drawString(fontRenderer, split[i], position.x, y, color, dropShadow);
         }
     }
 

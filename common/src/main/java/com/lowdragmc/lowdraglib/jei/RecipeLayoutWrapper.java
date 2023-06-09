@@ -23,11 +23,13 @@ import mezz.jei.library.gui.recipes.RecipeLayoutBuilder;
 import mezz.jei.library.gui.recipes.ShapelessIcon;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,7 +124,7 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
      * Rewrite the rendering of the recipe to use the LDLib wrapped rendering method.
      */
     @Override
-    public void drawRecipe(@NotNull PoseStack poseStack, int mouseX, int mouseY) {
+    public void drawRecipe(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         IRecipeCategory<R> recipeCategory = getRecipeCategory();
         IDrawable background = recipeCategory.getBackground();
 
@@ -133,33 +135,33 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
         final int recipeMouseX = mouseX - posX;
         final int recipeMouseY = mouseY - posY;
 
-        poseStack.pushPose();
+        graphics.pose().pushPose();
         {
-            poseStack.translate(posX, posY, 0);
+            graphics.pose().translate(posX, posY, 0);
 
             IDrawable categoryBackground = recipeCategory.getBackground();
             int width = categoryBackground.getWidth() + (2 * RECIPE_BORDER_PADDING);
             int height = categoryBackground.getHeight() + (2 * RECIPE_BORDER_PADDING);
-            accessor.getRecipeBorder().draw(poseStack, -RECIPE_BORDER_PADDING, -RECIPE_BORDER_PADDING, width, height);
-            background.draw(poseStack);
+            accessor.getRecipeBorder().draw(graphics, -RECIPE_BORDER_PADDING, -RECIPE_BORDER_PADDING, width, height);
+            background.draw(graphics);
 
             // defensive push/pop to protect against recipe categories changing the last pose
-            poseStack.pushPose();
+            graphics.pose().pushPose();
             {
-                wrapper.draw(poseStack, recipeMouseX, recipeMouseY, Minecraft.getInstance().getDeltaFrameTime());
+                wrapper.draw(graphics, recipeMouseX, recipeMouseY, Minecraft.getInstance().getDeltaFrameTime());
                 //drawExtras and drawInfo often render text which messes with the color, this clears it
                 RenderSystem.setShaderColor(1, 1, 1, 1);
             }
-            poseStack.popPose();
+            graphics.pose().popPose();
 
             //We have any shapeless recipes?
             ShapelessIcon shapelessIcon = accessor.getShapelessIcon();
             if (shapelessIcon != null) {
-                shapelessIcon.draw(poseStack);
+                shapelessIcon.draw(graphics);
             }
 
         }
-        poseStack.popPose();
+        graphics.pose().popPose();
 //
 //        if (getRecipeTransferButton() != null) {
 //            Minecraft minecraft = Minecraft.getInstance();
@@ -170,7 +172,7 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
     }
 
     @Override
-    public void drawOverlays(@NotNull PoseStack poseStack, int mouseX, int mouseY) {
+    public void drawOverlays(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         //:P
     }
 

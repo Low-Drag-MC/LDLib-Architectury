@@ -14,6 +14,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -85,7 +86,7 @@ public class ProgressWidget extends Widget implements IConfigurableWidget {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if ((tooltipTexts.size() > 0 || dynamicHoverTips != null) && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this && gui != null && gui.getModularUIGui() != null) {
             var tips = new ArrayList<>(tooltipTexts);
             if (dynamicHoverTips != null) {
@@ -97,14 +98,14 @@ public class ProgressWidget extends Widget implements IConfigurableWidget {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (progressSupplier == JEIProgress || isClientSideWidget) {
             lastProgressValue = progressSupplier.getAsDouble();
         }
         if (backgroundTexture instanceof ProgressTexture progressTexture) {
             progressTexture.setProgress(lastProgressValue);
         }
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override

@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
@@ -103,12 +104,12 @@ public class ResourceTexture extends TransformTexture {
     }
 
     @Environment(EnvType.CLIENT)
-    protected void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
-        drawSubArea(stack, x, y, width, height, 0, 0, 1, 1);
+    protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
+        drawSubArea(graphics, x, y, width, height, 0, 0, 1, 1);
     }
     
     @Environment(EnvType.CLIENT)
-    protected void drawSubAreaInternal(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+    protected void drawSubAreaInternal(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
         //sub area is just different width and height
         float imageU = this.offsetX + (this.imageWidth * drawnU);
         float imageV = this.offsetY + (this.imageHeight * drawnV);
@@ -118,7 +119,7 @@ public class ResourceTexture extends TransformTexture {
         BufferBuilder bufferbuilder = tessellator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, imageLocation);
-        var matrix4f = stack.last().pose();
+        var matrix4f = graphics.pose().last().pose();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
         bufferbuilder.vertex(matrix4f, x, y + height, 0).uv(imageU, imageV + imageHeight).color(color).endVertex();
         bufferbuilder.vertex(matrix4f, x + width, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight).color(color).endVertex();
@@ -156,8 +157,8 @@ public class ResourceTexture extends TransformTexture {
     }
 
     @Environment(EnvType.CLIENT)
-    protected void drawGuides(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
-        new ColorBorderTexture(-1, 0xffff0000).draw(stack, 0, 0,
+    protected void drawGuides(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
+        new ColorBorderTexture(-1, 0xffff0000).draw(graphics, 0, 0,
                 x + width * offsetX, y + height * offsetY,
                 (int) (width * imageWidth), (int) (height * imageHeight));
     }

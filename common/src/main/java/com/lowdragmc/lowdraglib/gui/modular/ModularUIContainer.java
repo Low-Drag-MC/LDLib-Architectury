@@ -141,7 +141,7 @@ public class ModularUIContainer extends AbstractContainerMenu implements WidgetU
             if (!slot.mayPlace(itemStack))
                 continue; //if itemstack cannot be placed into that slot, continue
             ItemStack stackInSlot = slot.getItem();
-            if (!ItemStack.isSame(itemStack, stackInSlot) || !ItemStack.isSameItemSameTags(itemStack, stackInSlot))
+            if (!ItemStack.isSameItem(itemStack, stackInSlot) || !ItemStack.isSameItemSameTags(itemStack, stackInSlot))
                 continue; //if itemstacks don't match, continue
             int slotMaxStackSize = Math.min(stackInSlot.getMaxStackSize(), slot.getMaxStackSize(stackInSlot));
             int amountToInsert = Math.min(itemStack.getCount(), slotMaxStackSize - stackInSlot.getCount());
@@ -207,12 +207,12 @@ public class ModularUIContainer extends AbstractContainerMenu implements WidgetU
             itemsMerged = stackInSlot.getCount();
         }
         int itemsToExtract = itemsMerged;
-        itemsMerged += transferredPerTick.get(player.level);
+        itemsMerged += transferredPerTick.get(player.level());
         if (itemsMerged > stackInSlot.getMaxStackSize()) {
             //we can merge at most one stack at a time
             return ItemStack.EMPTY;
         }
-        transferredPerTick.increment(player.level, itemsToExtract);
+        transferredPerTick.increment(player.level(), itemsToExtract);
         //otherwise, perform extraction and merge
         ItemStack extractedStack = stackInSlot.split(itemsToExtract);
         if (stackInSlot.isEmpty()) {

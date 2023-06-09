@@ -14,6 +14,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
@@ -82,12 +83,12 @@ public class ImageWidget extends Widget implements IConfigurableWidget {
     }
 
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         Position position = getPosition();
         Size size = getSize();
         if (border > 0) {
-            DrawerHelper.drawBorder(matrixStack, position.x, position.y, size.width, size.height, borderColor, border);
+            DrawerHelper.drawBorder(graphics, position.x, position.y, size.width, size.height, borderColor, border);
         }
     }
 }

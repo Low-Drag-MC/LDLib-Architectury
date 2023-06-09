@@ -1,9 +1,9 @@
 package com.lowdragmc.lowdraglib.rei;
 
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * @author KilaBash
@@ -15,22 +15,12 @@ public interface IGui2Renderer {
         return new Renderer() {
             int z = 0;
             @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 if (guiTexture == null) return;
-                matrices.pushPose();
-                matrices.translate(0, 0, z);
-                guiTexture.draw(matrices, mouseX, mouseY, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getWidth());
-                matrices.popPose();
-            }
-
-            @Override
-            public int getZ() {
-                return z;
-            }
-
-            @Override
-            public void setZ(int z) {
-                this.z = z;
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 0, z);
+                guiTexture.draw(graphics, mouseX, mouseY, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getWidth());
+                graphics.pose().popPose();
             }
         };
     }

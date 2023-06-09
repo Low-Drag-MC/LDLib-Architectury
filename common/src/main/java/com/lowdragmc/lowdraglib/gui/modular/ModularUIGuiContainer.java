@@ -14,8 +14,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -84,6 +84,11 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
     }
 
     @Override
+    protected void renderBg(GuiGraphics graphics, float delta, int mouseX, int mouseY) {
+
+    }
+
+    @Override
     public void removed() {
         super.removed();
     }
@@ -106,7 +111,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         this.hoveredSlot = null;
         
         RenderSystem.disableDepthTest();
@@ -115,29 +120,29 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         tooltipTexts = null;
         tooltipComponent = null;
 
-        this.renderBackground(poseStack);
-        if (Platform.isForge()) ForgeEventHooks.postBackgroundRenderedEvent(this, poseStack);
+        this.renderBackground(graphics);
+        if (Platform.isForge()) ForgeEventHooks.postBackgroundRenderedEvent(this, graphics);
 
-        modularUI.mainGroup.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
-        if (Platform.isForge()) ForgeEventHooks.postRenderBackgroundEvent(this, poseStack, mouseX, mouseY);
+        modularUI.mainGroup.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+        if (Platform.isForge()) ForgeEventHooks.postRenderBackgroundEvent(this, graphics, mouseX, mouseY);
 
         if (LDLib.isEmiLoaded()) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            EmiScreenManager.render(poseStack, mouseX, mouseY, partialTicks);
+            EmiScreenManager.render(graphics.pose(), mouseX, mouseY, partialTicks);
         }
 
-        modularUI.mainGroup.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
+        modularUI.mainGroup.drawInForeground(graphics, mouseX, mouseY, partialTicks);
 
         if (draggingElement != null) {
-            draggingElement.getB().draw(poseStack, mouseX, mouseY, mouseX - 20, mouseY - 20, 40, 40);
+            draggingElement.getB().draw(graphics, mouseX, mouseY, mouseX - 20, mouseY - 20, 40, 40);
         } else if (tooltipTexts != null && tooltipTexts.size() > 0) {
-            poseStack.translate(0, 0, 200);
+            graphics.pose().translate(0, 0, 200);
             if (tooltipComponent == null) {
-                renderTooltip(poseStack, tooltipTexts.stream().flatMap(component -> font.split(component, 200).stream()).toList(), mouseX, mouseY);
+                graphics.renderTooltip(font, tooltipTexts.stream().flatMap(component -> font.split(component, 200).stream()).toList(), mouseX, mouseY);
             } else {
-                renderTooltip(poseStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
+                graphics.renderTooltip(font, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
             }
-            poseStack.translate(0, 0, -200);
+            graphics.pose().translate(0, 0, -200);
         }
 
         RenderSystem.depthMask(true);
@@ -149,10 +154,10 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.hoveredSlot = null;
 
-        if (Platform.isForge()) ForgeEventHooks.postRenderForegroundEvent(this, poseStack, mouseX, mouseY);
+        if (Platform.isForge()) ForgeEventHooks.postRenderForegroundEvent(this, graphics, mouseX, mouseY);
 
-        renderItemStackOnMouse(poseStack, mouseX, mouseY);
-        renderReturningItemStack(poseStack);
+        renderItemStackOnMouse(graphics, mouseX, mouseY);
+        renderReturningItemStack(graphics);
 
         posestack.popPose();
         RenderSystem.applyModelViewMatrix();
@@ -164,7 +169,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         this.hoveredSlot = hoveredSlot;
     }
 
-    private void renderItemStackOnMouse(PoseStack poseStack, int mouseX, int mouseY) {
+    private void renderItemStackOnMouse(GuiGraphics graphics, int mouseX, int mouseY) {
         if (minecraft == null || minecraft.player == null) return;
         ItemStack draggedStack = ((AbstractContainerScreenAccessor)this).getDraggingItem();
         ItemStack itemstack = draggedStack.isEmpty() ? getMenu().getCarried() : draggedStack;
@@ -178,24 +183,23 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
                 itemstack = itemstack.copy();
                 itemstack.setCount(((AbstractContainerScreenAccessor)this).getQuickCraftingRemainder());
                 if (itemstack.isEmpty()) {
-                    s = "" + ChatFormatting.YELLOW + "0";
+                    s = ChatFormatting.YELLOW + "0";
                 }
             }
-            this.renderFloatingItem(poseStack, itemstack, mouseX - leftPos - 8, mouseY - topPos - k2, s);
+            this.renderFloatingItem(graphics, itemstack, mouseX - leftPos - 8, mouseY - topPos - k2, s);
         }
 
     }
 
-    public void renderFloatingItem(PoseStack poseStack, ItemStack stack, int pX, int pY, @Nullable String text) {
-        poseStack.translate(0.0D, 0.0D, 232.0D);
-        RenderSystem.applyModelViewMatrix();
-        Font font = Minecraft.getInstance().font;
-        this.itemRenderer.renderAndDecorateItem(poseStack, stack, pX, pY);
-        this.itemRenderer.renderGuiItemDecorations(poseStack, font, stack, pX, pY - (((AbstractContainerScreenAccessor)this).getDraggingItem().isEmpty() ? 0 : 8), text);
-        poseStack.popPose();
+    public void renderFloatingItem(GuiGraphics graphics, ItemStack stack, int x, int y, @Nullable String amountText) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(0.0f, 0.0f, 232.0f);
+        graphics.renderItem(stack, x, y);
+        graphics.renderItemDecorations(this.font, stack, x, y - (stack.isEmpty() ? 0 : 8), amountText);
+        graphics.pose().popPose();
     }
 
-    private void renderReturningItemStack(PoseStack poseStack) {
+    private void renderReturningItemStack(GuiGraphics graphics) {
         if (!((AbstractContainerScreenAccessor)this).getSnapbackItem().isEmpty()) {
             float f = (float)(Util.getMillis() - ((AbstractContainerScreenAccessor)this).getSnapbackTime()) / 100.0F;
             if (f >= 1.0F) {
@@ -207,7 +211,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
             int i3 = ((AbstractContainerScreenAccessor)this).getSnapbackEnd().y - ((AbstractContainerScreenAccessor)this).getSnapbackStartY();
             int l1 = ((AbstractContainerScreenAccessor)this).getSnapbackStartX() + (int)((float)l2 * f);
             int i2 = ((AbstractContainerScreenAccessor)this).getSnapbackStartY() + (int)((float)i3 * f);
-            this.renderFloatingItem(poseStack, ((AbstractContainerScreenAccessor)this).getSnapbackItem(), l1, i2, null);
+            this.renderFloatingItem(graphics, ((AbstractContainerScreenAccessor)this).getSnapbackItem(), l1, i2, null);
         }
     }
 
@@ -334,10 +338,6 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         super.mouseMoved(mouseX, mouseY);
     }
 
-    @Override
-    protected void renderBg(@Nonnull PoseStack pPoseStack, float pPartialTicks, int pX, int pY) {
-        
-    }
 
     public List<Rect2i> getGuiExtraAreas() {
         return modularUI.mainGroup.getGuiExtraAreas(modularUI.mainGroup.toRectangleBox(), new ArrayList<>());

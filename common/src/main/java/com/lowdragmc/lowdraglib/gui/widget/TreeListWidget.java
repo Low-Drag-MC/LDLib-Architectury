@@ -1,16 +1,15 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
-import com.lowdragmc.lowdraglib.client.utils.RenderUtils;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.TreeNode;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
@@ -107,61 +106,62 @@ public class TreeListWidget<K, T> extends Widget {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         int x = getPosition().x;
         int y = getPosition().y;
         int width = getSize().width;
         int height = getSize().height;
         if (backgroundTexture == null) {
-            DrawerHelper.drawGradientRect(matrixStack, x, y, width, height, 0x8f000000, 0x8f000000);
+            DrawerHelper.drawGradientRect(graphics, x, y, width, height, 0x8f000000, 0x8f000000);
         }
 
-        RenderUtils.useScissor(matrixStack, x, y, width, height, ()->{
-            Font fr = Minecraft.getInstance().font;
-            int minToRender = scrollOffset / ITEM_HEIGHT;
-            int maxToRender = Math.min(list.size(), height / ITEM_HEIGHT + 2 + minToRender);
-            for (int i = minToRender; i < maxToRender; i++) {
-                RenderSystem.setShaderColor(1,1,1,1);
-                TreeNode<K, T> node = list.get(i);
-                int sX = x + 10 * node.dimension;
-                int sY = y - scrollOffset + i * ITEM_HEIGHT;
-                String name = node.toString();
-                if (node.isLeaf()) {
-                    if (leafTexture != null) {
-                        leafTexture.draw(matrixStack, mouseX, mouseY, x, sY, width, ITEM_HEIGHT);
-                    } else {
-                        DrawerHelper.drawSolidRect(matrixStack, x, sY, width, ITEM_HEIGHT, 0xffff0000);
-                    }
-                    if (node.getContent() != null) {
-                        String nameS = contentNameSupplier == null ? null : contentNameSupplier.apply(node.getContent());
-                        name = nameS == null ? name : nameS;
-                        IGuiTexture icon = contentIconSupplier == null ? null : contentIconSupplier.apply(node.getContent());
-                        if (icon != null) {
-                            icon.draw(matrixStack, mouseX, mouseY, sX - 9, sY + 1, 8, 8);
-                        }
-                    }
+        graphics.enableScissor(x, y, x + width, y + height);
+        Font fr = Minecraft.getInstance().font;
+        int minToRender = scrollOffset / ITEM_HEIGHT;
+        int maxToRender = Math.min(list.size(), height / ITEM_HEIGHT + 2 + minToRender);
+        for (int i = minToRender; i < maxToRender; i++) {
+            RenderSystem.setShaderColor(1,1,1,1);
+            TreeNode<K, T> node = list.get(i);
+            int sX = x + 10 * node.dimension;
+            int sY = y - scrollOffset + i * ITEM_HEIGHT;
+            String name = node.toString();
+            if (node.isLeaf()) {
+                if (leafTexture != null) {
+                    leafTexture.draw(graphics, mouseX, mouseY, x, sY, width, ITEM_HEIGHT);
                 } else {
-                    if (nodeTexture != null) {
-                        nodeTexture.draw(matrixStack, mouseX, mouseY, x, sY, width, ITEM_HEIGHT);
-                    } else {
-                        DrawerHelper.drawSolidRect(matrixStack, x, sY, width, ITEM_HEIGHT, 0xffffff00);
-                    }
-                    String nameS = keyNameSupplier == null ? null : keyNameSupplier.apply(node.getKey());
+                    DrawerHelper.drawSolidRect(graphics, x, sY, width, ITEM_HEIGHT, 0xffff0000);
+                }
+                if (node.getContent() != null) {
+                    String nameS = contentNameSupplier == null ? null : contentNameSupplier.apply(node.getContent());
                     name = nameS == null ? name : nameS;
-                    IGuiTexture icon = keyIconSupplier == null ? null : keyIconSupplier.apply(node.getKey());
+                    IGuiTexture icon = contentIconSupplier == null ? null : contentIconSupplier.apply(node.getContent());
                     if (icon != null) {
-                        icon.draw(matrixStack, mouseX, mouseY, sX - 9, sY + 1, 8, 8);
+                        icon.draw(graphics, mouseX, mouseY, sX - 9, sY + 1, 8, 8);
                     }
                 }
-                if (node == selected) {
-                    DrawerHelper.drawSolidRect(matrixStack, x, sY, width, ITEM_HEIGHT, 0x7f000000);
+            } else {
+                if (nodeTexture != null) {
+                    nodeTexture.draw(graphics, mouseX, mouseY, x, sY, width, ITEM_HEIGHT);
+                } else {
+                    DrawerHelper.drawSolidRect(graphics, x, sY, width, ITEM_HEIGHT, 0xffffff00);
                 }
-                int textW = Math.max(width - 10 * node.dimension, 10);
-                List<FormattedText> list = fr.getSplitter().splitLines(LocalizationUtils.format(name), textW, Style.EMPTY);
-                fr.draw(matrixStack, list.get(Math.abs((tick / 20) % list.size())).getString(), sX, sY + 2, 0xff000000);
+                String nameS = keyNameSupplier == null ? null : keyNameSupplier.apply(node.getKey());
+                name = nameS == null ? name : nameS;
+                IGuiTexture icon = keyIconSupplier == null ? null : keyIconSupplier.apply(node.getKey());
+                if (icon != null) {
+                    icon.draw(graphics, mouseX, mouseY, sX - 9, sY + 1, 8, 8);
+                }
             }
-        });
+            if (node == selected) {
+                DrawerHelper.drawSolidRect(graphics, x, sY, width, ITEM_HEIGHT, 0x7f000000);
+            }
+            int textW = Math.max(width - 10 * node.dimension, 10);
+            List<FormattedText> list = fr.getSplitter().splitLines(LocalizationUtils.format(name), textW, Style.EMPTY);
+            graphics.drawString(fr, list.get(Math.abs((tick / 20) % list.size())).getString(), sX, sY + 2, 0xff000000, false);
+        }
+        graphics.disableScissor();
+
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(1,1,1,1);
     }

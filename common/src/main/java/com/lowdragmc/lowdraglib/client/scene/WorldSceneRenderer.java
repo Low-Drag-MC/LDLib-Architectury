@@ -14,6 +14,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
@@ -37,6 +38,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -91,7 +93,6 @@ public abstract class WorldSceneRenderer {
     private Vector3f eyePos = new Vector3f(0, 0, 10f);
     private Vector3f lookAt = new Vector3f(0, 0, 0);
     private Vector3f worldUp = new Vector3f(0, 1, 0);
-    private Matrix4f lastProject;
     private float fov = 60f;
     private float minX, maxX, minY, maxY, minZ, maxZ;
 
@@ -130,7 +131,7 @@ public abstract class WorldSceneRenderer {
             List<RenderType> layers = RenderType.chunkBufferLayers();
             this.vertexBuffers = new VertexBuffer[layers.size()];
             for (int j = 0; j < layers.size(); ++j) {
-                this.vertexBuffers[j] = new VertexBuffer();
+                this.vertexBuffers[j] = new VertexBuffer(VertexBuffer.Usage.STATIC);
             }
             if (cacheState.get() == CacheState.COMPILING && thread != null) {
                 thread.interrupt();
@@ -213,7 +214,7 @@ public abstract class WorldSceneRenderer {
         return lastTraceResult;
     }
 
-    public void render(PoseStack poseStack, float x, float y, float width, float height, int mouseX, int mouseY) {
+    public void render(@Nonnull PoseStack poseStack, float x, float y, float width, float height, int mouseX, int mouseY) {
         // setupCamera
         var pose = poseStack.last().pose();
         Vector4f pos = new Vector4f(x, y, 0, 1.0F);
@@ -330,13 +331,13 @@ public abstract class WorldSceneRenderer {
         clearView(x, y, width, height);
 
         //setup projection matrix to perspective
-        lastProject = RenderSystem.getProjectionMatrix();
+        RenderSystem.backupProjectionMatrix();
 
         float aspectRatio = width / (height * 1.0f);
         if (ortho) {
-            RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(minX, maxX, maxY / aspectRatio, minY / aspectRatio, minZ, maxZ));
+            RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(minX, maxX, maxY / aspectRatio, minY / aspectRatio, minZ, maxZ), VertexSorting.byDistance(camera.getPosition().toVector3f()));
         } else {
-            RenderSystem.setProjectionMatrix(new Matrix4f().setPerspective(fov * 0.01745329238474369F, aspectRatio, 0.1f, 10000.0f));
+            RenderSystem.setProjectionMatrix(new Matrix4f().setPerspective(fov * 0.01745329238474369F, aspectRatio, 0.1f, 10000.0f), VertexSorting.byDistance(camera.getPosition().toVector3f()));
         }
 
         //setup modelview matrix
@@ -372,8 +373,8 @@ public abstract class WorldSceneRenderer {
         RenderSystem.viewport(0, 0, minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
 
         //reset projection matrix
-        RenderSystem.setProjectionMatrix(lastProject);
-        
+        RenderSystem.restoreProjectionMatrix();
+
         //reset modelview matrix
         PoseStack posesStack = RenderSystem.getModelViewStack();
         posesStack.popPose();
@@ -431,7 +432,7 @@ public abstract class WorldSceneRenderer {
         }
 
         if (particleManager != null) {
-            PoseStack poseStack = new PoseStack();
+            @Nonnull PoseStack poseStack = new PoseStack();
             poseStack.setIdentity();
             poseStack.translate(cameraEntity.getX(), cameraEntity.getY(), cameraEntity.getZ());
             particleManager.render(poseStack, camera, particleTicks);
@@ -591,7 +592,7 @@ public abstract class WorldSceneRenderer {
         }
     }
 
-    private void renderBlocks(PoseStack matrixStack, BlockRenderDispatcher blockrendererdispatcher, RenderType layer, VertexConsumer buffer, Collection<BlockPos> renderedBlocks) {
+    private void renderBlocks(PoseStack poseStack, BlockRenderDispatcher blockrendererdispatcher, RenderType layer, VertexConsumer buffer, Collection<BlockPos> renderedBlocks) {
         VertexConsumerWrapper wrapperBuffer = new VertexConsumerWrapper(buffer);
         for (BlockPos pos : renderedBlocks) {
             if (blocked != null && blocked.contains(pos)) {
@@ -604,14 +605,14 @@ public abstract class WorldSceneRenderer {
 
             if (block == Blocks.AIR) continue;
             if (state.getRenderShape() != INVISIBLE && canRenderInLayer(state, layer)) {
-                matrixStack.pushPose();
-                matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
+                poseStack.pushPose();
+                poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
                 if (Platform.isForge()) {
-                    renderBlocksForge(blockrendererdispatcher, state, pos, world, matrixStack, wrapperBuffer, world.random, layer);
+                    renderBlocksForge(blockrendererdispatcher, state, pos, world, poseStack, wrapperBuffer, world.random, layer);
                 } else {
-                    blockrendererdispatcher.renderBatched(state, pos, world, matrixStack, wrapperBuffer, false, world.random);
+                    blockrendererdispatcher.renderBatched(state, pos, world, poseStack, wrapperBuffer, false, world.random);
                 }
-                matrixStack.popPose();
+                poseStack.popPose();
             }
             if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) { // I dont want to do this fxxk wrapper
                 wrapperBuffer.setOffset((pos.getX() - (pos.getX() & 15)), (pos.getY() - (pos.getY() & 15)), (pos.getZ() - (pos.getZ() & 15)));
@@ -631,25 +632,25 @@ public abstract class WorldSceneRenderer {
 
     @ExpectPlatform
     @PlatformOnly(PlatformOnly.FORGE)
-    public static void renderBlocksForge(BlockRenderDispatcher blockRenderDispatcher, BlockState state, BlockPos pos, BlockAndTintGetter level, PoseStack poseStack, VertexConsumer consumer, RandomSource random, RenderType renderType) {
+    public static void renderBlocksForge(BlockRenderDispatcher blockRenderDispatcher, BlockState state, BlockPos pos, BlockAndTintGetter level, @Nonnull PoseStack poseStack, VertexConsumer consumer, RandomSource random, RenderType renderType) {
         throw new AssertionError();
     }
 
-    private void renderTESR(Collection<BlockPos> poses, PoseStack matrixStack, MultiBufferSource.BufferSource buffers, float partialTicks) {
+    private void renderTESR(Collection<BlockPos> poses, PoseStack poseStack, MultiBufferSource.BufferSource buffers, float partialTicks) {
         if (buffers == null) return;
         for (BlockPos pos : poses) {
             BlockEntity tile = world.getBlockEntity(pos);
             if (tile != null) {
-                matrixStack.pushPose();
-                matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
+                poseStack.pushPose();
+                poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
                 BlockEntityRenderer<BlockEntity> tileentityrenderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(tile);
                 if (tileentityrenderer != null) {
                     if (tile.hasLevel() && tile.getType().isValid(tile.getBlockState())) {
                         Level world = tile.getLevel();
-                        tileentityrenderer.render(tile, partialTicks, matrixStack, buffers, 0xF000F0, OverlayTexture.NO_OVERLAY);
+                        tileentityrenderer.render(tile, partialTicks, poseStack, buffers, 0xF000F0, OverlayTexture.NO_OVERLAY);
                     }
                 }
-                matrixStack.popPose();
+                poseStack.popPose();
             }
         }
         buffers.endBatch();
