@@ -112,9 +112,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
 
     @Override
     public void onFocusChanged(@Nullable Widget lastFocus, Widget focus) {
-        if (!isFocus()) {
-            this.textField.setFocused(false);
-        }
+        this.textField.setFocused(isFocus());
     }
 
     @Override
@@ -151,6 +149,9 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
     @Environment(EnvType.CLIENT)
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         setFocus(isMouseOverElement(mouseX, mouseY));
+        if (!isMouseOverElement(mouseX, mouseY)) {
+            this.textField.setFocused(false);
+        }
         return this.textField.mouseClicked(mouseX, mouseY, button);
     }
 
