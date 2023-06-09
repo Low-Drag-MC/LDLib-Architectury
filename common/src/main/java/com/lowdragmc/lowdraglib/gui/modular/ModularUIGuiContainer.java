@@ -187,8 +187,8 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
     }
 
     public void renderFloatingItem(PoseStack poseStack, ItemStack stack, int pX, int pY, @Nullable String text) {
+        poseStack.pushPose();
         poseStack.translate(0.0D, 0.0D, 232.0D);
-        RenderSystem.applyModelViewMatrix();
         Font font = Minecraft.getInstance().font;
         this.itemRenderer.renderAndDecorateItem(poseStack, stack, pX, pY);
         this.itemRenderer.renderGuiItemDecorations(poseStack, font, stack, pX, pY - (((AbstractContainerScreenAccessor)this).getDraggingItem().isEmpty() ? 0 : 8), text);
