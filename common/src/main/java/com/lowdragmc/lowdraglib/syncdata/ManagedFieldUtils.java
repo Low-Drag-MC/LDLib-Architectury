@@ -65,7 +65,7 @@ public class ManagedFieldUtils {
 
         if (isReadOnlyManaged) {
             var readOnlyManaged = field.getAnnotation(ReadOnlyManaged.class);
-            var clazz = ReflectionUtils.getRawType(field.getGenericType());
+            var clazz = field.getDeclaringClass();
             var rawType = field.getType();
             try {
                 var onDirtyMethod = clazz.getDeclaredMethod(readOnlyManaged.onDirtyMethod(), rawType);
