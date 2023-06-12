@@ -1,9 +1,9 @@
-name: 1.19.2 Auto Build
+name: 1.20 Auto Build
 
 on:
   push:
     branches:
-      - '1.19.2'
+      - '1.20'
     paths:
       - 'gradle.properties'
 
@@ -51,13 +51,13 @@ jobs:
             fabric/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
 
           name: LDLib 1.0.8-fabric
-          version: mc1.19.2-fabric-1.0.8
+          version: mc1.20-fabric-1.0.8
           version-type: release
 
           loaders: |
             fabric
           game-versions: |
-            1.19.2
+            1.20
           game-version-filter: none
           java: |
             17
@@ -82,13 +82,13 @@ jobs:
             forge/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
 
           name: LDLib 1.0.8-forge
-          version: mc1.19.2-forge-1.0.8
+          version: mc1.20-forge-1.0.8
           version-type: release
 
           loaders: |
             forge
           game-versions: |
-            1.19.2
+            1.20
           game-version-filter: none
           java: |
             17
