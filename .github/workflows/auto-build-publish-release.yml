@@ -50,8 +50,8 @@ jobs:
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
 
-          name: LDLib 1.0.8-fabric
-          version: mc1.19.4-fabric-1.0.8
+          name: LDLib 1.0.9-fabric
+          version: mc1.19.4-fabric-1.0.9
           version-type: release
 
           loaders: |
@@ -81,8 +81,8 @@ jobs:
           files: |
             forge/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
 
-          name: LDLib 1.0.8-forge
-          version: mc1.19.4-forge-1.0.8
+          name: LDLib 1.0.9-forge
+          version: mc1.19.4-forge-1.0.9
           version-type: release
 
           loaders: |
