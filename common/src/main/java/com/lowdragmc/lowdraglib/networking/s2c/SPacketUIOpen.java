@@ -9,14 +9,15 @@ import lombok.NoArgsConstructor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 @NoArgsConstructor
 public class SPacketUIOpen implements IPacket {
-    private int uiFactoryId;
+    private ResourceLocation uiFactoryId;
     private FriendlyByteBuf serializedHolder;
     private int windowId;
 
-    public SPacketUIOpen(int uiFactoryId, FriendlyByteBuf serializedHolder, int windowId) {
+    public SPacketUIOpen(ResourceLocation uiFactoryId, FriendlyByteBuf serializedHolder, int windowId) {
         this.uiFactoryId = uiFactoryId;
         this.serializedHolder = serializedHolder;
         this.windowId = windowId;
@@ -27,7 +28,7 @@ public class SPacketUIOpen implements IPacket {
         buf.writeVarInt(serializedHolder.readableBytes());
         buf.writeBytes(serializedHolder);
 
-        buf.writeVarInt(uiFactoryId);
+        buf.writeResourceLocation(uiFactoryId);
         buf.writeVarInt(windowId);
     }
 
@@ -38,7 +39,7 @@ public class SPacketUIOpen implements IPacket {
         directSliceBuffer.release();
         this.serializedHolder = new FriendlyByteBuf(copiedDataBuffer);
 
-        this.uiFactoryId = buf.readVarInt();
+        this.uiFactoryId = buf.readResourceLocation();
         this.windowId = buf.readVarInt();
     }
 

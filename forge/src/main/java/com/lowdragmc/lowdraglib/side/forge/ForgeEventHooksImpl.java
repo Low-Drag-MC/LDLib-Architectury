@@ -6,6 +6,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ContainerScreenEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,18 +24,21 @@ public class ForgeEventHooksImpl {
         MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Open(player, container));
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void postBackgroundRenderedEvent(Screen screen, GuiGraphics graphics) {
         RenderSystem.depthMask(true);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new ScreenEvent.BackgroundRendered(screen, graphics));
         RenderSystem.depthMask(false);
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void postRenderBackgroundEvent(AbstractContainerScreen<?> guiContainer, GuiGraphics graphics, int mouseX, int mouseY) {
         RenderSystem.depthMask(true);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Background(guiContainer, graphics, mouseX, mouseY));
         RenderSystem.depthMask(false);
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void postRenderForegroundEvent(AbstractContainerScreen<?> guiContainer, GuiGraphics graphics, int mouseX, int mouseY) {
         RenderSystem.depthMask(true);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new ContainerScreenEvent.Render.Foreground(guiContainer, graphics, mouseX, mouseY));

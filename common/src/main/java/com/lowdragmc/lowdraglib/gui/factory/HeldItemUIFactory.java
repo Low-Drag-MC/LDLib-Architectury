@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.factory;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import net.minecraft.client.Minecraft;
@@ -19,6 +20,10 @@ import net.fabricmc.api.Environment;
 public class HeldItemUIFactory extends UIFactory<HeldItemUIFactory.HeldItemHolder> {
 
     public static final HeldItemUIFactory INSTANCE = new HeldItemUIFactory();
+
+    public HeldItemUIFactory() {
+        super(LDLib.location("held_item"));
+    }
 
     public final boolean openUI(ServerPlayer player, InteractionHand hand) {
         return openUI(new HeldItemHolder(player, hand), player);
