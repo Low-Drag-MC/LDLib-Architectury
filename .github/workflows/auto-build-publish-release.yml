@@ -55,7 +55,7 @@ jobs:
             fabric/build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
 
           name: LDLib ${{ steps.var.outputs.fabric_version }}-fabric
-          version: mc${{ github.ref_name }}-fabric-${{ steps.var.outputs.fabric_version }}
+          version: mc${{ steps.var.outputs.fabric_version }}-fabric
           version-type: release
 
           loaders: |
@@ -87,7 +87,7 @@ jobs:
             forge/build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
 
           name: LDLib ${{ steps.var.outputs.forge_version }}-forge
-          version: mc${{ github.ref_name }}-forge-${{ steps.var.outputs.forge_version }}
+          version: mc${{ steps.var.outputs.forge_version }}-forge
           version-type: release
 
           loaders: |
