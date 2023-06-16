@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.factory;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import net.minecraft.client.Minecraft;
@@ -14,7 +15,7 @@ public class BlockEntityUIFactory extends UIFactory<BlockEntity>{
     public static final BlockEntityUIFactory INSTANCE  = new BlockEntityUIFactory();
 
     private BlockEntityUIFactory() {
-        super();
+        super(LDLib.location("block_entity"));
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.factory;
 
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.editor.ui.UIEditor;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
@@ -13,7 +12,7 @@ public class UIEditorFactory extends UIFactory<UIEditorFactory> implements IUIHo
 	public static final UIEditorFactory INSTANCE = new UIEditorFactory();
 
 	private UIEditorFactory(){
-
+		super(LDLib.location("ui_editor"));
 	}
 
 	@Override

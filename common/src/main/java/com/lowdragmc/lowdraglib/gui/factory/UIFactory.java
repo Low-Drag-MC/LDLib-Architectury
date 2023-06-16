@@ -14,17 +14,21 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-public abstract class UIFactory<T> {
-    public final int uiFactoryId;
-    public static final Int2ObjectMap<UIFactory<?>> FACTORIES = new Int2ObjectOpenHashMap<>();
+import java.util.HashMap;
+import java.util.Map;
 
-    public UIFactory(){
-        uiFactoryId = FACTORIES.size();
+public abstract class UIFactory<T> {
+    public final ResourceLocation uiFactoryId;
+    public static final Map<ResourceLocation, UIFactory<?>> FACTORIES = new HashMap<>();
+
+    public UIFactory(ResourceLocation uiFactoryId){
+        this.uiFactoryId = uiFactoryId;
     }
     
     public static void register(UIFactory<?> factory) {
