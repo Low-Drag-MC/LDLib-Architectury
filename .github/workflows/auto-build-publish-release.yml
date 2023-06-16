@@ -1,11 +1,6 @@
-name: 1.20 Auto Build
+name: Auto Build, Publish, Releasing
 
-on:
-  push:
-    branches:
-      - '1.20'
-    paths:
-      - 'gradle.properties'
+on: workflow_dispatch
 
 jobs:
   build:
@@ -34,6 +29,18 @@ jobs:
         with:
           arguments: build publish
 
+      - name: Get Fabric Version
+        id: var
+        run: |
+          MESSAGE=$(ls fabric/build/libs/* | grep sources.jar -v | grep shadow.jar -v | awk -F 'ldlib-fabric-|.jar' '{print $2}')
+          echo fabric_version=$MESSAGE >> $GITHUB_OUTPUT
+
+      - name: Get Forge Version
+        id: var
+        run: |
+          MESSAGE=$(ls forge/build/libs/* | grep sources.jar -v | grep shadow.jar -v | awk -F 'ldlib-forge-|.jar' '{print $2}')
+          echo forge_version=$MESSAGE >> $GITHUB_OUTPUT
+
       - name: mc-publish-fabric
         uses: Kir-Antipov/mc-publish@v3.3
         with:
@@ -49,15 +56,16 @@ jobs:
 
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
+            fabric/build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
 
-          name: LDLib 1.0.9-fabric
-          version: mc1.20-fabric-1.0.9
+          name: LDLib ${{ steps.var.outputs.fabric_version }}-fabric
+          version: mc${{ github.ref_name }}-fabric-${{ steps.var.outputs.fabric_version }}
           version-type: release
 
           loaders: |
             fabric
           game-versions: |
-            1.20
+            ${{ github.ref_name }}
           game-version-filter: none
           java: |
             17
@@ -80,15 +88,16 @@ jobs:
 
           files: |
             forge/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
+            forge/build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
 
-          name: LDLib 1.0.9-forge
-          version: mc1.20-forge-1.0.9
+          name: LDLib ${{ steps.var.outputs.forge_version }}-forge
+          version: mc${{ github.ref_name }}-forge-${{ steps.var.outputs.forge_version }}
           version-type: release
 
           loaders: |
             forge
           game-versions: |
-            1.20
+            ${{ github.ref_name }}
           game-version-filter: none
           java: |
             17
