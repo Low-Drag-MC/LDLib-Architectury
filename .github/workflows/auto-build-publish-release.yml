@@ -29,15 +29,11 @@ jobs:
         with:
           arguments: build publish
 
-      - name: Get Fabric Version
+      - name: Get Version
         id: var
         run: |
           MESSAGE=$(ls fabric/build/libs/* | grep sources.jar -v | grep shadow.jar -v | awk -F 'ldlib-fabric-|.jar' '{print $2}')
           echo fabric_version=$MESSAGE >> $GITHUB_OUTPUT
-
-      - name: Get Forge Version
-        id: var
-        run: |
           MESSAGE=$(ls forge/build/libs/* | grep sources.jar -v | grep shadow.jar -v | awk -F 'ldlib-forge-|.jar' '{print $2}')
           echo forge_version=$MESSAGE >> $GITHUB_OUTPUT
 
