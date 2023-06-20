@@ -171,37 +171,39 @@ public class MenuWidget<K, T> extends WidgetGroup {
         if (super.mouseMoved(mouseX, mouseY)) {
             return true;
         }
-        int maxHeight = 0;
-        for (var node : root.getChildren()) {
-            if (crossLinePredicate != null && crossLinePredicate.test(node.getKey())) { // cross line
-                maxHeight += 1;
-                continue;
-            }
-            var widget = children.get(node);
-            if (widget.isMouseOverElement(mouseX, mouseY)) {
-                // if opened
-                if (opened != null && opened.root == node) return true;
-
-                // close previous
-                if (opened != null) {
-                    removeWidget(opened);
-                    opened = null;
+        if (root.getChildren() != null) {
+            int maxHeight = 0;
+            for (var node : root.getChildren()) {
+                if (crossLinePredicate != null && crossLinePredicate.test(node.getKey())) { // cross line
+                    maxHeight += 1;
+                    continue;
                 }
+                var widget = children.get(node);
+                if (widget.isMouseOverElement(mouseX, mouseY)) {
+                    // if opened
+                    if (opened != null && opened.root == node) return true;
 
-                // open a new menu
-                if (!node.isLeaf()) {
-                    opened = new MenuWidget<>(getSize().width, maxHeight, nodeHeight, node)
-                            .setNodeHoverTexture(nodeHoverTexture)
-                            .setNodeTexture(nodeTexture)
-                            .setLeafTexture(leafTexture)
-                            .setOnNodeClicked(onNodeClicked)
-                            .setKeyIconSupplier(keyIconSupplier)
-                            .setKeyNameSupplier(keyNameSupplier);
-                    addWidget(opened.setBackground(backgroundTexture));
+                    // close previous
+                    if (opened != null) {
+                        removeWidget(opened);
+                        opened = null;
+                    }
+
+                    // open a new menu
+                    if (!node.isLeaf()) {
+                        opened = new MenuWidget<>(getSize().width, maxHeight, nodeHeight, node)
+                                .setNodeHoverTexture(nodeHoverTexture)
+                                .setNodeTexture(nodeTexture)
+                                .setLeafTexture(leafTexture)
+                                .setOnNodeClicked(onNodeClicked)
+                                .setKeyIconSupplier(keyIconSupplier)
+                                .setKeyNameSupplier(keyNameSupplier);
+                        addWidget(opened.setBackground(backgroundTexture));
+                    }
+                    return true;
                 }
-                return true;
+                maxHeight += nodeHeight;
             }
-            maxHeight += nodeHeight;
         }
         return false;
     }
