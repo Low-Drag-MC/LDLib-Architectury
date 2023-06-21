@@ -4,11 +4,14 @@ import com.lowdragmc.lowdraglib.CommonProxy;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.ServerCommands;
+import com.lowdragmc.lowdraglib.plugin.ILDLibPlugin;
+import com.lowdragmc.lowdraglib.plugin.LDLibPlugin;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.test.TestBlock;
 import com.lowdragmc.lowdraglib.test.TestBlockEntity;
 import com.lowdragmc.lowdraglib.test.TestItem;
 import com.lowdragmc.lowdraglib.test.forge.TestBlockEntityImpl;
+import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -41,6 +44,14 @@ public class CommonProxyImpl {
         MinecraftForge.EVENT_BUS.addListener(this::registerCommand);
         // init common features
         CommonProxy.init();
+        // load ldlib plugin
+        ReflectionUtils.findAnnotationClasses(LDLibPlugin.class, clazz -> {
+            try {
+                if (clazz.getConstructor().newInstance() instanceof ILDLibPlugin plugin) {
+                    plugin.onLoad();
+                }
+            } catch (Throwable ignored) {}
+        }, () -> {});
         BLOCKS.register(eventBus);
         ITEMS.register(eventBus);
         BLOCK_ENTITY_TYPES.register(eventBus);
