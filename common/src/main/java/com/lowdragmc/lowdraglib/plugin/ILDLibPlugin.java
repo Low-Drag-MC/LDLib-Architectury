@@ -1,5 +1,4 @@
-package com.lowdragmc.lowdraglib.fabric;
-
+package com.lowdragmc.lowdraglib.plugin;
 
 /**
  * @author KilaBash
@@ -8,5 +7,4 @@ package com.lowdragmc.lowdraglib.fabric;
  */
 public interface ILDLibPlugin {
     void onLoad();
-
 }

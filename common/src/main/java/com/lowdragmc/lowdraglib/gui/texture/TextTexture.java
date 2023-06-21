@@ -192,6 +192,30 @@ public class TextTexture extends TransformTexture{
                     fontRenderer.draw(stack, resultText, x + width - textW, _y, color);
                 }
             }
+        } else if (type == TextType.LEFT_HIDE) {
+            int i = -1;
+            if (Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY)) {
+                i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
+            }
+            String resultText = i >= 0 ? texts.get(i) : (texts.get(0) + (texts.size() > 1 ? ".." : ""));
+            float _y = y + (height - textH) / 2f;
+            if (dropShadow) {
+                fontRenderer.drawShadow(stack, resultText, (int) x, (int) _y, color);
+            } else {
+                fontRenderer.draw(stack, resultText, (int) x, (int) _y, color);
+            }
+        } else if (type == TextType.LEFT_ROLL || type == TextType.LEFT_ROLL_ALWAYS) {
+            int i = 0;
+            if (type == TextType.LEFT_ROLL_ALWAYS || Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY)) {
+                i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
+            }
+            String resultText = texts.get(i);
+            float _y = y + (height - textH) / 2f;
+            if (dropShadow) {
+                fontRenderer.drawShadow(stack, resultText, (int) x, (int) _y, color);
+            } else {
+                fontRenderer.draw(stack, resultText, (int) x, (int) _y, color);
+            }
         }
         stack.popPose();
         RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -214,6 +238,9 @@ public class TextTexture extends TransformTexture{
         ROLL,
         ROLL_ALWAYS,
         LEFT,
-        RIGHT
+        RIGHT,
+        LEFT_HIDE,
+        LEFT_ROLL,
+        LEFT_ROLL_ALWAYS
     }
 }

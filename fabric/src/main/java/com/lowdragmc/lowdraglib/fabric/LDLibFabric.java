@@ -1,9 +1,7 @@
 package com.lowdragmc.lowdraglib.fabric;
 
-import com.lowdragmc.lowdraglib.CommonProxy;
-import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.Platform;
-import com.lowdragmc.lowdraglib.ServerCommands;
+import com.lowdragmc.lowdraglib.*;
+import com.lowdragmc.lowdraglib.plugin.ILDLibPlugin;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.test.TestBlock;
 import com.lowdragmc.lowdraglib.test.TestBlockEntity;
@@ -30,10 +28,6 @@ public class LDLibFabric implements ModInitializer {
                     FabricBlockEntityTypeBuilder.create(TestBlockEntity::new, TestBlock.BLOCK).build()
             );
         }
-        // load entry points
-        for (ILDLibPlugin ldlibPugin : FabricLoader.getInstance().getEntrypoints("ldlib_pugin", ILDLibPlugin.class)) {
-            ldlibPugin.onLoad();
-        }
         // hook server
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             PlatformImpl.SERVER = server;
@@ -42,6 +36,10 @@ public class LDLibFabric implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ServerCommands.createServerCommands().forEach(dispatcher::register));
         // init common features
         CommonProxy.init();
+        // load entry points
+        for (ILDLibPlugin ldlibPugin : FabricLoader.getInstance().getEntrypoints("ldlib_pugin", ILDLibPlugin.class)) {
+            ldlibPugin.onLoad();
+        }
         // execute annotation searching
         ReflectionUtilsImpl.execute();
         // register payload
