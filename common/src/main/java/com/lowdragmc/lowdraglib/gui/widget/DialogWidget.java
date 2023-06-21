@@ -1,10 +1,12 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
-import com.lowdragmc.lowdraglib.gui.texture.*;
+import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.Icons;
+import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
+import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.FileNode;
 import com.lowdragmc.lowdraglib.gui.util.TreeNode;
-import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,14 +16,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class DialogWidget extends WidgetGroup {
-    private static final int HEIGHT = 128;
-    private static final int WIDTH = 184;
     protected boolean isParentInVisible;
     protected Runnable onClosed;
     @Setter
@@ -135,79 +136,114 @@ public class DialogWidget extends WidgetGroup {
         };
     }
 
-    public static DialogWidget showStringEditorDialog(WidgetGroup parent, String title, String initial, Predicate<String> predicate, Consumer<String> result) {
-        Size size = parent.getSize();
-        DialogWidget dialog = new DialogWidget(parent, true);
-        TextFieldWidget textFieldWidget;
-        int x = (size.width - WIDTH) / 2;
-        int y = (size.height - HEIGHT) / 2;
-        dialog.addWidget(new ImageWidget(x, y, WIDTH, HEIGHT, ResourceBorderTexture.BORDERED_BACKGROUND));
+    public static WidgetGroup createContainer(DialogWidget dialog, int width, int height, String titleText) {
+        WidgetGroup title, content;
+        var size = dialog.getSize();
+        int x = (size.width - width) / 2;
+        int y = (size.height - height) / 2;
+        dialog.addWidget(title = new WidgetGroup(x, y, width, 15));
+        title.setBackground(new GuiTextureGroup(ColorPattern.RED.rectTexture().setTopRadius(5f), ColorPattern.GRAY.borderTexture(-1).setTopRadius(5f), new TextTexture(titleText).setWidth(width).setDropShadow(false).setType(TextTexture.TextType.ROLL)));
+        dialog.addWidget(content = new WidgetGroup(x, y + 15, width, height - 15));
+        content.setBackground(new GuiTextureGroup(ColorPattern.BLACK.rectTexture().setBottomRadius(5f), ColorPattern.GRAY.borderTexture(-1).setBottomRadius(5f)));
+        return content;
+    }
 
-        dialog.addWidget(textFieldWidget = new TextFieldWidget(x + WIDTH / 2 - 70, y + HEIGHT / 2 - 10, 140, 20,  null, null).setCurrentString(initial));
+    public static TextFieldWidget createTextField(WidgetGroup parent, int x, int y, int width, int height) {
+        TextFieldWidget textFieldWidget;
+        parent.addWidget(new ImageWidget(x, y, width, height, ColorPattern.T_GRAY.rectTexture().setRadius(height / 2f)));
+        parent.addWidget(textFieldWidget = new TextFieldWidget(x + 3, y, width - 6, height, null, null));
+        textFieldWidget.setBordered(false);
+        return textFieldWidget;
+    }
+
+    public static ButtonWidget createButton(WidgetGroup parent, int x, int y, int width, int height, String text, Runnable onClick) {
+        ButtonWidget buttonWidget;
+        parent.addWidget(buttonWidget = new ButtonWidget(x, y, width, height,
+                new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture().setRadius(height / 2f),
+                        new TextTexture(text).setWidth(width).setDropShadow(false).setType(TextTexture.TextType.ROLL)),
+                cd -> onClick.run())
+                .setHoverTexture(new GuiTextureGroup(ColorPattern.GRAY.rectTexture().setRadius(height / 2f),
+                        new TextTexture(text).setWidth(width).setDropShadow(false).setType(TextTexture.TextType.ROLL))));
+        return buttonWidget;
+    }
+
+    public static DialogWidget showStringEditorDialog(WidgetGroup parent, String title, String initial, @Nullable Predicate<String> predicate, Consumer<String> result) {
+        DialogWidget dialog = new DialogWidget(parent, true);
+        var container = createContainer(dialog, 200, 100, title);
+        var size = container.getSize();
+        TextFieldWidget textFieldWidget = createTextField(container, 10, size.height / 2 - 10 -5, size.width - 20, 10);
+
+        textFieldWidget.setCurrentString(initial);
         if (predicate != null) {
             textFieldWidget.setValidator(s -> predicate.test(s) ? s : textFieldWidget.getCurrentString());
         }
 
-        dialog.addWidget(new ButtonWidget(x + WIDTH / 2 - 30 - 20, y + HEIGHT - 32, 40, 20, cd -> {
+        createButton(container, ((size.width / 2) - 60) / 2, size.height / 2 + 20 - 7, 60, 15, "ldlib.gui.tips.confirm", () -> {
             dialog.close();
             if (result != null) result.accept(textFieldWidget.getCurrentString());
-        }).setButtonTexture(new ResourceTexture("ldlib:textures/gui/darkened_slot.png"), new TextTexture("ldlib.gui.tips.confirm", -1).setDropShadow(true)).setHoverBorderTexture(1, 0xff000000));
-        dialog.addWidget(new ButtonWidget(x + WIDTH / 2 + 30 - 20, y + HEIGHT - 32, 40, 20, cd -> {
+        });
+
+        createButton(container, ((size.width / 2) - 60) / 2 + size.width / 2, size.height / 2 + 20 - 7, 60, 15, "ldlib.gui.tips.cancel", () -> {
             dialog.close();
             if (result != null) result.accept(null);
-        }).setButtonTexture(new ResourceTexture("ldlib:textures/gui/darkened_slot.png"), new TextTexture("ldlib.gui.tips.cancel", 0xffff0000).setDropShadow(true)).setHoverBorderTexture(1, 0xff000000));
+        });
 
-
-        dialog.addWidget(new ImageWidget(x + 15, y + 20, WIDTH - 30,10, new TextTexture(title, -1).setWidth(WIDTH - 30).setDropShadow(true)));
         return dialog;
     }
 
     public static DialogWidget showFileDialog(WidgetGroup parent, String title, File dir, boolean isSelector, Predicate<TreeNode<File, File>> valid, Consumer<File> result) {
-        Size size = parent.getSize();
         DialogWidget dialog = new DialogWidget(parent, true);
+        dialog.addWidget(new ImageWidget(0, 0, parent.getSize().width, parent.getSize().height, new ColorRectTexture(0x4f000000)));
         if (!dir.isDirectory()) {
             if (!dir.mkdirs()) {
                 return dialog;
             }
         }
-        dialog.addWidget(new ImageWidget(0, 0, parent.getSize().width, parent.getSize().height, new ColorRectTexture(0x4f000000)));
+        var container = createContainer(dialog, 300, 200, title);
+        var size = container.getSize();
+
         AtomicReference<File> selected = new AtomicReference<>();
         selected.set(dir);
-        dialog.addWidget(new TreeListWidget<>(0, 0, 130, size.height, new FileNode(dir).setValid(valid), node -> selected.set(node.getKey()))
-                .setNodeTexture(ResourceBorderTexture.BORDERED_BACKGROUND)
-                .setKeyIconSupplier(file -> file.isDirectory() ? IGuiTexture.EMPTY : new TextTexture("├"))
-                .setContentIconSupplier(file -> file.isDirectory() ? IGuiTexture.EMPTY : new TextTexture("├"))
+        container.addWidget(new TreeListWidget<>(3, 15, size.width - 6, size.height - 20 - 15, new FileNode(dir).setValid(valid), node -> selected.set(node.getKey()))
+                .setKeyIconSupplier(file -> Icons.FOLDER)
+                .setContentIconSupplier(file -> Icons.getIcon(file.getName().substring(file.getName().lastIndexOf('.') + 1)))
                 .canSelectNode(true)
-                .setLeafTexture(new ResourceTexture("ldlib:textures/gui/darkened_slot.png")));
-        int x = 130 + (size.width - 133 - WIDTH) / 2;
-        int y = (size.height - HEIGHT) / 2;
-        dialog.addWidget(new ImageWidget(x, y, WIDTH, HEIGHT, ResourceBorderTexture.BORDERED_BACKGROUND));
-        dialog.addWidget(new ButtonWidget(x + WIDTH / 2 - 30 - 20, y + HEIGHT - 32, 40, 20, cd -> {
+                .setBackground(ColorPattern.GRAY.borderTexture(-1)));
+
+        createButton(container, ((size.width / 2) - 60) / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.confirm", () -> {
             dialog.close();
             if (result != null) result.accept(selected.get());
-        }).setButtonTexture(new ResourceTexture("ldlib:textures/gui/darkened_slot.png"), new TextTexture("ldlib.gui.tips.confirm", -1).setDropShadow(true)).setHoverBorderTexture(1, 0xff000000));
-        dialog.addWidget(new ButtonWidget(x + WIDTH / 2 + 30 - 20, y + HEIGHT - 32, 40, 20, cd -> {
+        });
+
+        createButton(container, ((size.width / 2) - 60) / 2 + size.width / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.cancel", () -> {
             dialog.close();
             if (result != null) result.accept(null);
-        }).setButtonTexture(new ResourceTexture("ldlib:textures/gui/darkened_slot.png"), new TextTexture("ldlib.gui.tips.cancel", 0xffff0000).setDropShadow(true)).setHoverBorderTexture(1, 0xff000000));
+        });
+
+        var textFieldWidget = createTextField(container, 3, 3, size.width - 6, 10);
+        var rootPath = dir.toString();
         if (isSelector) {
-            dialog.addWidget(new ImageWidget(x + 8, y + HEIGHT / 2 - 5, WIDTH - 16, 20, new GuiTextureGroup(new ColorBorderTexture(1, -1), new ColorRectTexture(0xff000000))));
-            dialog.addWidget(new ImageWidget(x + 8, y + HEIGHT / 2 - 5, WIDTH - 16, 20,
-                    new TextTexture("", -1).setWidth(WIDTH - 16).setType(TextTexture.TextType.ROLL)
-                            .setSupplier(() -> {
-                                if (selected.get() != null) {
-                                    return selected.get().toString();
-                                }
-                                return "no file selected";
-                            })));
+            textFieldWidget.setTextSupplier(() -> {
+                File file = selected.get();
+                if (file != null && !file.isDirectory()) {
+                    return selected.get().toString();
+                }
+                return "no file selected";
+            });
+            textFieldWidget.setTextResponder(res -> {
+                if (!res.isEmpty() && res.startsWith(rootPath)) {
+                    selected.set(new File(res));
+                }
+            });
         } else {
-            dialog.addWidget(new TextFieldWidget(x + WIDTH / 2 - 70, y + HEIGHT / 2 - 10, 140, 20,  ()->{
+            textFieldWidget.setTextSupplier(() -> {
                 File file = selected.get();
                 if (file != null && !file.isDirectory()) {
                     return selected.get().getName();
                 }
                 return "";
-            }, res->{
+            });
+            textFieldWidget.setTextResponder(res -> {
                 File file = selected.get();
                 if (file == null) return;
                 if (file.isDirectory()) {
@@ -215,16 +251,20 @@ public class DialogWidget extends WidgetGroup {
                 } else {
                     selected.set(new File(file.getParent(), res));
                 }
-            }));
+            });
         }
-        dialog.addWidget(new ButtonWidget(x + 15, y + 15, 20, 20, cd -> {
-            File file = selected.get();
-            if (file != null) {
-                Util.getPlatform().openFile(file.isDirectory() ? file : file.getParentFile());
-            }
-        }).setButtonTexture(new ResourceTexture("ldlib:textures/gui/darkened_slot.png"), new TextTexture("F", -1).setDropShadow(true)).setHoverBorderTexture(1, 0xff000000).setHoverTooltips("ldlib.gui.tips.open_folder"));
-        dialog.addWidget(new ImageWidget(x + 15, y + 20, WIDTH - 30,10, new TextTexture(title, -1).setWidth(WIDTH - 30).setDropShadow(true)));
-        //        dialog.addWidget(new LabelWidget(x + WIDTH / 2, y + 11, ()->title).setTextColor(-1));
+
+        // open folder
+        container.addWidget(new ButtonWidget(3, size.height - 20 + 3, 15, 15,
+                new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture().setRadius(5), Icons.OPEN_FILE),
+                cd -> {
+                    File file = selected.get();
+                    if (file != null) {
+                        Util.getPlatform().openFile(file.isDirectory() ? file : file.getParentFile());
+                    }
+                })
+                .setHoverTexture(new GuiTextureGroup(ColorPattern.GRAY.rectTexture().setRadius(5), Icons.OPEN_FILE))
+                .setHoverTooltips("ldlib.gui.tips.open_folder"));
         return dialog;
     }
 }

@@ -141,6 +141,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
     public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         this.textField.render(graphics, mouseX, mouseY, partialTicks);
+        RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(1,1,1,1);
     }

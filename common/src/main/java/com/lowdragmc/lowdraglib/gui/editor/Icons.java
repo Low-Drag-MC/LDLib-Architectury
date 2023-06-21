@@ -3,6 +3,8 @@ package com.lowdragmc.lowdraglib.gui.editor;
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import net.minecraft.Util;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 /**
@@ -12,6 +14,7 @@ import java.util.function.BiFunction;
  */
 public class Icons {
     private static final BiFunction<String, String, ResourceTexture> CACHE = Util.memoize((modID, name) -> new ResourceTexture("%s:textures/gui/icon/%s.png".formatted(modID, name)));
+    private static final Map<String, ResourceTexture> FILE_ICONS = new HashMap<>();
     public static ResourceTexture LEFT = new ResourceTexture("ldlib:textures/gui/left.png");
     public static ResourceTexture UP = new ResourceTexture("ldlib:textures/gui/up.png");
     public static ResourceTexture DOWN = new ResourceTexture("ldlib:textures/gui/down.png");
@@ -45,7 +48,9 @@ public class Icons {
     public static ResourceTexture EYE = icon("eye");
     public static ResourceTexture EYE_OFF = icon("eye_off");
     public static ResourceTexture FOLDER = icon("folder");
-
+    public static ResourceTexture FILE = icon("file");
+    public static ResourceTexture IMAGE = icon("image");
+    public static ResourceTexture JSON = icon("json");
     //align
     public static ResourceTexture ALIGN_H_C = icon("align_horizontal_center");
     public static ResourceTexture ALIGN_H_D = icon("align_horizontal_distribute");
@@ -56,6 +61,10 @@ public class Icons {
     public static ResourceTexture ALIGN_V_T = icon("align_vertical_top");
     public static ResourceTexture ALIGN_V_B = icon("align_vertical_bottom");
 
+    static {
+        registerFileIcon(IMAGE, "png", "jpg", "jpeg");
+        registerFileIcon(JSON, "json", "nbt");
+    }
 
     private static ResourceTexture icon(String name) {
         return CACHE.apply("ldlib", name);
@@ -71,6 +80,16 @@ public class Icons {
 
     public static IGuiTexture borderText(String text) {
         return borderText(1, text, -1);
+    }
+
+    public static void registerFileIcon(ResourceTexture icon, String... suffixes) {
+        for (String suffix : suffixes) {
+            FILE_ICONS.put(suffix.toLowerCase(), icon);
+        }
+    }
+
+    public static ResourceTexture getIcon(String suffix) {
+        return FILE_ICONS.getOrDefault(suffix.toLowerCase(), FILE);
     }
 
 }
