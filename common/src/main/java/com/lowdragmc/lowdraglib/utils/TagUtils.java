@@ -91,6 +91,7 @@ public class TagUtils {
         if (tag.equals(demo)) return null;
         if (tag instanceof CompoundTag compoundTag1 && demo instanceof CompoundTag compoundTag2) {
             for (var key : compoundTag2.getAllKeys()) {
+                if (key.startsWith("_")) continue;
                 var tag2 = compoundTag2.get(key);
                 var tag1 = compoundTag1.get(key);
                 if (tag1 != null && tag2 != null) {
