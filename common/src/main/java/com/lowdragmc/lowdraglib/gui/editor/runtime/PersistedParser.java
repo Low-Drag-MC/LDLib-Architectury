@@ -116,24 +116,22 @@ public class PersistedParser {
                 continue;
             }
 
-            Tag nbt = null;
+            Tag nbt = TagUtils.getTagExtended(tag, key);
             // sub configurable
-            if ((field.isAnnotationPresent(Configurable.class) && field.getAnnotation(Configurable.class).subConfigurable()) || (field.isAnnotationPresent(Persisted.class) && field.getAnnotation(Persisted.class).subPersisted())) {
-                try {
-                    field.setAccessible(true);
-                    var value = field.get(object);
-                    if (value != null) {
-                        if (value instanceof ITagSerializable serializable) {
-                            serializable.deserializeNBT(nbt = tag.get(key));
-                        } else {
-                            nbt = tag.getCompound(key);
-                            deserializeNBT((CompoundTag)nbt, new HashMap<>(), ReflectionUtils.getRawType(field.getGenericType()), value);
+            if (nbt != null) {
+                if ((field.isAnnotationPresent(Configurable.class) && field.getAnnotation(Configurable.class).subConfigurable()) || (field.isAnnotationPresent(Persisted.class) && field.getAnnotation(Persisted.class).subPersisted())) {
+                    try {
+                        field.setAccessible(true);
+                        var value = field.get(object);
+                        if (value != null) {
+                            if (value instanceof ITagSerializable serializable) {
+                                serializable.deserializeNBT(nbt);
+                            } else if (nbt instanceof CompoundTag compoundTag) {
+                                deserializeNBT(compoundTag, new HashMap<>(), ReflectionUtils.getRawType(field.getGenericType()), value);
+                            }
                         }
-                    }
-                } catch (IllegalAccessException ignored) {}
-            } else {
-                nbt = TagUtils.getTagExtended(tag, key);
-                if (nbt != null) {
+                    } catch (IllegalAccessException ignored) {}
+                } else {
                     var managedKey = ManagedFieldUtils.createKey(field);
                     managedKey.writePersistedField(managedKey.createRef(object), nbt);
                     Method setter = setters.get(field.getName());
