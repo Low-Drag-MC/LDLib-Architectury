@@ -97,6 +97,8 @@ public class TagUtils {
                     var cleanTag = removeDuplicates(tag1, tag2);
                     if (cleanTag != null) {
                         compoundTag1.put(key, cleanTag);
+                    } else {
+                        compoundTag1.remove(key);
                     }
                 }
             }
