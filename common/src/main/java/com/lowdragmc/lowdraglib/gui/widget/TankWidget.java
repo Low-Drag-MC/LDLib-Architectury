@@ -135,7 +135,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     public Object getJEIIngredient() {
-        if (lastFluidInTank == null) return null;
+        if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return null;
         if (LDLib.isReiLoaded()) {
             return lastFluidInTank.isEmpty() ? null : EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
         }

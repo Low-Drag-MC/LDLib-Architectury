@@ -1,13 +1,11 @@
 package com.lowdragmc.lowdraglib.client.forge;
 
-import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.forge.CommonProxyImpl;
-import com.lowdragmc.lowdraglib.forge.jei.JEIClientEventHandler;
 import com.lowdragmc.lowdraglib.test.TestBlock;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -18,7 +16,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
@@ -30,10 +27,6 @@ public class ClientProxyImpl extends CommonProxyImpl {
 
     public ClientProxyImpl() {
         super();
-        // init
-        if (LDLib.isJeiLoaded()) {
-            MinecraftForge.EVENT_BUS.register(JEIClientEventHandler.class);
-        }
     }
 
     @SubscribeEvent

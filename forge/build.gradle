@@ -90,9 +90,9 @@ dependencies {
     shadowCommon(project(path: "${parent_path}:${mod_id}-common", configuration: "transformProductionForge")) { transitive = false }
 
     // JEI
-    modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-    modCompileOnly("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
-    modCompileOnly("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}") { transitive = false }
+    modCompileOnly("mezz.jei:jei-${minecraft_version}-forge:${jei_version}") { transitive = false }
 
     // REI
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-forge:${rei_version}")
@@ -101,10 +101,10 @@ dependencies {
 
     // EMI
     modCompileOnly("dev.emi:emi-forge:${emi_version}:api")
-    modImplementation("dev.emi:emi-forge:${emi_version}")
+    modCompileOnly("dev.emi:emi-forge:${emi_version}")
 
     // KJS
-    modImplementation("dev.latvian.mods:kubejs-forge:${kjs_version}")
+    modCompileOnly("dev.latvian.mods:kubejs-forge:${kjs_version}")
 }
 
 processResources {

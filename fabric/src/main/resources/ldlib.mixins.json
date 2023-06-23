@@ -11,8 +11,7 @@
     "MinecraftMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
-    "ShaderInstanceMixin",
-    "jei.RecipesGuiMixin"
+    "ShaderInstanceMixin"
   ],
   "mixins": [
     "MinecraftServerMixin",

@@ -52,11 +52,6 @@ public class JEIPlugin implements IModPlugin {
     public void registerAdvanced(@Nonnull IAdvancedRegistration registration) {
     }
 
-
-    public static void setupInputHandler() {
-        //:P
-    }
-
     @Override
     @Nonnull
     public ResourceLocation getPluginUid() {

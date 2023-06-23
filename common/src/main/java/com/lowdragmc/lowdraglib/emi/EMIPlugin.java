@@ -1,4 +1,4 @@
-package com.lowdragmc.lowdraglib.forge.emi;
+package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIEmiHandlers;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;

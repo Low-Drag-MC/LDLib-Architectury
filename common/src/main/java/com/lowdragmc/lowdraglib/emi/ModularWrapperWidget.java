@@ -2,9 +2,10 @@ package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.emi.emi.api.recipe.EmiRecipe;
+import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
+import dev.emi.emi.screen.EmiScreenManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
@@ -25,9 +26,11 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
     private GuiEventListener focused;
     private boolean isDragging;
     public final ModularWrapper<?> modular;
+    public final List<Widget> slots;
 
-    public ModularWrapperWidget(ModularWrapper<?> modular) {
+    public ModularWrapperWidget(ModularWrapper<?> modular, List<Widget> slots) {
         this.modular = modular;
+        this.slots = slots;
     }
 
     @Override
@@ -52,7 +55,15 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
 
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int button) {
-        return modular.mouseClicked(mouseX + modular.getLeft(), mouseY + modular.getTop(), button);
+        if (modular.mouseClicked(mouseX + modular.getLeft(), mouseY + modular.getTop(), button)) {
+            return true;
+        }
+        for (Widget slot : slots) {
+            if (slot.mouseClicked(mouseX, mouseY, button)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -79,7 +90,14 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         modular.focused = false;
         if (modular.modularUI.mainGroup.keyPressed(pKeyCode, pScanCode, pModifiers)) {
-            return false;
+            return true;
+        }
+        for (Widget slot : slots) {
+            if (slot instanceof ModularSlotWidget slotWidget) {
+                EmiScreenManager.stackInteraction(new EmiStackInteraction(slotWidget.getStack(), slotWidget.getRecipe(), true),
+                        bind -> bind.matchesKey(pKeyCode, pScanCode));
+                return true;
+            }
         }
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }

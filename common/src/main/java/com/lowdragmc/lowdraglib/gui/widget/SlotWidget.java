@@ -330,7 +330,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     public Object getJEIIngredient() {
-        if (slotReference == null) return null;
+        if (slotReference == null || slotReference.getItem().isEmpty()) return null;
         if (LDLib.isReiLoaded()) {
             return EntryStacks.of(getRealStack(getHandle().getItem()));
         }
