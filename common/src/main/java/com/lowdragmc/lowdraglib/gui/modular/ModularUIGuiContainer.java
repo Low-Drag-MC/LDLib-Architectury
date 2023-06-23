@@ -9,6 +9,7 @@ import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
 import com.lowdragmc.lowdraglib.side.ForgeEventHooks;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.screen.EmiScreenManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -123,7 +124,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
 
         if (LDLib.isEmiLoaded()) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            EmiScreenManager.render(poseStack, mouseX, mouseY, partialTicks);
+            EmiScreenManager.render(EmiDrawContext.wrap(poseStack), mouseX, mouseY, partialTicks);
         }
 
         modularUI.mainGroup.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
