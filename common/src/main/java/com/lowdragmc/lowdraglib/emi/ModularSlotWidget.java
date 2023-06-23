@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.emi;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStackInteraction;
@@ -13,6 +12,7 @@ import dev.emi.emi.screen.RecipeScreen;
 import net.minecraft.client.gui.GuiGraphics;
 
 import javax.annotation.Nonnull;
+import lombok.Getter;
 
 /**
  * @author KilaBash
@@ -20,8 +20,11 @@ import javax.annotation.Nonnull;
  * @implNote ModularSlotWidget
  */
 public class ModularSlotWidget extends Widget {
+    @Getter
     private Bounds bounds;
+    @Getter
     private final EmiIngredient stack;
+    @Getter
     private final EmiRecipe recipe;
 
     public ModularSlotWidget(EmiIngredient stack, Bounds bounds, EmiRecipe recipe) {
@@ -34,23 +37,11 @@ public class ModularSlotWidget extends Widget {
         this.bounds = new Bounds(bounds.x(), bounds.y(), bounds.width(), bounds.height());
     }
 
-    @Override
-    public Bounds getBounds() {
-        return bounds;
-    }
 
-    @Override
-    public void method_25394(PoseStack matrices, int mouseX, int mouseY, float delta) {
-
-    }
 
     @Override
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
 
-    }
-
-    public EmiRecipe getRecipe() {
-        return recipe;
     }
 
     @Override
@@ -67,10 +58,11 @@ public class ModularSlotWidget extends Widget {
         return false;
     }
 
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return EmiScreenManager.stackInteraction(new EmiStackInteraction(stack, getRecipe(), true),
-                bind -> bind.matchesKey(keyCode, scanCode));
-    }
+    // fxxk EMI using refmap method
+//    @Override
+//    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+//        return EmiScreenManager.stackInteraction(new EmiStackInteraction(stack, getRecipe(), true),
+//                bind -> bind.matchesKey(keyCode, scanCode));
+//    }
 
 }

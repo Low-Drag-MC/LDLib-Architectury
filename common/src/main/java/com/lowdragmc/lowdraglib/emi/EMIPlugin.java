@@ -1,7 +1,8 @@
-package com.lowdragmc.lowdraglib.fabric.emi;
+package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIEmiHandlers;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
+import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 
@@ -10,6 +11,7 @@ import dev.emi.emi.api.EmiRegistry;
  * @date 2023/4/3
  * @implNote EMIPlugin
  */
+@EmiEntrypoint
 public class EMIPlugin implements EmiPlugin {
     @Override
     public void register(EmiRegistry registry) {

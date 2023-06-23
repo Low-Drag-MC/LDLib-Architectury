@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.jei;
 
-import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
@@ -92,19 +91,10 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
             updateScreen();
             lastTick = minecraft.player.tickCount;
         }
-        if (LDLib.isEmiLoaded()) {
-            var viewStack = RenderSystem.getModelViewStack();
-            viewStack.pushPose();
-            viewStack.translate(-left, -top, 0);
-            RenderSystem.applyModelViewMatrix();
-            render(graphics, mouseX + left, mouseY + top, partialTicks);
-            viewStack.popPose();
-            RenderSystem.applyModelViewMatrix();
-        } else {
-            graphics.pose().translate(-left, -top, 0);
-            render(graphics, mouseX + left, mouseY + top, partialTicks);
-            graphics.pose().translate(left, top, 0);
-        }
+        graphics.pose().pushPose();
+        graphics.pose().translate(-left, -top, 0);
+        render(graphics, mouseX + left, mouseY + top, partialTicks);
+        graphics.pose().popPose();
     }
 
     public void updateScreen() {
