@@ -10,6 +10,7 @@ import dev.emi.emi.bom.BoM;
 import dev.emi.emi.runtime.EmiHistory;
 import dev.emi.emi.screen.EmiScreenManager;
 import dev.emi.emi.screen.RecipeScreen;
+import lombok.Getter;
 
 /**
  * @author KilaBash
@@ -17,8 +18,11 @@ import dev.emi.emi.screen.RecipeScreen;
  * @implNote ModularSlotWidget
  */
 public class ModularSlotWidget extends Widget {
+    @Getter
     private Bounds bounds;
+    @Getter
     private final EmiIngredient stack;
+    @Getter
     private final EmiRecipe recipe;
 
     public ModularSlotWidget(EmiIngredient stack, Bounds bounds, EmiRecipe recipe) {
@@ -32,17 +36,8 @@ public class ModularSlotWidget extends Widget {
     }
 
     @Override
-    public Bounds getBounds() {
-        return bounds;
-    }
-
-    @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
 
-    }
-
-    public EmiRecipe getRecipe() {
-        return recipe;
     }
 
     @Override
@@ -59,10 +54,11 @@ public class ModularSlotWidget extends Widget {
         return false;
     }
 
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return EmiScreenManager.stackInteraction(new EmiStackInteraction(stack, getRecipe(), true),
-                bind -> bind.matchesKey(keyCode, scanCode));
-    }
+    // fxxk EMI using refmap method
+//    @Override
+//    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+//        return EmiScreenManager.stackInteraction(new EmiStackInteraction(stack, getRecipe(), true),
+//                bind -> bind.matchesKey(keyCode, scanCode));
+//    }
 
 }

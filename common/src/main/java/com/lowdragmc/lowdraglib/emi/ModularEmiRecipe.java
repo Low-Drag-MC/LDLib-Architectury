@@ -96,19 +96,19 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
         synchronized (CACHE_OPENED) {
             CACHE_OPENED.add(modular);
         }
-
-        widgets.add(new ModularWrapperWidget(modular));
-        List<Widget> flatVisibleWidgetCollection = getFlatWidgetCollection(widget);
-        for (Widget w : flatVisibleWidgetCollection) {
+        List<dev.emi.emi.api.widget.Widget> slots = new ArrayList<>();
+        for (Widget w : getFlatWidgetCollection(widget)) {
             if (w instanceof IRecipeIngredientSlot slot) {
                 var io = slot.getIngredientIO();
                 if (slot.getJEIIngredient() instanceof EmiIngredient ingredient && (io == IngredientIO.INPUT || io == IngredientIO.OUTPUT)) {
-                    widgets.add(new ModularSlotWidget(ingredient,
+                    slots.add(new ModularSlotWidget(ingredient,
                             new Bounds(w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height),
                             this));
                 }
             }
         }
+        widgets.add(new ModularWrapperWidget(modular, slots));
+        slots.forEach(widgets::add);
     }
 
     public static ModularWrapper<?> TEMP_CACHE = null;
@@ -120,7 +120,7 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
         var widget = this.widget.get();
         var modular = new ModularWrapper<>(widget);
         modular.setRecipeWidget(0, 0);
-        widgets.add(new ModularWrapperWidget(modular));
+        widgets.add(new ModularWrapperWidget(modular, new ArrayList<>()));
         TEMP_CACHE = modular;
     }
 }

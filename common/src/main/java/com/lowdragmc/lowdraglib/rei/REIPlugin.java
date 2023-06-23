@@ -1,4 +1,4 @@
-package com.lowdragmc.lowdraglib.fabric.rei;
+package com.lowdragmc.lowdraglib.rei;
 
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIReiHandlers;

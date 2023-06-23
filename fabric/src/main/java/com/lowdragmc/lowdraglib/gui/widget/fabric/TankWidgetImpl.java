@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib.gui.widget.fabric;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import mezz.jei.api.fabric.constants.FabricTypes;
 import mezz.jei.common.input.ClickableIngredient;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.fabric.ingredients.fluid.JeiFluidIngredient;

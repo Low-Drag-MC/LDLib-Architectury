@@ -1,4 +1,4 @@
-package com.lowdragmc.lowdraglib.fabric.core.mixins.jei;
+package com.lowdragmc.lowdraglib.core.mixins.jei;
 
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;

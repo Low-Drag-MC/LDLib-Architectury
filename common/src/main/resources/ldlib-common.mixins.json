@@ -20,6 +20,7 @@
     "emi.WidgetGroupAccessor",
     "emi.WidgetGroupMixin",
     "jei.RecipesGuiAccessor",
+    "jei.RecipesGuiMixin",
     "jei.RecipeSlotAccessor"
   ],
   "mixins": [
