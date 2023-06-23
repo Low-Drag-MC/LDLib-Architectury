@@ -1,13 +1,13 @@
 package com.lowdragmc.lowdraglib.emi;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.emi.emi.EmiHistory;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
 import dev.emi.emi.bom.BoM;
+import dev.emi.emi.runtime.EmiHistory;
 import dev.emi.emi.screen.EmiScreenManager;
 import dev.emi.emi.screen.RecipeScreen;
 

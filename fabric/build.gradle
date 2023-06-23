@@ -97,8 +97,8 @@ dependencies {
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}") { transitive = false }
 
     // EMI
-    modCompileOnly("dev.emi:emi:${emi_version}:api")
-    modImplementation("dev.emi:emi:${emi_version}")
+    modCompileOnly("dev.emi:emi-fabric:${emi_version}:api")
+    modImplementation("dev.emi:emi-fabric:${emi_version}")
 
     // KJS
     modImplementation("dev.latvian.mods:kubejs-fabric:${kjs_version}")

@@ -45,7 +45,7 @@ public class TextFormattingUtil {
     }
 
     public static String formatLongToCompactStringBuckets(long value, int precision) {
-        if (value == 0) return value + "";
+        if (value == 0) return String.valueOf(value);
         value = value * 1000 / FluidHelper.getBucket();
         if (value == 0) return String.format("%sm", new DecimalFormat("0.####").format(value * 1000d / FluidHelper.getBucket()));
         //Long.MIN_VALUE == -Long.MIN_VALUE so we need an adjustment here

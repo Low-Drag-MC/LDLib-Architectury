@@ -2,11 +2,14 @@ package com.lowdragmc.lowdraglib.core.mixins.emi;
 
 import com.lowdragmc.lowdraglib.emi.ModularSlotWidget;
 import com.lowdragmc.lowdraglib.emi.ModularWrapperWidget;
-import dev.emi.emi.api.recipe.EmiRecipe;
+import dev.emi.emi.api.widget.Widget;
+import dev.emi.emi.screen.WidgetGroup;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -15,18 +18,21 @@ import java.util.List;
  * @date 2023/4/3
  * @implNote WidgetGroupMixin
  */
-@Mixin(targets = "dev.emi.emi.screen.RecipeScreen$WidgetGroup")
+@Mixin(WidgetGroup.class)
 public abstract class WidgetGroupMixin {
 
-    @Inject(method = "<init>", at = @At(value = "TAIL"))
-    private void init(EmiRecipe recipe, List widgets, int x, int y, int width, int height, CallbackInfo ci) {
-        for (var widget : widgets) {
-            if (widget instanceof ModularWrapperWidget wrapperWidget) {
-                wrapperWidget.modular.setEmiRecipeWidget(x, y);
-            }
-            if (widget instanceof ModularSlotWidget slotWidget) {
-                slotWidget.setLayout(x, y);
-            }
+    @Shadow(remap = false) @Final
+    public int x;
+
+    @Shadow(remap = false) @Final public int y;
+
+    @Inject(method = "add", at = @At(value = "RETURN"), remap = false)
+    private <T extends Widget> void init(T widget, CallbackInfoReturnable<T> cir) {
+        if (widget instanceof ModularWrapperWidget wrapperWidget) {
+            wrapperWidget.modular.setEmiRecipeWidget(this.x, this.y);
+        }
+        if (widget instanceof ModularSlotWidget slotWidget) {
+            slotWidget.setLayout(x, y);
         }
     }
 }
