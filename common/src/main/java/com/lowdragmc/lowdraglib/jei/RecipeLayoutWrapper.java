@@ -5,7 +5,6 @@ import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeSlotsAccessor;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
@@ -13,6 +12,7 @@ import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.category.extensions.IRecipeCategoryDecorator;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IIngredientVisibility;
 import mezz.jei.common.gui.textures.Textures;
@@ -31,12 +31,13 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * To reduce workload and allow for customization, we wrapped and expanded {@link RecipeLayout}  to fit our needs.
  */
-public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayout<R> {
+public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
 
     private static final int RECIPE_BORDER_PADDING = 4;
 
@@ -48,15 +49,16 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
     private final ModularWrapper<?> wrapper;
 
 
-    public static <T extends ModularWrapper<?>> RecipeLayout<T> createWrapper(
+    public static <T> RecipeLayout<T> createWrapper(
             IRecipeCategory<T> recipeCategory,
+            Collection<IRecipeCategoryDecorator<T>> decorators,
             T recipe,
             IFocusGroup focuses,
             IIngredientManager ingredientManager,
             IIngredientVisibility ingredientVisibility,
             IModIdHelper modIdHelper,
             Textures textures) {
-        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(recipeCategory, recipe, ingredientManager, modIdHelper, textures);
+        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(recipeCategory, decorators, recipe, ingredientManager, modIdHelper, textures);
         if (wrapper.setRecipeLayout(recipeCategory, recipe, focuses, ingredientVisibility)) {
             return wrapper;
         }
@@ -107,13 +109,14 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
 
     public RecipeLayoutWrapper(
             IRecipeCategory<R> recipeCategory,
+            Collection<IRecipeCategoryDecorator<R>> decorators,
             R recipe,
             IIngredientManager ingredientManager,
             IModIdHelper modIdHelper,
             Textures textures
     ) {
-        super(recipeCategory, recipe, ingredientManager, modIdHelper, textures);
-        this.wrapper = recipe;
+        super(recipeCategory, decorators, recipe, ingredientManager, modIdHelper, textures);
+        this.wrapper = (ModularWrapper<?>) recipe;
     }
 
     public ModularWrapper<?> getWrapper() {
