@@ -142,15 +142,17 @@ public abstract class PipeNet<NodeDataType> implements ITagSerializable<Compound
             return;
         }
         Node<NodeDataType> selfNode = getNodeAt(nodePos);
-        if (selfNode.isBlocked(facing) == isBlocked)
+        if (selfNode.isBlocked(facing) == isBlocked) {
             return;
+        }
 
         setBlocked(selfNode, facing, isBlocked);
         BlockPos offsetPos = nodePos.relative(facing);
         PipeNet<NodeDataType> pipeNetAtOffset = worldData.getNetFromPos(offsetPos);
         if (pipeNetAtOffset == null) {
-            //if there is no any pipe net at this side,
-            //updating blocked status of it won't change anything in any net
+            onNodeConnectionsUpdate();
+            onPipeConnectionsUpdate();
+            worldData.setDirty();
             return;
         }
         //if we are on that side of node too

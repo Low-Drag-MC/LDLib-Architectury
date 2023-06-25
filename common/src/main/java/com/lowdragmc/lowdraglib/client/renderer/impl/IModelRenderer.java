@@ -116,11 +116,11 @@ public class IModelRenderer implements IRenderer {
             var model = getModel();
             if (model instanceof BlockModel blockModel && blockModel.getRootModel() == ModelBakery.GENERATION_MARKER) {
                 // fabric doesn't help us to fix vanilla bakery, so we have to do it ourselves
-                model = ModelFactory.ITEM_MODEL_GENERATOR.generateBlockModel(Material::sprite, blockModel);
+                model = ModelFactory.ITEM_MODEL_GENERATOR.generateBlockModel(this::materialMapping, blockModel);
             }
             itemModel = model.bake(
                     ModelFactory.getModeBaker(),
-                    Material::sprite,
+                    this::materialMapping,
                     BlockModelRotation.X0_Y0,
                     modelLocation);
         }
@@ -143,11 +143,16 @@ public class IModelRenderer implements IRenderer {
     public BakedModel getRotatedModel(Direction frontFacing) {
         return blockModels.computeIfAbsent(frontFacing, facing -> getModel().bake(
                 ModelFactory.getModeBaker(),
-                Material::sprite,
+                this::materialMapping,
                 ModelFactory.getRotation(facing),
                 modelLocation));
     }
 
+    @Environment(EnvType.CLIENT)
+    protected TextureAtlasSprite materialMapping(Material material) {
+        return material.sprite();
+    }
+    
     @Override
     @Environment(EnvType.CLIENT)
     public void onPrepareTextureAtlas(ResourceLocation atlasName, Consumer<ResourceLocation> register) {
