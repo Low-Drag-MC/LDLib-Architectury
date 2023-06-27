@@ -1,9 +1,7 @@
-package com.lowdragmc.lowdraglib.fabric.core.mixins;
+package com.lowdragmc.lowdraglib.fabric.core.mixins.rei;
 
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.emi.ModularEmiRecipe;
 import com.lowdragmc.lowdraglib.rei.ModularDisplay;
-import dev.emi.emi.screen.RecipeScreen;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -41,14 +39,6 @@ public class MinecraftMixin {
                     synchronized (ModularDisplay.CACHE_OPENED) {
                         ModularDisplay.CACHE_OPENED.forEach(modular -> modular.modularUI.triggerCloseListeners());
                         ModularDisplay.CACHE_OPENED.clear();
-                    }
-                }
-            }
-            if (LDLib.isEmiLoaded()) {
-                if (this.screen instanceof RecipeScreen && !ModularEmiRecipe.CACHE_OPENED.isEmpty()) {
-                    synchronized (ModularEmiRecipe.CACHE_OPENED) {
-                        ModularEmiRecipe.CACHE_OPENED.forEach(modular -> modular.modularUI.triggerCloseListeners());
-                        ModularEmiRecipe.CACHE_OPENED.clear();
                     }
                 }
             }

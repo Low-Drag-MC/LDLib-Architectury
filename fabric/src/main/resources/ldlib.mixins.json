@@ -8,10 +8,11 @@
     "BlockModelShaperMixin",
     "BlockRenderInfoMixin",
     "GameRendererMixin",
-    "MinecraftMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
-    "ShaderInstanceMixin"
+    "ShaderInstanceMixin",
+    "emi.MinecraftMixin",
+    "rei.MinecraftMixin"
   ],
   "mixins": [
     "MinecraftServerMixin",
