@@ -2,8 +2,10 @@ package com.lowdragmc.lowdraglib.client.forge;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.ClientCommands;
+import com.lowdragmc.lowdraglib.emi.ModularEmiRecipe;
 import com.lowdragmc.lowdraglib.rei.ModularDisplay;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.emi.emi.screen.RecipeScreen;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -38,6 +40,14 @@ public class ClientEventListener {
                 synchronized (ModularDisplay.CACHE_OPENED) {
                     ModularDisplay.CACHE_OPENED.forEach(modular -> modular.modularUI.triggerCloseListeners());
                     ModularDisplay.CACHE_OPENED.clear();
+                }
+            }
+        }
+        if (LDLib.isEmiLoaded()) {
+            if (event.getScreen() instanceof RecipeScreen && !ModularEmiRecipe.CACHE_OPENED.isEmpty()) {
+                synchronized (ModularEmiRecipe.CACHE_OPENED) {
+                    ModularEmiRecipe.CACHE_OPENED.forEach(modular -> modular.modularUI.triggerCloseListeners());
+                    ModularEmiRecipe.CACHE_OPENED.clear();
                 }
             }
         }
