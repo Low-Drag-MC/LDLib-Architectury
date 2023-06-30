@@ -5,36 +5,26 @@ import com.lowdragmc.lowdraglib.client.scene.*;
 import com.lowdragmc.lowdraglib.client.utils.RenderUtils;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
-import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.utils.BlockPosFace;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
-import com.mojang.blaze3d.vertex.*;
-import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.ingredients.IIngredientType;
-import mezz.jei.api.runtime.IClickableIngredient;
-import mezz.jei.common.input.ClickableIngredient;
-import mezz.jei.common.util.ImmutableRect2i;
-import mezz.jei.library.ingredients.TypedIngredient;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.util.FastColor;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import com.lowdragmc.lowdraglib.utils.interpolate.Eases;
 import com.lowdragmc.lowdraglib.utils.interpolate.Interpolator;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import dev.emi.emi.api.stack.ItemEmiStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -44,12 +34,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 public class SceneWidget extends WidgetGroup {
     @Environment(EnvType.CLIENT)
@@ -314,7 +304,7 @@ public class SceneWidget extends WidgetGroup {
                         if (blockState.getBlock() == Blocks.AIR) {
                             continue;
                         }
-                        hit = world.clipWithInteractionOverride(eyePos, endPos, pos, blockState.getInteractionShape(world, pos), blockState);
+                        hit = world.clipWithInteractionOverride(eyePos, endPos, pos, blockState.getShape(world, pos), blockState);
                         if (hit != null && hit.getType() != HitResult.Type.MISS) {
                             double dist = eyePos.distanceToSqr(hit.getLocation());
                             if (dist < min) {
@@ -521,6 +511,9 @@ public class SceneWidget extends WidgetGroup {
     @Override
     @Environment(EnvType.CLIENT)
     public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        // draw background
+        drawBackgroundTexture(graphics, mouseX, mouseY);
+
         int x = getPosition().x;
         int y = getPosition().y;
         int width = getSize().width;
@@ -537,9 +530,11 @@ public class SceneWidget extends WidgetGroup {
                 }
             }
         }
+
+        // draw widgets
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
-        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+        drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
         currentMouseX = mouseX;
         currentMouseY = mouseY;
     }

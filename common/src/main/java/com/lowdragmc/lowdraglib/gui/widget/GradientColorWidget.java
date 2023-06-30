@@ -7,8 +7,6 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
 import com.lowdragmc.lowdraglib.utils.ColorUtils;
 import com.lowdragmc.lowdraglib.utils.GradientColor;
-import com.lowdragmc.lowdraglib.utils.Position;
-import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import lombok.Setter;
@@ -214,16 +212,7 @@ public class GradientColorWidget extends WidgetGroup {
     @Environment(EnvType.CLIENT)
     public void drawInBackground(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         // render background
-        if (backgroundTexture != null) {
-            Position pos = getPosition();
-            Size size = getSize();
-            backgroundTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
-        }
-        if (hoverTexture != null && isMouseOverElement(mouseX, mouseY)) {
-            Position pos = getPosition();
-            Size size = getSize();
-            hoverTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
-        }
+        drawBackgroundTexture(graphics, mouseX, mouseY);
 
         var size = getSize();
         var pos = getPosition();
@@ -294,16 +283,6 @@ public class GradientColorWidget extends WidgetGroup {
         tesselator.end();
 
         // render children
-        for (Widget widget : widgets) {
-            if (widget.isVisible()) {
-                RenderSystem.setShaderColor(1, 1, 1, 1);
-                RenderSystem.enableBlend();
-                if (widget.inAnimate()) {
-                    widget.getAnimation().drawInBackground(graphics, mouseX, mouseY, partialTicks);
-                } else {
-                    widget.drawInBackground(graphics, mouseX, mouseY, partialTicks);
-                }
-            }
-        }
+        drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
     }
 }

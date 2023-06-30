@@ -177,7 +177,9 @@ public final class ModularUI {
             this.width = width;
             this.height = height;
             mainGroup.setSize(new Size(width, height));
-            getModularUIGui().init();
+            if (getModularUIGui() != null) {
+                getModularUIGui().init();
+            }
         }
     }
 
@@ -186,7 +188,9 @@ public final class ModularUI {
         if (fullScreen && (screenWidth != width || screenHeight != height)) {
             width = screenWidth;
             height = screenHeight;
-            getModularUIGui().init();
+            if (getModularUIGui() != null) {
+                getModularUIGui().init();
+            }
             return;
         }
         this.screenWidth = screenWidth;
