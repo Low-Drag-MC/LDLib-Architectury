@@ -324,11 +324,8 @@ public class Widget {
         }
     }
 
-    /**
-     * Called each draw tick to draw this widget in GUI
-     */
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    protected void drawTooltipTexts(int mouseX, int mouseY) {
         if (tooltipTexts.size() > 0 && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this && gui != null && gui.getModularUIGui() != null) {
             gui.getModularUIGui().setHoverTooltip(tooltipTexts, ItemStack.EMPTY, null, null);
         }
@@ -338,7 +335,12 @@ public class Widget {
      * Called each draw tick to draw this widget in GUI
      */
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        drawTooltipTexts(mouseX, mouseY);
+    }
+
+    @Environment(EnvType.CLIENT)
+    protected void drawBackgroundTexture(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         if (backgroundTexture != null) {
             Position pos = getPosition();
             Size size = getSize();
@@ -349,6 +351,14 @@ public class Widget {
             Size size = getSize();
             hoverTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
         }
+    }
+
+    /**
+     * Called each draw tick to draw this widget in GUI
+     */
+    @Environment(EnvType.CLIENT)
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        drawBackgroundTexture(graphics, mouseX, mouseY);
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
-import com.lowdragmc.lowdraglib.gui.animation.Animation;
+import com.lowdragmc.lowdraglib.gui.animation.Transform;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
@@ -256,13 +256,13 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         return this;
     }
 
-    public void addWidgetAnima(Widget widget, Animation animation) {
+    public void addWidgetAnima(Widget widget, Transform animation) {
         addWidget(widget);
         widget.animation(animation.setIn());
     }
 
-    public void removeWidgetAnima(Widget widget, Animation animation) {
-        widget.animation(animation.setOut().setOnFinish(() -> {
+    public void removeWidgetAnima(Widget widget, Transform animation) {
+        widget.animation(animation.setOut().appendOnFinish(() -> {
             widget.setVisible(false);
             waitToRemoved(widget);
         }));
@@ -392,10 +392,8 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         }
     }
 
-    @Override
     @Environment(EnvType.CLIENT)
-    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
+    protected void drawWidgetsForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         DialogWidget dialogWidget = null;
         for (int i = widgets.size() - 1; i >= 0; i--) {
             if (widgets.get(i) instanceof DialogWidget dialog) {
@@ -419,8 +417,13 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
+        drawWidgetsForeground(graphics, mouseX, mouseY, partialTicks);
+    }
+
+    @Environment(EnvType.CLIENT)
+    protected void drawWidgetsBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         for (Widget widget : widgets) {
             if (widget.isVisible()) {
                 RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -432,6 +435,13 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
                 }
             }
         }
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+        drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override
