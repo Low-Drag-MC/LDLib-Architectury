@@ -91,10 +91,10 @@ public class ToolPanel extends WidgetGroup {
         if (isShow() && !inAnimate()) {
             isShow = !isShow;
             animation(new Transform()
-                    .setOffset(-WIDTH, 0)
-                    .setEase(Eases.EaseQuadOut)
-                    .setDuration(500)
-                    .setOnFinish(() -> {
+                    .offset(-WIDTH, 0)
+                    .ease(Eases.EaseQuadOut)
+                    .duration(500)
+                    .onFinish(() -> {
                         addSelfPosition(-WIDTH, 0);
                         buttonHide.setButtonTexture(ColorPattern.BLACK.rectTexture(), ColorPattern.T_GRAY.borderTexture(1), Icons.RIGHT);
                     }));
@@ -105,10 +105,10 @@ public class ToolPanel extends WidgetGroup {
         if (!isShow() && !inAnimate()) {
             isShow = !isShow;
             animation(new Transform()
-                    .setOffset(WIDTH, 0)
-                    .setEase(Eases.EaseQuadOut)
-                    .setDuration(500)
-                    .setOnFinish(() -> {
+                    .offset(WIDTH, 0)
+                    .ease(Eases.EaseQuadOut)
+                    .duration(500)
+                    .onFinish(() -> {
                         addSelfPosition(WIDTH, 0);
                         buttonHide.setButtonTexture(ColorPattern.BLACK.rectTexture(), ColorPattern.T_GRAY.borderTexture(1), Icons.LEFT);
                     }));

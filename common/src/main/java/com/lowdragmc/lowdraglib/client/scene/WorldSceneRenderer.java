@@ -399,33 +399,33 @@ public abstract class WorldSceneRenderer {
         } else {
             BlockRenderDispatcher blockrendererdispatcher = mc.getBlockRenderer();
             try { // render com.lowdragmc.lowdraglib.test.block in each layer
-                for (RenderType layer : RenderType.chunkBufferLayers()) {
-                    PoseStack matrixstack = new PoseStack();
-                    renderedBlocksMap.forEach((renderedBlocks, hook) -> {
+                renderedBlocksMap.forEach((renderedBlocks, hook) -> {
+                    for (RenderType layer : RenderType.chunkBufferLayers()) {
+                        layer.setupRenderState();
+                        Random random = new Random();
+                        PoseStack matrixstack = new PoseStack();
+                        if (hook != null) {
+                            hook.apply(false, layer);
+                        } else {
+                            setDefaultRenderLayerState(layer);
+                        }
+
                         if (layer == RenderType.translucent()) { // render tesr before translucent
                             if (hook != null) {
                                 hook.apply(true, layer);
                             }
                             renderTESR(renderedBlocks, matrixstack, mc.renderBuffers().bufferSource(), particleTicks);
                         }
-                    });
-                    layer.setupRenderState();
-                    Random random = new Random();
-                    renderedBlocksMap.forEach((renderedBlocks, hook) -> {
-                        if (hook != null) {
-                            hook.apply(false, layer);
-                        } else {
-                            setDefaultRenderLayerState(layer);
-                        }
+
                         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
                         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
                         renderBlocks(matrixstack, blockrendererdispatcher, layer, buffer, renderedBlocks);
 
                         Tesselator.getInstance().end();
-                    });
-                    layer.clearRenderState();
-                }
+                        layer.clearRenderState();
+                    }
+                });
             } finally {
             }
         }

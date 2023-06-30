@@ -84,10 +84,10 @@ public class ResourcePanel extends WidgetGroup {
         if (isShow() && !inAnimate()) {
             isShow = !isShow;
             animation(new Transform()
-                    .setOffset(0, HEIGHT)
-                    .setEase(Eases.EaseQuadOut)
-                    .setDuration(500)
-                    .setOnFinish(() -> {
+                    .offset(0, HEIGHT)
+                    .ease(Eases.EaseQuadOut)
+                    .duration(500)
+                    .onFinish(() -> {
                         addSelfPosition(0, HEIGHT);
                         buttonHide.setButtonTexture(ColorPattern.BLACK.rectTexture(), ColorPattern.T_GRAY.borderTexture(1), Icons.UP);
                     }));
@@ -98,10 +98,10 @@ public class ResourcePanel extends WidgetGroup {
         if (!isShow() && !inAnimate()) {
             isShow = !isShow;
             animation(new Transform()
-                    .setOffset(0, -HEIGHT)
-                    .setEase(Eases.EaseQuadOut)
-                    .setDuration(500)
-                    .setOnFinish(() -> {
+                    .offset(0, -HEIGHT)
+                    .ease(Eases.EaseQuadOut)
+                    .duration(500)
+                    .onFinish(() -> {
                         addSelfPosition(0, -HEIGHT);
                         buttonHide.setButtonTexture(ColorPattern.BLACK.rectTexture(), ColorPattern.T_GRAY.borderTexture(1), Icons.DOWN);
                     }));
