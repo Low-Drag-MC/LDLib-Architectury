@@ -1,40 +1,65 @@
 package com.lowdragmc.lowdraglib.gui.animation;
 
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import com.lowdragmc.lowdraglib.utils.Position;
+import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.lowdraglib.utils.interpolate.Eases;
 import com.lowdragmc.lowdraglib.utils.interpolate.IEase;
 import com.lowdragmc.lowdraglib.utils.interpolate.Interpolator;
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.floats.FloatConsumer;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author KilaBash
  * @date 2022/9/8
  * @implNote Animation
  */
-public abstract class Animation {
-
+@Accessors(chain = true, fluent = true)
+public class Animation {
     protected Widget widget;
     protected Interpolator interpolator;
+    protected float time = 0;
+    protected boolean isFinish;
+    protected long startTick = -1;
+    protected boolean init = false;
+    // animation
+    @Setter
     protected long duration = 250;
+    @Setter
     protected long delay = 0;
+    @Setter
     protected IEase ease = Eases.EaseLinear;
+    @Setter
+    protected FloatConsumer onUpdate;
+    @Setter
     protected Runnable onFinish;
-    private float time = 0;
-    private boolean in;
-    private boolean isFinish;
-    private long startTick = -1;
-    private boolean init = false;
+    @Nullable
+    @Setter
+    protected Size size;
+    @Nullable
+    @Setter
+    protected Position position;
+    // initial data
+    protected Size initialSize;
+    protected Position initialPosition;
 
     public Animation setWidget(Widget widget) {
         this.widget = widget;
         return this;
     }
 
-    protected void onUpdate(Number number) {
+    public Widget getWidget() {
+        return widget;
+    }
+
+    protected void onInterpolatorUpdate(Number number) {
         time = number.floatValue();
     }
 
@@ -42,7 +67,7 @@ public abstract class Animation {
         return time;
     }
 
-    protected void onFinish(Number number) {
+    protected void onInterpolatorFinish(Number number) {
         widget.setActive(true);
         interpolator = null;
         isFinish = true;
@@ -55,28 +80,9 @@ public abstract class Animation {
         return isFinish;
     }
 
-    public Widget getWidget() {
-        return widget;
-    }
-
-    public Animation setDuration(long duration) {
-        this.duration = duration;
-        return this;
-    }
-
-    public Animation setDelay(long delay) {
-        this.delay = delay;
-        return this;
-    }
-
-    public Animation setEase(IEase ease) {
-        this.ease = ease;
-        return this;
-    }
-
-    public Animation setOnFinish(Runnable onFinish) {
+    public Animation appendOnFinish(Runnable onFinish) {
         if (this.onFinish != null) {
-            Runnable last = this.onFinish;
+            final Runnable last = this.onFinish;
             this.onFinish = () -> {
                 last.run();
                 onFinish.run();
@@ -91,42 +97,32 @@ public abstract class Animation {
         return onFinish;
     }
 
-    public boolean isIn() {
-        return in;
-    }
-
-    public boolean isOut() {
-        return !in;
-    }
-
-    public Animation setIn() {
-        this.in = true;
-        return this;
-    }
-
-    public Animation setOut() {
-        this.in = false;
-        return this;
-    }
-
     protected float getTick() {
         if (!init) {
-            init = true;
-            interpolator = new Interpolator(0, 1, duration, ease, this::onUpdate, this::onFinish);
-            startTick = System.currentTimeMillis();
-            widget.setActive(false);
+            init();
         }
         return (System.currentTimeMillis() - startTick);
     }
 
-    @Environment(EnvType.CLIENT)
-    public void pre(@Nonnull PoseStack poseStack) {
-
+    protected void init() {
+        init = true;
+        interpolator = new Interpolator(0, 1, duration, ease, this::onInterpolatorUpdate, this::onInterpolatorFinish);
+        startTick = System.currentTimeMillis();
+        widget.setActive(false);
+        initialSize = widget.getSize();
+        initialPosition = widget.getSelfPosition();
     }
 
-    @Environment(EnvType.CLIENT)
-    public void post(@Nonnull PoseStack poseStack) {
-
+    protected void updateWidget(float t) {
+        if (onUpdate != null) {
+            onUpdate.accept(t);
+        }
+        if (size != null) {
+            widget.setSize(new Size((int)(size.width * t + initialSize.width * (1 - t)), (int)(size.height * t + initialSize.height * (1 - t))));
+        }
+        if (position != null) {
+            widget.setSelfPosition(new Position((int)(position.x * t + initialPosition.x * (1 - t)), (int)(position.y * t + initialPosition.y * (1 - t))));
+        }
     }
 
     @Environment(EnvType.CLIENT)
@@ -135,15 +131,10 @@ public abstract class Animation {
         if (tickTime >= delay) {
             if (interpolator != null) {
                 interpolator.update(tickTime);
+                updateWidget(getTime());
             }
-            if (widget != null) {
-                pre(poseStack);
-                widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
-                post(poseStack);
-            }
-        } else if (isOut()) {
-            widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
         }
+        widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
     }
 
     @Environment(EnvType.CLIENT)
@@ -153,14 +144,8 @@ public abstract class Animation {
             if (interpolator != null) {
                 interpolator.update(tickTime);
             }
-            if (widget != null) {
-                pre(poseStack);
-                widget.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
-                post(poseStack);
-            }
-        } else if (isOut()) {
-            widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
         }
+        widget.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
     }
 
 }

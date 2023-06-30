@@ -212,16 +212,7 @@ public class GradientColorWidget extends WidgetGroup {
     @Environment(EnvType.CLIENT)
     public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         // render background
-        if (backgroundTexture != null) {
-            Position pos = getPosition();
-            Size size = getSize();
-            backgroundTexture.draw(poseStack, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
-        }
-        if (hoverTexture != null && isMouseOverElement(mouseX, mouseY)) {
-            Position pos = getPosition();
-            Size size = getSize();
-            hoverTexture.draw(poseStack, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
-        }
+        drawBackgroundTexture(poseStack, mouseX, mouseY);
 
         var size = getSize();
         var pos = getPosition();
@@ -297,16 +288,6 @@ public class GradientColorWidget extends WidgetGroup {
         RenderSystem.enableTexture();
 
         // render children
-        for (Widget widget : widgets) {
-            if (widget.isVisible()) {
-                RenderSystem.setShaderColor(1, 1, 1, 1);
-                RenderSystem.enableBlend();
-                if (widget.inAnimate()) {
-                    widget.getAnimation().drawInBackground(poseStack, mouseX, mouseY, partialTicks);
-                } else {
-                    widget.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
-                }
-            }
-        }
+        drawWidgetsBackground(poseStack, mouseX, mouseY, partialTicks);
     }
 }

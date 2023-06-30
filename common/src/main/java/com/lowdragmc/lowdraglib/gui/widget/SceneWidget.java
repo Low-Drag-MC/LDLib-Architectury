@@ -6,15 +6,12 @@ import com.lowdragmc.lowdraglib.client.utils.RenderUtils;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
-import com.lowdragmc.lowdraglib.utils.BlockPosFace;
-import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
-import com.lowdragmc.lowdraglib.utils.Vector3;
+import com.lowdragmc.lowdraglib.utils.*;
 import com.lowdragmc.lowdraglib.utils.interpolate.Eases;
 import com.lowdragmc.lowdraglib.utils.interpolate.Interpolator;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.ItemEmiStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
@@ -300,7 +297,7 @@ public class SceneWidget extends WidgetGroup {
                         if (blockState.getBlock() == Blocks.AIR) {
                             continue;
                         }
-                        hit = world.clipWithInteractionOverride(eyePos, endPos, pos, blockState.getInteractionShape(world, pos), blockState);
+                        hit = world.clipWithInteractionOverride(eyePos, endPos, pos, blockState.getShape(world, pos), blockState);
                         if (hit != null && hit.getType() != HitResult.Type.MISS) {
                             double dist = eyePos.distanceToSqr(hit.getLocation());
                             if (dist < min) {
@@ -457,7 +454,10 @@ public class SceneWidget extends WidgetGroup {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+        // draw background
+        drawBackgroundTexture(poseStack, mouseX, mouseY);
+
         int x = getPosition().x;
         int y = getPosition().y;
         int width = getSize().width;
@@ -466,17 +466,19 @@ public class SceneWidget extends WidgetGroup {
             interpolator.update(gui.getTickCount() + partialTicks);
         }
         if (renderer != null) {
-            renderer.render(matrixStack, x, y, width, height, mouseX, mouseY);
+            renderer.render(poseStack, x, y, width, height, mouseX, mouseY);
             if (renderer.isCompiling()) {
                 double progress = renderer.getCompileProgress();
                 if (progress > 0) {
-                    new TextTexture("Renderer is compiling! " + String.format("%.1f", progress * 100) + "%%").setWidth(width).draw(matrixStack, mouseX, mouseY, x, y, width, height);
+                    new TextTexture("Renderer is compiling! " + String.format("%.1f", progress * 100) + "%%").setWidth(width).draw(poseStack, mouseX, mouseY, x, y, width, height);
                 }
             }
         }
+
+        // draw widgets
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
-        super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+        drawWidgetsBackground(poseStack, mouseX, mouseY, partialTicks);
         currentMouseX = mouseX;
         currentMouseY = mouseY;
     }
