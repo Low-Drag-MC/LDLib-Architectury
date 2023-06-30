@@ -7,7 +7,6 @@
   "client": [
     "BlockModelShaperMixin",
     "BlockRenderInfoMixin",
-    "ClientTooltipComponentMixin",
     "GameRendererMixin",
     "ModelBakeryMixin",
     "ModelManagerMixin",
