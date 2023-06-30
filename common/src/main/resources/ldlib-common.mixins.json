@@ -15,6 +15,7 @@
     "TextureAtlasMixin",
     "WorldRendererMixin",
     "accessor.AbstractContainerScreenAccessor",
+    "accessor.MouseHandlerAccessor",
     "accessor.VertexFormatAccessor",
     "emi.RecipeScreenMixin",
     "emi.WidgetGroupAccessor",
