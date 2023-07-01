@@ -4,11 +4,9 @@ import com.lowdragmc.lowdraglib.networking.IHandlerContext;
 import com.lowdragmc.lowdraglib.networking.INetworking;
 import com.lowdragmc.lowdraglib.networking.IPacket;
 import lombok.Getter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.util.FakePlayer;
@@ -62,12 +60,8 @@ public class Networking implements INetworking {
                 }
 
                 @Override
-                public Player getPlayer() {
-                    if (isClient()) {
-                        return Minecraft.getInstance().player;
-                    } else {
-                        return context.getSender();
-                    }
+                public ServerPlayer getPlayer() {
+                    return context.getSender();
                 }
 
                 @Override
@@ -80,7 +74,7 @@ public class Networking implements INetworking {
                     if (isClient()) {
                         return LogicalSidedProvider.CLIENTWORLD.get(context.getDirection().getReceptionSide()).orElse(null);
                     } else {
-                        return getPlayer() instanceof ServerPlayer serverPlayer ? serverPlayer.level() : null;
+                        return getPlayer() == null ? null : getPlayer().level();
                     }
                 }
             }));

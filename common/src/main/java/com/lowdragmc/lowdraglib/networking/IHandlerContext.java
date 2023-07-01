@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.networking;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
@@ -13,7 +14,7 @@ import javax.annotation.Nullable;
 public interface IHandlerContext {
     Object getContext();
     boolean isClient();
-    @Nullable Player getPlayer();
+    @Nullable ServerPlayer getPlayer();
     @Nullable MinecraftServer getServer();
     Level getLevel();
 
