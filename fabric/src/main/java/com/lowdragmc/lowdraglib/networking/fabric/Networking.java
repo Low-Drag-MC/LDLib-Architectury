@@ -61,7 +61,7 @@ public class Networking implements INetworking {
                         }
 
                         @Override
-                        public @Nullable Player getPlayer() {
+                        public @Nullable ServerPlayer getPlayer() {
                             return player;
                         }
 
@@ -96,8 +96,8 @@ public class Networking implements INetworking {
                         }
 
                         @Override
-                        public @Nullable Player getPlayer() {
-                            return client.player;
+                        public @Nullable ServerPlayer getPlayer() {
+                            return null;
                         }
 
                         @Override
