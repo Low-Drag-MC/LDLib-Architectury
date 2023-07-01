@@ -7,7 +7,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.NoArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
 @NoArgsConstructor
@@ -41,8 +40,8 @@ public class CPacketUIClientAction implements IPacket {
 
     @Override
     public void execute(IHandlerContext handler) {
-        if (handler.getPlayer() instanceof ServerPlayer player) {
-            AbstractContainerMenu openContainer = player.containerMenu;
+        if (handler.getPlayer() != null) {
+            AbstractContainerMenu openContainer = handler.getPlayer().containerMenu;
             if (openContainer instanceof ModularUIContainer) {
                 ((ModularUIContainer)openContainer).handleClientAction(this);
             }
