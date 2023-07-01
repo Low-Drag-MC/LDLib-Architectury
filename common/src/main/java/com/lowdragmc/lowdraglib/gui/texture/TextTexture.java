@@ -117,7 +117,7 @@ public class TextTexture extends TransformTexture{
                         .splitLines(text, width, Style.EMPTY)
                         .stream().map(FormattedText::getString)
                         .collect(Collectors.toList());
-                if (texts.size() == 0) {
+                if (texts.isEmpty()) {
                     texts = Collections.singletonList(text);
                 }
             } else {
@@ -201,6 +201,7 @@ public class TextTexture extends TransformTexture{
         RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 
+    @Environment(EnvType.CLIENT)
     private void drawTextLine(GuiGraphics graphics, float x, float y, int width, int height, Font fontRenderer, int textH, String resultText) {
         int textW = fontRenderer.width(resultText);
         float _x = x + (width - textW) / 2f;
