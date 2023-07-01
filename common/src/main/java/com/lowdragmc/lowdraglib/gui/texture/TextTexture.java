@@ -221,6 +221,7 @@ public class TextTexture extends TransformTexture{
         RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 
+    @Environment(EnvType.CLIENT)
     private void drawTextLine(PoseStack stack, float x, float y, int width, int height, Font fontRenderer, int textH, String resultText) {
         int textW = fontRenderer.width(resultText);
         float _x = x + (width - textW) / 2f;
