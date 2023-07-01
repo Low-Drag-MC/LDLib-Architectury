@@ -62,12 +62,8 @@ public class Networking implements INetworking {
                 }
 
                 @Override
-                public Player getPlayer() {
-                    if (isClient()) {
-                        return Minecraft.getInstance().player;
-                    } else {
-                        return context.getSender();
-                    }
+                public ServerPlayer getPlayer() {
+                    return context.getSender();
                 }
 
                 @Override
@@ -80,7 +76,7 @@ public class Networking implements INetworking {
                     if (isClient()) {
                         return LogicalSidedProvider.CLIENTWORLD.get(context.getDirection().getReceptionSide()).orElse(null);
                     } else {
-                        return getPlayer() instanceof ServerPlayer serverPlayer ? serverPlayer.getLevel() : null;
+                        return getPlayer() == null ? null : getPlayer().getLevel();
                     }
                 }
             }));
