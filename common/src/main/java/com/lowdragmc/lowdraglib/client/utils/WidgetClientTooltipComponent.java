@@ -2,14 +2,13 @@ package com.lowdragmc.lowdraglib.client.utils;
 
 import com.lowdragmc.lowdraglib.gui.util.WidgetTooltipComponent;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -33,9 +32,9 @@ public record WidgetClientTooltipComponent(WidgetTooltipComponent tooltipCompone
     }
 
     @Override
-    public void renderImage(Font textRenderer, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer) {
+    public void renderImage(Font textRenderer, int x, int y, GuiGraphics graphics) {
         var modularWrapper = new ModularWrapper<>(tooltipComponent.widget());
         modularWrapper.setRecipeWidget(x, y);
-        modularWrapper.draw(poseStack, 0, 0, Minecraft.getInstance().getFrameTime());
+        modularWrapper.draw(graphics, 0, 0, Minecraft.getInstance().getFrameTime());
     }
 }
