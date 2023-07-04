@@ -33,9 +33,9 @@ public record WidgetClientTooltipComponent(WidgetTooltipComponent tooltipCompone
     }
 
     @Override
-    public void renderImage(Font font, int mouseX, int mouseY, PoseStack poseStack, ItemRenderer itemRenderer, int blitOffset) {
+    public void renderImage(Font textRenderer, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer) {
         var modularWrapper = new ModularWrapper<>(tooltipComponent.widget());
-        modularWrapper.setRecipeWidget(mouseX, mouseY);
+        modularWrapper.setRecipeWidget(x, y);
         modularWrapper.draw(poseStack, 0, 0, Minecraft.getInstance().getFrameTime());
     }
 }
