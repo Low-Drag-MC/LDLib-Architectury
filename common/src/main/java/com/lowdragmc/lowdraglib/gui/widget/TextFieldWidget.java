@@ -62,7 +62,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
         super(new Position(xPosition, yPosition), new Size(width, height));
         if (isRemote()) {
             Font fontRenderer = Minecraft.getInstance().font;
-            this.textField = new EditBox(fontRenderer, xPosition, yPosition, width, height, Component.translatable("text field"));
+            this.textField = new EditBox(fontRenderer, xPosition, yPosition, width, height, Component.literal("text field"));
             this.textField.setBordered(true);
             isBordered = true;
             this.textField.setMaxLength(this.maxStringLength);

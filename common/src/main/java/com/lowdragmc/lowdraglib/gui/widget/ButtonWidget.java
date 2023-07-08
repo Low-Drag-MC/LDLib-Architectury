@@ -17,6 +17,10 @@ public class ButtonWidget extends Widget implements IConfigurableWidget {
 
     public ButtonWidget() {
         this(0, 0, 40, 20, new GuiTextureGroup(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("Button")), null);
+    }
+
+    @Override
+    public void initTemplate() {
         setHoverBorderTexture(1, -1);
     }
 

@@ -12,6 +12,7 @@ import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 
 import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
@@ -206,5 +207,19 @@ public class MenuWidget<K, T> extends WidgetGroup {
             }
         }
         return false;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean mouseWheelMove(double mouseX, double mouseY, double wheelDelta) {
+        var pos = getPosition();
+        var size = getSize();
+        var screenHeight = getGui().getScreenHeight();
+        if (screenHeight < size.height && isMouseOverElement(mouseX, mouseY)) {
+            var offsetY = Mth.clamp(pos.getY() + (wheelDelta > 0 ? -nodeHeight : nodeHeight), 0, screenHeight - size.height);
+            addSelfPosition(0, offsetY - pos.getY());
+            return true;
+        }
+        return super.mouseWheelMove(mouseX, mouseY, wheelDelta);
     }
 }

@@ -96,6 +96,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     public TankWidget() {
         this(null, 0, 0, 18, 18, true, true);
+    }
+
+    @Override
+    public void initTemplate() {
         setBackground(new ResourceTexture("ldlib:textures/gui/fluid_slot.png"));
         setFillDirection(ProgressTexture.FillDirection.DOWN_TO_UP);
     }

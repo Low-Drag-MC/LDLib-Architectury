@@ -46,7 +46,12 @@ public class SelectorWidget extends WidgetGroup {
     protected final ButtonWidget button;
 
     public SelectorWidget() {
-        this(0, 0, 60, 15, new ArrayList<>(List.of("A", "B", "C", "D", "E", "F", "G")), -1);
+        this(0, 0, 60, 15, List.of(), -1);
+    }
+
+    @Override
+    public void initTemplate() {
+        setCandidates(new ArrayList<>(List.of("A", "B", "C", "D", "E", "F", "G")));
         setButtonBackground(ColorPattern.T_GRAY.rectTexture());
         setValue("D");
     }
