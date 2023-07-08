@@ -38,6 +38,10 @@ public class SwitchWidget extends Widget implements IConfigurableWidget {
 
     public SwitchWidget() {
         this(0, 0, 40, 20, null);
+    }
+
+    @Override
+    public void initTemplate() {
         setTexture(new GuiTextureGroup(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("off")), new GuiTextureGroup(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("on")));
         setHoverBorderTexture(1, -1);
     }
