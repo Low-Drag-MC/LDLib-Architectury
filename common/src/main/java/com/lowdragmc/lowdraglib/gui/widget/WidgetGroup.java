@@ -43,6 +43,10 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
 
     public WidgetGroup() {
         this(0, 0,50, 50);
+    }
+
+    @Override
+    public void initTemplate() {
         setBackground(ResourceBorderTexture.BORDERED_BACKGROUND);
     }
 

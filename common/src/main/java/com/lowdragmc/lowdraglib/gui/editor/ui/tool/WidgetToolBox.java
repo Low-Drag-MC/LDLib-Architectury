@@ -57,17 +57,16 @@ public class WidgetToolBox extends DraggableScrollableWidgetGroup {
             String group = wrapper.annotation().group().isEmpty() ? "widget.basic" : wrapper.annotation().group();
             if (group.equals(groupName)) {
                 var widget = wrapper.creator().get();
+                widget.initTemplate();
                 widget.widget().setSelfPosition(new Position(0, 0));
                 SelectableWidgetGroup selectableWidgetGroup = new SelectableWidgetGroup(0, yOffset, ToolPanel.WIDTH - 2, 50 + 14);
                 selectableWidgetGroup.addWidget(new ImageWidget((ToolPanel.WIDTH - 2 - 45) / 2, 17, 45, 30, new WidgetTexture(widget.widget())));
                 selectableWidgetGroup.addWidget(new LabelWidget(3, 3, widget.getTranslateKey()));
                 selectableWidgetGroup.setSelectedTexture(ColorPattern.T_GRAY.rectTexture());
-                selectableWidgetGroup.setDraggingProvider(() -> new IWidgetPanelDragging() {
+                selectableWidgetGroup.setDraggingProvider(() -> {
                     final IConfigurableWidget configurableWidget = wrapper.creator().get();
-                    @Override
-                    public IConfigurableWidget get() {
-                        return configurableWidget;
-                    }
+                    configurableWidget.initTemplate();
+                    return (IWidgetPanelDragging) () -> configurableWidget;
                 }, (w, p) -> new WidgetTexture(w.get().widget()).setDragging(true));
                 addWidget(selectableWidgetGroup);
                 yOffset += 50 + 14 + 3;

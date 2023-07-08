@@ -36,17 +36,14 @@ public class ImageWidget extends Widget implements IConfigurableWidget {
         this(0, 0, 50, 50, new ResourceTexture());
     }
 
-    public ImageWidget(int xPosition, int yPosition, int width, int height) {
-        super(xPosition, yPosition, width, height);
-    }
 
     public ImageWidget(int xPosition, int yPosition, int width, int height, IGuiTexture area) {
-        this(xPosition, yPosition, width, height);
+        super(xPosition, yPosition, width, height);
         setImage(area);
     }
 
     public ImageWidget(int xPosition, int yPosition, int width, int height, Supplier<IGuiTexture> textureSupplier) {
-        this(xPosition, yPosition, width, height);
+        super(xPosition, yPosition, width, height);
         setImage(textureSupplier);
     }
 

@@ -38,6 +38,9 @@ public interface IConfigurableWidget extends IConfigurable {
         return (Widget) this;
     }
 
+    default void initTemplate() {
+
+    }
 
     default boolean canDragIn(Object dragging) {
         if (dragging instanceof IGuiTexture) {

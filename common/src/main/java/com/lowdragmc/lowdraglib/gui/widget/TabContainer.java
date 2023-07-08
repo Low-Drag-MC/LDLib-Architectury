@@ -32,10 +32,14 @@ public class TabContainer extends WidgetGroup {
 
     public TabContainer() {
         this(0, 0,40, 60);
+    }
+
+    @Override
+    public void initTemplate() {
         setBackground(ResourceBorderTexture.BORDERED_BACKGROUND);
         addTab(new TabButton(-32 + 4, 0, 32, 28).setTexture(
-                new GuiTextureGroup(TABS_LEFT.getSubTexture(0, 0, 0.5f, 1f / 3), new TextTexture("A")),
-                new GuiTextureGroup(TABS_LEFT.getSubTexture(0.5f, 0, 0.5f, 1f / 3), new TextTexture("A"))
+                        new GuiTextureGroup(TABS_LEFT.getSubTexture(0, 0, 0.5f, 1f / 3), new TextTexture("A")),
+                        new GuiTextureGroup(TABS_LEFT.getSubTexture(0.5f, 0, 0.5f, 1f / 3), new TextTexture("A"))
                 ),
                 new WidgetGroup(0, 0, 0, 0));
         addTab(new TabButton(-32 + 4, 28, 32, 28).setTexture(
