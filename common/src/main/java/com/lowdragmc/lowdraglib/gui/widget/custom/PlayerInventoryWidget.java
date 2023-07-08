@@ -23,6 +23,7 @@ public class PlayerInventoryWidget extends WidgetGroup {
             String id = "player_inv_" + col;
             var pos = new Position(5 + col * 18, 5 + 58);
             var slot = new SlotWidget();
+            slot.initTemplate();
             slot.setSelfPosition(pos);
             slot.setId(id);
             addWidget(slot);
@@ -33,6 +34,7 @@ public class PlayerInventoryWidget extends WidgetGroup {
                 var id = "player_inv_" + (col + (row + 1) * 9);
                 var pos = new Position(5 + col * 18, 5 + row * 18);
                 var slot = new SlotWidget();
+                slot.initTemplate();
                 slot.setSelfPosition(pos);
                 slot.setId(id);
                 addWidget(slot);

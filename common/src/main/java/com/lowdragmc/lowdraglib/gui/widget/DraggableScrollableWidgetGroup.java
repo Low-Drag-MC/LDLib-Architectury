@@ -54,6 +54,11 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
 
     public DraggableScrollableWidgetGroup() {
         this(0, 0,50, 50);
+
+    }
+
+    @Override
+    public void initTemplate() {
         setBackground(ColorPattern.RED.rectTexture());
         setYScrollBarWidth(4).setYBarStyle(ColorPattern.RED.rectTexture(), ColorPattern.WHITE.rectTexture().setRadius(2));
     }

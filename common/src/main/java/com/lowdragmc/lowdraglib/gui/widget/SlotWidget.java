@@ -93,6 +93,10 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     public SlotWidget() {
         super(new Position(0, 0), new Size(18, 18));
+    }
+
+    @Override
+    public void initTemplate() {
         setBackgroundTexture(new ResourceTexture("ldlib:textures/gui/slot.png"));
         this.canTakeItems = true;
         this.canPutItems = true;
@@ -100,6 +104,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     public SlotWidget(Container inventory, int slotIndex, int xPosition, int yPosition, boolean canTakeItems, boolean canPutItems) {
         super(new Position(xPosition, yPosition), new Size(18, 18));
+        setBackgroundTexture(new ResourceTexture("ldlib:textures/gui/slot.png"));
         this.canTakeItems = canTakeItems;
         this.canPutItems = canPutItems;
         setContainerSlot(inventory, slotIndex);
@@ -107,6 +112,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     public SlotWidget(IItemTransfer itemHandler, int slotIndex, int xPosition, int yPosition, boolean canTakeItems, boolean canPutItems) {
         super(new Position(xPosition, yPosition), new Size(18, 18));
+        setBackgroundTexture(new ResourceTexture("ldlib:textures/gui/slot.png"));
         this.canTakeItems = canTakeItems;
         this.canPutItems = canPutItems;
         setHandlerSlot(itemHandler, slotIndex);

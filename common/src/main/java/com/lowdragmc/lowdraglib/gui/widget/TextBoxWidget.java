@@ -47,7 +47,12 @@ public class TextBoxWidget extends Widget implements IConfigurableWidget {
     private transient List<String> textLines;
 
     public TextBoxWidget() {
-        this(0, 0, 60, List.of("ldlib.author", "Lorem ipsum"));
+        this(0, 0, 60, List.of());
+    }
+
+    @Override
+    public void initTemplate() {
+        setContent(List.of("ldlib.author", "Lorem ipsum"));
         setFontColor(-1);
     }
 
