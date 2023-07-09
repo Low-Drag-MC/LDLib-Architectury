@@ -382,14 +382,10 @@ public class FluidTransferHelper {
         long fillableAmount = fluidDestination.fill(drainable, true);
         if (fillableAmount > 0) {
             drainable.setAmount(fillableAmount);
-            if (doTransfer) {
-                FluidStack drained = fluidSource.drain(drainable, false);
-                if (!drained.isEmpty()) {
-                    drained.setAmount(fluidDestination.fill(drained, false));
-                    return drained;
-                }
-            } else {
-                return drainable;
+            var drained = fluidSource.drain(drainable, !doTransfer);
+            if (!drained.isEmpty()) {
+                drained.setAmount(fluidDestination.fill(drained, !doTransfer));
+                return drained;
             }
         }
         return FluidStack.empty();
