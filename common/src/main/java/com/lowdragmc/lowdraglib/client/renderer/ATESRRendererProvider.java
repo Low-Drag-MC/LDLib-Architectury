@@ -37,7 +37,7 @@ public class ATESRRendererProvider<T extends BlockEntity> implements BlockEntity
     public boolean shouldRender(T pBlockEntity, Vec3 pCameraPos) {
         IRenderer renderer = getRenderer(pBlockEntity);
         if (renderer != null) {
-            renderer.shouldRender(pBlockEntity, pCameraPos);
+            return renderer.shouldRender(pBlockEntity, pCameraPos);
         }
         return BlockEntityRenderer.super.shouldRender(pBlockEntity, pCameraPos);
     }
