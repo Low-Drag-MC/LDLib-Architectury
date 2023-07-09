@@ -139,8 +139,7 @@ public class IManagedAccessor extends ReadonlyAccessor {
     }
 
     public static void writeSyncedFields(IManagedStorage storage, IRef[] syncedFields, BitSet changed, ITypedPayload<?>[] payloads) {
-        int j = 0;
-        for (int i = 0; i < changed.length(); i++) {
+        for (int i = 0; i < changed.length() && i < payloads.length; i++) {
             if (changed.get(i)) {
                 var field = syncedFields[i];
                 var key = field.getKey();
@@ -150,12 +149,10 @@ public class IManagedAccessor extends ReadonlyAccessor {
                 if (hasListener) {
                     oldValue = field.readRaw();
                 }
-                key.writeSyncedField(field, payloads[j]);
+                key.writeSyncedField(field, payloads[i]);
                 if(hasListener) {
                     storage.notifyFieldUpdate(key, field.readRaw(), oldValue);
                 }
-
-                j++;
             }
         }
     }
