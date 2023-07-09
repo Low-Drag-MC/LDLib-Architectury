@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -72,6 +73,16 @@ public interface IRenderer {
     @Environment(EnvType.CLIENT)
     default boolean isGlobalRenderer(BlockEntity blockEntity) {
         return false;
+    }
+
+    @Environment(EnvType.CLIENT)
+    default int getViewDistance() {
+        return 64;
+    }
+
+    @Environment(EnvType.CLIENT)
+    default boolean shouldRender(BlockEntity blockEntity, Vec3 cameraPos) {
+        return Vec3.atCenterOf(blockEntity.getBlockPos()).closerThan(cameraPos, this.getViewDistance());
     }
 
     @Environment(EnvType.CLIENT)
