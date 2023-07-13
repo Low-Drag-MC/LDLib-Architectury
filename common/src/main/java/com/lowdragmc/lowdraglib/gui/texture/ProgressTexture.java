@@ -72,8 +72,21 @@ public class ProgressTexture extends TransformTexture {
             float drawnV = (float) fillDirection.getDrawnV(progress);
             float drawnWidth = (float) fillDirection.getDrawnWidth(progress);
             float drawnHeight = (float) fillDirection.getDrawnHeight(progress);
-            filledBarArea.drawSubArea(stack, x + drawnU * width, y + drawnV * height, ((int) (width * drawnWidth)), ((int) (height * drawnHeight)),
-                    drawnU, drawnV,((int) (drawnWidth * width)) / (width * 1.0f), ((int) (drawnHeight * height)) / (height * 1.0f));
+            float X = x + drawnU * width;
+            float Y = y + drawnV * height;
+            float W = width * drawnWidth;
+            float H = height * drawnHeight;
+
+            if (fillDirection == FillDirection.LEFT_TO_RIGHT || fillDirection == FillDirection.UP_TO_DOWN) {
+                filledBarArea.drawSubArea(stack, X, Y, (int) W, (int) H, drawnU, drawnV,
+                        ((drawnWidth * width)) / (width),
+                        ((drawnHeight * height)) / (height));
+            } else {
+                filledBarArea.drawSubArea(stack, (int) X, (int) Y, width - (int) X, height - (int) Y, drawnU, drawnV,
+                        ((drawnWidth * width)) / (width),
+                        ((drawnHeight * height)) / (height));
+            }
+
         }
     }
 
