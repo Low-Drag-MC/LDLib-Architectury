@@ -5,7 +5,6 @@ import com.google.common.collect.Tables;
 import com.lowdragmc.lowdraglib.client.bakedpipeline.Quad;
 import com.lowdragmc.lowdraglib.client.bakedpipeline.Submap;
 import com.lowdragmc.lowdraglib.client.model.ModelFactory;
-import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -57,29 +56,30 @@ public class CustomBakedModel implements BakedModel {
         var connections = Connections.checkConnections(level, pos, state, side);
         if (side == null) {
             if (noSideCache.isEmpty()) {
-                noSideCache.addAll(buildCustomQuads(connections, parent.getQuads(state, null, rand)));
+                noSideCache.addAll(buildCustomQuads(connections, parent.getQuads(state, null, rand), 0.002f));
             }
             return noSideCache;
         }
         if (!sideCache.contains(side, connections)) {
             synchronized (sideCache) {
-                sideCache.put(side, connections, buildCustomQuads(connections, parent.getQuads(state, side, rand)));
+                sideCache.put(side, connections, buildCustomQuads(connections, parent.getQuads(state, side, rand), 0.002f));
             }
         }
         return Objects.requireNonNull(sideCache.get(side, connections));
     }
 
-    public static List<BakedQuad> reBakeCustomQuads(List<BakedQuad>quads, BlockAndTintGetter level, BlockPos pos, @Nonnull BlockState state, @Nullable Direction side) {
-        return buildCustomQuads(Connections.checkConnections(level, pos, state, side), quads);
+    public static List<BakedQuad> reBakeCustomQuads(List<BakedQuad>quads, BlockAndTintGetter level, BlockPos pos, @Nonnull BlockState state, @Nullable Direction side, float offset) {
+        return buildCustomQuads(Connections.checkConnections(level, pos, state, side), quads, offset);
     }
 
-    public static List<BakedQuad> buildCustomQuads(Connections connections, List<BakedQuad> base) {
+    public static List<BakedQuad> buildCustomQuads(Connections connections, List<BakedQuad> base, float offset) {
         List<BakedQuad> result = new LinkedList<>();
-        for (BakedQuad quad : base) {
+        for (int i = 0; i < base.size(); i++) {
+            BakedQuad quad = base.get(i);
             var section = LDLMetadataSection.getMetadata(quad.getSprite());
             List<Quad> quads = bakeConnectionQuads(quad, connections, section == null ? null :
                     section.connection == null ? null :
-                            ModelFactory.getBlockSprite(section.connection));
+                            ModelFactory.getBlockSprite(section.connection), offset * i);
             if (section != null) {
                 if (section.emissive) {
                     quads = quads.stream().map(q -> q.setLight(15, 15)).toList();
@@ -92,9 +92,9 @@ public class CustomBakedModel implements BakedModel {
         return result;
     }
 
-    public static List<Quad> bakeConnectionQuads(BakedQuad bakedQuad, Connections connections, @Nullable TextureAtlasSprite texture) {
+    public static List<Quad> bakeConnectionQuads(BakedQuad bakedQuad, Connections connections, @Nullable TextureAtlasSprite texture, float offset) {
         if (!connections.isEmpty()) {
-            var quads = Quad.from(bakedQuad).derotate().subdivide(4);
+            var quads = Quad.from(bakedQuad, offset).derotate().subdivide(4);
             if (texture != null) {
                 if (connections.contains(Connection.UP) && connections.contains(Connection.LEFT) && connections.contains(Connection.UP_LEFT)) {
                     quads[2] = quads[2] == null ? null : quads[2].grow().transformUVs(texture, Submap.uvs[0]);
