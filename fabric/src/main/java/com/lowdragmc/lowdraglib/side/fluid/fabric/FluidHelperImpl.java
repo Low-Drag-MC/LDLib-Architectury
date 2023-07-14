@@ -81,4 +81,8 @@ public class FluidHelperImpl {
         return toFluidVariant(fluidStack);
     }
 
+    public static String getUnit() {
+        return "dl";
+    }
+
 }

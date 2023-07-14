@@ -118,4 +118,9 @@ public interface IRenderer {
     default boolean reBakeCustomQuads() {
         return false;
     }
+
+    @Environment(EnvType.CLIENT)
+    default float reBakeCustomQuadsOffset() {
+        return 0.002f;
+    }
 }

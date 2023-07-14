@@ -29,6 +29,7 @@ import static com.lowdragmc.lowdraglib.client.bakedpipeline.IQuadTransformer.*;
 @ParametersAreNonnullByDefault
 @ToString(of = { "vertPos", "vertUv" })
 public class Quad {
+
     @Value
     public static class Vertex {
         Vector3f pos;
@@ -427,7 +428,13 @@ public class Quad {
 
     public static Quad from(BakedQuad baked) {
         Builder b = new Builder(baked.getSprite());
-        b.copyFrom(baked);
+        b.copyFrom(baked, 0);
+        return b.build();
+    }
+
+    public static Quad from(BakedQuad baked, float offset) {
+        Builder b = new Builder(baked.getSprite());
+        b.copyFrom(baked, offset);
         return b.build();
     }
 
@@ -459,10 +466,11 @@ public class Quad {
 
         private Map<VertexFormatElement, int[][]> packedByElement = new HashMap<>();
 
-        public void copyFrom(BakedQuad baked) {
+        public void copyFrom(BakedQuad baked, float directionOffset) {
             setQuadTint(baked.getTintIndex());
             setQuadOrientation(baked.getDirection());
             setApplyDiffuseLighting(baked.isShade());
+
             var vertices = baked.getVertices();
             for (int i = 0; i < 4; i++) {
                 int offset = i * STRIDE;
@@ -472,6 +480,11 @@ public class Quad {
                         Float.intBitsToFloat(vertices[offset + POSITION + 2]),
                         0
                 };
+                if (quadOrientation != null && directionOffset != 0) {
+                    this.positions[i][0] += directionOffset * quadOrientation.getStepX();
+                    this.positions[i][1] += directionOffset * quadOrientation.getStepY();
+                    this.positions[i][2] += directionOffset * quadOrientation.getStepZ();
+                }
                 int packedColor = vertices[offset + COLOR];
                 this.colors[i] = new int[] {
                         packedColor & 0xFF,

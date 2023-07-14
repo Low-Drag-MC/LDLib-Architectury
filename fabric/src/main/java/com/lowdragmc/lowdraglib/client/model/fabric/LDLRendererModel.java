@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.client.model.fabric;
 import com.lowdragmc.lowdraglib.client.model.custommodel.CustomBakedModel;
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import lombok.Setter;
 import net.fabricmc.fabric.api.client.model.ModelProviderContext;
 import net.fabricmc.fabric.api.client.model.ModelResourceProvider;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
@@ -26,7 +27,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -58,6 +58,7 @@ public class LDLRendererModel implements UnbakedModel {
     }
 
     public static final class RendererBakedModel implements BakedModel, FabricBakedModel {
+        @Setter
         private IRenderer renderer = IRenderer.EMPTY;
 
         @Override
@@ -116,7 +117,7 @@ public class LDLRendererModel implements UnbakedModel {
                         public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction direction, RandomSource random) {
                             var quads = renderer.renderModel(blockView, pos, state, direction, random);
                             if (renderer.reBakeCustomQuads() && state != null) {
-                                return CustomBakedModel.reBakeCustomQuads(quads, blockView, pos, state, direction);
+                                return CustomBakedModel.reBakeCustomQuads(quads, blockView, pos, state, direction, renderer.reBakeCustomQuadsOffset());
                             }
                             return quads;
                         }

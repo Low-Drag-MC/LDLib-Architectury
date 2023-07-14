@@ -106,7 +106,7 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
             if (renderer != null) {
                 var quads = renderer.renderModel(world, pos, state, side, rand);
                 if (renderer.reBakeCustomQuads() && state != null && world != null && pos != null) {
-                    return CustomBakedModel.reBakeCustomQuads(quads, world, pos, state, side);
+                    return CustomBakedModel.reBakeCustomQuads(quads, world, pos, state, side, renderer.reBakeCustomQuadsOffset());
                 }
                 return quads;
             }
