@@ -71,4 +71,9 @@ public class FluidHelper {
     public static Object toRealFluidStack(FluidStack fluidStack) {
         throw new AssertionError();
     }
+
+    @ExpectPlatform
+    public static String getUnit() {
+        throw new AssertionError();
+    }
 }

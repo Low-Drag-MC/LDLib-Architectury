@@ -74,4 +74,8 @@ public class FluidHelperImpl {
     public static Object toRealFluidStack(FluidStack fluidStack) {
         return toFluidStack(fluidStack);
     }
+
+    public static String getUnit() {
+        return "mB";
+    }
 }
