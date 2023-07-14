@@ -3,7 +3,7 @@
   "ldlib.gui.tips.confirm": "Confirm",
   "ldlib.gui.tips.cancel": "Cancel",
   "ldlib.fluid.empty": "Empty",
-  "ldlib.fluid.amount": "§9Amount: %d/%d mB",
+  "ldlib.fluid.amount": "§9Amount: %d/%d",
   "ldlib.fluid.temperature": "§cTemperature: %d K",
   "ldlib.fluid.state_gas": "§aState: Gaseous",
   "ldlib.fluid.state_liquid": "§aState: Liquid",
