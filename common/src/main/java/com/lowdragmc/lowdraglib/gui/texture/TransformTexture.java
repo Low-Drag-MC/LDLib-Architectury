@@ -48,7 +48,7 @@ public abstract class TransformTexture implements IGuiTexture{
     }
 
     @Environment(EnvType.CLIENT)
-    protected void preDraw(GuiGraphics graphics, float x, float y, int width, int height) {
+    protected void preDraw(GuiGraphics graphics, float x, float y, float width, float height) {
         graphics.pose().pushPose();
         graphics.pose().translate(xOffset, yOffset, 0);
 
@@ -60,7 +60,7 @@ public abstract class TransformTexture implements IGuiTexture{
 
 
     @Environment(EnvType.CLIENT)
-    protected void postDraw(GuiGraphics graphics, float x, float y, int width, int height) {
+    protected void postDraw(GuiGraphics graphics, float x, float y, float width, float height) {
         graphics.pose().popPose();
     }
 
@@ -74,18 +74,18 @@ public abstract class TransformTexture implements IGuiTexture{
 
     @Override
     @Environment(EnvType.CLIENT)
-    public final void drawSubArea(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
-        preDraw(graphics, x, y, width, height);
-        drawSubAreaInternal(graphics, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
-        postDraw(graphics, x, y, width, height);
+    public final void drawSubArea(GuiGraphics graphics, float x, float y, float width, float height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+            preDraw(graphics, x, y, width, height);
+            drawSubAreaInternal(graphics, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
+            postDraw(graphics, x, y, width, height);
     }
 
     @Environment(EnvType.CLIENT)
     protected abstract void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height);
 
     @Environment(EnvType.CLIENT)
-    protected void drawSubAreaInternal(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
-        drawInternal(graphics, 0, 0, x, y, width, height);
+    protected void drawSubAreaInternal(GuiGraphics graphics, float x, float y, float width, float height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+        drawInternal(graphics, 0, 0, x, y, (int) width, (int) height);
     }
 
 }

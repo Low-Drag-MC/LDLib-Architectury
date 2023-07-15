@@ -53,7 +53,7 @@ public class GuiTextureGroup extends TransformTexture{
 
     @Environment(EnvType.CLIENT)
     @Override
-    protected void drawSubAreaInternal(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+    protected void drawSubAreaInternal(GuiGraphics graphics, float x, float y, float width, float height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
         for (IGuiTexture texture : textures) {
             texture.drawSubArea(graphics, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
         }

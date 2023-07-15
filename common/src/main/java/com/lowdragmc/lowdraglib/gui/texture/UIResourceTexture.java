@@ -82,7 +82,7 @@ public class UIResourceTexture implements IGuiTexture {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void drawSubArea(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+    public void drawSubArea(GuiGraphics graphics, float x, float y, float width, float height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
         getTexture().drawSubArea(graphics, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
     }
 
