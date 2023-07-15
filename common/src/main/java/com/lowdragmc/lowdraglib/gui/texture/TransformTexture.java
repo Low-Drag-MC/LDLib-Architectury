@@ -47,7 +47,7 @@ public abstract class TransformTexture implements IGuiTexture{
     }
 
     @Environment(EnvType.CLIENT)
-    protected void preDraw(PoseStack stack, float x, float y, int width, int height) {
+    protected void preDraw(PoseStack stack, float x, float y, float width, float height) {
         stack.pushPose();
         stack.translate(xOffset, yOffset, 0);
 
@@ -58,7 +58,7 @@ public abstract class TransformTexture implements IGuiTexture{
     }
 
     @Environment(EnvType.CLIENT)
-    protected void postDraw(PoseStack stack, float x, float y, int width, int height) {
+    protected void postDraw(PoseStack stack, float x, float y, float width, float height) {
         stack.popPose();
     }
 
@@ -72,7 +72,7 @@ public abstract class TransformTexture implements IGuiTexture{
 
     @Override
     @Environment(EnvType.CLIENT)
-    public final void drawSubArea(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+    public final void drawSubArea(PoseStack stack, float x, float y, float width, float height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
         preDraw(stack, x, y, width, height);
         drawSubAreaInternal(stack, x, y, width, height, drawnU, drawnV, drawnWidth, drawnHeight);
         postDraw(stack, x, y, width, height);
@@ -82,8 +82,8 @@ public abstract class TransformTexture implements IGuiTexture{
     protected abstract void drawInternal(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height);
 
     @Environment(EnvType.CLIENT)
-    protected void drawSubAreaInternal(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
-        drawInternal(stack, 0, 0, x, y, width, height);
+    protected void drawSubAreaInternal(PoseStack stack, float x, float y, float width, float height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+        drawInternal(stack, 0, 0, x, y, (int) width, (int) height);
     }
 
 }

@@ -171,11 +171,6 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         } else {
             super.drawInForeground(mStack, mouseX, mouseY, partialTicks);
         }
-        if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY)) {
-            RenderSystem.colorMask(true, true, true, false);
-            DrawerHelper.drawSolidRect(mStack,getPosition().x + 1, getPosition().y + 1, 16, 16, 0x80FFFFFF);
-            RenderSystem.colorMask(true, true, true, true);
-        }
     }
 
     @Override
@@ -204,6 +199,11 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }
         if (overlay != null) {
             overlay.draw(mStack, mouseX, mouseY, pos.x, pos.y, 18, 18);
+        }
+        if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY)) {
+            RenderSystem.colorMask(true, true, true, false);
+            DrawerHelper.drawSolidRect(mStack,getPosition().x + 1, getPosition().y + 1, 16, 16, 0x80FFFFFF);
+            RenderSystem.colorMask(true, true, true, true);
         }
     }
 

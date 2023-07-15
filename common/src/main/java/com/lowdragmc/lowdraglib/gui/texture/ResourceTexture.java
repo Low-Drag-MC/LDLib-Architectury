@@ -109,7 +109,7 @@ public class ResourceTexture extends TransformTexture {
     }
     
     @Environment(EnvType.CLIENT)
-    protected void drawSubAreaInternal(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+    protected void drawSubAreaInternal(PoseStack stack, float x, float y, float width, float height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
         //sub area is just different width and height
         float imageU = this.offsetX + (this.imageWidth * drawnU);
         float imageV = this.offsetY + (this.imageHeight * drawnV);
