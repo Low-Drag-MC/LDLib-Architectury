@@ -38,7 +38,7 @@ public class ResourceBorderTexture extends ResourceTexture {
 
     @Environment(EnvType.CLIENT)
     @Override
-    protected void drawSubAreaInternal(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+    protected void drawSubAreaInternal(PoseStack stack, float x, float y, float width, float height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
         //compute relative sizes
         float cornerWidth = boderSize.width * 1f / imageSize.width;
         float cornerHeight = boderSize.height * 1f / imageSize.height;
