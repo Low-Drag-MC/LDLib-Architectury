@@ -77,8 +77,8 @@ public interface IGuiTexture extends IConfigurable {
     };
 
     @Environment(EnvType.CLIENT)
-    default void drawSubArea(GuiGraphics graphics, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
-        draw(graphics, 0, 0, x, y, width, height);
+    default void drawSubArea(GuiGraphics graphics, float x, float y, float width, float height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+        draw(graphics, 0, 0, x, y, (int) width, (int) height);
     }
 
     // ***************** EDITOR  ***************** //
