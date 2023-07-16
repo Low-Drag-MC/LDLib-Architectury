@@ -103,7 +103,7 @@ public class IModelRenderer implements IRenderer {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, RandomSource rand) {
+    public List<BakedQuad> renderModel(@Nullable BlockAndTintGetter level, @Nullable BlockPos pos, @Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
         var ibakedmodel = getBlockBakedModel(pos, level);
         if (ibakedmodel == null) return Collections.emptyList();
         return ibakedmodel.getQuads(state, side, rand);
