@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.core.mixins;
 
+import blue.endless.jankson.annotation.Nullable;
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -42,7 +43,7 @@ public class ItemModelShaperMixin {
 
                 shapesCache.putIfAbsent(itemIndex, new BakedModel() {
                     @Override
-                    public List<BakedQuad> getQuads(@org.jetbrains.annotations.Nullable BlockState state, @org.jetbrains.annotations.Nullable Direction direction, RandomSource random) {
+                    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction direction, RandomSource random) {
                         return renderer.renderModel(null, null, state, direction, random);
                     }
 
