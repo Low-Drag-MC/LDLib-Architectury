@@ -61,7 +61,7 @@ public class BlockStateRenderer implements IRenderer {
         }
     }
 
-    public BlockState getState(BlockState blockState) {
+    public BlockState getState(@Nullable BlockState blockState) {
         BlockState state = getBlockInfo().getBlockState();
         if (blockState == null) return state;
         Direction facing = Direction.NORTH;
@@ -127,7 +127,7 @@ public class BlockStateRenderer implements IRenderer {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, RandomSource rand) {
+    public List<BakedQuad> renderModel(@Nullable BlockAndTintGetter level, @Nullable BlockPos pos, @Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
         state = getState(state);
         if (state.getRenderShape() != RenderShape.INVISIBLE) {
             BlockRenderDispatcher brd = Minecraft.getInstance().getBlockRenderer();
