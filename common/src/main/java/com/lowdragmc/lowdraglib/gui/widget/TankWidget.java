@@ -239,8 +239,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     @Environment(EnvType.CLIENT)
+
     public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        if (drawHoverTips && isMouseOverElement(mouseX, mouseY)) {
+        if (drawHoverTips && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             List<Component> tooltips = new ArrayList<>();
             if (lastFluidInTank != null && !lastFluidInTank.isEmpty()) {
                 tooltips.add(FluidHelper.getDisplayName(lastFluidInTank));
