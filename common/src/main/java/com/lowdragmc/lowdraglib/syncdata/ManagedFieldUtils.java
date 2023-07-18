@@ -5,7 +5,6 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.*;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib.syncdata.field.RPCMethodMeta;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
-import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
 import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.Field;

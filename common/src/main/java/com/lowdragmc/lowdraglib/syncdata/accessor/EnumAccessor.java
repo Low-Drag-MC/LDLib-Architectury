@@ -27,7 +27,7 @@ public class EnumAccessor extends ManagedAccessor {
         });
         var value = values.get(name);
         if (value == null) {
-            throw new IllegalArgumentException("Invalid name for enum type " + type.getName() + ": " + name);
+            return null;
         }
         return type.cast(value);
     }
@@ -98,6 +98,9 @@ public class EnumAccessor extends ManagedAccessor {
             value = getEnum((Class<Enum>) field.getType(), ordinal);
         } else {
             value = getEnum((Class<Enum>) field.getType(), name);
+        }
+        if (value == null) {
+            value = getEnum((Class<Enum>) field.getType(), 0);
         }
         if (value == null) {
             throw new IllegalArgumentException("Invalid enum value %s (%d) for field %s".formatted(name, ordinal, field));
