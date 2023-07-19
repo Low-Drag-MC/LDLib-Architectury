@@ -11,6 +11,7 @@ public final class Node<NodeDataType> {
 
     public static final int DEFAULT_MARK = 0;
     public static final int ALL_OPENED = 0b111111;
+    public static final int ALL_CLOSED = 0b000000;
 
     public NodeDataType data;
     /**
