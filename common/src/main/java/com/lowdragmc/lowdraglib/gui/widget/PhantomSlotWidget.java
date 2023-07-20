@@ -74,7 +74,9 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
                 writeClientAction(2, buf -> {
                 });
             } else {
+                HOVER_SLOT = slotReference;
                 gui.getModularUIGui().superMouseClicked(mouseX, mouseY, button);
+                HOVER_SLOT = null;
             }
             return true;
         }
