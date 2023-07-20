@@ -56,7 +56,8 @@ import java.util.function.Supplier;
 @LDLRegister(name = "item_slot", group = "widget.container")
 @Accessors(chain = true)
 public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfigurableWidget {
-
+    @Nullable
+    protected static Slot HOVER_SLOT = null;
     @Nullable
     protected Slot slotReference;
     @Configurable
@@ -200,13 +201,13 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 }
             }
             if (!itemStack.isEmpty()) {
-                DrawerHelper.drawItemStack(mStack, itemStack, pos.x+ 1, pos.y + 1, -1, null);
+                DrawerHelper.drawItemStack(mStack, itemStack, pos.x + 1, pos.y + 1, -1, null);
             }
         }
         if (overlay != null) {
             overlay.draw(mStack, mouseX, mouseY, pos.x, pos.y, 18, 18);
         }
-        if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY)) {
+        if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             RenderSystem.colorMask(true, true, true, false);
             DrawerHelper.drawSolidRect(mStack,getPosition().x + 1, getPosition().y + 1, 16, 16, 0x80FFFFFF);
             RenderSystem.colorMask(true, true, true, true);
@@ -222,7 +223,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             ModularUIGuiContainer modularUIGui = gui.getModularUIGui();
             boolean last = modularUIGui.getQuickCrafting();
             InputConstants.Key mouseKey = InputConstants.Type.MOUSE.getOrCreate(button);
+            HOVER_SLOT = slotReference;
             gui.getModularUIGui().superMouseClicked(mouseX, mouseY, button);
+            HOVER_SLOT = null;
             if (last != modularUIGui.getQuickCrafting()) {
                 modularUIGui.dragSplittingButton = button;
                 if (button == 0) {
@@ -244,7 +247,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Environment(EnvType.CLIENT)
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (isMouseOverElement(mouseX, mouseY) && gui != null) {
+            HOVER_SLOT = slotReference;
             gui.getModularUIGui().superMouseReleased(mouseX, mouseY, button);
+            HOVER_SLOT = null;
             return getIngredientIO() == IngredientIO.RENDER_ONLY && (canPutItems || canTakeItems);
         }
         return false;
@@ -398,7 +403,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
         @Override
         public boolean isActive() {
-            return SlotWidget.this.isEnabled();
+            return SlotWidget.this.isEnabled() && (HOVER_SLOT == null || HOVER_SLOT == this);
         }
 
     }
@@ -480,7 +485,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
         @Override
         public boolean isActive() {
-            return SlotWidget.this.isEnabled();
+            return SlotWidget.this.isEnabled() && (HOVER_SLOT == null || HOVER_SLOT == this);
         }
 
     }

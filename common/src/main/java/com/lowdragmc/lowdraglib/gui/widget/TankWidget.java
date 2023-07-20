@@ -237,7 +237,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (overlay != null) {
             overlay.draw(matrixStack, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
         }
-        if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY)) {
+        if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             RenderSystem.colorMask(true, true, true, false);
             DrawerHelper.drawSolidRect(matrixStack, getPosition().x + 1, getPosition().y + 1, getSize().width - 2, getSize().height - 2, 0x80FFFFFF);
             RenderSystem.colorMask(true, true, true, true);
