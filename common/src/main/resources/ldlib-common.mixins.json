@@ -12,6 +12,7 @@
     "LanguageMixin",
     "ModelBakeryMixin",
     "ParticleEngineMixin",
+    "SpriteResourceLoaderMixin",
     "TextureAtlasMixin",
     "WorldRendererMixin",
     "accessor.AbstractContainerScreenAccessor",

@@ -56,6 +56,7 @@ public class Connections {
     public static Connections checkConnections(BlockAndTintGetter level, BlockPos pos, @Nonnull BlockState state, @Nullable Direction side) {
         Connections connections = Connections.of();
         if (side != null) {
+            pos = pos.immutable();
             for (var connection : Connection.values()) {
                 var offset = connection.transform(pos, side);
                 var adjacent = level.getBlockState(offset);
