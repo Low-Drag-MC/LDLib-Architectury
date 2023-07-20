@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.client.model.custommodel;
 import com.lowdragmc.lowdraglib.utils.ShapeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import javax.annotation.Nonnull;
 
@@ -36,7 +37,7 @@ public enum Connection {
                 pos = pos.relative(dir);
             }
             var rotated = ShapeUtils.rotate(new AABB(pos), normal);
-            offsets[normal.ordinal()] = new BlockPos((int) ((rotated.minX + rotated.maxX) / 2), (int) ((rotated.minY + rotated.maxY) / 2), (int) ((rotated.minZ + rotated.maxZ) / 2));
+            offsets[normal.ordinal()] = new BlockPos(Mth.floor((rotated.minX + rotated.maxX) / 2), Mth.floor((rotated.minY + rotated.maxY) / 2), Mth.floor((rotated.minZ + rotated.maxZ) / 2));
         }
     }
 
