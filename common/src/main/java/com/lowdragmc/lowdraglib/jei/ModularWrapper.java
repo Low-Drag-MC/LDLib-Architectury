@@ -120,6 +120,7 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
             graphics.pose().translate(0, 0, 200);
             graphics.renderTooltip(font, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
             graphics.pose().translate(0, 0, -200);
+            graphics.bufferSource().endLastBatch();
         }
 
         RenderSystem.depthMask(true);

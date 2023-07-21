@@ -677,7 +677,7 @@ public abstract class WorldSceneRenderer {
         hitPos.mul(2); // Double view range to ensure pos can be seen.
         Vec3 endPos = new Vec3((hitPos.x() - startPos.x), (hitPos.y() - startPos.y), (hitPos.z() - startPos.z));
         try {
-            return this.world.clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
+            return this.world.clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, cameraEntity));
         } catch (Exception e) {
             return null;
         }

@@ -45,8 +45,12 @@ public class SpriteResourceLoaderMixin {
             locals = LocalCapture.CAPTURE_FAILHARD)
     private static void injectLoad(ResourceManager resourceManager, ResourceLocation location, CallbackInfoReturnable<SpriteResourceLoader> cir, ResourceLocation resourceLocation, List<SpriteSource> list) {
         ResourceLocation atlas = new ResourceLocation(location.getNamespace(), "textures/atlas/%s.png".formatted(location.getPath()));
+        Set<ResourceLocation> sprites = new HashSet<>();
         for (var renderer : IRenderer.EVENT_REGISTERS) {
-            renderer.onPrepareTextureAtlas(atlas, texture -> list.add(new SingleFile(texture, Optional.empty())));
+            renderer.onPrepareTextureAtlas(atlas, sprites::add);
+        }
+        for (ResourceLocation sprite : sprites) {
+            list.add(new SingleFile(sprite, Optional.empty()));
         }
     }
 }

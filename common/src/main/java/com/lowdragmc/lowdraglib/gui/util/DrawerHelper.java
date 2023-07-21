@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.client.shader.uniform.UniformCache;
 import com.lowdragmc.lowdraglib.client.utils.RenderBufferUtils;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
+import com.lowdragmc.lowdraglib.utils.ColorUtils;
 import com.lowdragmc.lowdraglib.utils.LdUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Rect;
@@ -16,10 +17,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -167,17 +166,11 @@ public class DrawerHelper {
 
     @Environment(EnvType.CLIENT)
     public static void drawItemStack(@Nonnull GuiGraphics graphics, ItemStack itemStack, int x, int y, int color, @Nullable String altTxt) {
-        PoseStack posestack = RenderSystem.getModelViewStack();
-        posestack.pushPose();
-        posestack.mulPoseMatrix(graphics.pose().last().pose());
-        posestack.translate(0.0D, 0.0D, 32.0D);
-        RenderSystem.applyModelViewMatrix();
-        float a = (float)(color >> 24 & 255) / 255.0F;
-        float r   = (float)(color >> 16 & 255) / 255.0F;
-        float g = (float)(color >>  8 & 255) / 255.0F;
-        float b  = (float)(color       & 255) / 255.0F;
+        float a = ColorUtils.alpha(color);
+        float r = ColorUtils.red(color);
+        float g = ColorUtils.green(color);
+        float b = ColorUtils.blue(color);
         RenderSystem.setShaderColor(r, g, b, a);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(true);
@@ -192,8 +185,6 @@ public class DrawerHelper {
 
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-        posestack.popPose();
-        RenderSystem.applyModelViewMatrix();
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
         RenderSystem.disableDepthTest();
