@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * To reduce workload and allow for customization, we wrapped and expanded {@link RecipeLayout}  to fit our needs.
@@ -177,6 +178,9 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
     @Override
     public void drawOverlays(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         //:P
+        if (wrapper.tooltipTexts != null && !wrapper.tooltipTexts.isEmpty()) {
+            graphics.renderTooltip(Minecraft.getInstance().font, wrapper.tooltipTexts, Optional.ofNullable(wrapper.tooltipComponent), mouseX, mouseY);
+        }
     }
 
     /**

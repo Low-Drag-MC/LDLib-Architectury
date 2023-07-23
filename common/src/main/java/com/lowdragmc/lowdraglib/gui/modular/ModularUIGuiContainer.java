@@ -11,6 +11,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.screen.EmiScreenManager;
+import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -44,10 +45,14 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
     public int dragSplittingLimit;
     public int dragSplittingButton;
     // hover tips
-    protected List<Component> tooltipTexts;
-    protected TooltipComponent tooltipComponent;
-    protected Font tooltipFont;
-    protected ItemStack tooltipStack = ItemStack.EMPTY;
+    @Nullable
+    public List<Component> tooltipTexts;
+    @Nullable
+    public TooltipComponent tooltipComponent;
+    @Nullable
+    public Font tooltipFont;
+    @Nullable
+    public ItemStack tooltipStack = ItemStack.EMPTY;
     // drag element
     protected Tuple<Object, IGuiTexture> draggingElement;
 
