@@ -116,7 +116,8 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         modularUI.mainGroup.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         modularUI.mainGroup.drawInForeground(graphics, mouseX, mouseY, partialTicks);
 
-        if (tooltipTexts != null && tooltipTexts.size() > 0) {
+        // do not draw tooltips here, do it from recipe viewer.
+        if (tooltipTexts != null && !tooltipTexts.isEmpty()) {
             graphics.pose().translate(0, 0, 200);
             graphics.renderTooltip(font, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
             graphics.pose().translate(0, 0, -200);

@@ -5,7 +5,6 @@ import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeSlotsAccessor;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
@@ -32,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * To reduce workload and allow for customization, we wrapped and expanded {@link RecipeLayout}  to fit our needs.
@@ -174,6 +174,9 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
     @Override
     public void drawOverlays(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         //:P
+        if (wrapper.tooltipTexts != null && !wrapper.tooltipTexts.isEmpty()) {
+            graphics.renderTooltip(Minecraft.getInstance().font, wrapper.tooltipTexts, Optional.ofNullable(wrapper.tooltipComponent), mouseX, mouseY);
+        }
     }
 
     /**
