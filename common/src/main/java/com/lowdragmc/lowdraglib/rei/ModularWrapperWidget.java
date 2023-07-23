@@ -2,10 +2,13 @@ package com.lowdragmc.lowdraglib.rei;
 
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +29,23 @@ public class ModularWrapperWidget extends Widget {
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         modular.draw(pPoseStack, pMouseX, pMouseY, pPartialTick);
+        var tooltip = getTooltip(TooltipContext.ofMouse());
+        if (tooltip != null) {
+            tooltip.queue();
+        }
+    }
+
+    @Override
+    @Nullable
+    public Tooltip getTooltip(TooltipContext context) {
+        if (modular.tooltipTexts != null && !modular.tooltipTexts.isEmpty()) {
+            var tooltip = Tooltip.create(context.getPoint(), modular.tooltipTexts);
+            if (modular.tooltipComponent != null) {
+                tooltip.add(modular.tooltipComponent);
+            }
+            return tooltip;
+        }
+        return null;
     }
 
     @Override

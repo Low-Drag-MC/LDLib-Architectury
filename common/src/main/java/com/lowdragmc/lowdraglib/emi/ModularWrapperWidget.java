@@ -10,10 +10,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author KilaBash
@@ -41,6 +44,18 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         modular.draw(pPoseStack, pMouseX, pMouseY, pPartialTick);
+    }
+
+    @Override
+    public List<ClientTooltipComponent> getTooltip(int mouseX, int mouseY) {
+        if (modular.tooltipTexts != null && !modular.tooltipTexts.isEmpty()) {
+            List<ClientTooltipComponent> tooltips = modular.tooltipTexts.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
+            if (modular.tooltipComponent != null) {
+                tooltips.add(ClientTooltipComponent.create(modular.tooltipComponent));
+            }
+            return tooltips;
+        }
+        return super.getTooltip(mouseX, mouseY);
     }
 
     @Override
