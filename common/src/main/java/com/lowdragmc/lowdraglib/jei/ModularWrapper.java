@@ -117,11 +117,12 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         modularUI.mainGroup.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
         modularUI.mainGroup.drawInForeground(matrixStack, mouseX, mouseY, partialTicks);
 
-        if (tooltipTexts != null && tooltipTexts.size() > 0) {
-            matrixStack.translate(0, 0, 200);
-            renderTooltip(matrixStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
-            matrixStack.translate(0, 0, -200);
-        }
+        // do not draw tooltips here, do it from recipe viewer.
+//        if (tooltipTexts != null && !tooltipTexts.isEmpty()) {
+//            matrixStack.translate(0, 0, 200);
+//            renderTooltip(matrixStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
+//            matrixStack.translate(0, 0, -200);
+//        }
 
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();

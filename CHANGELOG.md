@@ -1,3 +1,3 @@
 # ChangeLog
 
-* update dependencies
+* fix recipe viewer tooltips
