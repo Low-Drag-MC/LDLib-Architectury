@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib.jei;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
-import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -120,7 +119,6 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
 
         if (tooltipTexts != null && !tooltipTexts.isEmpty()) {
             matrixStack.pushPose();
-            ClickData
             matrixStack.translate(0, 0, 240);
             renderTooltip(matrixStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
             matrixStack.popPose();
