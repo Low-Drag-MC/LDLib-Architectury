@@ -27,7 +27,7 @@ public class ClickData {
         MouseHandler mouseHelper = Minecraft.getInstance().mouseHandler;
         long id = Minecraft.getInstance().getWindow().getWindow();
         this.button = mouseHelper instanceof MouseHandlerAccessor accessor ? accessor.getActiveButton() : -1;
-        this.isShiftClick = InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_SHIFT);
+        this.isShiftClick = InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_SHIFT);
         this.isCtrlClick = InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_CONTROL) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_CONTROL);
         this.isRemote = true;
     }
