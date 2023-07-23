@@ -175,7 +175,10 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
     public void drawOverlays(@NotNull PoseStack poseStack, int mouseX, int mouseY) {
         //:P
         if (wrapper.tooltipTexts != null && !wrapper.tooltipTexts.isEmpty()) {
+            poseStack.pushPose();
+            poseStack.translate(0, 0, 240);
             wrapper.renderTooltip(poseStack, wrapper.tooltipTexts, Optional.ofNullable(wrapper.tooltipComponent), mouseX, mouseY);
+            poseStack.popPose();
         }
     }
 
