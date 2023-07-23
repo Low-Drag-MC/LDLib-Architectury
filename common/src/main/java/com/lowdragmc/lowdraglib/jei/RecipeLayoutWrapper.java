@@ -175,7 +175,10 @@ public class RecipeLayoutWrapper<R extends ModularWrapper<?>> extends RecipeLayo
     public void drawOverlays(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         //:P
         if (wrapper.tooltipTexts != null && !wrapper.tooltipTexts.isEmpty()) {
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 240);
             graphics.renderTooltip(Minecraft.getInstance().font, wrapper.tooltipTexts, Optional.ofNullable(wrapper.tooltipComponent), mouseX, mouseY);
+            graphics.pose().popPose();
         }
     }
 

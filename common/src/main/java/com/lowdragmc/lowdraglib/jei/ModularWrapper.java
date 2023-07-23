@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.jei;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
+import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -118,9 +119,10 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
 
         // do not draw tooltips here, do it from recipe viewer.
         if (tooltipTexts != null && !tooltipTexts.isEmpty()) {
-            graphics.pose().translate(0, 0, 200);
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 240);
             graphics.renderTooltip(font, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
-            graphics.pose().translate(0, 0, -200);
+            graphics.pose().popPose();
         }
 
         RenderSystem.depthMask(true);
