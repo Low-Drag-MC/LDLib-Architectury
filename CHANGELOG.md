@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix recipe viewer tooltips
+* fix small issue with `Platform#getMinecraftServer()`
