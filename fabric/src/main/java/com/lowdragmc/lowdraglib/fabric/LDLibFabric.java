@@ -29,7 +29,7 @@ public class LDLibFabric implements ModInitializer {
             );
         }
         // hook server
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             PlatformImpl.SERVER = server;
         });
         // register server commands
