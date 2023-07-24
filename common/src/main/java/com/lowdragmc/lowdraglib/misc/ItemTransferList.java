@@ -56,6 +56,7 @@ public class ItemTransferList implements IItemTransfer, ITagSerializable<Compoun
         for (var transfer : transfers) {
             if (slot - index < transfer.getSlots()) {
                 transfer.setStackInSlot(slot - index, stack);
+                return;
             }
             index += transfer.getSlots();
         }
