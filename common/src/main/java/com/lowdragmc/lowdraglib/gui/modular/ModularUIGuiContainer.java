@@ -148,6 +148,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
             } else {
                 graphics.renderTooltip(font, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
             }
+            graphics.bufferSource().endLastBatch();
             graphics.pose().translate(0, 0, -200);
         }
 
