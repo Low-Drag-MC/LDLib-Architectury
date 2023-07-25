@@ -20,7 +20,6 @@ import static dev.architectury.injectables.annotations.PlatformOnly.FORGE;
 public class ForgeEventHooks {
     @ExpectPlatform
     @PlatformOnly(FORGE)
-    @Environment(EnvType.CLIENT)
     public static void postPlayerContainerEvent(Player player, AbstractContainerMenu container) {
         throw new AssertionError();
     }
