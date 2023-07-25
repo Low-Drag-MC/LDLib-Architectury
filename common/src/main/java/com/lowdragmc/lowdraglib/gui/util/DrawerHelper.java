@@ -185,7 +185,6 @@ public class DrawerHelper {
 
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-        RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
         RenderSystem.disableDepthTest();
     }

@@ -11,7 +11,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.screen.EmiScreenManager;
-import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -142,23 +141,24 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         if (draggingElement != null) {
             draggingElement.getB().draw(graphics, mouseX, mouseY, mouseX - 20, mouseY - 20, 40, 40);
         } else if (tooltipTexts != null && tooltipTexts.size() > 0) {
+            graphics.pose().pushPose();
             graphics.pose().translate(0, 0, 200);
             if (tooltipComponent == null) {
                 graphics.renderTooltip(font, tooltipTexts.stream().flatMap(component -> font.split(component, 200).stream()).toList(), mouseX, mouseY);
             } else {
                 graphics.renderTooltip(font, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
             }
-            graphics.bufferSource().endLastBatch();
-            graphics.pose().translate(0, 0, -200);
+            graphics.pose().popPose();
         }
 
+        graphics.bufferSource().endBatch();
+
+        RenderSystem.enableDepthTest();
         RenderSystem.depthMask(true);
 
-        PoseStack posestack = RenderSystem.getModelViewStack();
+        PoseStack posestack = graphics.pose();
         posestack.pushPose();
         posestack.translate(leftPos, topPos, 0.0D);
-        RenderSystem.applyModelViewMatrix();
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.hoveredSlot = null;
 
         if (Platform.isForge()) ForgeEventHooks.postRenderForegroundEvent(this, graphics, mouseX, mouseY);
@@ -166,8 +166,8 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         renderItemStackOnMouse(graphics, mouseX, mouseY);
         renderReturningItemStack(graphics);
 
+        graphics.bufferSource().endBatch();
         posestack.popPose();
-        RenderSystem.applyModelViewMatrix();
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(true);
     }
@@ -202,7 +202,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         graphics.pose().pushPose();
         graphics.pose().translate(0.0f, 0.0f, 232.0f);
         graphics.renderItem(stack, x, y);
-        graphics.renderItemDecorations(this.font, stack, x, y - (stack.isEmpty() ? 0 : 8), amountText);
+        graphics.renderItemDecorations(this.font, stack, x, y - (((AbstractContainerScreenAccessor)this).getDraggingItem().isEmpty() ? 0 : 8), amountText);
         graphics.pose().popPose();
     }
 
