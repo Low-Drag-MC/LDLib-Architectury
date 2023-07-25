@@ -2,11 +2,13 @@ package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import lombok.val;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.runtime.IClickableIngredient;
 import net.minecraft.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -29,8 +31,9 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
             if (widget instanceof IRecipeIngredientSlot slot) {
                 IRecipeSlotBuilder slotBuilder = builder.addSlot(mapToRole(slot.getIngredientIO()), i, -1);
                 Object ingredient = slot.getJEIIngredient();
-                if (ingredient != null) {
-                    slotBuilder.addIngredientsUnsafe(List.of(ingredient));
+                if (ingredient instanceof IClickableIngredient<?> clickableIngredient) {
+                    val typedIngredient = clickableIngredient.getTypedIngredient();
+                    slotBuilder.addIngredientsUnsafe(List.of(typedIngredient.getIngredient()));
                 }
             }
         }

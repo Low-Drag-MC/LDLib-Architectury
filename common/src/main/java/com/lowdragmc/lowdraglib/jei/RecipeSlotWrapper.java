@@ -10,10 +10,10 @@ import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.runtime.IClickableIngredient;
 import mezz.jei.api.runtime.IIngredientVisibility;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.ingredients.RecipeSlot;
-import mezz.jei.library.ingredients.TypedIngredient;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
@@ -176,8 +176,8 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     private Optional<ITypedIngredient<?>> getDisplayIngredient() {
-        if (widget instanceof IRecipeIngredientSlot slot && slot.getJEIIngredient() != null) {
-            return TypedIngredient.createAndFilterInvalid(((RecipeSlotAccessor) this).getIngredientManager(), slot.getJEIIngredient());
+        if (widget instanceof IRecipeIngredientSlot slot && slot.getJEIIngredient() instanceof IClickableIngredient<?> clickableIngredient) {
+            return Optional.of(clickableIngredient.getTypedIngredient());
         }
         return Optional.empty();
     }
