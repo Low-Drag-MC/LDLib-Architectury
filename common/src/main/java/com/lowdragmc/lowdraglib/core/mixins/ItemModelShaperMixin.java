@@ -26,7 +26,7 @@ import java.util.Map;
 @Mixin(ItemModelShaper.class)
 public class ItemModelShaperMixin {
     @Unique
-    static Map<IRenderer, BakedModel> SHAPES_CACHE = new HashMap<>();
+    private final static Map<IRenderer, BakedModel> SHAPES_CACHE = new HashMap<>();
 
     @Inject(method = "getItemModel(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/client/resources/model/BakedModel;", at = @At("HEAD"), cancellable = true)
     public void injectGetModel(ItemStack stack, CallbackInfoReturnable<BakedModel> cir) {
