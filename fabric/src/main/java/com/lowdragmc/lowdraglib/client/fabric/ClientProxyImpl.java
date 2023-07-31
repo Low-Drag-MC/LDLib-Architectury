@@ -1,10 +1,12 @@
 package com.lowdragmc.lowdraglib.client.fabric;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.ClientCommands;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.model.fabric.LDLRendererModel;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
+import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
 import com.lowdragmc.lowdraglib.gui.util.WidgetTooltipComponent;
 import com.lowdragmc.lowdraglib.test.TestBlock;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -18,6 +20,11 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.renderer.RenderType;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.List;
 
@@ -27,7 +34,7 @@ import java.util.List;
  * @implNote ClientProxyImpl
  */
 @Environment(EnvType.CLIENT)
-public class ClientProxyImpl implements ClientModInitializer {
+public class ClientProxyImpl implements ClientModInitializer, SimpleSynchronousResourceReloadListener {
     @Override
     public void onInitializeClient() {
         // Minecraft start
@@ -51,6 +58,17 @@ public class ClientProxyImpl implements ClientModInitializer {
 
         //register tooltips
         TooltipComponentCallback.EVENT.register(data -> data instanceof WidgetTooltipComponent tooltipComponent ? new WidgetClientTooltipComponent(tooltipComponent) : null);
+
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
     }
 
+    @Override
+    public ResourceLocation getFabricId() {
+        return LDLib.location("client_proxy");
+    }
+
+    @Override
+    public void onResourceManagerReload(ResourceManager resourceManager) {
+        CompassManager.INSTANCE.onResourceManagerReload(resourceManager);
+    }
 }

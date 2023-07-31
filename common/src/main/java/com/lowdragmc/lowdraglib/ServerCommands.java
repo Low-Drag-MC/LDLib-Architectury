@@ -2,8 +2,15 @@ package com.lowdragmc.lowdraglib;
 
 import com.lowdragmc.lowdraglib.gui.factory.UIEditorFactory;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 import java.util.List;
 
@@ -21,6 +28,22 @@ public class ServerCommands {
                                     UIEditorFactory.INSTANCE.openUI(UIEditorFactory.INSTANCE, context.getSource().getPlayerOrException());
                                     return 1;
                                 })
+                        )
+                        .then(Commands.literal("copy_tag")
+                                .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                                        .executes(context -> {
+                                            var pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
+                                            var world = context.getSource().getLevel();
+                                            var blockEntity = world.getBlockEntity(pos);
+                                            if (blockEntity != null) {
+                                                var tag = blockEntity.saveWithoutMetadata();
+                                                var value = NbtUtils.structureToSnbt(tag);
+                                                context.getSource().sendSuccess(() -> Component.literal("[Copy to clipboard]").withStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, value))).append(NbtUtils.toPrettyComponent(tag)), true);
+                                            } else {
+                                                context.getSource().sendSuccess(() -> Component.literal("No block entity at " + pos).withStyle(Style.EMPTY.withColor(ChatFormatting.RED)), true);
+                                            }
+                                            return 1;
+                                        }))
                         )
         );
     }

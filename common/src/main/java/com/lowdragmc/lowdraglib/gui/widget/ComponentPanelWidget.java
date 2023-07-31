@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
-import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
@@ -36,20 +36,25 @@ import java.util.function.Consumer;
 @Accessors(fluent = true)
 public class ComponentPanelWidget extends Widget {
     protected int maxWidthLimit;
-    @Setter
+    @Setter @Nullable
     protected Consumer<List<Component>> textSupplier;
     @Setter
     protected BiConsumer<String, ClickData> clickHandler;
-    private List<Component> lastText = new ArrayList<>();
-    private List<FormattedCharSequence> cacheLines = Collections.emptyList();
+    protected List<Component> lastText = new ArrayList<>();
+    @Getter
+    protected List<FormattedCharSequence> cacheLines = Collections.emptyList();
+    protected boolean isCenter = false;
+    protected int space = 2;
 
-    public ComponentPanelWidget(int x, int y, Consumer<List<Component>> textSupplier) {
+    public ComponentPanelWidget(int x, int y, @Nonnull Consumer<List<Component>> textSupplier) {
         super(x, y, 0, 0);
         this.textSupplier = textSupplier;
+        this.textSupplier.accept(lastText);
     }
 
-    public ComponentPanelWidget(int x, int y) {
+    public ComponentPanelWidget(int x, int y, List<Component> text) {
         super(x, y, 0, 0);
+        this.lastText.addAll(text);
     }
 
     public static Component withButton(Component textComponent, String componentData) {
@@ -81,10 +86,27 @@ public class ComponentPanelWidget extends Widget {
         return this;
     }
 
+    public ComponentPanelWidget setCenter(boolean center) {
+        isCenter = center;
+        if (isRemote()) {
+            formatDisplayText();
+            updateComponentTextSize();
+        }
+        return this;
+    }
+
+    public ComponentPanelWidget setSpace(int space) {
+        this.space = space;
+        if (isRemote()) {
+            formatDisplayText();
+            updateComponentTextSize();
+        }
+        return this;
+    }
+
     @Override
     public void writeInitialData(FriendlyByteBuf buffer) {
         super.writeInitialData(buffer);
-        textSupplier.accept(lastText);
         buffer.writeVarInt(lastText.size());
         for (Component textComponent : lastText) {
             buffer.writeComponent(textComponent);
@@ -100,27 +122,45 @@ public class ComponentPanelWidget extends Widget {
     @Override
     public void initWidget() {
         super.initWidget();
-        if (isClientSideWidget && isRemote()) {
+        if (textSupplier != null) {
             lastText.clear();
             textSupplier.accept(lastText);
+        }
+        if (isClientSideWidget && isRemote()) {
             formatDisplayText();
             updateComponentTextSize();
         }
     }
 
     @Override
+    public void updateScreen() {
+        super.updateScreen();
+        if (isClientSideWidget && textSupplier != null) {
+            List<Component> textBuffer = new ArrayList<>();
+            textSupplier.accept(textBuffer);
+            if (!lastText.equals(textBuffer)){
+                this.lastText = textBuffer;
+                formatDisplayText();
+                updateComponentTextSize();
+            }
+        }
+    }
+
+    @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
-        List<Component> textBuffer = new ArrayList<>();
-        textSupplier.accept(textBuffer);
-        if (!lastText.equals(textBuffer)) {
-            this.lastText = textBuffer;
-            writeUpdateInfo(1, buffer -> {
-                buffer.writeVarInt(lastText.size());
-                for (Component textComponent : lastText) {
-                    buffer.writeComponent(textComponent);
-                }
-            });
+        if (textSupplier != null) {
+            List<Component> textBuffer = new ArrayList<>();
+            textSupplier.accept(textBuffer);
+            if (!lastText.equals(textBuffer)) {
+                this.lastText = textBuffer;
+                writeUpdateInfo(1, buffer -> {
+                    buffer.writeVarInt(lastText.size());
+                    for (Component textComponent : lastText) {
+                        buffer.writeComponent(textComponent);
+                    }
+                });
+            }
         }
     }
 
@@ -151,20 +191,25 @@ public class ComponentPanelWidget extends Widget {
     }
 
     @Environment(EnvType.CLIENT)
-    private void updateComponentTextSize() {
+    public void updateComponentTextSize() {
         var fontRenderer = Minecraft.getInstance().font;
-        int maxStringWidth = 0;
-        int totalHeight = 0;
-        for (var textComponent : lastText) {
-            maxStringWidth = Math.max(maxStringWidth, fontRenderer.width(textComponent.getVisualOrderText()));
-            totalHeight += fontRenderer.lineHeight + 2;
+        int totalHeight = cacheLines.size() * (fontRenderer.lineHeight + space);
+        if (totalHeight > 0) {
+            totalHeight -= space;
         }
-        totalHeight -= 2;
-        setSize(new Size(maxWidthLimit == 0 ? maxStringWidth : Math.min(maxWidthLimit, maxStringWidth), totalHeight));
+        if (isCenter) {
+            setSize(new Size(maxWidthLimit, totalHeight));
+        } else {
+            int maxStringWidth = 0;
+            for (var line : cacheLines) {
+                maxStringWidth = Math.max(fontRenderer.width(line), maxStringWidth);
+            }
+            setSize(new Size(maxWidthLimit == 0 ? maxStringWidth : Math.min(maxWidthLimit, maxStringWidth), totalHeight));
+        }
     }
 
     @Environment(EnvType.CLIENT)
-    private void formatDisplayText() {
+    public void formatDisplayText() {
         var fontRenderer = Minecraft.getInstance().font;
         int maxTextWidthResult = maxWidthLimit == 0 ? Integer.MAX_VALUE : maxWidthLimit;
         this.cacheLines = lastText.stream().flatMap(component ->
@@ -176,12 +221,26 @@ public class ComponentPanelWidget extends Widget {
     @Nullable
     protected Style getStyleUnderMouse(double mouseX, double mouseY) {
         var fontRenderer = Minecraft.getInstance().font;
-        Position position = getPosition();
-        var selectedLine = (mouseY - position.y) / (fontRenderer.lineHeight + 2);
-        if (mouseX >= position.x && selectedLine >= 0 && selectedLine < cacheLines.size()) {
-            var cacheLine = cacheLines.get((int) selectedLine);
-            var mouseOffset = (int)(mouseX - position.x);
-            return fontRenderer.getSplitter().componentStyleAtWidth(cacheLine, mouseOffset);
+        var position = getPosition();
+        var size = getSize();
+
+        var selectedLine = (mouseY - position.y) / (fontRenderer.lineHeight + space);
+        if (isCenter) {
+            if (selectedLine >= 0 && selectedLine < cacheLines.size()) {
+                var cacheLine = cacheLines.get((int) selectedLine);
+                var lineWidth = fontRenderer.width(cacheLine);
+                var offsetX = position.x + (size.width - lineWidth) / 2f;
+                if (mouseX >= offsetX) {
+                    var mouseOffset = (int)(mouseX - position.x);
+                    return fontRenderer.getSplitter().componentStyleAtWidth(cacheLine, mouseOffset);
+                }
+            }
+        } else {
+            if (mouseX >= position.x && selectedLine >= 0 && selectedLine < cacheLines.size()) {
+                var cacheLine = cacheLines.get((int) selectedLine);
+                var mouseOffset = (int)(mouseX - position.x);
+                return fontRenderer.getSplitter().componentStyleAtWidth(cacheLine, mouseOffset);
+            }
         }
         return null;
     }
@@ -234,9 +293,16 @@ public class ComponentPanelWidget extends Widget {
     public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         var fontRenderer = Minecraft.getInstance().font;
-        Position position = getPosition();
+        var position = getPosition();
+        var size = getSize();
         for (int i = 0; i < cacheLines.size(); i++) {
-            graphics.drawString(fontRenderer, cacheLines.get(i), position.x, position.y + i * (fontRenderer.lineHeight + 2), -1);
+            var cacheLine = cacheLines.get(i);
+            if (isCenter) {
+                var lineWidth = fontRenderer.width(cacheLine);
+                graphics.drawString(fontRenderer, cacheLine, position.x + (size.width - lineWidth) / 2, position.y + i * (fontRenderer.lineHeight + space), -1);
+            } else {
+                graphics.drawString(fontRenderer, cacheLines.get(i), position.x, position.y + i * (fontRenderer.lineHeight + 2), -1);
+            }
         }
     }
 }

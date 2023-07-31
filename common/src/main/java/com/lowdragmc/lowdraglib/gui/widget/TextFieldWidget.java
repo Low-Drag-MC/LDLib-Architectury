@@ -6,7 +6,6 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -54,6 +53,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
     protected float wheelDur;
     protected NumberFormat numberInstance;
     protected Component hover;
+    private boolean isDragging;
 
     public TextFieldWidget() {
         this(0, 0, 60, 15, null, null);
@@ -149,9 +149,19 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
     @Override
     @Environment(EnvType.CLIENT)
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (isMouseOverElement(mouseX, mouseY)) {
+            isDragging = true;
+        }
         setFocus(isMouseOverElement(mouseX, mouseY));
         this.textField.setFocused(isMouseOverElement(mouseX, mouseY));
         return this.textField.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        isDragging = false;
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
@@ -169,6 +179,18 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
         if (this.isVisible() && this.isActive() && textSupplier != null && isClientSideWidget&& !textSupplier.get().equals(getCurrentString())) {
             setCurrentString(textSupplier.get());
         }
+    }
+
+    @Override
+    public void writeInitialData(FriendlyByteBuf buffer) {
+        super.writeInitialData(buffer);
+        buffer.writeUtf(getCurrentString());
+    }
+
+    @Override
+    public void readInitialData(FriendlyByteBuf buffer) {
+        super.readInitialData(buffer);
+        setCurrentString(buffer.readUtf());
     }
 
     @Override
@@ -366,6 +388,20 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (isDragging && numberInstance != null && isFocus()) {
+            try {
+                onTextChanged(numberInstance.format(Float.parseFloat(getCurrentString()) + dragX * wheelDur));
+            } catch (Exception ignored) {
+            }
+            setFocus(true);
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     @Override

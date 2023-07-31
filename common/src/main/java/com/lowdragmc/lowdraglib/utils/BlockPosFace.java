@@ -24,6 +24,6 @@ public class BlockPosFace {
 
     @Override
     public int hashCode() {
-        return pos.hashCode() + facing.hashCode();
+        return pos.hashCode() + (facing == null ? 0 : facing.hashCode());
     }
 }

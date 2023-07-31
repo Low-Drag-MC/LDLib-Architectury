@@ -183,6 +183,8 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     public void computeMax() {
         if (isComputingMax) return;
         isComputingMax = true;
+        var lastScrollXOffset = scrollXOffset;
+        var lastScrollYOffset = scrollYOffset;
         int mh = 0;
         int mw = 0;
         for (Widget widget : widgets) {
@@ -221,6 +223,10 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
             }
             scrollXOffset -= offsetX;
         }
+        offsetX += scrollXOffset - Math.min(scrollXOffset, lastScrollXOffset);
+        offsetY += scrollYOffset - Math.min(scrollYOffset, lastScrollYOffset);
+        scrollXOffset = Math.min(scrollXOffset, lastScrollXOffset);
+        scrollYOffset = Math.min(scrollYOffset, lastScrollYOffset);
         for (Widget widget : widgets) {
             Position newPos = widget.addSelfPosition(offsetX, offsetY);
             widget.setVisible(newPos.x < getSize().width - yBarWidth && newPos.x + widget.getSize().width > 0);
@@ -299,6 +305,7 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     @Override
     @Environment(EnvType.CLIENT)
     public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        drawBackgroundTexture(graphics, mouseX, mouseY);
         int x = getPosition().x;
         int y = getPosition().y;
         int width = getSize().width;
@@ -306,12 +313,12 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         if (useScissor) {
             graphics.enableScissor(x, y, x + width, y + height);
             if(!hookDrawInBackground(graphics, mouseX, mouseY, partialTicks)) {
-                super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+                drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
             }
             graphics.disableScissor();
         } else {
             if(!hookDrawInBackground(graphics, mouseX, mouseY, partialTicks)) {
-                super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+                drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
             }
         }
 

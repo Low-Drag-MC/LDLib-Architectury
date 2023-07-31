@@ -1,9 +1,10 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import lombok.Setter;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -21,7 +22,11 @@ import java.util.function.Consumer;
 public class BlockInfo {
     public static final BlockInfo EMPTY = new BlockInfo(Blocks.AIR);
 
+    @Setter
     private BlockState blockState;
+    @Setter
+    private CompoundTag tag;
+    @Setter
     private boolean hasBlockEntity;
     private final ItemStack itemStack;
     private BlockEntity lastEntity;
@@ -79,6 +84,14 @@ public class BlockInfo {
                 return lastEntity;
             }
             lastEntity = entityBlock.newBlockEntity(pos, blockState);
+            if (tag != null && lastEntity != null) {
+                var compoundTag2 = lastEntity.saveWithoutMetadata();
+                var compoundTag3 = compoundTag2.copy();
+                compoundTag2.merge(tag);
+                if (!compoundTag2.equals(compoundTag3)) {
+                    lastEntity.load(compoundTag2);
+                }
+            }
             if (postCreate != null) {
                 postCreate.accept(lastEntity);
             }
@@ -112,11 +125,7 @@ public class BlockInfo {
         }
     }
 
-    public void setHasBlockEntity(boolean hasBlockEntity) {
-        this.hasBlockEntity = hasBlockEntity;
-    }
-
-    public void setBlockState(BlockState blockState) {
-        this.blockState = blockState;
+    public void clearBlockEntityCache() {
+        lastEntity = null;
     }
 }

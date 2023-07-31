@@ -50,8 +50,8 @@ public class ItemStackTexture extends TransformTexture{
     protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         if (itemStack.length == 0) return;
         graphics.pose().pushPose();
-        graphics.pose().scale(width / 16f, height / 16f, (width + height) / 32f);
-        graphics.pose().translate(x * 16 / width, y * 16 / height, -200 * (width + height) / 32f);
+        graphics.pose().scale(width / 16f, height / 16f, 1);
+        graphics.pose().translate(x * 16 / width, y * 16 / height, -200);
         DrawerHelper.drawItemStack(graphics, itemStack[index], 0, 0, color, null);
         graphics.pose().popPose();
     }
