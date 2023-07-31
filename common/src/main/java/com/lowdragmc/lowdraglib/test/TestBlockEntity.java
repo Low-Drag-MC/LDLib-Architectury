@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib.test;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.gui.compass.CompassConfig;
+import com.lowdragmc.lowdraglib.gui.compass.CompassView;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.editor.ui.UIEditor;
 import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
@@ -38,7 +40,9 @@ public class TestBlockEntity extends BlockEntity implements IUIHolder {
 
     @Override
     public ModularUI createUI(Player entityPlayer) {
-        return new ModularUI(this, entityPlayer).widget(new UIEditor(LDLib.location));
+        return new ModularUI(this, entityPlayer)
+                .widget(new CompassView(LDLib.MOD_ID));
+//        return new ModularUI(this, entityPlayer).widget(new UIEditor(LDLib.location));
     }
 
     @Override

@@ -140,7 +140,7 @@ public class MenuWidget<K, T> extends WidgetGroup {
         // check height
         if (bottomSpace < maxHeight) {
             if (parent instanceof MenuWidget) {
-                addSelfPosition(0, nodeHeight - maxWidth);
+                addSelfPosition(0, nodeHeight - maxHeight);
             }
             bottomSpace = getGui().getScreenHeight() - getPosition().getY();
             if (bottomSpace < maxHeight) {

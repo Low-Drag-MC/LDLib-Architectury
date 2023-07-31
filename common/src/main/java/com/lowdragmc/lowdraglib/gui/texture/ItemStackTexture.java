@@ -50,9 +50,9 @@ public class ItemStackTexture extends TransformTexture{
     protected void drawInternal(PoseStack mStack, int mouseX, int mouseY, float x, float y, int width, int height) {
         if (itemStack.length == 0) return;
         mStack.pushPose();
-        mStack.scale(width / 16f, height / 16f, (width + height) / 32f);
+        mStack.scale(width / 16f, height / 16f, 1);
         //TODO fix scale z offset
-        mStack.translate(x * 16 / width, y * 16 / height, -200 * (width + height) / 32f);
+        mStack.translate(x * 16 / width, y * 16 / height, -200);
         DrawerHelper.drawItemStack(mStack, itemStack[index], 0, 0, color, null);
         mStack.popPose();
     }

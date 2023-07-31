@@ -184,6 +184,8 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     public void computeMax() {
         if (isComputingMax) return;
         isComputingMax = true;
+        var lastScrollXOffset = scrollXOffset;
+        var lastScrollYOffset = scrollYOffset;
         int mh = 0;
         int mw = 0;
         for (Widget widget : widgets) {
@@ -222,6 +224,10 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
             }
             scrollXOffset -= offsetX;
         }
+        offsetX += scrollXOffset - Math.min(scrollXOffset, lastScrollXOffset);
+        offsetY += scrollYOffset - Math.min(scrollYOffset, lastScrollYOffset);
+        scrollXOffset = Math.min(scrollXOffset, lastScrollXOffset);
+        scrollYOffset = Math.min(scrollYOffset, lastScrollYOffset);
         for (Widget widget : widgets) {
             Position newPos = widget.addSelfPosition(offsetX, offsetY);
             widget.setVisible(newPos.x < getSize().width - yBarWidth && newPos.x + widget.getSize().width > 0);
@@ -300,6 +306,7 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     @Override
     @Environment(EnvType.CLIENT)
     public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        drawBackgroundTexture(matrixStack, mouseX, mouseY);
         int x = getPosition().x;
         int y = getPosition().y;
         int width = getSize().width;
@@ -307,12 +314,12 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         if (useScissor) {
             RenderUtils.useScissor(matrixStack, x, y, width, height, ()->{
                 if(!hookDrawInBackground(matrixStack, mouseX, mouseY, partialTicks)) {
-                    super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+                    drawWidgetsBackground(matrixStack, mouseX, mouseY, partialTicks);
                 }
             });
         } else {
             if(!hookDrawInBackground(matrixStack, mouseX, mouseY, partialTicks)) {
-                super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
+                drawWidgetsBackground(matrixStack, mouseX, mouseY, partialTicks);
             }
         }
 

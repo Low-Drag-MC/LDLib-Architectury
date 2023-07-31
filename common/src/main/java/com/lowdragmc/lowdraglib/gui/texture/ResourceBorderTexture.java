@@ -9,9 +9,10 @@ import net.fabricmc.api.Environment;
 
 @LDLRegister(name = "border_texture", group = "texture")
 public class ResourceBorderTexture extends ResourceTexture {
-    public static final ResourceBorderTexture BORDERED_BACKGROUND = new ResourceBorderTexture("ldlib:textures/gui/bordered_background.png", 195, 136, 4, 4);
+    public static final ResourceBorderTexture BORDERED_BACKGROUND = new ResourceBorderTexture("ldlib:textures/gui/background.png", 16, 16, 4, 4);
+    public static final ResourceBorderTexture BORDERED_BACKGROUND_INVERSE = new ResourceBorderTexture("ldlib:textures/gui/background_inverse.png", 16, 16, 4, 4);
     public static final ResourceBorderTexture BORDERED_BACKGROUND_BLUE = new ResourceBorderTexture("ldlib:textures/gui/bordered_background_blue.png", 195, 136, 4, 4);
-    public static final ResourceBorderTexture BUTTON_COMMON = new ResourceBorderTexture("ldlib:textures/gui/button_common.png", 198, 18, 1, 1);
+    public static final ResourceBorderTexture BUTTON_COMMON = new ResourceBorderTexture("ldlib:textures/gui/button.png", 32, 32, 2, 2);
     public static final ResourceBorderTexture BAR = new ResourceBorderTexture("ldlib:textures/gui/button_common.png", 180, 20, 1, 1);
 
     @Configurable(tips = {"ldlib.gui.editor.tips.corner_size.0", "ldlib.gui.editor.tips.corner_size.1"}, collapse = false)
@@ -28,6 +29,11 @@ public class ResourceBorderTexture extends ResourceTexture {
         super(imageLocation);
         boderSize = new Size(cornerWidth, cornerHeight);
         imageSize = new Size(imageWidth, imageHeight);
+    }
+
+    @Override
+    public ResourceTexture copy() {
+        return new ResourceBorderTexture(imageLocation.toString(), imageSize.width, imageSize.height, boderSize.width, boderSize.height);
     }
 
     @Override

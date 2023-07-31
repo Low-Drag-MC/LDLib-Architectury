@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.client;
 
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
+import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,6 +15,7 @@ public class ClientProxy {
     public static void init() {
         Shaders.init();
         DrawerHelper.init();
+        CompassManager.INSTANCE.init();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.scene.ParticleManager;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
@@ -10,6 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.material.FluidState;
@@ -69,12 +71,18 @@ public class TrackedDummyWorld extends DummyWorld {
         if (blockInfo.getBlockState().getBlock() == Blocks.AIR)
             return;
         this.renderedBlocks.put(pos, blockInfo);
+        this.blockEntities.remove(pos);
         minPos.x = (Math.min(minPos.x, pos.getX()));
         minPos.y = (Math.min(minPos.y, pos.getY()));
         minPos.z = (Math.min(minPos.z, pos.getZ()));
         maxPos.x = (Math.max(maxPos.x, pos.getX()));
         maxPos.y = (Math.max(maxPos.y, pos.getY()));
         maxPos.z = (Math.max(maxPos.z, pos.getZ()));
+    }
+
+    public BlockInfo removeBlock(BlockPos pos) {
+        this.blockEntities.remove(pos);
+        return this.renderedBlocks.remove(pos);
     }
 
     // wth? mcp issue
@@ -89,7 +97,8 @@ public class TrackedDummyWorld extends DummyWorld {
 
     @Override
     public boolean setBlock(@Nonnull BlockPos pos, @Nonnull BlockState state, int a, int b) {
-        renderedBlocks.put(pos, BlockInfo.fromBlockState(state));
+        this.renderedBlocks.put(pos, BlockInfo.fromBlockState(state));
+        this.blockEntities.remove(pos);
         return true;
     }
 
@@ -156,5 +165,22 @@ public class TrackedDummyWorld extends DummyWorld {
             return dummyWorld.getParticleManager();
         }
         return particleManager;
+    }
+
+    public void tickWorld() {
+        for (var entry : renderedBlocks.entrySet()) {
+            var blockState = entry.getValue().getBlockState();
+            var blockEntity = getBlockEntity(entry.getKey());
+            if (blockEntity != null && blockEntity.getType().isValid(blockState)) {
+                try {
+                    BlockEntityTicker ticker = blockState.getTicker(this, blockEntity.getType());
+                    if (ticker != null) {
+                        ticker.tick(this, entry.getKey(), blockState, blockEntity);
+                    }
+                } catch (Exception e) {
+                    LDLib.LOGGER.error("error while update DummyWorld tick, pos {} type {}", entry.getKey(), blockEntity.getType(), e);
+                }
+            }
+        }
     }
 }

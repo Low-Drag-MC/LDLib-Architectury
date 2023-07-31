@@ -134,5 +134,7 @@
   "ldlib.gui.editor.register.editor.ui.ui": "UI Project",
 
   "ldlib.gui.editor.register.editor.file": "file",
-  "ldlib.gui.editor.register.editor.view": "view"
+  "ldlib.gui.editor.register.editor.view": "view",
+  "ldlib.gui.compass.reset_view": "reset view",
+  "ldlib.compass.c_press": "Press [C] open compass"
 }

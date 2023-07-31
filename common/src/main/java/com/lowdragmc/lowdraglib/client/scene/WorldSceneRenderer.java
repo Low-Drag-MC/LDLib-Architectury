@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
@@ -413,13 +414,13 @@ public abstract class WorldSceneRenderer {
                             if (hook != null) {
                                 hook.apply(true, layer);
                             }
-                            renderTESR(renderedBlocks, matrixstack, mc.renderBuffers().bufferSource(), particleTicks);
+                            renderTESR(renderedBlocks, matrixstack, mc.renderBuffers().bufferSource(), hook, particleTicks);
                         }
 
                         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
                         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
-                        renderBlocks(matrixstack, blockrendererdispatcher, layer, buffer, renderedBlocks);
+                        renderBlocks(matrixstack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), renderedBlocks, hook, particleTicks);
 
                         Tesselator.getInstance().end();
                         layer.clearRenderState();
@@ -470,7 +471,7 @@ public abstract class WorldSceneRenderer {
                         BufferBuilder buffer = new BufferBuilder(layer.bufferSize());
                         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
                         renderedBlocksMap.forEach((renderedBlocks, hook) -> {
-                            renderBlocks(matrixstack, blockrendererdispatcher, layer, buffer, renderedBlocks);
+                            renderBlocks(matrixstack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), renderedBlocks, hook, 0);
                         });
                         var builder = buffer.end();
 
@@ -520,7 +521,7 @@ public abstract class WorldSceneRenderer {
 
                 RenderType layer = layers.get(i);
                 if (layer == RenderType.translucent() && tileEntities != null) { // render tesr before translucent
-                    renderTESR(tileEntities, matrixstack, mc.renderBuffers().bufferSource(), particleTicks);
+                    renderTESR(tileEntities, matrixstack, mc.renderBuffers().bufferSource(), null, particleTicks);
                 }
 
                 layer.setupRenderState();
@@ -590,8 +591,7 @@ public abstract class WorldSceneRenderer {
         }
     }
 
-    private void renderBlocks(PoseStack matrixStack, BlockRenderDispatcher blockrendererdispatcher, RenderType layer, VertexConsumer buffer, Collection<BlockPos> renderedBlocks) {
-        VertexConsumerWrapper wrapperBuffer = new VertexConsumerWrapper(buffer);
+    private void renderBlocks(PoseStack matrixStack, BlockRenderDispatcher blockrendererdispatcher, RenderType layer, VertexConsumerWrapper wrapperBuffer, Collection<BlockPos> renderedBlocks, @Nullable ISceneRenderHook hook, float partialTicks) {
         for (BlockPos pos : renderedBlocks) {
             if (blocked != null && blocked.contains(pos)) {
                 continue;
@@ -600,6 +600,10 @@ public abstract class WorldSceneRenderer {
             FluidState fluidState = state.getFluidState();
             Block block = state.getBlock();
             BlockEntity te = world.getBlockEntity(pos);
+
+            if (hook != null) {
+                hook.applyVertexConsumerWrapper(world, pos, state, wrapperBuffer, layer, partialTicks);
+            }
 
             if (block == Blocks.AIR) continue;
             if (state.getRenderShape() != INVISIBLE && canRenderInLayer(state, layer)) {
@@ -613,10 +617,11 @@ public abstract class WorldSceneRenderer {
                 matrixStack.popPose();
             }
             if (!fluidState.isEmpty() && ItemBlockRenderTypes.getRenderLayer(fluidState) == layer) { // I dont want to do this fxxk wrapper
-                wrapperBuffer.setOffset((pos.getX() - (pos.getX() & 15)), (pos.getY() - (pos.getY() & 15)), (pos.getZ() - (pos.getZ() & 15)));
+                wrapperBuffer.addOffset((pos.getX() - (pos.getX() & 15)), (pos.getY() - (pos.getY() & 15)), (pos.getZ() - (pos.getZ() & 15)));
                 blockrendererdispatcher.renderLiquid(pos, world, wrapperBuffer, state, fluidState);
-                wrapperBuffer.clerOffset();
             }
+            wrapperBuffer.clerOffset();
+            wrapperBuffer.clearColor();
             if (maxProgress > 0) {
                 progress++;
             }
@@ -634,7 +639,7 @@ public abstract class WorldSceneRenderer {
         throw new AssertionError();
     }
 
-    private void renderTESR(Collection<BlockPos> poses, PoseStack matrixStack, MultiBufferSource.BufferSource buffers, float partialTicks) {
+    private void renderTESR(Collection<BlockPos> poses, PoseStack matrixStack, MultiBufferSource.BufferSource buffers, @Nullable ISceneRenderHook hook, float partialTicks) {
         if (buffers == null) return;
         for (BlockPos pos : poses) {
             BlockEntity tile = world.getBlockEntity(pos);
@@ -645,6 +650,9 @@ public abstract class WorldSceneRenderer {
                 if (tileentityrenderer != null) {
                     if (tile.hasLevel() && tile.getType().isValid(tile.getBlockState())) {
                         Level world = tile.getLevel();
+                        if (hook != null) {
+                            hook.applyBESR(world, pos, tile, matrixStack, partialTicks);
+                        }
                         tileentityrenderer.render(tile, partialTicks, matrixStack, buffers, 0xF000F0, OverlayTexture.NO_OVERLAY);
                     }
                 }
@@ -681,7 +689,7 @@ public abstract class WorldSceneRenderer {
         }
     }
 
-    public Vector3f project(BlockPos pos) {
+    public Vector3f project(Vector3f pos) {
         //read current rendering parameters
         RenderSystem.getModelViewMatrix().store(MODELVIEW_MATRIX_BUFFER);
         RenderSystem.getProjectionMatrix().store(PROJECTION_MATRIX_BUFFER);
@@ -693,7 +701,7 @@ public abstract class WorldSceneRenderer {
         VIEWPORT_BUFFER.rewind();
 
         //call gluProject with retrieved parameters
-        Project.gluProject(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, MODELVIEW_MATRIX_BUFFER, PROJECTION_MATRIX_BUFFER, VIEWPORT_BUFFER, OBJECT_POS_BUFFER);
+        Project.gluProject(pos.x(), pos.y(), pos.z(), MODELVIEW_MATRIX_BUFFER, PROJECTION_MATRIX_BUFFER, VIEWPORT_BUFFER, OBJECT_POS_BUFFER);
 
         //rewind buffers after read by gluProject
         VIEWPORT_BUFFER.rewind();
@@ -792,32 +800,47 @@ public abstract class WorldSceneRenderer {
         setupCamera(getPositionedRect(x, y, width, height));
 
         drawWorld();
-        Vector3f winPos = project(pos);
+        Vector3f winPos = project(new Vector3f(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f));
 
         resetCamera();
 
         return winPos;
     }
 
-    private class VertexConsumerWrapper implements VertexConsumer {
+    public static class VertexConsumerWrapper implements VertexConsumer {
         final VertexConsumer builder;
         @Setter
         double offsetX, offsetY, offsetZ;
+        float r = 1, g = 1, b = 1, a = 1;
 
         public VertexConsumerWrapper(VertexConsumer builder) {
             this.builder = builder;
         }
 
-        public void setOffset(double offsetX, double offsetY, double offsetZ) {
-            this.offsetX = offsetX;
-            this.offsetY = offsetY;
-            this.offsetZ = offsetZ;
+        public void addOffset(double offsetX, double offsetY, double offsetZ) {
+            this.offsetX += offsetX;
+            this.offsetY += offsetY;
+            this.offsetZ += offsetZ;
+        }
+
+        public void setColor(float r, float g, float b, float a) {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.a = a;
         }
 
         public void clerOffset() {
             this.offsetX = 0;
             this.offsetY = 0;
             this.offsetZ = 0;
+        }
+
+        public void clearColor() {
+            this.r = 1;
+            this.g = 1;
+            this.b = 1;
+            this.a = 1;
         }
 
         @Override
@@ -827,7 +850,7 @@ public abstract class WorldSceneRenderer {
 
         @Override
         public VertexConsumer color(int red, int green, int blue, int alpha) {
-            return builder.color(red, green, blue, alpha);
+            return builder.color((int)(red * r), (int)(green * g), (int)(blue * b), (int)(alpha * a));
         }
 
         @Override

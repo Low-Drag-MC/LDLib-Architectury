@@ -13,6 +13,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import dev.emi.emi.api.stack.ItemEmiStack;
+import lombok.Getter;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -57,6 +58,7 @@ public class SceneWidget extends WidgetGroup {
     protected BlockPosFace selectedPosFace;
     protected ItemStack hoverItem;
     protected BiConsumer<BlockPos, Direction> onSelected;
+    @Getter
     protected Set<BlockPos> core;
     protected boolean useCache;
     protected boolean useOrtho = false;

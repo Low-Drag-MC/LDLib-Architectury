@@ -19,6 +19,9 @@ public class Icons {
     public static ResourceTexture UP = new ResourceTexture("ldlib:textures/gui/up.png");
     public static ResourceTexture DOWN = new ResourceTexture("ldlib:textures/gui/down.png");
     public static ResourceTexture RIGHT = new ResourceTexture("ldlib:textures/gui/right.png");
+    public static ResourceTexture ROTATION = icon("rotation");
+    public static ResourceTexture REPLAY = icon("replay");
+    public static ResourceTexture PLAY_PAUSE = icon("play_pause");
     public static ResourceTexture RESOURCE = icon("resource");
     public static ResourceTexture PALETTE = icon("palette");
     public static ResourceTexture RESOURCE_SETTING = icon("resource_setting");
