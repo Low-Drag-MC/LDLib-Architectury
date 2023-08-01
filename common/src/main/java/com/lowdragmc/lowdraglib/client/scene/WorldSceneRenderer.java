@@ -367,6 +367,8 @@ public abstract class WorldSceneRenderer {
     }
 
     protected void resetCamera() {
+        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+
         //reset viewport
         Minecraft minecraft = Minecraft.getInstance();
         RenderSystem.viewport(0, 0, minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());

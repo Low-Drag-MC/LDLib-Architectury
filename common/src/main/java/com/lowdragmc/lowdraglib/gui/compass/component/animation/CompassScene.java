@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.client.scene.WorldSceneRenderer;
 import com.lowdragmc.lowdraglib.client.utils.RenderUtils;
 import com.lowdragmc.lowdraglib.gui.animation.Transform;
 import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
+import com.lowdragmc.lowdraglib.gui.compass.component.CompassComponent;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
@@ -15,6 +16,7 @@ import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.*;
+import com.lowdragmc.lowdraglib.utils.interpolate.Eases;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import lombok.Getter;
@@ -55,7 +57,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
     @Getter
     protected final WidgetGroup headerGroup;
     @Getter
-    protected int minX = -5, minY = 0, minZ = -5, maxX = 5, maxY = 0, maxZ = 5;
+    protected final int minX, minY = 0, minZ, maxX, maxY = 0, maxZ;
     @Getter
     protected final List<AnimationFrame> frames;
     protected final boolean useScene, tickScene;
@@ -70,34 +72,45 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
     private int frameTick = 0;
     private boolean isPause;
 
-    public CompassScene(int width, int height, boolean useScene, boolean tickScene, float zoom, List<AnimationFrame> frames) {
-        super(0, 0, width, height);
-        this.frames = frames;
-        this.useScene = useScene;
-        this.tickScene = tickScene;
+    public CompassScene(int width, CompassComponent component) {
+        super(0, 0, width, component.getHeight());
+        this.frames = component.getFrames();
+        this.useScene = component.isUseScene();
+        this.tickScene = component.isTickScene();
+        this.minX = -component.getRange();
+        this.minZ = -component.getRange();
+        this.maxX = component.getRange();
+        this.maxZ = component.getRange();
+        var height = component.getHeight();
         var headerHeight = 80;
         var sceneHeight = height - headerHeight;
-        this.addWidget(headerGroup = new WidgetGroup(0, 0, width, useScene ? headerHeight : (height - 25)));
         if (useScene) {
             int sw = (sceneHeight * 4);
-            sceneWidget = new SceneWidget((width - sw) / 2, 80, sw, sceneHeight, world = new TrackedDummyWorld());
+            sceneWidget = new SceneWidget((width - sw) / 2, headerHeight, sw, sceneHeight, world = new TrackedDummyWorld());
             sceneWidget.setHoverTips(true)
-                    .useOrtho(true)
-                    .setOrthoRange(zoom)
-                    .setScalable(false)
+                    .useOrtho(component.isOrtho())
+                    .setOrthoRange(0.5f)
+                    .setScalable(component.isScalable())
                     .setDraggable(false)
                     .setRenderFacing(false)
                     .setRenderSelect(false);
 
             sceneWidget.getRenderer().setFov(30);
             sceneWidget.setRenderedCore(List.of(BlockPos.ZERO), this);
+            if (component.getZoom() > 0) {
+                sceneWidget.setZoom(component.getZoom());
+            } else {
+                sceneWidget.setZoom((9 * Mth.sqrt(maxX - minX)));
+            }
 
-            sceneWidget.getRenderer().setBeforeWorldRender(this::renderBeforeWorld);
-            sceneWidget.getRenderer().setAfterWorldRender(this::renderAfterWorld);
+            sceneWidget.setBeforeWorldRender(this::renderBeforeWorld);
+            sceneWidget.setAfterWorldRender(this::renderAfterWorld);
+            sceneWidget.setCameraYawAndPitch(component.getYaw(), sceneWidget.getRotationPitch());
             addWidget(sceneWidget);
         } else {
             sceneWidget = null;
         }
+        addWidget(headerGroup = new WidgetGroup(0, 0, width, useScene ? headerHeight : (height - 25)));
         addWidget(new ButtonWidget((width - 12) / 2 + 20, height - 20, 12, 12, Icons.REPLAY, this::replay).setHoverTexture(Icons.REPLAY.copy().setColor(ColorPattern.GREEN.color)));
         addWidget(new ButtonWidget((width - 12) / 2, height - 20, 12, 12, Icons.ROTATION, this::rotation).setHoverTexture(Icons.ROTATION.copy().setColor(ColorPattern.GREEN.color)));
         addWidget(new ButtonWidget((width - 12) / 2 + 40, height - 20, 12, 12, Icons.borderText(0, "+", -1), cd -> zoom(-1)).setHoverTexture(Icons.borderText(0, "+", ColorPattern.GREEN.color)));
@@ -132,7 +145,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
         sceneWidget.setZoom(zoom);
     }
 
-    private void renderBeforeWorld(WorldSceneRenderer worldSceneRenderer) {
+    private void renderBeforeWorld(SceneWidget worldSceneRenderer) {
         PoseStack matrixStack = new PoseStack();
         matrixStack.pushPose();
         RenderUtils.moveToFace(matrixStack, (minX + maxX) / 2f, minY, (minZ + maxZ) / 2f, Direction.DOWN);
@@ -143,7 +156,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
         matrixStack.popPose();
     }
 
-    private void renderAfterWorld(WorldSceneRenderer worldSceneRenderer) {
+    private void renderAfterWorld(SceneWidget sceneWidget) {
         PoseStack matrixStack = new PoseStack();
         var tick = Math.abs((Minecraft.getInstance().getDeltaFrameTime() + gui.getTickCount() % 40) - 20) / 20;
         for (Map.Entry<BlockPosFace, Integer> entry : highlightBlocks.entrySet()) {
@@ -156,7 +169,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
         }
         var window = Minecraft.getInstance().getWindow();
         for (var pos : tooltipBlocks.keySet()) {
-            var result = worldSceneRenderer.project(new Vector3f((float) pos.x, (float) pos.y, (float) pos.z));
+            var result = sceneWidget.getRenderer().project(new Vector3f((float) pos.x, (float) pos.y, (float) pos.z));
             //translate gui coordinates to window's ones (y is inverted)
             var x = result.x() * window.getGuiScaledWidth() / window.getWidth();
             var y = (window.getHeight() - result.y()) * window.getGuiScaledHeight() / window.getHeight();
@@ -312,6 +325,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
 
     @Override
     public void applyBESR(Level world, BlockPos pos, BlockEntity blockEntity, PoseStack poseStack, float partialTicks) {
+        if (isPause) partialTicks = 0;
         if (removedBlocks.containsKey(pos)) {
             var tuple = removedBlocks.get(pos);
             var anima = tuple.getA();
@@ -324,6 +338,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
             var anima = tuple.getA();
             var tick = (tuple.getB() - partialTicks) / anima.duration();
             if (tick > 0) {
+                tick = Eases.EaseQuadIn.getInterpolation(tick);
                 poseStack.translate(tick * anima.offset().x, tick * anima.offset().y, tick * anima.offset().z);
             }
         }
@@ -331,6 +346,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
 
     @Override
     public void applyVertexConsumerWrapper(Level world, BlockPos pos, BlockState state, WorldSceneRenderer.VertexConsumerWrapper wrapperBuffer, RenderType layer, float partialTicks) {
+        if (isPause) partialTicks = 0;
         if (removedBlocks.containsKey(pos)) {
             var tuple = removedBlocks.get(pos);
             var anima = tuple.getA();

@@ -15,6 +15,7 @@
     "rei.MinecraftMixin"
   ],
   "mixins": [
+    "ItemMixin",
     "MinecraftServerMixin",
     "accessor.PackRepositoryMixin"
   ],

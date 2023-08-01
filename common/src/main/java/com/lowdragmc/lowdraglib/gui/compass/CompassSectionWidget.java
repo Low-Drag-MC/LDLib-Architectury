@@ -51,15 +51,11 @@ public class CompassSectionWidget extends WidgetGroup {
         maxX = maxY = Integer.MIN_VALUE;
         for (CompassNode node : section.nodes.values()) {
             Position position = node.getPosition();
-            minX = Math.min(minX, position.x);
-            minY = Math.min(minY, position.y);
-            maxX = Math.max(maxX, position.x);
-            maxY = Math.max(maxY, position.y);
+            minX = Math.min(minX, position.x - node.size);
+            minY = Math.min(minY, position.y - node.size);
+            maxX = Math.max(maxX, position.x + node.size);
+            maxY = Math.max(maxY, position.y + node.size);
         }
-        minX -= 20;
-        minY -= 20;
-        maxX += 40;
-        maxY += 40;
         this.xOffset = minX;
         this.yOffset = minY;
         var scaleWidth = (float) getSize().width / (maxX - minX);

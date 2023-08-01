@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.AbstractContainerScreenAccessor;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
 import com.lowdragmc.lowdraglib.side.ForgeEventHooks;
@@ -138,14 +139,17 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
 
         if (draggingElement != null) {
             draggingElement.getB().draw(poseStack, mouseX, mouseY, mouseX - 20, mouseY - 20, 40, 40);
-        } else if (tooltipTexts != null && tooltipTexts.size() > 0) {
+        } else if (tooltipTexts != null && !tooltipTexts.isEmpty()) {
+            poseStack.pushPose();
             poseStack.translate(0, 0, 200);
             if (tooltipComponent == null) {
                 renderTooltip(poseStack, tooltipTexts.stream().flatMap(component -> font.split(component, 200).stream()).toList(), mouseX, mouseY);
             } else {
                 renderTooltip(poseStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
             }
-            poseStack.translate(0, 0, -200);
+            DrawerHelper.drawTooltip(poseStack, mouseX, mouseY, tooltipTexts, tooltipStack, tooltipComponent, tooltipFont == null ? Minecraft.getInstance().font : tooltipFont);
+
+            poseStack.popPose();
         }
 
         RenderSystem.depthMask(true);

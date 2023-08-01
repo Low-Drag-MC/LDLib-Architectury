@@ -77,12 +77,13 @@ public class ClientEventListener {
         var isCPressed = InputConstants.isKeyDown(id, GLFW.GLFW_KEY_C);
 
         if (CompassManager.INSTANCE.hasCompass(itemStack.getItem())) {
-            elements.add((Either.left(FormattedText.of(I18n.get("ldlib.compass.c_press"), Style.EMPTY.withColor(ChatFormatting.DARK_GRAY)))));
             if (isCPressed) {
-                elements.add(Either.right(new WidgetTooltipComponent(new ItemLookupWidget())));
+                elements.add(Either.right(new WidgetTooltipComponent(new ItemLookupWidget("ldlib.compass.c_press"))));
                 CompassManager.INSTANCE.onCPressed(itemStack);
-                return;
+            } else {
+                elements.add((Either.left(FormattedText.of(I18n.get("ldlib.compass.c_press"), Style.EMPTY.withColor(ChatFormatting.DARK_GRAY)))));
             }
+            return;
         }
         CompassManager.INSTANCE.clearCPressed();
     }

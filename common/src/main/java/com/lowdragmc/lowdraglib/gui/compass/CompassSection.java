@@ -78,6 +78,6 @@ public class CompassSection {
     }
 
     public Component getChatComponent() {
-        return Component.translatable(sectionName.toLanguageKey("compass.node"));
+        return Component.translatable(sectionName.toLanguageKey("compass.section"));
     }
 }

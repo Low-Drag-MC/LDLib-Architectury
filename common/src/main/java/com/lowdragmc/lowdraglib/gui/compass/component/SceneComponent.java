@@ -39,7 +39,6 @@ public class SceneComponent extends AbstractComponent {
 
     protected final List<Map<BlockPos, BlockInfo>> pages = new ArrayList<>();
     protected final List<Map<BlockPos, String>> hoverInfos = new ArrayList<>();
-    protected final List<Object2BooleanMap<BlockPos>> itemInfos = new ArrayList<>();
     private boolean draggable = false;
     private boolean scalable = false;
     private boolean ortho = false;
@@ -88,7 +87,6 @@ public class SceneComponent extends AbstractComponent {
         }
         pages.add(blocks);
         hoverInfos.add(contents);
-        itemInfos.add(items);
     }
 
     @Override
@@ -107,9 +105,6 @@ public class SceneComponent extends AbstractComponent {
                     if (hoverPosFace == null) {
                         return;
                     }
-                    if (!itemInfos.get(pageNum.get()).getBoolean(hoverPosFace.pos)) {
-                        list.clear();
-                    }
                     String hover = hoverInfos.get(pageNum.get()).getOrDefault(hoverPosFace.pos, "");
                     if (!hover.isEmpty()) {
                         list.add(Component.literal(hover));
@@ -127,7 +122,7 @@ public class SceneComponent extends AbstractComponent {
         group.addWidget(sceneWidget);
         sceneWidget.setRenderedCore(pages.stream().flatMap(page -> page.keySet().stream()).toList(), null);
 
-        sceneWidget.getRenderer().setBeforeWorldRender(renderer -> {
+        sceneWidget.setBeforeWorldRender(renderer -> {
             PoseStack matrixStack = new PoseStack();
             matrixStack.pushPose();
             RenderUtils.moveToFace(matrixStack, (minX + maxX) / 2f, minY, (minZ + maxZ) / 2f, Direction.DOWN);
