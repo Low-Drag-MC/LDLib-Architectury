@@ -12,10 +12,10 @@
     "ModelManagerMixin",
     "ShaderInstanceMixin",
     "emi.MinecraftMixin",
-    "rei.MinecraftMixin"
+    "rei.MinecraftMixin",
+    "ItemMixin"
   ],
   "mixins": [
-    "ItemMixin",
     "MinecraftServerMixin",
     "accessor.PackRepositoryMixin"
   ],
