@@ -142,13 +142,7 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         } else if (tooltipTexts != null && !tooltipTexts.isEmpty()) {
             poseStack.pushPose();
             poseStack.translate(0, 0, 200);
-            if (tooltipComponent == null) {
-                renderTooltip(poseStack, tooltipTexts.stream().flatMap(component -> font.split(component, 200).stream()).toList(), mouseX, mouseY);
-            } else {
-                renderTooltip(poseStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
-            }
             DrawerHelper.drawTooltip(poseStack, mouseX, mouseY, tooltipTexts, tooltipStack, tooltipComponent, tooltipFont == null ? Minecraft.getInstance().font : tooltipFont);
-
             poseStack.popPose();
         }
 
