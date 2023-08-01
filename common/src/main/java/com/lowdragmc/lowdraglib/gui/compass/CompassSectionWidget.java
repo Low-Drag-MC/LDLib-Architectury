@@ -178,7 +178,8 @@ public class CompassSectionWidget extends WidgetGroup {
 
     @Environment(EnvType.CLIENT)
     protected void drawChildLines(GuiGraphics graphics, CompassNode node) {
-        for (var childNode : section.childNodes.getOrDefault(node, new CompassNode[0])) {
+        for (var childNode : node.getChildNodes()) {
+            if (childNode.section != node.section) continue;
             var from = new Vec2(node.getPosition().x, node.getPosition().y);
             var to = new Vec2(childNode.getPosition().x, childNode.getPosition().y);
             DrawerHelper.drawLines(graphics, List.of(from, to), ColorPattern.T_WHITE.color, ColorPattern.T_WHITE.color, 1f);
