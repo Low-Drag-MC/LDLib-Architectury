@@ -20,6 +20,7 @@ import com.lowdragmc.lowdraglib.utils.interpolate.Eases;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import lombok.Getter;
+import lombok.val;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -122,18 +123,19 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
         if (!frames.isEmpty()) {
             int progressWidth = (width - 2) / frames.size();
             for (int i = 0; i < frames.size(); i++) {
-                var frame = frames.get(i);
+                val frame = frames.get(i);
+                val frameIndex = i;
                 addWidget(new ProgressWidget(() -> {
                     if (currentFrame < 0) return 0;
-                    if (frame.getFrameIndex() < currentFrame) return 1;
-                    if (frameTick > 0 && frame.getFrameIndex() == currentFrame) {
+                    if (frameIndex < currentFrame) return 1;
+                    if (frameTick > 0 && frameIndex == currentFrame) {
                         var duration = frame.getDuration();
                         return (frameTick + (isPause ? 0 : Minecraft.getInstance().getDeltaFrameTime())) / Math.max(duration, 1);
                     }
                     return 0;
                 }, progressWidth * i + 1 + 1, height - 6 + 1, progressWidth - 4, 4, new ProgressTexture(IGuiTexture.EMPTY, ColorPattern.WHITE.rectTexture())));
                 addWidget(new ButtonWidget(progressWidth * i + 1, height - 6, progressWidth - 2, 6, ColorPattern.WHITE.borderTexture(1), cd -> jumpFrame(frame))
-                        .setHoverTooltips(frame.getTooltips())
+                        .setHoverTooltips(frame.tooltips())
                         .setHoverTexture(ColorPattern.GREEN.borderTexture(1)));
             }
         }
@@ -254,11 +256,12 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
 
     private void jumpFrame(AnimationFrame frame) {
         resetScene();
+        currentFrame = 0;
         for (AnimationFrame animationFrame : frames) {
             if (animationFrame != frame) {
                 animationFrame.performFrameResult(this);
+                currentFrame++;
             } else {
-                currentFrame = frame.getFrameIndex();
                 frameTick = 0;
                 break;
             }
@@ -320,7 +323,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
                 return;
             }
         }
-        frameTick = -frames.get(currentFrame).getDelay();
+        frameTick = -frames.get(currentFrame).delay();
     }
 
     @Override

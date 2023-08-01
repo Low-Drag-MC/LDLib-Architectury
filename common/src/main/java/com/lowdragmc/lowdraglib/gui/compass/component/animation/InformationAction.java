@@ -26,6 +26,11 @@ public class InformationAction extends Action {
     private final IGuiTexture guiTexture;
     private final List<Component> text = new ArrayList<>();
 
+    public InformationAction(IGuiTexture guiTexture, List<Component> text) {
+        this.guiTexture = guiTexture;
+        this.text.addAll(text);
+    }
+
     public InformationAction(Element element) {
         super(element);
         var u0 = XmlUtils.getAsFloat(element, "u0", 0);
