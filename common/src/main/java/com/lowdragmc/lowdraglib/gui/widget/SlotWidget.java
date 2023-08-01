@@ -171,7 +171,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (slotReference != null && drawHoverTips && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             ItemStack stack = slotReference.getItem();
             if (!stack.isEmpty() && gui != null) {
-                List<Component> tips = new ArrayList<>(getToolTips(Screen.getTooltipFromItem(Minecraft.getInstance(), stack)));
+                List<Component> tips = new ArrayList<>(getToolTips(DrawerHelper.getItemToolTip(stack)));
                 tips.addAll(tooltipTexts);
                 gui.getModularUIGui().setHoverTooltip(tips, stack, null, stack.getTooltipImage().orElse(null));
             } else {

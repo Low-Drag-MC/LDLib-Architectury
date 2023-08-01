@@ -13,18 +13,20 @@ import com.lowdragmc.lowdraglib.utils.Rect;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -32,6 +34,7 @@ import org.joml.Vector4f;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class DrawerHelper {
@@ -59,7 +62,6 @@ public class DrawerHelper {
     }
 
 
-    @Environment(EnvType.CLIENT)
     public static void drawFluidTexture(@Nonnull GuiGraphics graphics, float xCoord, float yCoord, TextureAtlasSprite textureSprite, int maskTop, int maskRight, float zLevel, int fluidColor) {
         float uMin = textureSprite.getU0();
         float uMax = textureSprite.getU1();
@@ -80,7 +82,6 @@ public class DrawerHelper {
         BufferUploader.drawWithShader(buffer.end());
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawFluidForGui(@Nonnull GuiGraphics graphics, FluidStack contents, long tankCapacity, int startX, int startY, int widthT, int heightT) {
         ResourceLocation LOCATION_BLOCKS_TEXTURE = InventoryMenu.BLOCK_ATLAS;
         TextureAtlasSprite fluidStillSprite = FluidHelper.getStillTexture(contents);
@@ -118,7 +119,6 @@ public class DrawerHelper {
         RenderSystem.enableBlend();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawBorder(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int color, int border) {
         graphics.drawManaged(() -> {
             drawSolidRect(graphics,x - border, y - border, width + 2 * border, border, color);
@@ -128,7 +128,6 @@ public class DrawerHelper {
         });
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawStringSized(@Nonnull GuiGraphics graphics, String text, float x, float y, int color, boolean dropShadow, float scale, boolean center) {
         graphics.pose().pushPose();
         Font fontRenderer = Minecraft.getInstance().font;
@@ -139,7 +138,6 @@ public class DrawerHelper {
         graphics.pose().popPose();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawStringFixedCorner(@Nonnull GuiGraphics graphics, String text, float x, float y, int color, boolean dropShadow, float scale) {
         Font fontRenderer = Minecraft.getInstance().font;
         float scaledWidth = fontRenderer.width(text) * scale;
@@ -147,12 +145,10 @@ public class DrawerHelper {
         drawStringSized(graphics, text, x - scaledWidth, y - scaledHeight, color, dropShadow, scale, false);
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawText(@Nonnull GuiGraphics graphics, String text, float x, float y, float scale, int color) {
         drawText(graphics, text, x, y, scale, color, false);
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawText(@Nonnull GuiGraphics graphics, String text, float x, float y, float scale, int color, boolean shadow) {
         Font fontRenderer = Minecraft.getInstance().font;
         RenderSystem.disableBlend();
@@ -164,7 +160,6 @@ public class DrawerHelper {
         RenderSystem.enableBlend();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawItemStack(@Nonnull GuiGraphics graphics, ItemStack itemStack, int x, int y, int color, @Nullable String altTxt) {
         float a = ColorUtils.alpha(color);
         float r = ColorUtils.red(color);
@@ -189,24 +184,20 @@ public class DrawerHelper {
         RenderSystem.disableDepthTest();
     }
 
-    @Environment(EnvType.CLIENT)
     public static List<Component> getItemToolTip(ItemStack itemStack) {
         Minecraft mc = Minecraft.getInstance();
-        return itemStack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ?  TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+        return Screen.getTooltipFromItem(mc, itemStack);
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawSolidRect(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int color) {
         graphics.fill(x, y, x + width, y + height, color);
         RenderSystem.enableBlend();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawSolidRect(@Nonnull GuiGraphics graphics, Rect rect, int color) {
         drawSolidRect(graphics, rect.left, rect.up, rect.right, rect.down, color);
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawRectShadow(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int distance) {
         drawGradientRect(graphics, x + distance, y + height, width - distance, distance, 0x4f000000, 0, false);
         drawGradientRect(graphics, x + width, y + distance, distance, height - distance, 0x4f000000, 0, true);
@@ -231,12 +222,10 @@ public class DrawerHelper {
         tesselator.end();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawGradientRect(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int startColor, int endColor) {
         drawGradientRect(graphics, x, y, width, height, startColor, endColor, false);
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawGradientRect(@Nonnull GuiGraphics graphics, float x, float y, float width, float height, int startColor, int endColor, boolean horizontal) {
         float startAlpha = (float)(startColor >> 24 & 255) / 255.0F;
         float startRed   = (float)(startColor >> 16 & 255) / 255.0F;
@@ -268,7 +257,6 @@ public class DrawerHelper {
         }
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawLines(@Nonnull GuiGraphics graphics, List<Vec2> points, int startColor, int endColor, float width) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
@@ -283,7 +271,6 @@ public class DrawerHelper {
         RenderSystem.defaultBlendFunc();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawTextureRect(@Nonnull GuiGraphics graphics, float x, float y, float width, float height) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
@@ -306,7 +293,6 @@ public class DrawerHelper {
         uniform.glUniformMatrix4F("ProjMat", RenderSystem.getProjectionMatrix());
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawRound(@Nonnull GuiGraphics graphics, int color, float radius, Position centerPos) {
         DrawerHelper.ROUND.use(uniform -> {
 
@@ -323,7 +309,6 @@ public class DrawerHelper {
         uploadScreenPosVertex();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawPanelBg(@Nonnull GuiGraphics graphics) {
         DrawerHelper.PANEL_BG.use(uniform -> {
 
@@ -341,7 +326,6 @@ public class DrawerHelper {
         uploadScreenPosVertex();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawRoundBox(@Nonnull GuiGraphics graphics, Rect square, Vector4f radius, int color) {
         DrawerHelper.ROUND_BOX.use(uniform -> {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
@@ -356,7 +340,6 @@ public class DrawerHelper {
         uploadScreenPosVertex();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawProgressRoundBox(@Nonnull GuiGraphics graphics, Rect square, Vector4f radius, int color1, int color2, float progress) {
         DrawerHelper.PROGRESS_ROUND_BOX.use(uniform -> {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
@@ -373,7 +356,6 @@ public class DrawerHelper {
         uploadScreenPosVertex();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawFrameRoundBox(@Nonnull GuiGraphics graphics, Rect square, float thickness, Vector4f radius1, Vector4f radius2, int color) {
         DrawerHelper.FRAME_ROUND_BOX.use(uniform -> {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
@@ -390,7 +372,6 @@ public class DrawerHelper {
         uploadScreenPosVertex();
     }
 
-    @Environment(EnvType.CLIENT)
     public static void drawRoundLine(@Nonnull GuiGraphics graphics, Position begin, Position end, int width, int color1, int color2) {
         DrawerHelper.ROUND_LINE.use(uniform -> {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
@@ -407,7 +388,6 @@ public class DrawerHelper {
         uploadScreenPosVertex();
     }
 
-    @Environment(EnvType.CLIENT)
     private static void uploadScreenPosVertex() {
         var builder = Tesselator.getInstance().getBuilder();
 
@@ -419,4 +399,8 @@ public class DrawerHelper {
         BufferUploader.draw(builder.end());
     }
 
+    @ExpectPlatform
+    public static void drawTooltip(GuiGraphics graphics, int mouseX, int mouseY, List<Component> tooltipTexts, ItemStack tooltipStack, @Nullable TooltipComponent tooltipComponent, Font tooltipFont) {
+        throw new AssertionError();
+    }
 }

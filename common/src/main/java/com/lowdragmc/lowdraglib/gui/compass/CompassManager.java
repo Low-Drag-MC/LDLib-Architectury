@@ -176,7 +176,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
 
     public void onCPressed(ItemStack itemStack) {
         var tick = Minecraft.getInstance().level.getGameTime();
-        if (lastStack != itemStack) {
+        if (ItemStack.isSameItemSameTags(lastStack, itemStack)) {
             lastStack = itemStack;
             cHoverTick = 0;
             startedTick = tick;

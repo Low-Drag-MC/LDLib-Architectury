@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.AbstractContainerScreenAccessor;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
 import com.lowdragmc.lowdraglib.side.ForgeEventHooks;
@@ -15,6 +16,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -140,14 +142,10 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
 
         if (draggingElement != null) {
             draggingElement.getB().draw(graphics, mouseX, mouseY, mouseX - 20, mouseY - 20, 40, 40);
-        } else if (tooltipTexts != null && tooltipTexts.size() > 0) {
+        } else if (tooltipTexts != null && !tooltipTexts.isEmpty()) {
             graphics.pose().pushPose();
             graphics.pose().translate(0, 0, 200);
-            if (tooltipComponent == null) {
-                graphics.renderTooltip(font, tooltipTexts.stream().flatMap(component -> font.split(component, 200).stream()).toList(), mouseX, mouseY);
-            } else {
-                graphics.renderTooltip(font, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
-            }
+            DrawerHelper.drawTooltip(graphics, mouseX, mouseY, tooltipTexts, tooltipStack, tooltipComponent, tooltipFont == null ? Minecraft.getInstance().font : tooltipFont);
             graphics.pose().popPose();
         }
 

@@ -53,7 +53,7 @@ public class TextBoxComponent extends AbstractComponent {
                 }
                 setSize(new Size(maxWidthLimit, totalHeight));
             }
-        }.setMaxWidthLimit(currentPage.getPageWidth()).clickHandler(CompassManager::onComponentClick);
+        }.setSpace(space).setCenter(isCenter).setMaxWidthLimit(currentPage.getPageWidth()).clickHandler(CompassManager::onComponentClick);
         return currentPage.addStreamWidget(panel);
     }
 

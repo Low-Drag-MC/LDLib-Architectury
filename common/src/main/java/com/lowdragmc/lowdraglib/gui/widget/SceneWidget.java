@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.client.scene.*;
 import com.lowdragmc.lowdraglib.client.utils.RenderUtils;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.utils.BlockPosFace;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
@@ -41,6 +42,7 @@ import org.joml.Vector3f;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class SceneWidget extends WidgetGroup {
     @Environment(EnvType.CLIENT)
@@ -71,6 +73,8 @@ public class SceneWidget extends WidgetGroup {
     protected boolean useOrtho = false;
     protected boolean autoReleased;
     protected BiConsumer<SceneWidget, List<Component>> onAddedTooltips;
+    private Consumer<SceneWidget> beforeWorldRender;
+    private Consumer<SceneWidget> afterWorldRender;
 
     public SceneWidget(int x, int y, int width, int height, Level world, boolean useFBO) {
         super(x, y, width, height);
@@ -113,6 +117,19 @@ public class SceneWidget extends WidgetGroup {
         if (isRemote() && renderer != null) {
             renderer.useOrtho(useOrtho);
         }
+        return this;
+    }
+
+    public SceneWidget setBeforeWorldRender(Consumer<SceneWidget> beforeWorldRender) {
+        this.beforeWorldRender = beforeWorldRender;
+        if (this.beforeWorldRender != null && isRemote() && renderer != null) {
+            renderer.setBeforeWorldRender(s -> beforeWorldRender.accept(this));
+        }
+        return this;
+    }
+
+    public SceneWidget setAfterWorldRender(Consumer<SceneWidget> afterWorldRender) {
+        this.afterWorldRender = afterWorldRender;
         return this;
     }
 
@@ -192,6 +209,9 @@ public class SceneWidget extends WidgetGroup {
         renderer.useOrtho(useOrtho);
         renderer.setOnLookingAt(ray -> {});
         renderer.setAfterWorldRender(this::renderBlockOverLay);
+        if (this.beforeWorldRender != null) {
+            renderer.setBeforeWorldRender(s -> beforeWorldRender.accept(this));
+        }
         renderer.setCameraLookAt(center, camZoom(), Math.toRadians(rotationPitch), Math.toRadians(rotationYaw));
         renderer.useCacheBuffer(useCache);
         renderer.setParticleManager(createParticleManager());
@@ -294,7 +314,7 @@ public class SceneWidget extends WidgetGroup {
             if (hit != null) {
                 if (core.contains(hit.getBlockPos())) {
                     hoverPosFace = new BlockPosFace(hit.getBlockPos(), hit.getDirection());
-                } else {
+                } else if (!useOrtho) {
                     Vector3f hitPos = hit.getLocation().toVector3f();
                     Level world = renderer.world;
                     Vec3 eyePos = new Vec3(renderer.getEyePos());
@@ -331,9 +351,12 @@ public class SceneWidget extends WidgetGroup {
                 drawFacingBorder(poseStack, tmp, 0xffffffff);
             }
         }
-        if (selectedPosFace == null) return;
-        if (renderSelect) {
+        if (selectedPosFace != null && renderSelect) {
             RenderUtils.renderBlockOverLay(poseStack, selectedPosFace.pos, 0.6f, 0, 0, 1.01f);
+        }
+
+        if (this.afterWorldRender != null) {
+            this.afterWorldRender.accept(this);
         }
     }
 
@@ -503,9 +526,8 @@ public class SceneWidget extends WidgetGroup {
     public void drawInForeground(@NotNull @Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (hoverTips && isMouseOverElement(mouseX, mouseY)) {
             if (hoverItem != null && !hoverItem.isEmpty()) {
-                gui.getModularUIGui().setHoverTooltip(getToolTips(Screen.getTooltipFromItem(Minecraft.getInstance(), hoverItem)), hoverItem, null, hoverItem.getTooltipImage().orElse(null));
+                gui.getModularUIGui().setHoverTooltip(getToolTips(DrawerHelper.getItemToolTip(hoverItem)), hoverItem, null, hoverItem.getTooltipImage().orElse(null));
             }
-            gui.getModularUIGui().setHoverTooltip(getToolTips(new ArrayList<>()), hoverItem, null, null);
         }
         super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
     }
