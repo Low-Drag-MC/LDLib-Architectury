@@ -362,6 +362,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
             var anima = tuple.getA();
             var tick = (tuple.getB() - partialTicks) / anima.duration();
             if (tick > 0) {
+                tick = Eases.EaseQuadIn.getInterpolation(tick);
                 wrapperBuffer.addOffset(tick * anima.offset().x, tick * anima.offset().y, tick * anima.offset().z);
             }
         }
@@ -422,7 +423,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
         var size = headerGroup.getSize();
         widget.setSelfPosition(new Position((size.width - widget.getSize().width) / 2, (size.height - widget.getSize().height) / 2));
         if (anima) {
-            headerGroup.addWidgetAnima(widget, new Transform().duration(500).offset(size.width - widget.getSelfPosition().x, 0));
+            headerGroup.addWidgetAnima(widget, new Transform().ease(Eases.EaseQuadOut).duration(500).offset(size.width - widget.getSelfPosition().x, 0));
         } else {
             headerGroup.addWidget(widget);
         }

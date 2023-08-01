@@ -12,7 +12,6 @@ import net.minecraft.client.resources.language.I18n;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
-
 /**
  * @author KilaBash
  * @date 2023/7/30

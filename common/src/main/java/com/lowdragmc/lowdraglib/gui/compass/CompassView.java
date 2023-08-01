@@ -173,11 +173,15 @@ public class CompassView extends WidgetGroup {
 
         // nodes
         List<CompassNode> relatedNodes = new ArrayList<>();
-        relatedNodes.addAll(Arrays.asList(Objects.requireNonNullElse(node.getSection().childNodes.get(node), new CompassNode[0])));
-        relatedNodes.addAll(Arrays.asList(Objects.requireNonNullElse(node.getSection().preNodes.get(node), new CompassNode[0])));
+        relatedNodes.addAll(node.getPreNodes());
+        relatedNodes.addAll(node.getChildNodes());
         var height = relatedNodes.size() * 20;
-        var nodeList = new DraggableScrollableWidgetGroup(mainView.getSize().width - 20, (mainView.getSize().height - Math.min(140, height)) / 2, 20, Math.min(140, height));
-        nodeList.setBackground(new GuiTextureGroup(ColorPattern.BLACK.rectTexture(), ColorPattern.WHITE.borderTexture(-1)));
+        var listHeight = Math.min(140, height);
+        if (height > listHeight) {
+            listHeight += 10;
+        }
+        var nodeList = new DraggableScrollableWidgetGroup(mainView.getSize().width - 21, (mainView.getSize().height - listHeight) / 2, 20, listHeight);
+        nodeList.setBackground(new GuiTextureGroup(ColorPattern.BLACK.rectTexture(), ColorPattern.WHITE.borderTexture(1)));
         for (var compassNode : relatedNodes) {
             nodeList.addWidget(new ButtonWidget(2, 2 + nodeList.getAllWidgetSize() * 20, 16, 16,
                     compassNode.getButtonTexture(), cd -> openNodeContent(compassNode))
