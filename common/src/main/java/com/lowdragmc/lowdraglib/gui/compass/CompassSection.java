@@ -9,10 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -27,14 +25,7 @@ public class CompassSection {
     public final ResourceLocation sectionName;
     public final int priority;
     public final Map<ResourceLocation, CompassNode> nodes;
-    /**
-     * pre nodes of this node.
-     */
-    public final Map<CompassNode, CompassNode[]> preNodes;
-    /**
-     * child nodes of this node.
-     */
-    public final Map<CompassNode, CompassNode[]> childNodes;
+
     @Getter
     protected float chance;
     @Getter @Setter
@@ -46,8 +37,6 @@ public class CompassSection {
         this.config = config;
         this.sectionName = sectionName;
         this.nodes = new HashMap<>();
-        this.preNodes = new HashMap<>();
-        this.childNodes = new HashMap<>();
         this.priority = JsonUtils.getIntOr("priority", config, 0);
         this.setButtonTexture(Suppliers.memoize(() -> SimpleIGuiTextureJsonUtils.fromJson(config.get("button_texture").getAsJsonObject())));
         this.setBackgroundTexture(Suppliers.memoize(() -> SimpleIGuiTextureJsonUtils.fromJson(config.get("background_texture").getAsJsonObject())));
@@ -57,10 +46,6 @@ public class CompassSection {
         nodes.put(compassNode.getNodeName(), compassNode);
     }
 
-    public void initRelation() {
-        nodes.values().forEach(CompassNode::initRelation);
-    }
-
     @Override
     public final String toString() {
         return sectionName.toString();
@@ -68,13 +53,6 @@ public class CompassSection {
 
     public CompassNode getNode(ResourceLocation nodeName) {
         return nodes.get(nodeName);
-    }
-
-    public void addPreRelation(CompassNode node, CompassNode... pres) {
-        preNodes.put(node, ArrayUtils.addAll(preNodes.get(node), pres));
-        for (var pre : pres) {
-            childNodes.put(pre, ArrayUtils.add(childNodes.get(pre), node));
-        }
     }
 
     public Component getChatComponent() {

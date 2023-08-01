@@ -160,12 +160,9 @@ public final class CompassManager implements ResourceManagerReloadListener {
         }
 
         // init relation
-        for (Map<ResourceLocation, CompassSection> map : sections.values()) {
-            for (CompassSection section : map.values()) {
-                section.initRelation();
-            }
+        for (Map<ResourceLocation, CompassNode> nodes : nodes.values()) {
+            nodes.values().forEach(CompassNode::initRelation);
         }
-
     }
 
     public static void onComponentClick(String link, ClickData cd) {
@@ -245,5 +242,15 @@ public final class CompassManager implements ResourceManagerReloadListener {
 
     public List<CompassNode> getNodesByItem(Item item) {
         return itemLookup.getOrDefault(item, Collections.emptySet()).stream().map(nodeName -> nodes.getOrDefault(nodeName.getNamespace(), Collections.emptyMap()).get(nodeName)).toList();
+    }
+
+    @Nullable
+    public CompassNode getNodeByName(ResourceLocation nodeName) {
+        return nodes.getOrDefault(nodeName.getNamespace(), Collections.emptyMap()).get(nodeName);
+    }
+
+    @Nullable
+    public CompassSection getSectionByName(ResourceLocation sectionName) {
+        return sections.getOrDefault(sectionName.getNamespace(), Collections.emptyMap()).get(sectionName);
     }
 }

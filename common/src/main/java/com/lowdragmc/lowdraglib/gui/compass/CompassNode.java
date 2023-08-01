@@ -16,7 +16,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author KilaBash
@@ -37,6 +39,10 @@ public class CompassNode {
     protected int size;
     @Getter
     protected IGuiTexture buttonTexture;
+    @Getter
+    protected Set<CompassNode> preNodes = new HashSet<>();
+    @Getter
+    protected Set<CompassNode> childNodes = new HashSet<>();
     protected List<Item> items;
 
     public CompassNode(ResourceLocation nodeName, JsonObject config) {
@@ -56,14 +62,14 @@ public class CompassNode {
     public void initRelation() {
         if (config.has("pre_nodes")) {
             JsonArray pre = config.get("pre_nodes").getAsJsonArray();
-            List<CompassNode> preNodes = new ArrayList<>();
             for (JsonElement element : pre) {
-                CompassNode node = section.getNode(new ResourceLocation(element.getAsString()));
+                var nodeName = new ResourceLocation(element.getAsString());
+                CompassNode node = CompassManager.INSTANCE.getNodeByName(nodeName);
                 if (node != null) {
                     preNodes.add(node);
+                    node.childNodes.add(this);
                 }
             }
-            section.addPreRelation(this, preNodes.toArray(CompassNode[]::new));
         }
     }
 

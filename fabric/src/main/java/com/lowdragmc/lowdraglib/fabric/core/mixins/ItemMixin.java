@@ -4,7 +4,6 @@ import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
 import com.lowdragmc.lowdraglib.gui.compass.ItemLookupWidget;
 import com.lowdragmc.lowdraglib.gui.util.WidgetTooltipComponent;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;

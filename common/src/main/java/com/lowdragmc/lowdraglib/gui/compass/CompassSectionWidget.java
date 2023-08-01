@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -176,10 +177,11 @@ public class CompassSectionWidget extends WidgetGroup {
 
     @Environment(EnvType.CLIENT)
     protected void drawChildLines(PoseStack poseStack, CompassNode node) {
-        for (var childNode : section.childNodes.getOrDefault(node, new CompassNode[0])) {
+        for (var childNode : node.getChildNodes()) {
+            if (childNode.section != node.section) continue;
             var from = new Vec2(node.getPosition().x, node.getPosition().y);
             var to = new Vec2(childNode.getPosition().x, childNode.getPosition().y);
-            DrawerHelper.drawLines(poseStack, List.of(from, to), -1, ColorPattern.T_WHITE.color, 1f);
+            DrawerHelper.drawLines(poseStack, List.of(from, to), ColorPattern.T_WHITE.color, ColorPattern.T_WHITE.color, 1f);
         }
     }
 
