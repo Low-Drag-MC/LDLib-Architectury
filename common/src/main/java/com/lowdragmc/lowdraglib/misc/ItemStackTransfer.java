@@ -200,4 +200,14 @@ public class ItemStackTransfer implements IItemTransfer, ITagSerializable<Compou
         onContentsChanged.run();
     }
 
+    public ItemStackTransfer copy() {
+        var copiedStack = NonNullList.withSize(stacks.size(), ItemStack.EMPTY);
+        for (int i = 0; i < stacks.size(); i++) {
+            copiedStack.set(i, stacks.get(i).copy());
+        }
+        var copied = new ItemStackTransfer(copiedStack);
+        copied.setFilter(filter);
+        return copied;
+    }
+
 }

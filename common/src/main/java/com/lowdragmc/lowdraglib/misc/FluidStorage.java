@@ -114,4 +114,10 @@ public class FluidStorage implements IFluidStorage, IContentChangeAware, ITagSer
     public void deserializeNBT(CompoundTag nbt) {
         setFluid(FluidStack.loadFromTag(nbt));
     }
+
+    public FluidStorage copy() {
+        var storage = new FluidStorage(capacity, validator);
+        storage.setFluid(fluid.copy());
+        return storage;
+    }
 }
