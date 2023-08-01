@@ -3,12 +3,14 @@ package com.lowdragmc.lowdraglib.gui.compass.component.animation;
 import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
 import com.lowdragmc.lowdraglib.utils.XmlUtils;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,23 +18,31 @@ import java.util.List;
  * @date 2023/7/28
  * @implNote AnimationFrame
  */
+@Accessors(chain = true, fluent = true)
 public class AnimationFrame {
-    private final int duration; // -1: wait for all actions to finish
+    @Setter
+    private int duration = -1; // -1: wait for all actions to finish
+    @Getter @Setter
+    private int delay;
     @Getter
-    private final int delay; // -1: wait for all actions to finish
-    @Getter
-    private final int frameIndex;
-    @Getter
-    private final List<Action> actions;
+    private final List<Action> actions = new ArrayList<>();
     @Getter
     private final List<Component> tooltips = new ArrayList<>();
+    //runtime
     private int[] actionTime = new int[0];
+
+    public AnimationFrame() {
+    }
+
+    public AnimationFrame addActions(Action... actions) {
+        this.actions.addAll(Arrays.asList(actions));
+        this.calculateActionTime();
+        return this;
+    }
 
     public AnimationFrame(int frameIndex, Element element) {
         this.duration = XmlUtils.getAsInt(element, "duration", -1);
         this.delay = XmlUtils.getAsInt(element, "delay", 0);
-        this.frameIndex = frameIndex;
-        this.actions = new ArrayList<>();
         var nodeList = element.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
             var node = nodeList.item(i);

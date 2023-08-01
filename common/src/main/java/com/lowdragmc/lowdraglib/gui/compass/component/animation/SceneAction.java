@@ -31,6 +31,9 @@ public class SceneAction extends Action {
     //runtime
     private int duration = -1;
 
+    public SceneAction() {
+    }
+
     public SceneAction(Element element) {
         super(element);
         final var nodes = element.getChildNodes();
@@ -49,6 +52,36 @@ public class SceneAction extends Action {
                 }
             }
         }
+    }
+
+    public SceneAction rotation(Float rotation) {
+        this.rotation = rotation;
+        return this;
+    }
+
+    public SceneAction addedBlock(BlockPos pos, BlockInfo blockInfo, Vec3 offset, int duration) {
+        addedBlocks.add(new Tuple<>(new BlockAnima(pos, offset, duration), blockInfo));
+        return this;
+    }
+
+    public SceneAction removedBlock(BlockPos pos, Vec3 offset, int duration) {
+        removedBlocks.add(new BlockAnima(pos, offset, duration));
+        return this;
+    }
+
+    public SceneAction modifiedTag(BlockPos pos, BlockInfo blockInfo) {
+        modifiedTags.put(pos, blockInfo);
+        return this;
+    }
+
+    public SceneAction highlightedBlock(BlockPos pos, Direction face, int duration) {
+        highlightedBlocks.put(new BlockPosFace(pos, face), duration);
+        return this;
+    }
+
+    public SceneAction tooltip(Vec3 pos, Tuple<XmlUtils.SizedIngredient, List<Component>> tooltip, Vec2 screenOffset, int duration) {
+        tooltipBlocks.put(pos, MutableTriple.of(tooltip, screenOffset, duration));
+        return this;
     }
 
     @Override

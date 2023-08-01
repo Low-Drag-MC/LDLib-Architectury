@@ -2,6 +2,8 @@ package com.lowdragmc.lowdraglib.gui.compass.component.animation;
 
 import com.lowdragmc.lowdraglib.utils.XmlUtils;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.w3c.dom.Element;
 
 /**
@@ -9,12 +11,16 @@ import org.w3c.dom.Element;
  * @date 2023/7/28
  * @implNote Action
  */
+@Accessors(chain = true, fluent = true)
 public abstract class Action {
 
-    @Getter
+    @Getter @Setter
     protected int delay;
-    @Getter
+    @Getter @Setter
     protected boolean startBeforeLast;
+
+    public Action() {
+    }
 
     public Action(Element element) {
         delay = XmlUtils.getAsInt(element, "delay", 0);
