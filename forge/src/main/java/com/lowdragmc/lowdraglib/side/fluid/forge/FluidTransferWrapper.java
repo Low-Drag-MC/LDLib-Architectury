@@ -44,4 +44,16 @@ public record FluidTransferWrapper(@Getter IFluidHandler handler) implements IFl
     public FluidStack drain(FluidStack resource, boolean simulate) {
         return FluidHelperImpl.toFluidStack(handler.drain(FluidHelperImpl.toFluidStack(resource), simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE));
     }
+
+    @Override
+    public boolean supportsFill(int tank) {
+        // IFluidHandler doesn't support this check natively.
+        return true;
+    }
+
+    @Override
+    public boolean supportsDrain(int tank) {
+        // IFluidHandler doesn't support this check natively.
+        return true;
+    }
 }

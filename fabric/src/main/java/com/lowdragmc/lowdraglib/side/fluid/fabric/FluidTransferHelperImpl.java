@@ -151,6 +151,15 @@ public class FluidTransferHelperImpl {
                 return copied;
             }
 
+            @Override
+            public boolean supportsFill(int tank) {
+                return storage.supportsInsertion();
+            }
+
+            @Override
+            public boolean supportsDrain(int tank) {
+                return storage.supportsExtraction();
+            }
         };
     }
 
