@@ -64,4 +64,14 @@ public class FluidBlockTransfer implements IFluidTransfer {
 
         return FluidStack.empty();
     }
+
+    @Override
+    public boolean supportsFill(int tank) {
+        return false;
+    }
+
+    @Override
+    public boolean supportsDrain(int tank) {
+        return true;
+    }
 }

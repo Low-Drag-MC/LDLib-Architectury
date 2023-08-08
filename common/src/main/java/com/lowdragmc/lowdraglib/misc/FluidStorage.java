@@ -120,4 +120,14 @@ public class FluidStorage implements IFluidStorage, IContentChangeAware, ITagSer
         storage.setFluid(fluid.copy());
         return storage;
     }
+
+    @Override
+    public boolean supportsFill(int tank) {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDrain(int tank) {
+        return true;
+    }
 }
