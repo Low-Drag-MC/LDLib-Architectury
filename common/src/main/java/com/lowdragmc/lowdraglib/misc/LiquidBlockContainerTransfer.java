@@ -70,6 +70,16 @@ public class LiquidBlockContainerTransfer implements IFluidTransfer {
         return 0;
     }
 
+    @Override
+    public boolean supportsFill(int tank) {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDrain(int tank) {
+        return false;
+    }
+
     public static class BlockWrapper implements IFluidTransfer {
 
         protected final BlockState state;
@@ -121,6 +131,16 @@ public class LiquidBlockContainerTransfer implements IFluidTransfer {
                 world.setBlock(blockPos, state, Block.UPDATE_ALL_IMMEDIATE);
             }
             return FluidHelper.getBucket();
+        }
+
+        @Override
+        public boolean supportsFill(int tank) {
+            return true;
+        }
+
+        @Override
+        public boolean supportsDrain(int tank) {
+            return false;
         }
     }
 }

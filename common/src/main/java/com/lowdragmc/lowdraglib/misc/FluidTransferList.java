@@ -172,4 +172,32 @@ public class FluidTransferList implements IFluidTransfer, ITagSerializable<Compo
             }
         }
     }
+
+    @Override
+    public boolean supportsFill(int tank) {
+        for (IFluidTransfer transfer : transfers) {
+            if (tank >= transfer.getTanks()) {
+                tank -= transfer.getTanks();
+                continue;
+            }
+
+            return transfer.supportsFill(tank);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean supportsDrain(int tank) {
+        for (IFluidTransfer transfer : transfers) {
+            if (tank >= transfer.getTanks()) {
+                tank -= transfer.getTanks();
+                continue;
+            }
+
+            return transfer.supportsDrain(tank);
+        }
+
+        return false;
+    }
 }

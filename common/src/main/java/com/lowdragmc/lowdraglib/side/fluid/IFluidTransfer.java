@@ -37,10 +37,20 @@ public interface IFluidTransfer {
             return 0;
         }
 
+        @Override
+        public boolean supportsFill(int tank) {
+            return false;
+        }
+
         @NotNull
         @Override
         public FluidStack drain(FluidStack resource, boolean simulate) {
             return FluidStack.empty();
+        }
+
+        @Override
+        public boolean supportsDrain(int tank) {
+            return false;
         }
     };
 
@@ -103,6 +113,19 @@ public interface IFluidTransfer {
     long fill(FluidStack resource, boolean simulate);
 
     /**
+     * Determines whether the specified tank can be inserted into.
+     *
+     * <p>
+     * This does NOT check whether a specific amount or type of fluid can be inserted, just whether the tank
+     * supports insertion at all.
+     * </p>
+     *
+     * @param tank Tank to query for insertion
+     * @return Whether fluid can be filled into the specified tank.
+     */
+    boolean supportsFill(int tank);
+
+    /**
      * Drains fluid out of internal tanks, distribution is left entirely to the IFluidTransfer.
      *
      * @param resource FluidStack representing the Fluid and maximum amount of fluid to be drained.
@@ -112,6 +135,19 @@ public interface IFluidTransfer {
      */
     @Nonnull
     FluidStack drain(FluidStack resource, boolean simulate);
+
+    /**
+     * Determines whether the specified tank can be extracted from.
+     *
+     * <p>
+     * This does NOT check whether a specific amount or type of fluid can be extracted, just whether the tank
+     * supports extraction at all.
+     * </p>
+     *
+     * @param tank Tank to query for extraction
+     * @return Whether fluid can be drained from the specified tank.
+     */
+    boolean supportsDrain(int tank);
 
     /**
      * Drains fluid out of internal tanks, distribution is left entirely to the IFluidTransfer.
