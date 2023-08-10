@@ -37,39 +37,10 @@ import java.util.function.Predicate;
 public class FluidTransferHelperImpl {
 
     public static Storage<FluidVariant> toFluidVariantStorage(IFluidTransfer fluidTransfer) {
-        return new Storage<>() {
-
-            @Override
-            public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
-                return fluidTransfer.fill(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), false);
-            }
-
-            @Override
-            public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
-                return fluidTransfer.drain(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), false).getAmount();
-            }
-
-            @Override
-            public long simulateInsert(FluidVariant resource, long maxAmount, @javax.annotation.Nullable TransactionContext transaction) {
-                return fluidTransfer.fill(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), true);
-            }
-
-            @Override
-            public long simulateExtract(FluidVariant resource, long maxAmount, @javax.annotation.Nullable TransactionContext transaction) {
-                return fluidTransfer.drain(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), true).getAmount();
-            }
-
-            @Override
-            public Iterator<StorageView<FluidVariant>> iterator() {
-                List<StorageView<FluidVariant>> views = new ArrayList<>();
-                for (int i = 0; i < fluidTransfer.getTanks(); i++) {
-                    views.add(toSingleFluidStackStorage(fluidTransfer, i));
-                }
-                return views.iterator();
-            }
-        };
+        return IFluidTransferWrapper.of(fluidTransfer);
     }
 
+    //FIXME doesn't check if fluid can be inserted/extracted at the slot
     public static SingleFluidStackStorage toSingleFluidStackStorage(IFluidTransfer fluidTransfer, int index) {
         return new SingleFluidStackStorage() {
 

@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author KilaBash
@@ -32,6 +33,11 @@ public class FluidHelperImpl {
         } else {
             return FluidStack.create(view.getResource().getFluid(), view.getAmount(), view.getResource().getNbt());
         }
+    }
+
+    @NotNull
+    public static FluidStack toFluidStack(@NotNull FluidVariant resource, long maxAmount) {
+        return FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt());
     }
 
     public static long getBucket() {
