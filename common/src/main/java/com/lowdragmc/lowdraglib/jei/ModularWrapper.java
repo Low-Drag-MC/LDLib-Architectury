@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
@@ -18,6 +19,8 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
     protected T widget;
+    @Setter
+    protected boolean shouldRenderTooltips = false;
 
     public ModularWrapper(T widget) {
         super(new ModularUI(widget.getSize().width, widget.getSize().height, IUIHolder.EMPTY, Minecraft.getInstance().player).widget(widget), -1);
@@ -117,7 +120,7 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         modularUI.mainGroup.drawInForeground(graphics, mouseX, mouseY, partialTicks);
 
         // do not draw tooltips here, do it from recipe viewer.
-        if (tooltipTexts != null && !tooltipTexts.isEmpty()) {
+        if (shouldRenderTooltips && tooltipTexts != null && !tooltipTexts.isEmpty()) {
             graphics.pose().pushPose();
             graphics.pose().translate(0, 0, 240);
             graphics.renderTooltip(font, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
