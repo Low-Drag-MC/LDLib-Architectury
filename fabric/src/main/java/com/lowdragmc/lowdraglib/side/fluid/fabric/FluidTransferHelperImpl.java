@@ -107,6 +107,17 @@ public class FluidTransferHelperImpl {
             protected long getCapacity(FluidVariant fluidVariant) {
                 return fluidTransfer.getTankCapacity(index);
             }
+
+            @Override
+            protected boolean canInsert(FluidVariant fluidVariant) {
+                return fluidTransfer.supportsFill(index);
+            }
+
+            @Override
+            protected boolean canExtract(FluidVariant fluidVariant) {
+                return fluidTransfer.supportsDrain(index);
+            }
+
         };
     }
 
