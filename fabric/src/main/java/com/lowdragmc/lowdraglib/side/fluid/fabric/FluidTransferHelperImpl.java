@@ -110,12 +110,12 @@ public class FluidTransferHelperImpl {
 
             @Override
             protected boolean canInsert(FluidVariant fluidVariant) {
-                return fluidTransfer.supportsFill(index);
+                return fluidTransfer.supportsFill(index) && fluidTransfer.fill(FluidStack.create(fluidVariant.getFluid(), 1, fluidVariant.getNbt()), true) > 0;
             }
 
             @Override
             protected boolean canExtract(FluidVariant fluidVariant) {
-                return fluidTransfer.supportsDrain(index);
+                return fluidTransfer.supportsDrain(index) && fluidTransfer.drain(FluidStack.create(fluidVariant.getFluid(), 1, fluidVariant.getNbt()), true).getAmount() > 0;
             }
 
         };
