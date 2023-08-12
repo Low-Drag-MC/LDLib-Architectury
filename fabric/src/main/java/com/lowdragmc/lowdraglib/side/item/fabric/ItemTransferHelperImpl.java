@@ -93,6 +93,36 @@ public class ItemTransferHelperImpl {
             protected void setStack(ItemStack stack) {
                 itemTransfer.setStackInSlot(slot, stack);
             }
+
+            @Override
+            protected boolean canInsert(ItemVariant itemVariant) {
+                return itemTransfer.insertItem(slot, itemVariant.toStack(), true).isEmpty();
+            }
+
+            @Override
+            protected boolean canExtract(ItemVariant itemVariant) {
+                return !itemTransfer.extractItem(slot, Integer.MAX_VALUE, true).isEmpty();
+            }
+
+            @Override
+            public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
+                return maxAmount - itemTransfer.insertItem(slot, (resource.toStack((int) maxAmount)), false).getCount();
+            }
+
+            @Override
+            public long extract(ItemVariant variant, long maxAmount, TransactionContext transaction) {
+                return itemTransfer.extractItem(slot, (int) maxAmount, false).getCount();
+            }
+
+            @Override
+            public long simulateInsert(ItemVariant resource, long maxAmount, @Nullable TransactionContext transaction) {
+                return maxAmount - itemTransfer.insertItem(slot, (resource.toStack((int) maxAmount)), true).getCount();
+            }
+
+            @Override
+            public long simulateExtract(ItemVariant resource, long maxAmount, @Nullable TransactionContext transaction) {
+                return itemTransfer.extractItem(slot, (int) maxAmount, true).getCount();
+            }
         };
     }
 
