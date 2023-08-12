@@ -153,7 +153,6 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         posestack.translate(leftPos, topPos, 0.0D);
         RenderSystem.applyModelViewMatrix();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.hoveredSlot = null;
 
         if (Platform.isForge()) ForgeEventHooks.postRenderForegroundEvent(this, poseStack, mouseX, mouseY);
 

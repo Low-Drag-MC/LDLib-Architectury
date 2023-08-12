@@ -23,6 +23,8 @@ def emi_version = getConfig("emi_version")
 def kjs_version = getConfig("kjs_version")
 def lazydfu_version = getConfig("lazydfu_version")
 def modmenu_version = getConfig("modmenu_version")
+def sodium_version = getConfig("sodium_version")
+def iris_version = getConfig("iris_version")
 
 architectury {
     platformSetupLoomIde()
@@ -102,6 +104,13 @@ dependencies {
 
     // KJS
     modImplementation("dev.latvian.mods:kubejs-fabric:${kjs_version}")
+
+    //iris
+    modCompileOnly("maven.modrinth:sodium:${sodium_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:iris:${iris_version}") { transitive = false }
+    implementation("org.joml:joml:1.10.4")
+    implementation('org.anarres:jcpp:1.4.14')
+    implementation('io.github.douira:glsl-transformer:2.0.0-pre13')
 }
 
 processResources {

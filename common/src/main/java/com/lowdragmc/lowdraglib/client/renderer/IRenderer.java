@@ -124,4 +124,9 @@ public interface IRenderer {
     default float reBakeCustomQuadsOffset() {
         return 0.002f;
     }
+
+    @Environment(EnvType.CLIENT)
+    default boolean isGui3d() {
+        return true;
+    }
 }

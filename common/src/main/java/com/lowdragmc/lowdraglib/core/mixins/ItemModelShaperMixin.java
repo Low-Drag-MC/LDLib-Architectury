@@ -46,7 +46,7 @@ public class ItemModelShaperMixin {
 
                     @Override
                     public boolean isGui3d() {
-                        return true;
+                        return renderer.isGui3d();
                     }
 
                     @Override

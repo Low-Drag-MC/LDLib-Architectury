@@ -162,6 +162,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public void drawInForeground(@Nonnull PoseStack mStack, int mouseX, int mouseY, float partialTicks) {
         if (slotReference != null && drawHoverTips && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             ItemStack stack = slotReference.getItem();
+            if (gui != null) {
+                gui.getModularUIGui().setHoveredSlot(slotReference);
+            }
             if (!stack.isEmpty() && gui != null) {
                 List<Component> tips = new ArrayList<>(getToolTips(DrawerHelper.getItemToolTip(stack)));
                 tips.addAll(tooltipTexts);
