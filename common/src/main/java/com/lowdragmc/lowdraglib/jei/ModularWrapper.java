@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
 import net.fabricmc.api.EnvType;
@@ -18,6 +19,8 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
     protected T widget;
+    @Setter
+    protected boolean shouldRenderTooltips = false;
 
     public ModularWrapper(T widget) {
         super(new ModularUI(widget.getSize().width, widget.getSize().height, IUIHolder.EMPTY, Minecraft.getInstance().player).widget(widget), -1);
@@ -117,7 +120,7 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         modularUI.mainGroup.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
         modularUI.mainGroup.drawInForeground(matrixStack, mouseX, mouseY, partialTicks);
 
-        if (tooltipTexts != null && !tooltipTexts.isEmpty()) {
+        if (shouldRenderTooltips && tooltipTexts != null && !tooltipTexts.isEmpty()) {
             matrixStack.pushPose();
             matrixStack.translate(0, 0, 240);
             renderTooltip(matrixStack, tooltipTexts, Optional.ofNullable(tooltipComponent), mouseX, mouseY);
