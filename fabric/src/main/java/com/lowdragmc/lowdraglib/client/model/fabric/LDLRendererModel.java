@@ -129,7 +129,7 @@ public class LDLRendererModel implements UnbakedModel {
 
                         @Override
                         public boolean isGui3d() {
-                            return true;
+                            return renderer.isGui3d();
                         }
 
                         @Override

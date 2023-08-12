@@ -157,7 +157,6 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         PoseStack posestack = graphics.pose();
         posestack.pushPose();
         posestack.translate(leftPos, topPos, 0.0D);
-        this.hoveredSlot = null;
 
         if (Platform.isForge()) ForgeEventHooks.postRenderForegroundEvent(this, graphics, mouseX, mouseY);
 

@@ -67,6 +67,26 @@ public class FluidTransferHelperImpl {
                 }
                 return views.iterator();
             }
+
+            @Override
+            public boolean supportsInsertion() {
+                for (int i = 0; i < fluidTransfer.getTanks(); i++) {
+                    if (fluidTransfer.supportsFill(i)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public boolean supportsExtraction() {
+                for (int i = 0; i < fluidTransfer.getTanks(); i++) {
+                    if (fluidTransfer.supportsDrain(i)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
         };
     }
 

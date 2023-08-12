@@ -218,4 +218,14 @@ public class BlockStateRenderer implements IRenderer {
         }
         return false;
     }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean isGui3d() {
+        var model = getItemModel(getBlockInfo().getItemStackForm());
+        if (model == null) {
+            return IRenderer.super.isGui3d();
+        }
+        return model.isGui3d();
+    }
 }

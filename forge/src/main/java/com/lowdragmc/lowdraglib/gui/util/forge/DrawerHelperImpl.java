@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.gui.util.forge;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -18,4 +19,9 @@ public class DrawerHelperImpl {
     public static void drawTooltip(GuiGraphics graphics, int mouseX, int mouseY, List<Component> tooltipTexts, ItemStack tooltipStack, TooltipComponent tooltipComponent, Font tooltipFont) {
         graphics.renderTooltip(tooltipFont, tooltipTexts, Optional.ofNullable(tooltipComponent), tooltipStack, mouseX, mouseY);
     }
+
+    public static ClientTooltipComponent getClientTooltipComponent(TooltipComponent component) {
+        return ClientTooltipComponent.create(component);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.emi;
 
+import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.api.widget.Bounds;
@@ -52,7 +53,7 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
         if (modular.tooltipTexts != null && !modular.tooltipTexts.isEmpty()) {
             List<ClientTooltipComponent> tooltips = modular.tooltipTexts.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
             if (modular.tooltipComponent != null) {
-                tooltips.add(ClientTooltipComponent.create(modular.tooltipComponent));
+                tooltips.add(DrawerHelper.getClientTooltipComponent(modular.tooltipComponent));
             }
             return tooltips;
         }

@@ -167,4 +167,14 @@ public class IModelRenderer implements IRenderer {
     public void onAdditionalModel(Consumer<ResourceLocation> registry) {
         registry.accept(modelLocation);
     }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean isGui3d() {
+        var model = getItemBakedModel();
+        if (model == null) {
+            return IRenderer.super.isGui3d();
+        }
+        return model.isGui3d();
+    }
 }
