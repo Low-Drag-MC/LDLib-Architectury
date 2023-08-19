@@ -40,6 +40,10 @@ public class ModelFactory {
     public static ModelBakery getModeBakery() {
         throw new AssertionError();
     }
+    @ExpectPlatform
+    public static UnbakedModel getLDLibModel(UnbakedModel vanilla) {
+        throw new AssertionError();
+    }
 
     public static ModelBaker getModeBaker() {
         return new ModelBaker() {

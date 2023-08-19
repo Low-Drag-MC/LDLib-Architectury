@@ -1,6 +1,6 @@
 # ChangeLog
 
-* fix widget rendering issue
-* fix renderer is gui 3d
-* fix widget hotswap
-* fix emi tooltips
+* fix fabric transfer api
+* fix compatibility with Continuity
+* fix jei crash
+* fix fabric model loading

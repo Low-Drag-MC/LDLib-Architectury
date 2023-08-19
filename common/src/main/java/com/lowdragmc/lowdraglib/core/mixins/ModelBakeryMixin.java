@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.core.mixins;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.client.model.ModelFactory;
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -61,7 +62,7 @@ public abstract class ModelBakeryMixin {
                 if (block instanceof IBlockRendererProvider) {
                     var model = this.unbakedCache.computeIfAbsent(new ResourceLocation("ldlib:block/renderer_model"), modelLocation -> {
                         try {
-                            return loadBlockModel(modelLocation);
+                            return ModelFactory.getLDLibModel(loadBlockModel(modelLocation));
                         } catch (IOException e) {
                             LDLib.LOGGER.error("Couldn't load ldlib:renderer_model", e);
                             return this.unbakedCache.get(MISSING_MODEL_LOCATION);
