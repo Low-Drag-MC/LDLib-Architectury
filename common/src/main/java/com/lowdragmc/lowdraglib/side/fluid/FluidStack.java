@@ -145,6 +145,10 @@ public class FluidStack {
         return create(getFluid(), getAmount(), getTag());
     }
 
+    public FluidStack copy(long amount) {
+        return create(getFluid(), amount, getTag());
+    }
+
     public boolean isFluidEqual(@Nonnull FluidStack other) {
         return getFluid() == other.getFluid() && Objects.equals(getTag(), other.getTag());
     }

@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import lombok.Getter;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -25,6 +26,11 @@ public record FluidTransferWrapper(@Getter IFluidHandler handler) implements IFl
     }
 
     @Override
+    public void setFluidInTank(int tank, @NotNull FluidStack fluidStack) {
+        throw new NotImplementedException("try to set fluid for a FluidTransfer wrapper");
+    }
+
+    @Override
     public long getTankCapacity(int tank) {
         return handler.getTankCapacity(tank);
     }
@@ -35,20 +41,42 @@ public record FluidTransferWrapper(@Getter IFluidHandler handler) implements IFl
     }
 
     @Override
-    public long fill(FluidStack resource, boolean simulate) {
+    public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+        throw new NotImplementedException("try to fill fluid for a FluidTransfer wrapper with a specific tank");
+    }
+
+    @Override
+    public long fill(FluidStack resource, boolean simulate, boolean notifyChange) {
         return handler.fill(FluidHelperImpl.toFluidStack(resource), simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE);
     }
 
     @NotNull
     @Override
-    public FluidStack drain(FluidStack resource, boolean simulate) {
+    public FluidStack drain(FluidStack resource, boolean simulate, boolean notifyChange) {
         return FluidHelperImpl.toFluidStack(handler.drain(FluidHelperImpl.toFluidStack(resource), simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE));
+    }
+
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        return new Object();
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+
     }
 
     @Override
     public boolean supportsFill(int tank) {
         // IFluidHandler doesn't support this check natively.
         return true;
+    }
+
+    @NotNull
+    @Override
+    public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+        throw new NotImplementedException("try to drain fluid for a FluidTransfer wrapper with a specific tank");
     }
 
     @Override

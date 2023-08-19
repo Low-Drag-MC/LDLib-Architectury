@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 
@@ -40,6 +41,11 @@ public class LiquidBlockContainerTransfer implements IFluidTransfer {
     }
 
     @Override
+    public void setFluidInTank(int tank, @NotNull FluidStack fluidStack) {
+        fill(0, fluidStack, false, false);
+    }
+
+    @Override
     public long getTankCapacity(int tank) {
         return Integer.MAX_VALUE;
     }
@@ -51,12 +57,12 @@ public class LiquidBlockContainerTransfer implements IFluidTransfer {
 
     @Nonnull
     @Override
-    public FluidStack drain(FluidStack resource, boolean simulate) {
+    public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
         return FluidStack.empty();
     }
 
     @Override
-    public long fill(FluidStack resource, boolean simulate) {
+    public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
         // NOTE: "Filling" means placement in this context!
         if (resource.getAmount() >= FluidHelper.getBucket()) {
             BlockState state = world.getBlockState(blockPos);
@@ -78,6 +84,19 @@ public class LiquidBlockContainerTransfer implements IFluidTransfer {
     @Override
     public boolean supportsDrain(int tank) {
         return false;
+    }
+
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        return world.getBlockState(blockPos);
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+        if (snapshot instanceof BlockState state) {
+            world.setBlockAndUpdate(blockPos, state);
+        }
     }
 
     public static class BlockWrapper implements IFluidTransfer {
@@ -103,6 +122,10 @@ public class LiquidBlockContainerTransfer implements IFluidTransfer {
             return FluidStack.empty();
         }
 
+        @Override
+        public void setFluidInTank(int tank, @NotNull FluidStack fluidStack) {
+            fill(0, fluidStack, false, false);
+        }
 
         @Override
         public long getTankCapacity(int tank) {
@@ -116,12 +139,12 @@ public class LiquidBlockContainerTransfer implements IFluidTransfer {
 
         @Nonnull
         @Override
-        public FluidStack drain(FluidStack resource, boolean simulate) {
+        public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
             return FluidStack.empty();
         }
 
         @Override
-        public long fill(FluidStack resource, boolean simulate) {
+        public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
             // NOTE: "Filling" means placement in this context!
             if (resource.getAmount() < FluidHelper.getBucket()) {
                 return 0;
@@ -141,6 +164,17 @@ public class LiquidBlockContainerTransfer implements IFluidTransfer {
         @Override
         public boolean supportsDrain(int tank) {
             return false;
+        }
+
+        @NotNull
+        @Override
+        public Object createSnapshot() {
+            return state;
+        }
+
+        @Override
+        public void restoreFromSnapshot(Object snapshot) {
+            world.setBlockAndUpdate(blockPos, state);
         }
     }
 }

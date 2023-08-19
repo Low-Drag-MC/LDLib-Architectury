@@ -64,14 +64,14 @@ public class ItemTransferList implements IItemTransfer, ITagSerializable<Compoun
 
     @NotNull
     @Override
-    public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+    public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate, boolean notifyChanges) {
         if (!filter.test(stack)) {
             return stack;
         }
         int index = 0;
         for (var transfer : transfers) {
             if (slot - index < transfer.getSlots()) {
-                return transfer.insertItem(slot - index, stack, simulate);
+                return transfer.insertItem(slot - index, stack, simulate, notifyChanges);
             }
             index += transfer.getSlots();
         }
@@ -80,11 +80,11 @@ public class ItemTransferList implements IItemTransfer, ITagSerializable<Compoun
 
     @NotNull
     @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
+    public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
         int index = 0;
         for (var transfer : transfers) {
             if (slot - index < transfer.getSlots()) {
-                return transfer.extractItem(slot - index, amount, simulate);
+                return transfer.extractItem(slot - index, amount, simulate, notifyChanges);
             }
             index += transfer.getSlots();
         }
@@ -116,6 +116,28 @@ public class ItemTransferList implements IItemTransfer, ITagSerializable<Compoun
             index += transfer.getSlots();
         }
         return false;
+    }
+
+    @Override
+    public final void onContentsChanged() {
+        for (var transfer : transfers) {
+            transfer.onContentsChanged();
+        }
+    }
+
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        return Arrays.stream(transfers).map(IItemTransfer::createSnapshot).toArray(Object[]::new);
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+        if (snapshot instanceof Object[] array && array.length == transfers.length) {
+            for (int i = 0; i < array.length; i++) {
+                transfers[i].restoreFromSnapshot(array[i]);
+            }
+        }
     }
 
     @Override

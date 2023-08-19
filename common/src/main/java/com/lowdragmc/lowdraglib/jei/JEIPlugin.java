@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -47,7 +48,7 @@ public class JEIPlugin implements IModPlugin {
 
     @Nonnull
     public static List<RecipeLayout<?>> getRecipeLayouts(RecipesGui recipesGui) {
-        return ((RecipesGuiAccessor)recipesGui).getRecipeLayouts();
+        return new ArrayList<>(((RecipesGuiAccessor)recipesGui).getRecipeLayouts());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.side.fluid;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -23,6 +24,11 @@ public interface IFluidTransfer {
         }
 
         @Override
+        public void setFluidInTank(int tank, @NotNull FluidStack fluidStack) {
+
+        }
+
+        @Override
         public long getTankCapacity(int tank) {
             return 0;
         }
@@ -33,7 +39,7 @@ public interface IFluidTransfer {
         }
 
         @Override
-        public long fill(FluidStack resource, boolean simulate) {
+        public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
             return 0;
         }
 
@@ -44,13 +50,24 @@ public interface IFluidTransfer {
 
         @NotNull
         @Override
-        public FluidStack drain(FluidStack resource, boolean simulate) {
+        public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
             return FluidStack.empty();
         }
 
         @Override
         public boolean supportsDrain(int tank) {
             return false;
+        }
+
+        @NotNull
+        @Override
+        public Object createSnapshot() {
+            return new Object();
+        }
+
+        @Override
+        public void restoreFromSnapshot(Object snapshot) {
+
         }
     };
 
@@ -62,7 +79,7 @@ public interface IFluidTransfer {
     int getTanks();
 
     /**
-     * Returns the FluidStack in a given tank.
+     * Returns the FluidStack in a given tank. without notify changes.
      *
      * <p>
      * <strong>IMPORTANT:</strong> This FluidStack <em>MUST NOT</em> be modified. This method is not for
@@ -80,9 +97,13 @@ public interface IFluidTransfer {
     @Nonnull
     FluidStack getFluidInTank(int tank);
 
-    default void setFluidInTank(int tank, @Nonnull FluidStack fluidStack) {
-        throw new RuntimeException("FluidTransfer %s doesn't support set fluid in tank".formatted(this));
-    }
+    /**
+     * Set the FluidStack of specific tank without notify changes.
+     * <br/>
+     * You have to implement it but do not call it yourself, unless you can make sure it works.
+     */
+    @ApiStatus.Internal
+    void setFluidInTank(int tank, @Nonnull FluidStack fluidStack);
 
     /**
      * Retrieves the maximum fluid amount for a given tank.
@@ -105,12 +126,17 @@ public interface IFluidTransfer {
 
     /**
      * Fills fluid into internal tanks, distribution is left entirely to the IFluidTransfer.
+     * <br/>
+     * You have to implement it but do not call it yourself, you should always use {@link IFluidTransfer#fill(FluidStack, boolean, boolean)} instead.
      *
+     * @param tank tank index..
      * @param resource FluidStack representing the Fluid and maximum amount of fluid to be filled.
      * @param simulate   If SIMULATE, fill will only be simulated.
+     * @param notifyChanges should notify changes if simulate is false and it does accept fluid.
      * @return Amount of resource that was (or would have been, if simulated) filled.
      */
-    long fill(FluidStack resource, boolean simulate);
+    @ApiStatus.Internal
+    long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges);
 
     /**
      * Determines whether the specified tank can be inserted into.
@@ -127,14 +153,19 @@ public interface IFluidTransfer {
 
     /**
      * Drains fluid out of internal tanks, distribution is left entirely to the IFluidTransfer.
+     * <br/>
+     * You have to implement it but do not call it yourself, you should always use {@link IFluidTransfer#drain(FluidStack, boolean, boolean)} )} instead.
      *
+     * @param tank tank index..
      * @param resource FluidStack representing the Fluid and maximum amount of fluid to be drained.
      * @param simulate   If SIMULATE, drain will only be simulated.
+     * @param notifyChanges should notify changes if simulate is false, and it does be drained fluid.
      * @return FluidStack representing the Fluid and amount that was (or would have been, if
      * simulated) drained.
      */
     @Nonnull
-    FluidStack drain(FluidStack resource, boolean simulate);
+    @ApiStatus.Internal
+    FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges);
 
     /**
      * Determines whether the specified tank can be extracted from.
@@ -150,6 +181,58 @@ public interface IFluidTransfer {
     boolean supportsDrain(int tank);
 
     /**
+     * Fills fluid into internal tanks, distribution is left entirely to the IFluidTransfer.
+     *
+     * @param resource FluidStack representing the Fluid and maximum amount of fluid to be filled.
+     * @param simulate   If SIMULATE, fill will only be simulated.
+     * @param notifyChanges should notify changes if simulate is false and it does accept fluid.
+     * @return Amount of resource that was (or would have been, if simulated) filled.
+     */
+    default long fill(FluidStack resource, boolean simulate, boolean notifyChanges) {
+        if (resource.isEmpty()) return 0;
+        long filled = 0;
+        for (int i = 0; i < getTanks(); i++) {
+            filled += fill(i, resource.copy(resource.getAmount() - filled), simulate, false);
+            if (filled == resource.getAmount()) break;
+        }
+        if (notifyChanges && filled > 0 && !simulate) {
+            onContentsChanged();
+        }
+        return filled;
+    }
+
+    default long fill(FluidStack resource, boolean simulate) {
+        return fill(resource, simulate, !simulate);
+    }
+
+    /**
+     * Drains fluid out of internal tanks, distribution is left entirely to the IFluidTransfer.
+     *
+     * @param resource FluidStack representing the Fluid and maximum amount of fluid to be drained.
+     * @param simulate   If SIMULATE, drain will only be simulated.
+     * @param notifyChanges should notify changes if simulate is false, and it does be drained fluid.
+     * @return FluidStack representing the Fluid and amount that was (or would have been, if
+     * simulated) drained.
+     */
+    @Nonnull
+    default FluidStack drain(FluidStack resource, boolean simulate, boolean notifyChanges) {
+        if (resource.isEmpty()) return FluidStack.empty();
+        long drained = 0;
+        for (int i = 0; i < getTanks(); i++) {
+            drained += drain(i, resource.copy(resource.getAmount() - drained), simulate, false).getAmount();
+            if (drained == resource.getAmount()) break;
+        }
+        if (notifyChanges && drained > 0 && !simulate) {
+            onContentsChanged();
+        }
+        return resource.copy(drained);
+    }
+
+    default FluidStack drain(FluidStack resource, boolean simulate) {
+        return drain(resource, simulate, !simulate);
+    }
+
+    /**
      * Drains fluid out of internal tanks, distribution is left entirely to the IFluidTransfer.
      * <p>
      * This method is not Fluid-sensitive.
@@ -160,7 +243,7 @@ public interface IFluidTransfer {
      * simulated) drained.
      */
     @Nonnull
-    default FluidStack drain(long maxDrain, boolean simulate) {
+    default FluidStack drain(long maxDrain, boolean simulate, boolean notifyChanges) {
         if (maxDrain == 0) {
             return FluidStack.empty();
         }
@@ -175,7 +258,9 @@ public interface IFluidTransfer {
                 maxDrain -= totalDrained.getAmount();
                 if (!simulate) {
                     handler.shrink(totalDrained.getAmount());
-                    onContentsChanged();
+                    if (notifyChanges) {
+                        onContentsChanged();
+                    }
                 }
             } else if (totalDrained.isFluidEqual(handler)){
                 var toDrain = Math.min(maxDrain, handler.getAmount());
@@ -183,7 +268,9 @@ public interface IFluidTransfer {
                 totalDrained.grow(toDrain);
                 if (!simulate) {
                     handler.shrink(toDrain);
-                    onContentsChanged();
+                    if (notifyChanges) {
+                        onContentsChanged();
+                    }
                 }
             }
             if (maxDrain <= 0) break;
@@ -191,7 +278,28 @@ public interface IFluidTransfer {
         return totalDrained == null ? FluidStack.empty() : totalDrained;
     }
 
+    default FluidStack drain(long maxDrain, boolean simulate) {
+        return drain(maxDrain, simulate, !simulate);
+    }
+
     default void onContentsChanged() {
 
     }
+
+    /**
+     * snapshot for fabric. non null
+     * <br/>
+     * Do not call it yourself, unless you can make sure it works.
+     */
+    @Nonnull
+    @ApiStatus.Internal
+    Object createSnapshot();
+
+    /**
+     * <br/>
+     * Do not call it yourself, unless you can make sure it works.
+     */
+    @ApiStatus.Internal
+    void restoreFromSnapshot(Object snapshot);
+
 }

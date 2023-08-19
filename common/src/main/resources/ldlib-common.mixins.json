@@ -6,7 +6,6 @@
   "plugin": "com.lowdragmc.lowdraglib.core.mixins.LDLibMixinPlugin",
   "client": [
     "BlockEntityRendererDispatcherMixin",
-    "BlockModelShaperMixin",
     "ItemModelShaperMixin",
     "ItemRendererMixin",
     "LanguageMixin",

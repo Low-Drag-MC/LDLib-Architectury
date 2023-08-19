@@ -11,9 +11,6 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -21,12 +18,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -34,164 +27,16 @@ import java.util.function.Predicate;
  * @date 2023/2/10
  * @implNote FluidTransferHelper
  */
+@SuppressWarnings("UnstableApiUsage")
 public class FluidTransferHelperImpl {
 
     public static Storage<FluidVariant> toFluidVariantStorage(IFluidTransfer fluidTransfer) {
-        return new Storage<>() {
-
-            @Override
-            public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
-                return fluidTransfer.fill(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), false);
-            }
-
-            @Override
-            public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
-                return fluidTransfer.drain(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), false).getAmount();
-            }
-
-            @Override
-            public long simulateInsert(FluidVariant resource, long maxAmount, @javax.annotation.Nullable TransactionContext transaction) {
-                return fluidTransfer.fill(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), true);
-            }
-
-            @Override
-            public long simulateExtract(FluidVariant resource, long maxAmount, @javax.annotation.Nullable TransactionContext transaction) {
-                return fluidTransfer.drain(FluidStack.create(resource.getFluid(), maxAmount, resource.getNbt()), true).getAmount();
-            }
-
-            @Override
-            public Iterator<StorageView<FluidVariant>> iterator() {
-                List<StorageView<FluidVariant>> views = new ArrayList<>();
-                for (int i = 0; i < fluidTransfer.getTanks(); i++) {
-                    views.add(toSingleFluidStackStorage(fluidTransfer, i));
-                }
-                return views.iterator();
-            }
-
-            @Override
-            public boolean supportsInsertion() {
-                for (int i = 0; i < fluidTransfer.getTanks(); i++) {
-                    if (fluidTransfer.supportsFill(i)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public boolean supportsExtraction() {
-                for (int i = 0; i < fluidTransfer.getTanks(); i++) {
-                    if (fluidTransfer.supportsDrain(i)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        };
+        return new FluidTransferProxyStorage(fluidTransfer);
     }
 
-    public static SingleFluidStackStorage toSingleFluidStackStorage(IFluidTransfer fluidTransfer, int index) {
-        return new SingleFluidStackStorage() {
-
-            @Override
-            protected FluidStack getStack() {
-                return fluidTransfer.getFluidInTank(index);
-            }
-
-            @Override
-            protected void setStack(FluidStack stack) {
-                fluidTransfer.setFluidInTank(index, stack);
-            }
-
-            @Override
-            protected long getCapacity(FluidVariant fluidVariant) {
-                return fluidTransfer.getTankCapacity(index);
-            }
-
-            @Override
-            protected boolean canInsert(FluidVariant fluidVariant) {
-                return fluidTransfer.supportsFill(index) && fluidTransfer.fill(FluidStack.create(fluidVariant.getFluid(), 1, fluidVariant.getNbt()), true) > 0;
-            }
-
-            @Override
-            protected boolean canExtract(FluidVariant fluidVariant) {
-                return fluidTransfer.supportsDrain(index) && fluidTransfer.drain(FluidStack.create(fluidVariant.getFluid(), 1, fluidVariant.getNbt()), true).getAmount() > 0;
-            }
-
-        };
-    }
 
     public static IFluidTransfer toFluidTransfer(Storage<FluidVariant> storage) {
-        var iter = storage.iterator();
-        List<StorageView<FluidVariant>> views = new ArrayList<>();
-        while (iter.hasNext()) {
-            views.add(iter.next());
-        }
-        return new IFluidTransfer() {
-
-            @Override
-            public int getTanks() {
-                return views.size();
-            }
-
-            @NotNull
-            @Override
-            public FluidStack getFluidInTank(int tank) {
-                return FluidHelperImpl.toFluidStack(views.get(tank));
-            }
-
-            @Override
-            public long getTankCapacity(int tank) {
-                return views.get(tank).getCapacity();
-            }
-
-            @Override
-            public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
-                boolean result;
-                try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
-                    result = storage.simulateExtract(FluidHelperImpl.toFluidVariant(stack), stack.getAmount(), transaction) > 0;
-                }
-                return result;
-            }
-
-            @Override
-            public long fill(FluidStack resource, boolean simulate) {
-                if (resource.isEmpty()) return 0;
-                long filled;
-                try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
-                    filled = simulate ?
-                            storage.simulateInsert(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction) :
-                            storage.insert(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction);
-                    transaction.commit();
-                }
-                return filled;
-            }
-
-            @NotNull
-            @Override
-            public FluidStack drain(FluidStack resource, boolean simulate) {
-                if (resource.isEmpty()) return FluidStack.empty();
-                var copied = resource.copy();
-                try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
-                    var drained = simulate ?
-                            storage.simulateExtract(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction) :
-                            storage.extract(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction);
-                    copied.setAmount(drained);
-                    transaction.commit();
-                }
-                return copied;
-            }
-
-            @Override
-            public boolean supportsFill(int tank) {
-                return storage.supportsInsertion();
-            }
-
-            @Override
-            public boolean supportsDrain(int tank) {
-                return storage.supportsExtraction();
-            }
-        };
+        return new FluidStorageProxyFluidTransfer(storage);
     }
 
     public static IFluidTransfer getFluidTransfer(Level level, BlockPos pos, @Nullable Direction direction) {
@@ -246,4 +91,5 @@ public class FluidTransferHelperImpl {
             }, maxAmount, null);
         }
     }
+
 }

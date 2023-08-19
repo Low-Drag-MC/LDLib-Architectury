@@ -58,8 +58,8 @@ public class FluidStorage implements IFluidStorage, IContentChangeAware, ITagSer
     }
 
     @Override
-    public long fill(FluidStack resource, boolean simulate) {
-        if (resource.isEmpty() || !isFluidValid(resource)) {
+    public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChange) {
+        if (tank >= getTanks() || resource.isEmpty() || !isFluidValid(resource)) {
             return 0;
         }
         if (simulate) {
@@ -73,7 +73,9 @@ public class FluidStorage implements IFluidStorage, IContentChangeAware, ITagSer
         }
         if (fluid.isEmpty()) {
             fluid = FluidStack.create(resource, Math.min(capacity, resource.getAmount()));
-            onContentsChanged();
+            if (notifyChange) {
+                onContentsChanged();
+            }
             return fluid.getAmount();
         }
         if (!fluid.isFluidEqual(resource)) {
@@ -87,22 +89,35 @@ public class FluidStorage implements IFluidStorage, IContentChangeAware, ITagSer
         } else {
             fluid.setAmount(capacity);
         }
-        if (filled > 0)
+        if (filled > 0 && notifyChange)
             onContentsChanged();
         return filled;
     }
 
     @NotNull
     @Override
-    public FluidStack drain(FluidStack resource, boolean simulate) {
-        if (resource.isEmpty() || !resource.isFluidEqual(fluid)) {
+    public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChange) {
+        if (tank >= getTanks() || resource.isEmpty() || !resource.isFluidEqual(fluid)) {
             return FluidStack.empty();
         }
-        return drain(resource.getAmount(), simulate);
+        return drain(resource.getAmount(), simulate, notifyChange);
     }
 
     public void onContentsChanged() {
         onContentsChanged.run();
+    }
+
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        return fluid.copy();
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+        if (snapshot instanceof FluidStack stack) {
+            this.fluid = stack.copy();
+        }
     }
 
     @Override

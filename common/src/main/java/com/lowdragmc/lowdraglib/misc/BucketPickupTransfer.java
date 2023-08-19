@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.material.FluidState;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 
@@ -47,6 +48,11 @@ public class BucketPickupTransfer implements IFluidTransfer {
     }
 
     @Override
+    public void setFluidInTank(int tank, @NotNull FluidStack fluidStack) {
+
+    }
+
+    @Override
     public long getTankCapacity(int tank) {
         return FluidHelper.getBucket();
     }
@@ -57,21 +63,17 @@ public class BucketPickupTransfer implements IFluidTransfer {
     }
 
     @Override
-    public long fill(FluidStack resource, boolean simulate) {
+    public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
         return 0;
     }
 
     @Nonnull
     @Override
-    public FluidStack drain(FluidStack resource, boolean simulate)
-    {
-        if (!resource.isEmpty() && FluidHelper.getBucket() <= resource.getAmount())
-        {
+    public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+        if (!resource.isEmpty() && FluidHelper.getBucket() <= resource.getAmount()) {
             FluidState fluidState = world.getFluidState(blockPos);
-            if (!fluidState.isEmpty() && resource.getFluid() == fluidState.getType())
-            {
-                if (!simulate)
-                {
+            if (!fluidState.isEmpty() && resource.getFluid() == fluidState.getType()) {
+                if (!simulate) {
                     ItemStack itemStack = bucketPickupHandler.pickupBlock(world, blockPos, world.getBlockState(blockPos));
                     if (itemStack != ItemStack.EMPTY && itemStack.getItem() instanceof BucketItemAccessor bucket) {
                         FluidStack extracted = FluidStack.create(bucket.fabric_getFluid(), FluidHelper.getBucket());
@@ -80,12 +82,9 @@ public class BucketPickupTransfer implements IFluidTransfer {
                         }
                         return extracted;
                     }
-                }
-                else
-                {
+                } else {
                     FluidStack extracted = FluidStack.create(fluidState.getType(), FluidHelper.getBucket());
-                    if (resource.isFluidEqual(extracted))
-                    {
+                    if (resource.isFluidEqual(extracted)) {
                         //Validate NBT matches
                         return extracted;
                     }
@@ -103,5 +102,16 @@ public class BucketPickupTransfer implements IFluidTransfer {
     @Override
     public boolean supportsDrain(int tank) {
         return true;
+    }
+
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        return new Object();
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+
     }
 }
