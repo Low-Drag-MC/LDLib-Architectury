@@ -9,6 +9,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemModelGenerator;
 import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -33,6 +34,11 @@ public class ModelFactory {
 
     @ExpectPlatform
     public static ModelBakery getModeBakery() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static UnbakedModel getLDLibModel(UnbakedModel vanilla) {
         throw new AssertionError();
     }
 
