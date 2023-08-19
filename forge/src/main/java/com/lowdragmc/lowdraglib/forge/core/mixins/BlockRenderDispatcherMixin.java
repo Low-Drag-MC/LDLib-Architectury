@@ -43,6 +43,8 @@ public class BlockRenderDispatcherMixin {
             var te = blockAndTintGetter.getBlockEntity(pos);
             instance.tesselateBlock(blockAndTintGetter, bakedModel, blockState, pos, poseStack, vertexConsumer, b, randomSource, l, i,
                     model.getModelData(blockAndTintGetter, pos, blockState, te == null ? ModelData.EMPTY : te.getModelData()), renderType);
+        } else {
+            instance.tesselateBlock(blockAndTintGetter, bakedModel, blockState, pos, poseStack, vertexConsumer, b, randomSource, l, i, modelData, renderType);
         }
     }
 }
