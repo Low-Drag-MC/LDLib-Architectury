@@ -14,6 +14,7 @@ import mezz.jei.library.gui.recipes.RecipeLayout;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,7 +34,7 @@ public class JEIPlugin implements IModPlugin {
 
     @Nonnull
     public static List<RecipeLayout<?>> getRecipeLayouts(RecipesGui recipesGui) {
-        return ((RecipesGuiAccessor)recipesGui).getRecipeLayouts();
+        return new ArrayList<>(((RecipesGuiAccessor)recipesGui).getRecipeLayouts());
     }
 
     @Override

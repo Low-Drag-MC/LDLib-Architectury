@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.utils;
 
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -43,13 +44,13 @@ public class CycleItemStackHandler implements IItemTransfer {
 
     @Nonnull
     @Override
-    public ItemStack insertItem(int i, @Nonnull ItemStack itemStack, boolean b) {
+    public ItemStack insertItem(int i, @Nonnull ItemStack itemStack, boolean b, boolean notifyChanges) {
         return itemStack;
     }
 
     @Nonnull
     @Override
-    public ItemStack extractItem(int i, int i1, boolean b) {
+    public ItemStack extractItem(int i, int i1, boolean b, boolean notifyChanges) {
         return ItemStack.EMPTY;
     }
 
@@ -61,5 +62,16 @@ public class CycleItemStackHandler implements IItemTransfer {
     @Override
     public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
         return true;
+    }
+
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        return new Object();
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+
     }
 }

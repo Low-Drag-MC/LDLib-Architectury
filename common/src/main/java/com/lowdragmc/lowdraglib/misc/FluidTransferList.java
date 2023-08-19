@@ -89,12 +89,24 @@ public class FluidTransferList implements IFluidTransfer, ITagSerializable<Compo
     }
 
     @Override
-    public long fill(FluidStack resource, boolean simulate) {
+    public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+        int index = 0;
+        for (IFluidTransfer transfer : transfers) {
+            if (tank - index < transfer.getTanks()) {
+                return transfer.fill(tank - index, resource, simulate, notifyChanges);
+            }
+            index += transfer.getTanks();
+        }
+        return 0;
+    }
+
+    @Override
+    public long fill(FluidStack resource, boolean simulate, boolean notifyChange) {
         if (resource.isEmpty() || !filter.test(resource)) return 0;
         var copied = resource.copy();
         for (var transfer : transfers) {
             var candidate = copied.copy();
-            copied.shrink(transfer.fill(candidate, simulate));
+            copied.shrink(transfer.fill(candidate, simulate, notifyChange));
             if (copied.isEmpty()) break;
         }
         return resource.getAmount() - copied.getAmount();
@@ -102,12 +114,25 @@ public class FluidTransferList implements IFluidTransfer, ITagSerializable<Compo
 
     @NotNull
     @Override
-    public FluidStack drain(FluidStack resource, boolean simulate) {
+    public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+        int index = 0;
+        for (IFluidTransfer transfer : transfers) {
+            if (tank - index < transfer.getTanks()) {
+                return transfer.drain(tank - index, resource, simulate, notifyChanges);
+            }
+            index += transfer.getTanks();
+        }
+        return FluidStack.empty();
+    }
+
+    @NotNull
+    @Override
+    public FluidStack drain(FluidStack resource, boolean simulate, boolean notifyChange) {
         if (resource.isEmpty() || !filter.test(resource)) return FluidStack.empty();
         var copied = resource.copy();
         for (var transfer : transfers) {
             var candidate = copied.copy();
-            copied.shrink(transfer.drain(candidate, simulate).getAmount());
+            copied.shrink(transfer.drain(candidate, simulate, notifyChange).getAmount());
             if (copied.isEmpty()) break;
         }
         copied.setAmount(resource.getAmount() - copied.getAmount());
@@ -116,14 +141,14 @@ public class FluidTransferList implements IFluidTransfer, ITagSerializable<Compo
 
     @NotNull
     @Override
-    public FluidStack drain(long maxDrain, boolean simulate) {
+    public FluidStack drain(long maxDrain, boolean simulate, boolean notifyChange) {
         if (maxDrain == 0) {
             return FluidStack.empty();
         }
         FluidStack totalDrained = null;
         for (var storage : transfers) {
             if (totalDrained == null || totalDrained.isEmpty()) {
-                totalDrained = storage.drain(maxDrain, simulate);
+                totalDrained = storage.drain(maxDrain, simulate, notifyChange);
                 if (totalDrained.isEmpty()) {
                     totalDrained = null;
                 } else {
@@ -132,7 +157,7 @@ public class FluidTransferList implements IFluidTransfer, ITagSerializable<Compo
             } else {
                 FluidStack copy = totalDrained.copy();
                 copy.setAmount(maxDrain);
-                FluidStack drain = storage.drain(copy, simulate);
+                FluidStack drain = storage.drain(copy, simulate, notifyChange);
                 totalDrained.grow(drain.getAmount());
                 maxDrain -= drain.getAmount();
             }
@@ -143,6 +168,24 @@ public class FluidTransferList implements IFluidTransfer, ITagSerializable<Compo
 
     @Override
     public final void onContentsChanged() {
+        for (IFluidTransfer transfer : transfers) {
+            transfer.onContentsChanged();
+        }
+    }
+
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        return Arrays.stream(transfers).map(IFluidTransfer::createSnapshot).toArray(Object[]::new);
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+        if (snapshot instanceof Object[] array && array.length == transfers.length) {
+            for (int i = 0; i < array.length; i++) {
+                transfers[i].restoreFromSnapshot(array[i]);
+            }
+        }
     }
 
     @Override

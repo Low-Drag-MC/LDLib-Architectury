@@ -41,6 +41,11 @@ public class FluidBlockTransfer implements IFluidTransfer {
         return tank == 0 ? FluidStack.create(getFluid(), FluidHelper.getBucket()) : FluidStack.empty();
     }
 
+    @Override
+    public void setFluidInTank(int tank, @NotNull FluidStack fluidStack) {
+
+    }
+
     public long getTankCapacity(int tank) {
         return FluidHelper.getBucket();
     }
@@ -49,11 +54,11 @@ public class FluidBlockTransfer implements IFluidTransfer {
         return stack.getFluid() == getFluid();
     }
 
-    public long fill(FluidStack resource, boolean simulate) {
+    public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
         return 0;
     }
 
-    public @NotNull FluidStack drain(FluidStack resource, boolean simulate) {
+    public @NotNull FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
         if (!resource.isEmpty() && resource.getFluid() == getFluid() && resource.getAmount() >= getTankCapacity(0)) {
             FluidStack drained = getFluidInTank(0).copy();
             if (!simulate) {
@@ -73,5 +78,16 @@ public class FluidBlockTransfer implements IFluidTransfer {
     @Override
     public boolean supportsDrain(int tank) {
         return true;
+    }
+
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        return new Object();
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+
     }
 }

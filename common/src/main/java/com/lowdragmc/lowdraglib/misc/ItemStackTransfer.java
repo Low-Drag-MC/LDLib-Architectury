@@ -11,9 +11,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author KilaBash
@@ -54,7 +56,6 @@ public class ItemStackTransfer implements IItemTransfer, ITagSerializable<Compou
     public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
         validateSlotIndex(slot);
         this.stacks.set(slot, stack);
-        onContentsChanged(slot);
     }
 
     @Override
@@ -71,7 +72,7 @@ public class ItemStackTransfer implements IItemTransfer, ITagSerializable<Compou
 
     @Override
     @Nonnull
-    public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+    public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate, boolean notifyChanges) {
         if (stack.isEmpty())
             return ItemStack.EMPTY;
 
@@ -102,7 +103,9 @@ public class ItemStackTransfer implements IItemTransfer, ITagSerializable<Compou
             } else {
                 existing.grow(reachedLimit ? limit : stack.getCount());
             }
-            onContentsChanged(slot);
+            if (notifyChanges) {
+                onContentsChanged(slot);
+            }
         }
 
         return reachedLimit ? ItemTransferHelper.copyStackWithSize(stack, stack.getCount() - limit) : ItemStack.EMPTY;
@@ -110,7 +113,7 @@ public class ItemStackTransfer implements IItemTransfer, ITagSerializable<Compou
 
     @Override
     @Nonnull
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
+    public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
         if (amount == 0)
             return ItemStack.EMPTY;
 
@@ -126,7 +129,9 @@ public class ItemStackTransfer implements IItemTransfer, ITagSerializable<Compou
         if (existing.getCount() <= toExtract) {
             if (!simulate) {
                 this.stacks.set(slot, ItemStack.EMPTY);
-                onContentsChanged(slot);
+                if (notifyChanges) {
+                    onContentsChanged(slot);
+                }
                 return existing;
             } else {
                 return existing.copy();
@@ -134,7 +139,9 @@ public class ItemStackTransfer implements IItemTransfer, ITagSerializable<Compou
         } else {
             if (!simulate) {
                 this.stacks.set(slot, ItemTransferHelper.copyStackWithSize(existing, existing.getCount() - toExtract));
-                onContentsChanged(slot);
+                if (notifyChanges) {
+                    onContentsChanged(slot);
+                }
             }
 
             return ItemTransferHelper.copyStackWithSize(existing, toExtract);
@@ -196,9 +203,29 @@ public class ItemStackTransfer implements IItemTransfer, ITagSerializable<Compou
 
     }
 
-    protected void onContentsChanged(int slot) {
+    public void onContentsChanged() {
         onContentsChanged.run();
     }
+
+    public void onContentsChanged(int slot) {
+        onContentsChanged();
+    }
+
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        return stacks.stream().map(ItemStack::copy).toArray(ItemStack[]::new);
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+        if (snapshot instanceof ItemStack[] copied && copied.length == stacks.size()) {
+            for (int i = 0; i < stacks.size(); i++) {
+                stacks.set(i, copied[i].copy());
+            }
+        }
+    }
+
 
     public ItemStackTransfer copy() {
         var copiedStack = NonNullList.withSize(stacks.size(), ItemStack.EMPTY);

@@ -1,8 +1,8 @@
 package com.lowdragmc.lowdraglib.side.item;
 
-import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
 import javax.annotation.Nonnull;
 
@@ -42,8 +42,8 @@ public interface IItemTransfer {
     ItemStack getStackInSlot(int slot);
 
     default void setStackInSlot(int index, ItemStack stack) {
-        extractItem(index, getStackInSlot(index).getCount(), false);
-        insertItem(index, stack, false);
+        extractItem(index, getStackInSlot(index).getCount(), false, false);
+        insertItem(index, stack, false, false);
     }
 
     /**
@@ -51,17 +51,21 @@ public interface IItemTransfer {
      * Inserts an ItemStack into the given slot and return the remainder.
      * The ItemStack <em>should not</em> be modified in this function!
      * </p>
-     * Note: This behaviour is subtly different from {@link com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer#fill(FluidStack, boolean)}
      *
      * @param slot     Slot to insert into.
      * @param stack    ItemStack to insert. This must not be modified by the item handler.
      * @param simulate If true, the insertion is only simulated
+     * @param notifyChanges should notify changes if simulate is false and it does accept fluid.
      * @return The remaining ItemStack that was not inserted (if the entire stack is accepted, then return an empty ItemStack).
      *         May be the same as the input ItemStack if unchanged, otherwise a new ItemStack.
      *         The returned ItemStack can be safely modified after.
      **/
     @Nonnull
-    ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate);
+    ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate, boolean notifyChanges);
+
+    default ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+        return insertItem(slot, stack, simulate, !simulate);
+    }
 
     /**
      * Extracts an ItemStack from the given slot.
@@ -73,11 +77,16 @@ public interface IItemTransfer {
      * @param slot     Slot to extract from.
      * @param amount   Amount to extract (may be greater than the current stack's max limit)
      * @param simulate If true, the extraction is only simulated
+     * @param notifyChanges should notify changes if simulate is false and it does accept fluid.
      * @return ItemStack extracted from the slot, must be empty if nothing can be extracted.
      *         The returned ItemStack can be safely modified after, so item handlers should return a new or copied stack.
      **/
     @Nonnull
-    ItemStack extractItem(int slot, int amount, boolean simulate);
+    ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges);
+
+    default ItemStack extractItem(int slot, int amount, boolean simulate) {
+        return extractItem(slot, amount, simulate, !simulate);
+    }
 
     /**
      * Retrieves the maximum stack size allowed to exist in the given slot.
@@ -107,5 +116,24 @@ public interface IItemTransfer {
      *         false if the slot can never insert the ItemStack in any situation.
      */
     boolean isItemValid(int slot, @Nonnull ItemStack stack);
+
+    default void onContentsChanged() {
+    }
+
+    /**
+     * snapshot for fabric. non null
+     * <br/>
+     * Do not call it yourself, unless you can make sure it works.
+     */
+    @Nonnull
+    @ApiStatus.Internal
+    Object createSnapshot();
+
+    /**
+     * <br/>
+     * Do not call it yourself, unless you can make sure it works.
+     */
+    @ApiStatus.Internal
+    void restoreFromSnapshot(Object snapshot);
 
 }

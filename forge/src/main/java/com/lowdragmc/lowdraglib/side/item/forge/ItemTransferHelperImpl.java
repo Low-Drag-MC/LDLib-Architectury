@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,13 +39,13 @@ public class ItemTransferHelperImpl {
             @NotNull
             @Override
             public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-                return itemTransfer.insertItem(slot, stack, simulate);
+                return itemTransfer.insertItem(slot, stack, simulate, !simulate);
             }
 
             @NotNull
             @Override
             public ItemStack extractItem(int slot, int amount, boolean simulate) {
-                return itemTransfer.extractItem(slot, amount, simulate);
+                return itemTransfer.extractItem(slot, amount, simulate, !simulate);
             }
 
             @Override
@@ -72,15 +73,24 @@ public class ItemTransferHelperImpl {
                 return handler.getStackInSlot(slot);
             }
 
+            @Override
+            public void setStackInSlot(int index, ItemStack stack) {
+                if (handler instanceof IItemHandlerModifiable modifiable) {
+                    modifiable.setStackInSlot(index, stack);
+                } else {
+                    IItemTransfer.super.setStackInSlot(index, stack);
+                }
+            }
+
             @NotNull
             @Override
-            public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+            public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate, boolean notifyChanges) {
                 return handler.insertItem(slot, stack, simulate);
             }
 
             @NotNull
             @Override
-            public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
                 return handler.extractItem(slot, amount, simulate);
             }
 
@@ -92,6 +102,17 @@ public class ItemTransferHelperImpl {
             @Override
             public boolean isItemValid(int slot, @NotNull ItemStack stack) {
                 return handler.isItemValid(slot, stack);
+            }
+
+            @NotNull
+            @Override
+            public Object createSnapshot() {
+                return new Object();
+            }
+
+            @Override
+            public void restoreFromSnapshot(Object snapshot) {
+
             }
         };
     }
@@ -117,14 +138,14 @@ public class ItemTransferHelperImpl {
                 if (cap.isPresent()) {
                     var target = cap.get();
                     for (int srcIndex = 0; srcIndex < source.getSlots(); srcIndex++) {
-                        ItemStack sourceStack = source.extractItem(srcIndex, Integer.MAX_VALUE, true);
+                        ItemStack sourceStack = source.extractItem(srcIndex, Integer.MAX_VALUE, true, false);
                         if (sourceStack.isEmpty() || !predicate.test(sourceStack)) {
                             continue;
                         }
                         ItemStack remainder = insertItem(target, sourceStack, true);
                         int amountToInsert = sourceStack.getCount() - remainder.getCount();
                         if (amountToInsert > 0) {
-                            sourceStack = source.extractItem(srcIndex, Math.min(maxAmount, amountToInsert), false);
+                            sourceStack = source.extractItem(srcIndex, Math.min(maxAmount, amountToInsert), false, true);
                             insertItem(target, sourceStack, false);
                             maxAmount -= Math.min(maxAmount, amountToInsert);
                             if (maxAmount <= 0) return;
@@ -237,7 +258,7 @@ public class ItemTransferHelperImpl {
                 emptySlots.add(i);
             }
             if (ItemHandlerHelper.canItemStacksStackRelaxed(stack, slotStack)) {
-                stack = handler.insertItem(i, stack, simulate);
+                stack = handler.insertItem(i, stack, simulate, !simulate);
                 if (stack.isEmpty()) {
                     return ItemStack.EMPTY;
                 }
@@ -245,7 +266,7 @@ public class ItemTransferHelperImpl {
         }
 
         for (int slot : emptySlots) {
-            stack = handler.insertItem(slot, stack, simulate);
+            stack = handler.insertItem(slot, stack, simulate, !simulate);
             if (stack.isEmpty()) {
                 return ItemStack.EMPTY;
             }
@@ -264,7 +285,7 @@ public class ItemTransferHelperImpl {
         for (int i = 0; i < slots; i++) {
             ItemStack slotStack = handler.getStackInSlot(i);
             if (slotStack.isEmpty()) {
-                stack = handler.insertItem(i, stack, simulate);
+                stack = handler.insertItem(i, stack, simulate, !simulate);
                 if (stack.isEmpty()) {
                     return ItemStack.EMPTY;
                 }

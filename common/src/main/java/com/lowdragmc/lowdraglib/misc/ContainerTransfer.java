@@ -1,8 +1,10 @@
 package com.lowdragmc.lowdraglib.misc;
 
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
+import lombok.Getter;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 
@@ -12,6 +14,7 @@ import javax.annotation.Nonnull;
  * @implNote InventoryItemTransfer
  */
 public class ContainerTransfer implements IItemTransfer {
+    @Getter
     private final Container inv;
 
     public ContainerTransfer(Container inv) {
@@ -49,7 +52,7 @@ public class ContainerTransfer implements IItemTransfer {
 
     @Override
     @Nonnull
-    public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+    public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate, boolean notifyChanges) {
         if (stack.isEmpty())
             return ItemStack.EMPTY;
 
@@ -73,6 +76,9 @@ public class ContainerTransfer implements IItemTransfer {
                     ItemStack copy = stack.copy();
                     copy.grow(stackInSlot.getCount());
                     getInv().setItem(slot, copy);
+                    if (notifyChanges) {
+                        onContentsChanged();
+                    }
                     getInv().setChanged();
                 }
 
@@ -84,6 +90,9 @@ public class ContainerTransfer implements IItemTransfer {
                     ItemStack copy = stack.split(m);
                     copy.grow(stackInSlot.getCount());
                     getInv().setItem(slot, copy);
+                    if (notifyChanges) {
+                        onContentsChanged();
+                    }
                     getInv().setChanged();
                     return stack;
                 } else {
@@ -101,6 +110,9 @@ public class ContainerTransfer implements IItemTransfer {
                 stack = stack.copy();
                 if (!simulate) {
                     getInv().setItem(slot, stack.split(m));
+                    if (notifyChanges) {
+                        onContentsChanged();
+                    }
                     getInv().setChanged();
                     return stack;
                 } else {
@@ -110,6 +122,9 @@ public class ContainerTransfer implements IItemTransfer {
             } else {
                 if (!simulate) {
                     getInv().setItem(slot, stack);
+                    if (notifyChanges) {
+                        onContentsChanged();
+                    }
                     getInv().setChanged();
                 }
                 return ItemStack.EMPTY;
@@ -120,7 +135,7 @@ public class ContainerTransfer implements IItemTransfer {
 
     @Override
     @Nonnull
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
+    public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
         if (amount == 0)
             return ItemStack.EMPTY;
 
@@ -141,6 +156,9 @@ public class ContainerTransfer implements IItemTransfer {
             int m = Math.min(stackInSlot.getCount(), amount);
 
             ItemStack decrStackSize = getInv().removeItem(slot, m);
+            if (notifyChanges) {
+                onContentsChanged();
+            }
             getInv().setChanged();
             return decrStackSize;
         }
@@ -161,7 +179,22 @@ public class ContainerTransfer implements IItemTransfer {
         return getInv().canPlaceItem(slot, stack);
     }
 
-    public Container getInv() {
-        return inv;
+    @NotNull
+    @Override
+    public Object createSnapshot() {
+        ItemStack[] copied = new ItemStack[inv.getContainerSize()];
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            copied[i] = inv.getItem(i).copy();
+        }
+        return copied;
+    }
+
+    @Override
+    public void restoreFromSnapshot(Object snapshot) {
+        if (snapshot instanceof ItemStack[] copied && copied.length == inv.getContainerSize()) {
+            for (int i = 0; i < inv.getContainerSize(); i++) {
+                inv.setItem(i, copied[i]);
+            }
+        }
     }
 }
