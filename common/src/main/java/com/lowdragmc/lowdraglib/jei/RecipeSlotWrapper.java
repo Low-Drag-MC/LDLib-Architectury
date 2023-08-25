@@ -158,18 +158,11 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     public void onPositionUpdate(RecipeLayoutWrapper<?> layoutWrapper) {
-        int posY = widget.getPosition().y - layoutWrapper.getWrapper().getTop();
-        int height = widget.getSize().height;
-        if (posY < 0) {
-            height += posY;
-            posY = 0;
-        }
-
         this.area = new ImmutableRect2i(
                 widget.getPosition().x - layoutWrapper.getWrapper().getLeft(),
-                posY,
+                widget.getPosition().y - layoutWrapper.getWrapper().getTop(),
                 widget.getSize().width,
-                height
+                widget.getSize().height
         );
         ((RecipeSlotAccessor) this).setArea(this.area);
         ((RecipeSlotAccessor) wrapperSlot).setArea(this.area);
