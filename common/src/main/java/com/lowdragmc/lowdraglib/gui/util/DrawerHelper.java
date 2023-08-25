@@ -1,5 +1,8 @@
 package com.lowdragmc.lowdraglib.gui.util;
 
+import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
+import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.shader.management.ShaderProgram;
 import com.lowdragmc.lowdraglib.client.shader.uniform.UniformCache;
@@ -24,6 +27,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -86,6 +91,12 @@ public class DrawerHelper {
     public static void drawFluidForGui(PoseStack poseStack, FluidStack contents, long tankCapacity, int startX, int startY, int widthT, int heightT) {
         ResourceLocation LOCATION_BLOCKS_TEXTURE = InventoryMenu.BLOCK_ATLAS;
         TextureAtlasSprite fluidStillSprite = FluidHelper.getStillTexture(contents);
+        if (fluidStillSprite == null) {
+            fluidStillSprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(MissingTextureAtlasSprite.getLocation());
+            if (Platform.isDevEnv()) {
+                LDLib.LOGGER.error("Missing fluid texture for fluid: " + contents.getDisplayName().getString());
+            }
+        }
         int fluidColor = FluidHelper.getColor(contents) | 0xff000000;
         int scaledAmount = (int) (contents.getAmount() * heightT / tankCapacity);
         if (contents.getAmount() > 0 && scaledAmount < 1) {

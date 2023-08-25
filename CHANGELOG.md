@@ -1,6 +1,5 @@
 # ChangeLog
 
 * fix fabric transfer api
-* fix compatibility with Continuity
-* fix jei crash
-* fix fabric model loading
+* make IRenderer events synchronized
+* check still texture existing

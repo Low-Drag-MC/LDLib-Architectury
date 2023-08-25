@@ -52,12 +52,15 @@ class ItemStorageProxyItemTransfer implements IItemTransfer {
         Storage<ItemVariant> handler = storage;
         if (views.get(slot) instanceof SingleStackStorage storage) {
             handler = storage;
+        } else if (slot != 0) {
+            return stack;
         }
         try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
-            copied.shrink(simulate ?
-                    (int) handler.simulateInsert(ItemVariant.of(stack), stack.getCount(), transaction) :
-                    (int) handler.insert(ItemVariant.of(stack), stack.getCount(), transaction));
-            transaction.commit();
+            var filled = (int) handler.insert(ItemVariant.of(stack), stack.getCount(), transaction);
+            copied.shrink(filled);
+            if (!simulate && filled > 0) {
+                transaction.commit();
+            }
         }
         return copied;
     }
@@ -67,16 +70,13 @@ class ItemStorageProxyItemTransfer implements IItemTransfer {
     public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
         var item = getStackInSlot(slot);
         if (item.isEmpty()) return ItemStack.EMPTY;
-        Storage<ItemVariant> handler = storage;
-        if (views.get(slot) instanceof SingleStackStorage storage) {
-            handler = storage;
-        }
         var copied = item.copy();
         try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
-            copied.setCount(simulate ?
-                    (int) handler.simulateExtract(ItemVariant.of(item), amount, transaction) :
-                    (int) handler.extract(ItemVariant.of(item), amount, transaction));
-            transaction.commit();
+            var extracted = (int) views.get(slot).extract(ItemVariant.of(item), amount, transaction);
+            copied.setCount(extracted);
+            if (!simulate && extracted > 0) {
+                transaction.commit();
+            }
         }
         return copied;
     }

@@ -2,7 +2,6 @@ package com.lowdragmc.lowdraglib.side.fluid.fabric;
 
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
-import lombok.val;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
@@ -71,17 +70,15 @@ class FluidStorageProxyFluidTransfer implements IFluidTransfer {
     @NotNull
     @Override
     public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
-        if (tank < views.size()) {
+        if (tank >= 0 && tank < views.size()) {
             long drained;
             var storage = views.get(tank);
-
             try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
                 drained = storage.extract(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction);
-                if (!simulate) {
+                if (!simulate && drained > 0) {
                     transaction.commit();
                 }
             }
-
             return resource.copy(drained);
         }
         return FluidStack.empty();
@@ -92,10 +89,10 @@ class FluidStorageProxyFluidTransfer implements IFluidTransfer {
         if (resource.isEmpty()) return 0;
         long filled;
         try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
-            filled = simulate ?
-                    storage.simulateInsert(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction) :
-                    storage.insert(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction);
-            transaction.commit();
+            filled = storage.insert(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction);
+            if (!simulate && filled > 0) {
+                transaction.commit();
+            }
         }
         return filled;
     }
@@ -106,11 +103,11 @@ class FluidStorageProxyFluidTransfer implements IFluidTransfer {
         if (resource.isEmpty()) return FluidStack.empty();
         var copied = resource.copy();
         try (Transaction transaction = Transaction.openNested(Transaction.getCurrentUnsafe())) {
-            var drained = simulate ?
-                    storage.simulateExtract(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction) :
-                    storage.extract(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction);
-            copied.setAmount(drained);
-            transaction.commit();
+            var extracted = storage.extract(FluidHelperImpl.toFluidVariant(resource), resource.getAmount(), transaction);
+            copied.setAmount(extracted);
+            if (!simulate && extracted > 0) {
+                transaction.commit();
+            }
         }
         return copied;
     }

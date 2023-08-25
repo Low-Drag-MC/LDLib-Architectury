@@ -10,6 +10,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
+
 /**
  * @author KilaBash
  * @date 2023/2/10
@@ -26,6 +28,7 @@ public class FluidHelper {
         throw new AssertionError();
     }
 
+    @Nullable
     @ExpectPlatform
     @Environment(EnvType.CLIENT)
     public static TextureAtlasSprite getStillTexture(FluidStack fluidStack) {

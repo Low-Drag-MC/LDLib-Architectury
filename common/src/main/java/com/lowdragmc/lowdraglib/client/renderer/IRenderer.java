@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 
 public interface IRenderer {
@@ -59,7 +60,9 @@ public interface IRenderer {
 
     @Environment(EnvType.CLIENT)
     default void registerEvent() {
-        EVENT_REGISTERS.add(this);
+        synchronized (EVENT_REGISTERS) {
+            EVENT_REGISTERS.add(this);
+        }
     }
 
     default boolean isRaw() {

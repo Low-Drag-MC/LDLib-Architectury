@@ -15,6 +15,8 @@ import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.fluids.FluidType;
 
+import javax.annotation.Nullable;
+
 /**
  * @author KilaBash
  * @date 2023/2/10
@@ -38,9 +40,11 @@ public class FluidHelperImpl {
         return IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(toFluidStack(fluidStack));
     }
 
+    @Nullable
     @OnlyIn(Dist.CLIENT)
     public static TextureAtlasSprite getStillTexture(FluidStack fluidStack) {
-        return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluidStack.getFluid()).getStillTexture(toFluidStack(fluidStack)));
+        var texture = IClientFluidTypeExtensions.of(fluidStack.getFluid()).getStillTexture(toFluidStack(fluidStack));
+        return texture == null ? null : Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
     }
 
     public static Component getDisplayName(FluidStack fluidStack) {
