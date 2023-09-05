@@ -29,14 +29,22 @@ public class LDLib {
             .registerTypeAdapter(ItemStack.class, ItemStackTypeAdapter.INSTANCE)
             .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
             .create();
+    @Deprecated
     public static File location;
 
     public static void init() {
         LOGGER.info("{} is initializing on platform: {}", NAME, Platform.platformName());
-        location = new File(Platform.getGamePath().toFile(), "ldlib");
-        if (location.mkdir()) {
-            LOGGER.info("create ldlib config folder");
+        getLDLibDir();
+    }
+
+    public static File getLDLibDir() {
+        if (location == null) {
+            location = new File(Platform.getGamePath().toFile(), "ldlib");
+            if (location.mkdir()) {
+                LOGGER.info("create ldlib config folder");
+            }
         }
+        return location;
     }
 
     public static ResourceLocation location(String path) {

@@ -33,7 +33,7 @@ public class UIEditorFactory extends UIFactory<UIEditorFactory> implements IUIHo
 	@Override
 	public ModularUI createUI(Player entityPlayer) {
 		return new ModularUI(this, entityPlayer)
-				.widget(new UIEditor(LDLib.location));
+				.widget(new UIEditor(LDLib.getLDLibDir()));
 	}
 
 	@Override
