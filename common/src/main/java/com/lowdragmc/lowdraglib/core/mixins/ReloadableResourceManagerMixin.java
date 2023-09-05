@@ -18,7 +18,7 @@ public abstract class ReloadableResourceManagerMixin {
     @ModifyVariable(method = "createReload", at = @At("HEAD"), index = 4, argsOnly = true)
     private List<PackResources> injectCreateReload(List<PackResources> resourcePacks) {
         var mutableList = new ArrayList<>(resourcePacks);
-        mutableList.add(new CustomResourcePack(LDLib.location,LDLib.MOD_ID, PackType.CLIENT_RESOURCES));
+        mutableList.add(new CustomResourcePack(LDLib.getLDLibDir(), LDLib.MOD_ID, PackType.CLIENT_RESOURCES));
         return mutableList;
     }
 
