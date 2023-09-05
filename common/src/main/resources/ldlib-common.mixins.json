@@ -28,6 +28,7 @@
     "BlockEntityMixin",
     "PackConfigMixin",
     "ReloadableResourceManagerMixin",
+    "WorldLoaderMixin",
     "accessor.AbstractContainerMenuAccessor",
     "accessor.ServerPlayerAccessor",
     "accessor.SlotAccessor",
