@@ -1,12 +1,18 @@
 package com.lowdragmc.lowdraglib;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
+import org.jetbrains.annotations.ApiStatus;
+
 import javax.annotation.Nullable;
 
 import java.nio.file.Path;
 
 public class Platform {
+
+    @ApiStatus.Internal
+    public static RegistryAccess FROZEN_REGISTRY_ACCESS;
 
     @ExpectPlatform
     public static String platformName() {
@@ -49,5 +55,10 @@ public class Platform {
     @ExpectPlatform
     public static Path getGamePath() {
         throw new AssertionError();
+    }
+
+    @Nullable
+    public static RegistryAccess getFrozenRegistry() {
+        return FROZEN_REGISTRY_ACCESS;
     }
 }
