@@ -77,6 +77,7 @@ repositories {
             includeGroup("com.simibubi.create")
         }
     }
+    maven { url = "https://jitpack.io/" } // Mixin Extras, Fabric ASM
     maven {
         // saps.dev Maven (KubeJS and Rhino)
         url = "https://maven.saps.dev/minecraft"
@@ -106,7 +107,7 @@ dependencies {
     modCompileOnly("dev.emi:emi-forge:${emi_version}")
 
     // KJS
-//    modImplementation("dev.latvian.mods:kubejs-forge:${kjs_version}")
+    modImplementation("dev.latvian.mods:kubejs-forge:${kjs_version}")
 
     //oculus
     modCompileOnly("maven.modrinth:rubidium:${rubidium_version}")

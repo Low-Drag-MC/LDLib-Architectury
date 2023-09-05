@@ -57,7 +57,7 @@ dependencies {
     modCompileOnly("dev.emi:emi-fabric:${emi_version}")
 
     // KJS
-//    modCompileOnly("dev.latvian.mods:kubejs-fabric:${kjs_version}")
+    modCompileOnly("dev.latvian.mods:kubejs-fabric:${kjs_version}")
 }
 
 publishing {

@@ -101,7 +101,7 @@ dependencies {
     modCompileOnly("dev.emi:emi-fabric:${emi_version}")
 
     // KJS
-//    modImplementation("dev.latvian.mods:kubejs-fabric:${kjs_version}")
+    modImplementation("dev.latvian.mods:kubejs-fabric:${kjs_version}")
 
     //iris
     modCompileOnly("maven.modrinth:sodium:${sodium_version}") { transitive = false }
