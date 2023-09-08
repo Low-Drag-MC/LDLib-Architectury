@@ -31,6 +31,7 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
     private boolean isDragging;
     public final ModularWrapper<?> modular;
     public final List<Widget> slots;
+    private int lastX, lastY;
 
     public ModularWrapperWidget(ModularWrapper<?> modular, List<Widget> slots) {
         this.modular = modular;
@@ -44,6 +45,8 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
 
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        this.lastX = pMouseX;
+        this.lastY = pMouseY;
         modular.draw(pPoseStack, pMouseX, pMouseY, pPartialTick);
     }
 
@@ -110,9 +113,13 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
         }
         for (Widget slot : slots) {
             if (slot instanceof ModularSlotWidget slotWidget) {
-                EmiScreenManager.stackInteraction(new EmiStackInteraction(slotWidget.getStack(), slotWidget.getRecipe(), true),
-                        bind -> bind.matchesKey(pKeyCode, pScanCode));
-                return true;
+                if (slotWidget.getBounds().contains(lastX, lastY)) {
+                    if (slotWidget.slotInteraction(bind -> bind.matchesKey(pKeyCode, pScanCode))) {
+                        return true;
+                    }
+                    return EmiScreenManager.stackInteraction(new EmiStackInteraction(slotWidget.getStack(), slotWidget.getRecipe(), true),
+                            bind -> bind.matchesKey(pKeyCode, pScanCode));
+                }
             }
         }
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);

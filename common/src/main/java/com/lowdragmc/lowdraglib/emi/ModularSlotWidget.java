@@ -7,10 +7,14 @@ import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
 import dev.emi.emi.bom.BoM;
+import dev.emi.emi.config.EmiConfig;
+import dev.emi.emi.input.EmiBind;
 import dev.emi.emi.runtime.EmiHistory;
 import dev.emi.emi.screen.EmiScreenManager;
 import dev.emi.emi.screen.RecipeScreen;
 import lombok.Getter;
+
+import java.util.function.Function;
 
 /**
  * @author KilaBash
@@ -43,12 +47,30 @@ public class ModularSlotWidget extends Widget {
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int button) {
         if (bounds.contains(mouseX, mouseY)) {
-            if (button == 0 && getRecipe() != null && getRecipe().supportsRecipeTree() && RecipeScreen.resolve != null) {
+            if (slotInteraction(bind -> bind.matchesMouse(button))) {
+                return true;
+            }
+            return EmiScreenManager.stackInteraction(new EmiStackInteraction(getStack(), getRecipe(), true),
+                    bind -> bind.matchesMouse(button));
+        }
+        return false;
+    }
+
+    public boolean canResolve() {
+        EmiRecipe recipe = getRecipe();
+        return recipe != null && recipe.supportsRecipeTree() && RecipeScreen.resolve != null;
+    }
+
+    public boolean slotInteraction(Function<EmiBind, Boolean> function) {
+        if (canResolve()) {
+            if (function.apply(EmiConfig.defaultStack)) {
+                BoM.addRecipe(RecipeScreen.resolve, getRecipe());
+                EmiHistory.pop();
+                return true;
+            } else if (function.apply(EmiConfig.viewRecipes)) {
                 BoM.addResolution(RecipeScreen.resolve, getRecipe());
                 EmiHistory.pop();
                 return true;
-            } else {
-                return EmiScreenManager.stackInteraction(new EmiStackInteraction(stack, getRecipe(), true), bind -> bind.matchesMouse(button));
             }
         }
         return false;
