@@ -60,11 +60,13 @@ public class FluidHelper {
         throw new AssertionError();
     }
 
+    @Nullable
     @ExpectPlatform
     public static SoundEvent getEmptySound(FluidStack fluidStack) {
         throw new AssertionError();
     }
 
+    @Nullable
     @ExpectPlatform
     public static SoundEvent getFillSound(FluidStack fluidStack) {
         throw new AssertionError();

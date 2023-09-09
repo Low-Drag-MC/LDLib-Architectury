@@ -373,7 +373,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             }
             if (performedFill) {
                 SoundEvent soundevent = FluidHelper.getFillSound(initialFluid);
-                player.level().playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                if (soundevent != null) {
+                    player.level().playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
                 gui.getModularUIContainer().setCarried(currentStack);
                 return currentStack.getCount();
             }
@@ -395,7 +397,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             var filledFluid = fluidTank.getFluid();
             if (performedEmptying) {
                 SoundEvent soundevent = FluidHelper.getEmptySound(filledFluid);
-                player.level().playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                if (soundevent != null) {
+                    player.level().playSound(null, player.position().x, player.position().y + 0.5, player.position().z, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
                 gui.getModularUIContainer().setCarried(currentStack);
                 return currentStack.getCount();
             }

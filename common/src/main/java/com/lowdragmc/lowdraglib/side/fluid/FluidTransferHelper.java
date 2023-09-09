@@ -163,7 +163,9 @@ public class FluidTransferHelper {
                     tryFluidTransfer(handler, fluidSource, maxAmount, true);
                     if (player != null) {
                         SoundEvent soundevent = FluidHelper.getFillSound(simulatedTransfer);
-                        player.level().playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                        if (soundevent != null) {
+                            player.level().playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                        }
                     }
                 } else {
                     handler.fill(simulatedTransfer, true);
@@ -201,7 +203,9 @@ public class FluidTransferHelper {
 
             if (doDrain && player != null) {
                 SoundEvent soundevent = FluidHelper.getEmptySound(transfer);
-                player.level().playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                if (soundevent != null) {
+                    player.level().playSound(null, player.getX(), player.getY() + 0.5, player.getZ(), soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
             }
 
             return new FluidActionResult(getContainerItem(itemStorage, handler));
@@ -522,7 +526,9 @@ public class FluidTransferHelper {
             FluidStack result = tryFluidTransfer(handler, fluidSource, resource, true);
             if (!result.isEmpty()) {
                 SoundEvent soundevent = FluidHelper.getEmptySound(resource);
-                level.playSound(player, pos, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                if (soundevent != null) {
+                    level.playSound(player, pos, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
                 return true;
             }
         }
