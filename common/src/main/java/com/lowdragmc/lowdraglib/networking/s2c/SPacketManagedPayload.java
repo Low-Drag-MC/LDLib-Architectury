@@ -91,11 +91,11 @@ public class SPacketManagedPayload extends PacketIntLocation implements IPacket 
         var syncedFields = tile.getRootStorage().getSyncFields();
         for (int i = 0; i < syncedFields.length; i++) {
             var field = syncedFields[i];
-            if (force || field.isChanged()) {
+            if (force || field.isSyncDirty()) {
                 changed.set(i);
                 var key = field.getKey();
                 payloads.put(key, key.readSyncedField(field, force));
-                field.setChanged(false);
+                field.clearSyncDirty();
             }
         }
         var extra = new CompoundTag();

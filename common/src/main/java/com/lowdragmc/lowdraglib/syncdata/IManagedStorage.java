@@ -24,9 +24,14 @@ public interface IManagedStorage {
     IRef[] getNonLazyFields();
 
     /**
-     * get managed dirty fields
+     * get managed sync dirty fields
      */
-    boolean hasDirtyFields();
+    boolean hasDirtySyncFields();
+
+    /**
+     * get managed persisted dirty fields
+     */
+    boolean hasDirtyPersistedFields();
 
     /**
      * get managed persisted fields
@@ -66,7 +71,7 @@ public interface IManagedStorage {
      * @param key the key of the field
      */
     default void markDirty(ManagedKey key) {
-        getFieldByKey(key).setChanged(true);
+        getFieldByKey(key).markAsDirty();
     }
 
     /**
@@ -74,7 +79,7 @@ public interface IManagedStorage {
      */
     default void markAllDirty() {
         for (IRef syncField : getSyncFields()) {
-            syncField.setChanged(true);
+            syncField.markAsDirty();
         }
     }
 

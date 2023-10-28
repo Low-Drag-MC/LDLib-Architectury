@@ -41,57 +41,62 @@ public class ManagedArrayLikeRef extends ManagedRef implements IArrayRef {
                 this.oldValue = null;
                 this.oldLength = 0;
             }
-            setChanged(true);
+            this.markAsDirty();
         }
     }
 
     protected boolean checkArrayLikeChanges(@NotNull Object oldValue, @NotNull Object newValue) {
         if (isArray) {
             if(Array.getLength(newValue) != oldLength) {
-                setChanged(true);
+                this.markAsDirty();
                 dirty.clear();
                 return true;
             }
             Object[] a = (Object[]) oldValue;
             Object[] b = (Object[]) newValue;
+            var dirty = false;
             for (int i = 0; i < a.length; i++) {
                 if (SyncUtils.isChanged(a[i], b[i])) {
                     setChanged(i);
+                    dirty = true;
                 }
             }
-            return isChanged();
+            return dirty;
         }
         if (newValue instanceof Collection<?> collection) {
             if(collection.size() != oldLength) {
-                setChanged(true);
+                this.markAsDirty();
                 dirty.clear();
                 return true;
             }
             var array = (Object[]) oldValue;
             int i = 0;
+            var dirty = false;
             for (var item : collection) {
                 var oldItem = array[i];
                 if ((oldItem == null && item != null) || (oldItem != null && item == null) || (oldItem != null && SyncUtils.isChanged(oldItem, item))) {
                     setChanged(i);
+                    dirty = true;
                 }
                 i++;
             }
-            return isChanged();
+            return dirty;
         }
         throw new IllegalArgumentException("Value %s is not an array or collection".formatted(newValue));
     }
 
     @Override
-    public void setChanged(boolean changed) {
-        super.setChanged(changed);
-        if (!changed) {
-            dirty.clear();
-        }
+    public void markAsDirty() {
+        super.markAsDirty();
+        //TODO
+//        if (!changed) {
+//            dirty.clear();
+//        }
     }
 
     @Override
     public void setChanged(int index) {
-        setChanged(true);
+        markAsDirty();
         dirty.add(index);
     }
 

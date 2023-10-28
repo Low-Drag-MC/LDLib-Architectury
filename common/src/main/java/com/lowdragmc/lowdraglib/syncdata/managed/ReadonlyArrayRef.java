@@ -65,7 +65,7 @@ public class ReadonlyArrayRef extends ReadonlyRef implements IArrayRef {
                     for (IRef field : managed.getSyncStorage().getNonLazyFields()) {
                         field.update();
                     }
-                    if (managed.getSyncStorage().hasDirtyFields()) {
+                    if (managed.getSyncStorage().hasDirtySyncFields() || managed.getSyncStorage().hasDirtyPersistedFields()) {
                         setChanged(i);
                     }
                 }
@@ -77,7 +77,7 @@ public class ReadonlyArrayRef extends ReadonlyRef implements IArrayRef {
                     for (IRef field : managed.getSyncStorage().getNonLazyFields()) {
                         field.update();
                     }
-                    if (managed.getSyncStorage().hasDirtyFields()) {
+                    if (managed.getSyncStorage().hasDirtySyncFields() || managed.getSyncStorage().hasDirtyPersistedFields()) {
                         setChanged(i);
                     }
                 }
@@ -87,16 +87,17 @@ public class ReadonlyArrayRef extends ReadonlyRef implements IArrayRef {
     }
 
     @Override
-    public void setChanged(boolean changed) {
-        super.setChanged(changed);
-        if (!changed) {
-            dirty.clear();
-        }
+    public void markAsDirty() {
+        super.markAsDirty();
+        //TODO
+//        if (!changed) {
+//            dirty.clear();
+//        }
     }
 
     @Override
     public void setChanged(int index) {
-        setChanged(true);
+        markAsDirty();
         dirty.add(index);
     }
 

@@ -2,14 +2,22 @@ package com.lowdragmc.lowdraglib.syncdata.managed;
 
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import lombok.Getter;
+import lombok.Setter;
 
 public class ManagedRef implements IRef {
     protected final IManagedVar<?> field;
-    protected boolean changed;
+    @Getter
+    protected boolean isSyncDirty, isPersistedDirty;
     protected boolean lazy = false;
     protected ManagedKey key;
-    protected BooleanConsumer onChanged = changed -> {
+    @Setter
+    protected BooleanConsumer onSyncListener = changed -> {
     };
+    @Setter
+    protected BooleanConsumer onPersistedListener = changed -> {
+    };
+
 
     protected ManagedRef(IManagedVar<?> field) {
         this.field = field;
@@ -54,13 +62,32 @@ public class ManagedRef implements IRef {
         return (T) field;
     }
 
-    public boolean isChanged() {
-        return changed;
+    @Override
+    public void clearSyncDirty() {
+        isSyncDirty = false;
+        if (key.isDestSync()) {
+            onSyncListener.accept(false);
+        }
     }
 
-    public void setChanged(boolean changed) {
-        onChanged.accept(changed);
-        this.changed = changed;
+    @Override
+    public void clearPersistedDirty() {
+        isPersistedDirty = false;
+        if (key.isPersist()) {
+            onPersistedListener.accept(false);
+        }
+    }
+
+    @Override
+    public void markAsDirty() {
+        if (key.isDestSync()) {
+            isSyncDirty = true;
+            onSyncListener.accept(true);
+        }
+        if (key.isPersist()) {
+            isPersistedDirty = true;
+            onPersistedListener.accept(true);
+        }
     }
 
     @Override
@@ -76,10 +103,6 @@ public class ManagedRef implements IRef {
     protected ManagedRef setLazy(boolean lazy) {
         this.lazy = lazy;
         return this;
-    }
-
-    public void setChangeListener(BooleanConsumer listener) {
-        this.onChanged = listener;
     }
 
     public void update() {
@@ -98,7 +121,7 @@ public class ManagedRef implements IRef {
             int newValue = this.<IManagedVar.Int>getField().intValue();
             if (oldValue != newValue) {
                 oldValue = newValue;
-                setChanged(true);
+                markAsDirty();
             }
         }
     }
@@ -116,7 +139,7 @@ public class ManagedRef implements IRef {
             long newValue = this.<IManagedVar.Long>getField().longValue();
             if (oldValue != newValue) {
                 oldValue = newValue;
-                setChanged(true);
+                markAsDirty();
             }
         }
     }
@@ -134,7 +157,7 @@ public class ManagedRef implements IRef {
             float newValue = this.<IManagedVar.Float>getField().floatValue();
             if (oldValue != newValue) {
                 oldValue = newValue;
-                setChanged(true);
+                markAsDirty();
             }
         }
     }
@@ -152,7 +175,7 @@ public class ManagedRef implements IRef {
             double newValue = this.<IManagedVar.Double>getField().doubleValue();
             if (oldValue != newValue) {
                 oldValue = newValue;
-                setChanged(true);
+                markAsDirty();
             }
         }
     }
@@ -170,7 +193,7 @@ public class ManagedRef implements IRef {
             boolean newValue = this.<IManagedVar.Boolean>getField().booleanValue();
             if (oldValue != newValue) {
                 oldValue = newValue;
-                setChanged(true);
+                markAsDirty();
             }
         }
     }
@@ -188,7 +211,7 @@ public class ManagedRef implements IRef {
             byte newValue = this.<IManagedVar.Byte>getField().byteValue();
             if (oldValue != newValue) {
                 oldValue = newValue;
-                setChanged(true);
+                markAsDirty();
             }
         }
     }
@@ -206,7 +229,7 @@ public class ManagedRef implements IRef {
             short newValue = this.<IManagedVar.Short>getField().shortValue();
             if (oldValue != newValue) {
                 oldValue = newValue;
-                setChanged(true);
+                markAsDirty();
             }
         }
     }
@@ -224,7 +247,7 @@ public class ManagedRef implements IRef {
             char newValue = this.<IManagedVar.Char>getField().charValue();
             if (oldValue != newValue) {
                 oldValue = newValue;
-                setChanged(true);
+                markAsDirty();
             }
         }
     }

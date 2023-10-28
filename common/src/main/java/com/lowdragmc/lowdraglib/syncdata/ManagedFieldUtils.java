@@ -87,18 +87,18 @@ public class ManagedFieldUtils {
     }
 
     public interface FieldChangedCallback {
-        void onFieldChanged(int indexInSync, int indexInPersist, boolean changed);
+        void onFieldChanged(IRef ref, int index, boolean changed);
     }
 
 
-    public static FieldRefs getFieldRefs(ManagedKey[] keys, Object obj, FieldChangedCallback callback) {
+    public static FieldRefs getFieldRefs(ManagedKey[] keys, Object obj, FieldChangedCallback syncFieldChangedCallback, FieldChangedCallback persistedFieldChangedCallback) {
         List<IRef> syncedFields = new ArrayList<>();
         List<IRef> persistedFields = new ArrayList<>();
         List<IRef> nonLazyFields = new ArrayList<>();
         Map<ManagedKey, IRef> fieldRefMap = new HashMap<>();
         for (ManagedKey key : keys) {
-            var fieldObj = key.createRef(obj);
-            fieldObj.setChanged(true);
+            final var fieldObj = key.createRef(obj);
+            fieldObj.markAsDirty();
             fieldRefMap.put(key, fieldObj);
             if (!fieldObj.isLazy()) {
                 nonLazyFields.add(fieldObj);
@@ -115,7 +115,8 @@ public class ManagedFieldUtils {
             }
             int finalSyncIndex = syncIndex;
             int finalPersistIndex = persistIndex;
-            fieldObj.setChangeListener((changed) -> callback.onFieldChanged(finalSyncIndex, finalPersistIndex, changed));
+            fieldObj.setOnSyncListener((changed) -> syncFieldChangedCallback.onFieldChanged(fieldObj, finalSyncIndex, changed));
+            fieldObj.setOnPersistedListener((changed) -> persistedFieldChangedCallback.onFieldChanged(fieldObj, finalPersistIndex, changed));
         }
         return new FieldRefs(
                 syncedFields.toArray(IRef[]::new),

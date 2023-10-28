@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  */
 public interface IArrayRef extends IRef {
     default void setChanged(int index) {
-        setChanged(true);
+        markAsDirty();
     }
 
     IntSet getChanged();

@@ -47,7 +47,7 @@ public class IManagedAccessor extends ReadonlyAccessor {
         var list = new ListTag();
         for (int i = 0; i < syncedFields.length; i++) {
             var field = syncedFields[i];
-            if (force || field.isChanged()) {
+            if (force || field.isSyncDirty()) {
                 changed.set(i);
                 var key = field.getKey();
 
@@ -60,7 +60,7 @@ public class IManagedAccessor extends ReadonlyAccessor {
                 }
                 list.add(payloadTag);
 
-                field.setChanged(false);
+                field.clearSyncDirty();
             }
         }
         tag.putByteArray("c", changed.toByteArray());

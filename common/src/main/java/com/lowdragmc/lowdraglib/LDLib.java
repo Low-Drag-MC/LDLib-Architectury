@@ -67,7 +67,7 @@ public class LDLib {
     }
 
     public static boolean isJeiLoaded() {
-        return !isReiLoaded() && isModLoaded(MODID_JEI);
+        return !isEmiLoaded() && !isReiLoaded() && isModLoaded(MODID_JEI);
     }
 
     public static boolean isReiLoaded() {

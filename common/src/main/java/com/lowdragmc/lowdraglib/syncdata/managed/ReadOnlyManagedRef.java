@@ -29,13 +29,13 @@ public class ReadOnlyManagedRef extends ManagedRef {
     public void update() {
         Object newValue = getField().value();
         if ((wasNull && newValue != null) || (!wasNull && newValue == null)) {
-            setChanged(true);
+            markAsDirty();
         }
         wasNull = newValue == null;
         if (newValue != null) {
             var newUid = getReadOnlyField().serializeUid(newValue);
             if (!newUid.equals(lastUid) || getReadOnlyField().isDirty(newValue)) {
-                setChanged(true);
+                markAsDirty();
             }
             lastUid = newUid;
         }

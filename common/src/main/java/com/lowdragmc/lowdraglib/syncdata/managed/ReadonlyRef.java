@@ -4,15 +4,23 @@ import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
 import com.lowdragmc.lowdraglib.syncdata.IManaged;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.lang.ref.WeakReference;
 
 public class ReadonlyRef implements IRef {
     protected final boolean lazy;
     private ManagedKey key;
-    private boolean changed;
-    protected BooleanConsumer onChanged = changed -> {
+    @Getter
+    private boolean isSyncDirty, isPersistedDirty;
+    @Setter
+    protected BooleanConsumer onSyncListener = changed -> {
     };
+    @Setter
+    protected BooleanConsumer onPersistedListener = changed -> {
+    };
+
     protected final WeakReference<?> reference;
 
     public ReadonlyRef(boolean lazy, Object value) {
@@ -38,11 +46,11 @@ public class ReadonlyRef implements IRef {
         var onContentChanged = handler.getOnContentsChanged();
         if (onContentChanged != null) {
             handler.setOnContentsChanged(() -> {
-                setChanged(true);
+                markAsDirty();
                 onContentChanged.run();
             });
         } else {
-            handler.setOnContentsChanged(() -> setChanged(true));
+            handler.setOnContentsChanged(() -> markAsDirty());
         }
     }
 
@@ -61,31 +69,72 @@ public class ReadonlyRef implements IRef {
     }
 
     @Override
-    public boolean isChanged() {
-        return changed;
+    public void clearSyncDirty() {
+        isSyncDirty = false;
+        if (readRaw() instanceof IManaged managed) {
+            for (var field : managed.getSyncStorage().getSyncFields()) {
+                field.clearSyncDirty();
+            }
+        }
+        if (key.isDestSync()) {
+            onSyncListener.accept(false);
+        }
     }
 
     @Override
-    public void setChanged(boolean changed) {
-        onChanged.accept(changed);
-        this.changed = changed;
+    public void clearPersistedDirty() {
+        isPersistedDirty = false;
+        if (readRaw() instanceof IManaged managed) {
+            for (var field : managed.getSyncStorage().getPersistedFields()) {
+                field.clearPersistedDirty();
+            }
+        }
+        if (key.isPersist()) {
+            onPersistedListener.accept(false);
+        }
+    }
+
+    @Override
+    public void markAsDirty() {
+        if (key.isDestSync()) {
+            isSyncDirty = true;
+            onSyncListener.accept(true);
+        }
+        if (key.isPersist()) {
+            isPersistedDirty = true;
+            onPersistedListener.accept(true);
+        }
     }
 
     @Override
     public void update() {
         if (readRaw() instanceof IManaged managed) {
-            for (IRef field : managed.getSyncStorage().getNonLazyFields()) {
+            var storage = managed.getSyncStorage();
+
+            for (IRef field : storage.getNonLazyFields()) {
                 field.update();
             }
-            if (managed.getSyncStorage().hasDirtyFields()) {
-                setChanged(true);
+
+            if (storage.hasDirtySyncFields()) {
+                if (key.isDestSync()) {
+                    markAsDirty();
+                } else {
+                    for (var field : storage.getSyncFields()) {
+                        field.clearSyncDirty();
+                    }
+                }
+            }
+
+            if (storage.hasDirtyPersistedFields()) {
+                if (key.isPersist()) {
+                    markAsDirty();
+                } else {
+                    for (var field : storage.getPersistedFields()) {
+                        field.clearPersistedDirty();
+                    }
+                }
             }
         }
-    }
-
-    @Override
-    public void setChangeListener(BooleanConsumer listener) {
-        this.onChanged = listener;
     }
 
     @Override

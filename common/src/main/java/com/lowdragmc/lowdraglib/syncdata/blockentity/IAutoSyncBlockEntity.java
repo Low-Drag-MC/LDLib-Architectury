@@ -39,7 +39,7 @@ public interface IAutoSyncBlockEntity extends IManagedBlockEntity {
         for (IRef field : getNonLazyFields()) {
             field.update();
         }
-        if (getRootStorage().hasDirtyFields()) {
+        if (getRootStorage().hasDirtySyncFields()) {
             var packet = SPacketManagedPayload.of(this, false);
             LDLNetworking.NETWORK.sendToTrackingChunk(packet, Objects.requireNonNull(this.getSelf().getLevel()).getChunkAt(this.getCurrentPos()));
         }

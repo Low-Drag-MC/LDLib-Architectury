@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.syncdata;
 
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
+import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 
 public interface IManaged {
 
@@ -15,7 +16,25 @@ public interface IManaged {
     IManagedStorage getSyncStorage();
 
     /**
-     * on field updated
+     * on field updated.
+     * it may be called in any thread if you are using {@link com.lowdragmc.lowdraglib.syncdata.blockentity.IAsyncAutoSyncBlockEntity}.
+     */
+    default void onSyncChanged(IRef ref, boolean isDirty) {
+    }
+
+    /**
+     * on field updated.
+     * it may be called in any thread if you are using {@link com.lowdragmc.lowdraglib.syncdata.blockentity.IAsyncAutoSyncBlockEntity}.
+     */
+    default void onPersistedChanged(IRef ref, boolean isDirty) {
+        if (isDirty) {
+            onChanged();
+            ref.clearPersistedDirty();
+        }
+    }
+
+    /**
+     * notify persisted. it may be called in any thread
      */
     void onChanged();
 
@@ -37,7 +56,7 @@ public interface IManaged {
      * @param name the key of the field, usually its name
      */
     default void markDirty(String name) {
-        getSyncStorage().getFieldByKey(getFieldHolder().getSyncedFieldIndex(name)).setChanged(true);
+        getSyncStorage().getFieldByKey(getFieldHolder().getSyncedFieldIndex(name)).markAsDirty();
     }
 
 }
