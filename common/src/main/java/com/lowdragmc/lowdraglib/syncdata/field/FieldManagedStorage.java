@@ -10,7 +10,8 @@ public class FieldManagedStorage implements IManagedStorage {
 
     private final IManaged owner;
 
-    private BitSet dirtyFields;
+    private BitSet dirtySyncFields;
+    private BitSet dirtyPersistedFields;
 
     private IRef[] syncFields;
 
@@ -66,20 +67,24 @@ public class FieldManagedStorage implements IManagedStorage {
             }
             ManagedKey[] fields = owner.getFieldHolder().getFields();
 
-            var result = ManagedFieldUtils.getFieldRefs(fields, owner, (iS, iP, changed) -> {
-                if (dirtyFields != null && iS >= 0) {
-                    dirtyFields.set(iS, changed);
+            var result = ManagedFieldUtils.getFieldRefs(fields, owner, (ref, index, changed) -> {
+                if (dirtySyncFields != null && index >= 0) {
+                    dirtySyncFields.set(index, changed);
+                    owner.onSyncChanged(ref, changed);
                 }
-                if (changed) {
-                    if (iP >= 0) {
-                        owner.onChanged();
-                    }
+            }, (ref, index, changed) -> {
+                if (dirtyPersistedFields != null && index >= 0) {
+                    dirtyPersistedFields.set(index, changed);
+                    owner.onPersistedChanged(ref, changed);
                 }
             });
 
             syncFields = result.syncedRefs();
-            dirtyFields = new BitSet(syncFields.length);
             persistedFields = result.persistedRefs();
+
+            dirtySyncFields = new BitSet(syncFields.length);
+            dirtyPersistedFields = new BitSet(result.persistedRefs().length);
+
             nonLazyFields = result.nonLazyFields();
             fieldMap = result.fieldRefMap();
             initialized = true;
@@ -98,10 +103,14 @@ public class FieldManagedStorage implements IManagedStorage {
     }
 
     @Override
-    public boolean hasDirtyFields() {
-        return !dirtyFields.isEmpty();
+    public boolean hasDirtySyncFields() {
+        return !dirtySyncFields.isEmpty();
     }
 
+    @Override
+    public boolean hasDirtyPersistedFields() {
+        return !dirtyPersistedFields.isEmpty();
+    }
 
     public IRef[] getPersistedFields() {
         init();

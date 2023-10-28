@@ -92,9 +92,19 @@ public class MultiManagedStorage implements IManagedStorage {
     }
 
     @Override
-    public boolean hasDirtyFields() {
+    public boolean hasDirtySyncFields() {
         for (IManagedStorage storage : storages) {
-            if (storage.hasDirtyFields()) {
+            if (storage.hasDirtySyncFields()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasDirtyPersistedFields() {
+        for (IManagedStorage storage : storages) {
+            if (storage.hasDirtyPersistedFields()) {
                 return true;
             }
         }

@@ -11,14 +11,29 @@ public interface IRef {
     ManagedKey getKey();
 
     /**
-     * whether it has changed.
+     * whether it is dirty.
      */
-    boolean isChanged();
+    boolean isSyncDirty();
 
     /**
-     * mark it as changed or not.
+     * whether it is dirty.
      */
-    void setChanged(boolean changed);
+    boolean isPersistedDirty();
+
+    /**
+     * clear dirty mark.
+     */
+    void clearSyncDirty();
+
+    /**
+     * clear dirty mark.
+     */
+    void clearPersistedDirty();
+
+    /**
+     * mark it as dirty.
+     */
+    void markAsDirty();
 
     /**
      * called to automatically check its internal changed per tick.
@@ -29,7 +44,12 @@ public interface IRef {
     /**
      * listener should be called while it has changed.
      */
-    void setChangeListener(BooleanConsumer listener);
+    void setOnSyncListener(BooleanConsumer listener);
+
+    /**
+     * listener should be called while it has changed.
+     */
+    void setOnPersistedListener(BooleanConsumer listener);
 
     /**
      * is a lazy ref

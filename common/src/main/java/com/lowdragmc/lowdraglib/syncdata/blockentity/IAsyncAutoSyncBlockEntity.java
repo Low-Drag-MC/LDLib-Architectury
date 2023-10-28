@@ -40,7 +40,7 @@ public interface IAsyncAutoSyncBlockEntity extends IAutoSyncBlockEntity, IAsyncL
             for (IRef field : getNonLazyFields()) {
                 field.update();
             }
-            if (getRootStorage().hasDirtyFields()) {
+            if (getRootStorage().hasDirtySyncFields()) {
                 Platform.getMinecraftServer().execute(() -> {
                     var packet = SPacketManagedPayload.of(this, false);
                     LDLNetworking.NETWORK.sendToTrackingChunk(packet, Objects.requireNonNull(this.getSelf().getLevel()).getChunkAt(this.getCurrentPos()));
