@@ -102,6 +102,7 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
                 buffer.writeUtf(lastTextValue);
             }
         } else {
+            buffer.writeBoolean(false);
             buffer.writeUtf(lastTextValue);
         }
     }
