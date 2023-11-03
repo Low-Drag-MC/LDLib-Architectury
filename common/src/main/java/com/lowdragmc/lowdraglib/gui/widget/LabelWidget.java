@@ -8,7 +8,6 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,8 +15,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 @Configurable(name = "ldlib.gui.editor.register.widget.label", collapse = false)
@@ -27,6 +28,10 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
     @Setter
     @Nonnull
     protected Supplier<String> textSupplier;
+
+    @Setter
+    @Nullable
+    protected Component component;
 
     @Configurable(name = "ldlib.gui.editor.name.text")
     private String lastTextValue = "";
@@ -44,6 +49,17 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
 
     public LabelWidget(int xPosition, int yPosition, String text) {
         this(xPosition, yPosition, ()->text);
+    }
+
+    public LabelWidget(int xPosition, int yPosition, Component component) {
+        super(new Position(xPosition, yPosition), new Size(10, 10));
+        setDropShadow(true);
+        setTextColor(-1);
+        this.component = component;
+        if (isRemote()) {
+            lastTextValue = component.getString();
+            updateSize();
+        }
     }
 
     public LabelWidget(int xPosition, int yPosition, Supplier<String> text) {
@@ -64,6 +80,7 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
 
     public LabelWidget setTextColor(int color) {
         this.color = color;
+        if (this.component != null) this.component = this.component.copy().withStyle(this.component.getStyle().withColor(color));
         return this;
     }
 
@@ -76,21 +93,41 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
     public void writeInitialData(FriendlyByteBuf buffer) {
         super.writeInitialData(buffer);
         if (!isClientSideWidget) {
-            this.lastTextValue = textSupplier.get();
+            if (this.component != null) {
+                buffer.writeBoolean(true);
+                buffer.writeComponent(this.component);
+            } else {
+                buffer.writeBoolean(false);
+                this.lastTextValue = textSupplier.get();
+                buffer.writeUtf(lastTextValue);
+            }
+        } else {
+            buffer.writeUtf(lastTextValue);
         }
-        buffer.writeUtf(lastTextValue);
     }
 
     @Override
     public void readInitialData(FriendlyByteBuf buffer) {
         super.readInitialData(buffer);
-        this.lastTextValue = buffer.readUtf();
+        if (buffer.readBoolean()) {
+            this.component = buffer.readComponent();
+            this.lastTextValue = component.getString();
+        } else {
+            this.lastTextValue = buffer.readUtf();
+        }
     }
 
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
         if (!isClientSideWidget) {
+            if (this.component != null) {
+                String latest = component.getString();
+                if (!latest.equals(lastTextValue)) {
+                    this.lastTextValue = latest;
+                    writeUpdateInfo(-2, buffer -> buffer.writeComponent(this.component));
+                }
+            }
             String latest = textSupplier.get();
             if (!latest.equals(lastTextValue)) {
                 this.lastTextValue = latest;
@@ -105,6 +142,10 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
         if (id == -1) {
             this.lastTextValue = buffer.readUtf();
             updateSize();
+        } else if(id == -2) {
+            this.component = buffer.readComponent();
+            this.lastTextValue = component.getString();
+            updateSize();
         } else {
             super.readUpdateInfo(id, buffer);
         }
@@ -115,7 +156,7 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
     public void updateScreen() {
         super.updateScreen();
         if (isClientSideWidget) {
-            String latest = textSupplier.get();
+            String latest = component == null ? textSupplier.get() : component.getString();
             if (!latest.equals(lastTextValue)) {
                 this.lastTextValue = latest;
                 updateSize();
@@ -126,20 +167,24 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
     @Environment(EnvType.CLIENT)
     private void updateSize() {
         Font fontRenderer = Minecraft.getInstance().font;
-        setSize(new Size(fontRenderer.width(LocalizationUtils.format(lastTextValue)), fontRenderer.lineHeight));
+        setSize(new Size(this.component == null ? fontRenderer.width(LocalizationUtils.format(lastTextValue)) : fontRenderer.width(this.component), fontRenderer.lineHeight));
     }
 
     @Override
     @Environment(EnvType.CLIENT)
     public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
-        String suppliedText = LocalizationUtils.format(lastTextValue);
-        String[] split = suppliedText.split("\n");
         Font fontRenderer = Minecraft.getInstance().font;
         Position position = getPosition();
-        for (int i = 0; i < split.length; i++) {
-            int y = position.y + (i * (fontRenderer.lineHeight + 2));
-            graphics.drawString(fontRenderer, split[i], position.x, y, color, dropShadow);
+        if (component == null) {
+            String suppliedText = LocalizationUtils.format(lastTextValue);
+            String[] split = suppliedText.split("\n");
+            for (int i = 0; i < split.length; i++) {
+                int y = position.y + (i * (fontRenderer.lineHeight + 2));
+                graphics.drawString(fontRenderer, split[i], position.x, y, color, dropShadow);
+            }
+        } else {
+            graphics.drawString(fontRenderer, component, position.x, position.y, color, dropShadow);
         }
     }
 
