@@ -16,11 +16,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Environment(EnvType.CLIENT)
 public class LDLMetadataSection {
     public static final String SECTION_NAME = LDLib.MOD_ID;
-    private static final Map<ResourceLocation, LDLMetadataSection> METADATA_CACHE = new HashMap<>();
+    private static final Map<ResourceLocation, LDLMetadataSection> METADATA_CACHE = new ConcurrentHashMap<>();
+    public static final LDLMetadataSection MISSING = new LDLMetadataSection(false, null);
 
     public final boolean emissive;
     public final ResourceLocation connection;
@@ -30,12 +32,20 @@ public class LDLMetadataSection {
         this.connection = connection;
     }
 
-    @Nullable
+    public static void clearCache() {
+        METADATA_CACHE.clear();
+    }
+
+    public boolean isMissing() {
+        return this == MISSING;
+    }
+
+    @Nonnull
     public static LDLMetadataSection getMetadata(ResourceLocation res) {
         if (METADATA_CACHE.containsKey(res)) {
             return METADATA_CACHE.get(res);
         }
-        LDLMetadataSection ret = null;
+        LDLMetadataSection ret = MISSING;
         var resourceOptional = Minecraft.getInstance().getResourceManager().getResource(res);
         if (resourceOptional.isPresent()) {
             var resource = resourceOptional.get();
@@ -48,20 +58,20 @@ public class LDLMetadataSection {
         return ret;
     }
 
-    @Nullable
+    @Nonnull
     public static LDLMetadataSection getMetadata(TextureAtlasSprite sprite) {
         return getMetadata(spriteToAbsolute(sprite.contents().name()));
     }
 
     public static boolean isEmissive(TextureAtlasSprite sprite) {
         LDLMetadataSection ret = getMetadata(spriteToAbsolute(sprite.contents().name()));
-        return ret != null && ret.emissive;
+        return ret.emissive;
     }
 
     @Nullable
     public static TextureAtlasSprite getConnection(TextureAtlasSprite sprite) {
         LDLMetadataSection ret = getMetadata(spriteToAbsolute(sprite.contents().name()));
-        return (ret == null || ret.connection == null) ? null : ModelFactory.getBlockSprite(ret.connection);
+        return ret.connection == null ? null : ModelFactory.getBlockSprite(ret.connection);
     }
 
     public static ResourceLocation spriteToAbsolute(ResourceLocation sprite) {
