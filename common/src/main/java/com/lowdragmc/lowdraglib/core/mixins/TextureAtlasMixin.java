@@ -26,7 +26,7 @@ public abstract class TextureAtlasMixin {
         Set<ResourceLocation> append = new HashSet<>();
         for (var spriteName : spriteNames) {
             var data = LDLMetadataSection.getMetadata(LDLMetadataSection.spriteToAbsolute(spriteName));
-            if (data != null && data.connection != null) {
+            if (data.connection != null) {
                 append.add(data.connection);
             }
         }
