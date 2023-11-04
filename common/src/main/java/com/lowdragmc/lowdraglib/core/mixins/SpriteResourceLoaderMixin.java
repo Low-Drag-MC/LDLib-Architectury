@@ -34,7 +34,7 @@ public class SpriteResourceLoaderMixin {
         for (Object o : map.keySet()) {
             var spriteName = (ResourceLocation) o;
             var data = LDLMetadataSection.getMetadata(LDLMetadataSection.spriteToAbsolute(spriteName));
-            if (data != null && data.connection != null) {
+            if (data.connection != null) {
                 new SingleFile(data.connection, Optional.empty()).run(resourceManager, output);
             }
         }

@@ -68,7 +68,7 @@ public class ImageComponent extends TextBoxComponent {
         if (this.hoverInfo != null) {
             imageWidget.setHoverTooltips(hoverInfo);
         }
-        currentPage.addStreamWidget(imageWidget);
+        currentPage.addStreamWidget(wrapper(imageWidget));
         currentPage.addOffsetSpace(3);
         return super.addWidgets(currentPage);
     }

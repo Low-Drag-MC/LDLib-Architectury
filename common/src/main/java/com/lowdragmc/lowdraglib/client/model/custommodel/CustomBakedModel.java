@@ -77,7 +77,7 @@ public class CustomBakedModel implements BakedModel {
         for (int i = 0; i < base.size(); i++) {
             BakedQuad quad = base.get(i);
             var section = LDLMetadataSection.getMetadata(quad.getSprite());
-            List<Quad> quads = bakeConnectionQuads(quad, connections, section == null ? null :
+            List<Quad> quads = bakeConnectionQuads(quad, connections, section.isMissing() ? null :
                     section.connection == null ? null :
                             ModelFactory.getBlockSprite(section.connection), offset * i);
             if (section != null) {
