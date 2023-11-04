@@ -1,3 +1,4 @@
 # ChangeLog
 
-* fix crash
+* fix LDLibMetaData crash
+* improve compass
