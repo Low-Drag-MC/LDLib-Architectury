@@ -67,6 +67,6 @@ public class IngredientComponent extends AbstractComponent {
             }
             x += 20;
         }
-        return currentPage.addStreamWidget(group);
+        return currentPage.addStreamWidget(wrapper(group));
     }
 }

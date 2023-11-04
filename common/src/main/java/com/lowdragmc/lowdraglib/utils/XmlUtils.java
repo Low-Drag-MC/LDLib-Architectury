@@ -107,7 +107,11 @@ public class XmlUtils {
     public static int getAsColor(Element element, String name, int defaultValue) {
         if (element.hasAttribute(name)) {
             try {
-                return Long.decode(element.getAttribute(name)).intValue();
+                var value = Long.decode(element.getAttribute(name)).intValue();
+                if (value != 0 && ((value & 0xff000000) == 0)) {
+                    value = value | 0xff000000;
+                }
+                return value;
             } catch (Exception ignored) {
 
             }

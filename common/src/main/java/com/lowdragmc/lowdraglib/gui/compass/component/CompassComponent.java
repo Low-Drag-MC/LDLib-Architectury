@@ -62,7 +62,7 @@ public class CompassComponent extends AbstractComponent {
 
     @Override
     protected LayoutPageWidget addWidgets(LayoutPageWidget currentPage) {
-        return currentPage.addStreamWidget(new CompassScene(currentPage.getPageWidth(), this));
+        return currentPage.addStreamWidget(wrapper(new CompassScene(width(currentPage), this)));
     }
 
 }

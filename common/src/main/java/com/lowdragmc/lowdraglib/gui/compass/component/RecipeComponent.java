@@ -109,7 +109,7 @@ public class RecipeComponent extends AbstractComponent {
             }
         }
         recipeGroup.addWidget(new ImageWidget(-40, recipeGroup.getSize().height / 2 - 15, 30, 30, new ItemStackTexture(workstation)));
-        return currentPage.addStreamWidget(recipeGroup);
+        return currentPage.addStreamWidget(wrapper(recipeGroup));
     }
 
     protected WidgetGroup createSmeltingRecipeWidget(Int2ObjectMap<Ingredient> input, ItemStack output) {

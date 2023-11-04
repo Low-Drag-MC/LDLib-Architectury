@@ -94,12 +94,12 @@ public class SceneComponent extends AbstractComponent {
     protected LayoutPageWidget addWidgets(LayoutPageWidget currentPage) {
         if (pages.isEmpty()) return currentPage;
         AtomicInteger pageNum = new AtomicInteger(0);
-        WidgetGroup group = new WidgetGroup(0, 0, currentPage.getSize().width, height);
+        WidgetGroup group = new WidgetGroup(0, 0, currentPage.getSize().width - leftMargin - rightMargin, height);
         TrackedDummyWorld world = new TrackedDummyWorld();
         for (Map<BlockPos, BlockInfo> blocks : pages) {
             world.addBlocks(blocks);
         }
-        SceneWidget sceneWidget = new SceneWidget(currentPage.getSize().width / 2 - 2 * height, 0, 4 * height, height, world);
+        SceneWidget sceneWidget = new SceneWidget((currentPage.getSize().width - leftMargin - rightMargin) / 2 - 2 * height, 0, 4 * height, height, world);
         sceneWidget.setOnAddedTooltips((scene, list) -> {
                     var hoverPosFace = scene.getHoverPosFace();
                     if (hoverPosFace == null) {
@@ -137,7 +137,7 @@ public class SceneComponent extends AbstractComponent {
 
         ButtonWidget left, right;
         group.addWidget(left = (ButtonWidget) new ButtonWidget(20, height - 16, 12, 7, Icons.LEFT, null).setClientSideWidget());
-        group.addWidget(right = (ButtonWidget) new ButtonWidget(currentPage.getSize().width - 20 - 12, height - 16, 12, 7, Icons.RIGHT, null).setClientSideWidget());
+        group.addWidget(right = (ButtonWidget) new ButtonWidget(currentPage.getSize().width - leftMargin - rightMargin - 20 - 12, height - 16, 12, 7, Icons.RIGHT, null).setClientSideWidget());
         left.setVisible(pageNum.get() - 1 >=0);
         right.setVisible(pageNum.get() + 1 < pages.size());
         left.setOnPressCallback(cd -> {
@@ -155,7 +155,7 @@ public class SceneComponent extends AbstractComponent {
             right.setVisible(pageNum.get() + 1 < pages.size());
         });
 
-        group.addWidget(new ButtonWidget((currentPage.getSize().width - 24) / 2 + 6, height - 19, 12, 12, Icons.ROTATION, cd -> {
+        group.addWidget(new ButtonWidget((currentPage.getSize().width - leftMargin - rightMargin - 24) / 2 + 6, height - 19, 12, 12, Icons.ROTATION, cd -> {
             float current = sceneWidget.getRotationPitch();
             sceneWidget.setCameraYawAndPitchAnima(sceneWidget.getRotationYaw(), current + 90, 20);
         }).setClientSideWidget());
@@ -164,7 +164,7 @@ public class SceneComponent extends AbstractComponent {
             group.setHoverTooltips(hoverInfo);
         }
 
-        return currentPage.addStreamWidget(group);
+        return currentPage.addStreamWidget(wrapper(group));
     }
 
     int minX = Integer.MAX_VALUE;

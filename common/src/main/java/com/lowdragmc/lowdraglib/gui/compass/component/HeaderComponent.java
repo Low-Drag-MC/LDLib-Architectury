@@ -77,7 +77,7 @@ public class HeaderComponent extends AbstractComponent {
     @Override
     @Environment(EnvType.CLIENT)
     protected LayoutPageWidget addWidgets(LayoutPageWidget currentPage) {
-        var pageWidth = currentPage.getPageWidth();
+        var pageWidth = width(currentPage);
         // text
         List<String> textLines = new ArrayList<>();
         Font font = Minecraft.getInstance().font;
@@ -92,17 +92,17 @@ public class HeaderComponent extends AbstractComponent {
             }
         }
 
-        currentPage = currentPage.addStreamWidget(new TextBoxWidget(0, 0, pageWidth, textLines)
+        currentPage = currentPage.addStreamWidget(wrapper(new TextBoxWidget(0, 0, pageWidth, textLines)
                 .setShadow(isShadow)
                 .setCenter(isCenter)
                 .setFontColor(fontColor)
                 .setFontSize(fontSize)
-                .setSpace(space));
+                .setSpace(space)));
 
         // tail
         WidgetGroup group = new WidgetGroup(0, 0, pageWidth, 3);
         group.addWidget(new ImageWidget(isCenter ? (pageWidth - header.width) / 2 : 0, 0, header.width, 2, ColorPattern.WHITE.rectTexture()));
-        return currentPage.addStreamWidget(group);
+        return currentPage.addStreamWidget(wrapper(group));
     }
 
 }
