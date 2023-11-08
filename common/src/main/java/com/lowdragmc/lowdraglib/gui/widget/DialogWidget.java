@@ -8,6 +8,7 @@ import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.FileNode;
 import com.lowdragmc.lowdraglib.gui.util.TreeNode;
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -156,6 +157,12 @@ public class DialogWidget extends WidgetGroup {
         return textFieldWidget;
     }
 
+    public static TextTexture createText(WidgetGroup parent, int x, int y, int width, int height) {
+        TextTexture textTexture;
+        parent.addWidget(new ImageWidget(x, y, width, height, textTexture = new TextTexture().setWidth(width)));
+        return textTexture;
+    }
+
     public static ButtonWidget createButton(WidgetGroup parent, int x, int y, int width, int height, String text, Runnable onClick) {
         ButtonWidget buttonWidget;
         parent.addWidget(buttonWidget = new ButtonWidget(x, y, width, height,
@@ -186,6 +193,50 @@ public class DialogWidget extends WidgetGroup {
         createButton(container, ((size.width / 2) - 60) / 2 + size.width / 2, size.height / 2 + 20 - 7, 60, 15, "ldlib.gui.tips.cancel", () -> {
             dialog.close();
             if (result != null) result.accept(null);
+        });
+
+        return dialog;
+    }
+    public static DialogWidget showNotification(WidgetGroup parent, String title, String info) {
+        return showNotification(parent, title, info, 200, 100, null);
+    }
+
+    public static DialogWidget showNotification(WidgetGroup parent, String title, String info, int width, int height, Runnable onClosed) {
+        DialogWidget dialog = new DialogWidget(parent, true);
+        var container = createContainer(dialog, width, height, title);
+        var size = container.getSize();
+
+        var text = createText(container, 10, size.height / 2 - 10 -5, size.width - 20, 10);
+        text.setSupplier(() -> info);
+
+        createButton(container, (size.width - 60) / 2, size.height / 2 + 20 - 7, 60, 15, "ldlib.gui.tips.confirm", () -> {
+            dialog.close();
+            if (onClosed != null) onClosed.run();
+        });
+
+        return dialog;
+    }
+
+    public static DialogWidget showCheckBox(WidgetGroup parent, String title, String info, BooleanConsumer onClosed) {
+        return showCheckBox(parent, title, info, 200, 100, onClosed);
+    }
+
+    public static DialogWidget showCheckBox(WidgetGroup parent, String title, String info, int width, int height, BooleanConsumer onClosed) {
+        DialogWidget dialog = new DialogWidget(parent, true);
+        var container = createContainer(dialog, width, height, title);
+        var size = container.getSize();
+
+        var text = createText(container, 10, size.height / 2 - 10 -5, size.width - 20, 10);
+        text.setSupplier(() -> info);
+
+        createButton(container, ((size.width / 2) - 60) / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.confirm", () -> {
+            dialog.close();
+            if (onClosed != null) onClosed.accept(true);
+        });
+
+        createButton(container, ((size.width / 2) - 60) / 2 + size.width / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.cancel", () -> {
+            dialog.close();
+            if (onClosed != null) onClosed.accept(false);
         });
 
         return dialog;

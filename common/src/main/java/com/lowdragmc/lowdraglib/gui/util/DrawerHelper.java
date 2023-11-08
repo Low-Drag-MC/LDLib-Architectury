@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.gui.util;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.lowdragmc.lowdraglib.client.scene.WorldSceneRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.shader.management.ShaderProgram;
 import com.lowdragmc.lowdraglib.client.shader.uniform.UniformCache;
@@ -37,6 +38,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.phys.Vec2;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -203,6 +205,8 @@ public class DrawerHelper {
         itemRenderer.renderGuiItemDecorations(mc.font, itemStack, x, y, altTxt);
         itemRenderer.blitOffset = 0.0F;
 
+        // clear depth buffer,it may cause some rendering issues?
+        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
         posestack.popPose();

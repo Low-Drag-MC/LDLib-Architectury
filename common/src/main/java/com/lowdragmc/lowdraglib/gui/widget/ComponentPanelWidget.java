@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.network.FriendlyByteBuf;
@@ -253,16 +254,21 @@ public class ComponentPanelWidget extends Widget {
             if (style.getClickEvent() != null) {
                 ClickEvent clickEvent = style.getClickEvent();
                 String componentText = clickEvent.getValue();
-                if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL && componentText.startsWith("@!")) {
-                    String rawText = componentText.substring(2);
-                    ClickData clickData = new ClickData();
-                    if (clickHandler != null) {
-                        clickHandler.accept(rawText, clickData);
+                if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
+                    if (componentText.startsWith("@!")) {
+                        String rawText = componentText.substring(2);
+                        ClickData clickData = new ClickData();
+                        if (clickHandler != null) {
+                            clickHandler.accept(rawText, clickData);
+                        }
+                        writeClientAction(1, buf -> {
+                            clickData.writeToBuf(buf);
+                            buf.writeUtf(rawText);
+                        });
+                    } else if (componentText.startsWith("@#")) {
+                        String rawText = componentText.substring(2);
+                        Util.getPlatform().openUri(rawText);
                     }
-                    writeClientAction(1, buf -> {
-                        clickData.writeToBuf(buf);
-                        buf.writeUtf(rawText);
-                    });
                     playButtonClickSound();
                     return true;
                 }

@@ -135,6 +135,19 @@
 
   "ldlib.gui.editor.register.editor.file": "file",
   "ldlib.gui.editor.register.editor.view": "view",
-  "ldlib.gui.compass.reset_view": "reset view",
+  "ldlib.gui.compass.reset_view": "Reset View",
+  "ldlib.gui.compass.edit_mode": "Edit Mode",
+  "ldlib.gui.compass.mode.cursor": "Cursor",
+  "ldlib.gui.compass.mode.move": "Move",
+  "ldlib.gui.compass.mode.link": "link",
+  "ldlib.gui.compass.mode.move.tooltip": "- Drag the node to adjust its position\n- Press Shift for fine-grained movement",
+  "ldlib.gui.compass.mode.link.tooltip": "- Drag to connect two nodes.\n- Select the link and right-click to remove it",
+  "ldlib.gui.compass.mode.cursor.tooltip": "- Select a node and right-click to modify its meta data",
+  "ldlib.gui.compass.save_success": "Save Success!",
+  "ldlib.gui.compass.save_success.desc": "Open the folder to view the saved file.",
+  "ldlib.gui.compass.grid_size": "Grid Size",
+  "ldlib.gui.compass.magnetic": "Magnetic",
+  "ldlib.gui.compass.add_node": "Add Node",
+  "ldlib.gui.compass.remove_node": "Remove Node",
   "ldlib.compass.c_press": "Press [C] open compass"
 }

@@ -2,11 +2,9 @@ package com.lowdragmc.lowdraglib.gui.editor.ui;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
-import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
-import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
 import com.lowdragmc.lowdraglib.gui.util.TreeNode;
 import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
@@ -15,7 +13,6 @@ import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -109,20 +106,11 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
     }
 
     public <T, C> MenuWidget<T, C> openMenu(double posX, double posY, TreeNode<T, C> menuNode) {
-        IGuiTexture nodeTexture = new IGuiTexture() {
-            @Override
-            @Environment(EnvType.CLIENT)
-            public void draw(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
-                ColorPattern.BLACK.rectTexture().draw(stack, mouseX, mouseY, x, y, width, height);
-                Icons.RIGHT.draw(stack, mouseX, mouseY, x + width - height + 3, y + 3, height - 6, height - 6);
-            }
-        };
-
         var menu = new MenuWidget<>((int) posX, (int) posY, 14, menuNode)
-                .setNodeTexture(nodeTexture)
-                .setLeafTexture(ColorPattern.BLACK.rectTexture())
-                .setNodeHoverTexture(ColorPattern.T_GRAY.rectTexture());
-        waitToAdded(menu.setBackground(new ColorRectTexture(0xff3C4146), ColorPattern.GRAY.borderTexture(1)));
+                .setNodeTexture(MenuWidget.NODE_TEXTURE)
+                .setLeafTexture(MenuWidget.LEAF_TEXTURE)
+                .setNodeHoverTexture(MenuWidget.NODE_HOVER_TEXTURE);
+        waitToAdded(menu.setBackground(MenuWidget.BACKGROUND));
 
         return menu;
     }
