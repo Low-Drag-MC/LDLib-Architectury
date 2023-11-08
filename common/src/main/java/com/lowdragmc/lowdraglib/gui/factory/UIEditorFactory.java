@@ -4,12 +4,8 @@ import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ui.UIEditor;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
-import com.lowdragmc.lowdraglib.gui.widget.custom.PlayerInventoryWidget;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-
-import java.util.List;
 
 public class UIEditorFactory extends UIFactory<UIEditorFactory> implements IUIHolder {
 
@@ -36,15 +32,8 @@ public class UIEditorFactory extends UIFactory<UIEditorFactory> implements IUIHo
 
 	@Override
 	public ModularUI createUI(Player entityPlayer) {
-		var playerInventory = new PlayerInventoryWidget();
-		playerInventory.setPlayer(entityPlayer);
-		var pos = entityPlayer.getOnPos();
-		var sceneWidget = new SceneWidget(50, 50, 200, 200, entityPlayer.level());
-		sceneWidget.setRenderedCore(List.of(pos, pos.below(), pos.above(), pos.north(), pos.south(), pos.east(), pos.west()), null);
 		return new ModularUI(this, entityPlayer)
-				.widget(new UIEditor(LDLib.getLDLibDir()))
-				.widget(playerInventory)
-				.widget(sceneWidget);
+				.widget(new UIEditor(LDLib.getLDLibDir()));
 	}
 
 	@Override

@@ -13,7 +13,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceProvider;
 
 import java.io.IOException;
@@ -86,6 +85,8 @@ public class Shaders {
 	private static ShaderInstance blitShader;
 	@Getter
 	private static ShaderInstance hsbShader;
+	@Getter
+	private static ShaderInstance compassLineShader;
 
 	/**
 	 * the vertex format for HSB color, three four of float
@@ -109,7 +110,10 @@ public class Shaders {
 							shaderInstance -> blitShader = shaderInstance),
 					Pair.of(new ShaderInstance(resourceProvider,
 									new ResourceLocation(LDLib.MOD_ID, "hsb_block").toString(), HSB_VERTEX_FORMAT),
-							shaderInstance -> hsbShader = shaderInstance)
+							shaderInstance -> hsbShader = shaderInstance),
+					Pair.of(new ShaderInstance(resourceProvider,
+									new ResourceLocation(LDLib.MOD_ID, "compass_line").toString(), DefaultVertexFormat.POSITION_TEX_COLOR),
+							shaderInstance -> compassLineShader = shaderInstance)
 			);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.gui.util;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.lowdragmc.lowdraglib.client.scene.WorldSceneRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.shader.management.ShaderProgram;
 import com.lowdragmc.lowdraglib.client.shader.uniform.UniformCache;
@@ -37,6 +38,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -191,6 +193,8 @@ public class DrawerHelper {
         graphics.renderItemDecorations(mc.font, itemStack, x, y, altTxt);
         graphics.pose().popPose();
 
+        // clear depth buffer,it may cause some rendering issues?
+        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
         RenderSystem.enableBlend();

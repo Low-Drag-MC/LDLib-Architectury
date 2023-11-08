@@ -21,5 +21,5 @@ public class CompassConfig {
     @Getter @Setter
     public IGuiTexture nodeBackground = ResourceBorderTexture.BUTTON_COMMON;
     @Getter @Setter
-    public IGuiTexture nodeSelectedBackground = ResourceBorderTexture.BUTTON_COMMON.copy().setColor(0xff337f7f);
+    public IGuiTexture nodeHoverBackground = ResourceBorderTexture.BUTTON_COMMON.copy().setColor(0xff337f7f);
 }

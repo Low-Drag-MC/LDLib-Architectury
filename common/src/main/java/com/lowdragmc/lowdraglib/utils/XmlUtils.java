@@ -366,7 +366,7 @@ public class XmlUtils {
                         component = Component.empty();
                     }
                     case "style" -> {
-                        Style newStyle = style;
+                        Style newStyle = style.withColor(style.getColor());
                         if (nodeElement.hasAttribute("color")) {
                             newStyle = newStyle.withColor(getAsColor(nodeElement, "color", 0XFFFFFFFF));
                         }
@@ -393,6 +393,9 @@ public class XmlUtils {
                         }
                         if (nodeElement.hasAttribute("link")) {
                             newStyle = newStyle.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "@!" + nodeElement.getAttribute("link")));
+                        }
+                        if (nodeElement.hasAttribute("url-link")) {
+                            newStyle = newStyle.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "@#" + nodeElement.getAttribute("url-link")));
                         }
                         var components = getComponents(nodeElement, newStyle);
                         for (int j = 0; j < components.size(); j++) {

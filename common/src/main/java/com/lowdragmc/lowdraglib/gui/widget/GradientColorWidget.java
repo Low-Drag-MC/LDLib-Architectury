@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib.gui.widget;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
-import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
 import com.lowdragmc.lowdraglib.utils.ColorUtils;
 import com.lowdragmc.lowdraglib.utils.GradientColor;
@@ -97,21 +96,14 @@ public class GradientColorWidget extends WidgetGroup {
                 }
             });
             var widget = new MenuWidget<>(mouseX - getPosition().x, mouseY - getPosition().y, 14, menu.build())
-                    .setNodeTexture(new IGuiTexture() {
-                        @Override
-                        @Environment(EnvType.CLIENT)
-                        public void draw(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
-                            ColorPattern.BLACK.rectTexture().draw(graphics, mouseX, mouseY, x, y, width, height);
-                            Icons.RIGHT.draw(graphics, mouseX, mouseY, x + width - height + 3, y + 3, height - 6, height - 6);
-                        }
-                    })
-                    .setLeafTexture(ColorPattern.BLACK.rectTexture())
-                    .setNodeHoverTexture(ColorPattern.T_GRAY.rectTexture())
+                    .setNodeTexture(MenuWidget.NODE_TEXTURE)
+                    .setLeafTexture(MenuWidget.LEAF_TEXTURE)
+                    .setNodeHoverTexture(MenuWidget.NODE_HOVER_TEXTURE)
                     .setCrossLinePredicate(TreeBuilder.Menu::isCrossLine)
                     .setKeyIconSupplier(TreeBuilder.Menu::getIcon)
                     .setKeyNameSupplier(TreeBuilder.Menu::getName)
                     .setOnNodeClicked(TreeBuilder.Menu::handle);
-            waitToAdded(widget.setBackground(new ColorRectTexture(0xff3C4146), ColorPattern.GRAY.borderTexture(1)));
+            waitToAdded(widget.setBackground(MenuWidget.BACKGROUND));
         }
 
     }
