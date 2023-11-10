@@ -1,4 +1,3 @@
 # ChangeLog
 
-* fix LDLibMetaData crash
-* improve compass
+* support entity particle in the compass
