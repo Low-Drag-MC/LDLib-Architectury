@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.model.fabric.LDLRendererModel;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
+import com.lowdragmc.lowdraglib.fabric.core.mixins.accessor.ParticleEngineAccessor;
 import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
 import com.lowdragmc.lowdraglib.gui.util.WidgetTooltipComponent;
 import com.lowdragmc.lowdraglib.test.TestBlock;
@@ -24,6 +25,10 @@ import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -73,5 +78,12 @@ public class ClientProxyImpl implements ClientModInitializer, SimpleSynchronousR
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
         CompassManager.INSTANCE.onResourceManagerReload(resourceManager);
+    }
+
+    public static ParticleProvider getProvider(ParticleType<?> type) {
+        if (Minecraft.getInstance().particleEngine instanceof ParticleEngineAccessor accessor) {
+            return accessor.getProviders().get(Registry.PARTICLE_TYPE.getId(type));
+        }
+        return null;
     }
 }

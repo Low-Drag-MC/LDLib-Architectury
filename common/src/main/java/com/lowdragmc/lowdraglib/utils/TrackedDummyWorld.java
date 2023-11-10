@@ -2,10 +2,19 @@ package com.lowdragmc.lowdraglib.utils;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.scene.ParticleManager;
+import com.lowdragmc.lowdraglib.core.mixins.accessor.EntityAccessor;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -14,12 +23,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.material.FluidState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -36,6 +48,7 @@ public class TrackedDummyWorld extends DummyWorld {
     public final Level proxyWorld;
     public final Map<BlockPos, BlockInfo> renderedBlocks = new HashMap<>();
     public final Map<BlockPos, BlockEntity> blockEntities = new HashMap<>();
+    public final Map<Integer, Entity> entities =new Int2ObjectArrayMap<>();
 
     public final Vector3 minPos = new Vector3(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
     public final Vector3 maxPos = new Vector3(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
@@ -57,6 +70,7 @@ public class TrackedDummyWorld extends DummyWorld {
     public void clear() {
         renderedBlocks.clear();
         blockEntities.clear();
+        entities.clear();
     }
 
     public Map<BlockPos, BlockInfo> getRenderedBlocks() {
@@ -116,6 +130,62 @@ public class TrackedDummyWorld extends DummyWorld {
         return proxyWorld != null ? proxyWorld.getBlockState(pos) : renderedBlocks.getOrDefault(pos, BlockInfo.EMPTY).getBlockState();
     }
 
+
+    @Override
+    public boolean addFreshEntity(Entity entity) {
+        ((EntityAccessor) entity).invokeSetLevel(this);
+        if (entity instanceof ItemFrame itemFrame)
+            itemFrame.setItem(withUnsafeNBTDiscarded(itemFrame.getItem()));
+        if (entity instanceof ArmorStand armorStand)
+            for (EquipmentSlot equipmentSlot : EquipmentSlot.values())
+                armorStand.setItemSlot(equipmentSlot,
+                        withUnsafeNBTDiscarded(armorStand.getItemBySlot(equipmentSlot)));
+        entities.put(entity.getId(), entity);
+        return true;
+    }
+
+    public static ItemStack withUnsafeNBTDiscarded(ItemStack stack) {
+        if (stack.getTag() == null)
+            return stack;
+        ItemStack copy = stack.copy();
+        stack.getTag()
+                .getAllKeys()
+                .stream()
+                .filter(TrackedDummyWorld::isUnsafeItemNBTKey)
+                .forEach(copy::removeTagKey);
+        if (copy.getTag().isEmpty())
+            copy.setTag(null);
+        return copy;
+    }
+
+    public static boolean isUnsafeItemNBTKey(String name) {
+        if (name.equals(EnchantedBookItem.TAG_STORED_ENCHANTMENTS))
+            return false;
+        if (name.equals("Enchantments"))
+            return false;
+        if (name.contains("Potion"))
+            return false;
+        if (name.contains("Damage"))
+            return false;
+        if (name.equals("display"))
+            return false;
+        return true;
+    }
+
+    @Override
+    protected LevelEntityGetter<Entity> getEntities() {
+        return super.getEntities();
+    }
+
+    @Override
+    public Entity getEntity(int id) {
+        for (Entity entity : entities.values()) {
+            if (entity.getId() == id && entity.isAlive())
+                return entity;
+        }
+        return super.getEntity(id);
+    }
+
     public Vector3 getSize() {
         return new Vector3(maxPos.x - minPos.x + 1, maxPos.y - minPos.y + 1, maxPos.z - minPos.z + 1);
     }
@@ -168,6 +238,20 @@ public class TrackedDummyWorld extends DummyWorld {
     }
 
     public void tickWorld() {
+        var iter = entities.values().iterator();
+        while (iter.hasNext()) {
+            var entity = iter.next();
+            entity.tickCount++;
+            entity.setOldPosAndRot();
+            entity.tick();
+
+            if (entity.getY() <= -.5f)
+                entity.discard();
+
+            if (!entity.isAlive())
+                iter.remove();
+        }
+
         for (var entry : renderedBlocks.entrySet()) {
             var blockState = entry.getValue().getBlockState();
             var blockEntity = getBlockEntity(entry.getKey());
@@ -182,5 +266,12 @@ public class TrackedDummyWorld extends DummyWorld {
                 }
             }
         }
+    }
+
+    public List<Entity> geAllEntities() {
+        var entities = new ArrayList<>(this.entities.values());
+        if (proxyWorld instanceof TrackedDummyWorld trackedDummyWorld)
+            entities.addAll(trackedDummyWorld.geAllEntities());
+        return entities;
     }
 }

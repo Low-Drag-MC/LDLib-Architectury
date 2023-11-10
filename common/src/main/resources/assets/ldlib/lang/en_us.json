@@ -79,6 +79,7 @@
   "ldlib.gui.editor.tips.hover_tips": "Hover tips. Each item identifies a new row.",
   "ldlib.gui.editor.tips.add_item": "add a new item",
   "ldlib.gui.editor.tips.remove_item": "remove item",
+  "ldlib.gui.editor.tips.remove_tag": "remove tag",
   "ldlib.gui.editor.tips.drag_item": "reorder items by dragging",
   "ldlib.gui.editor.tips.corner_size。0": "Set the border size of this texture.",
   "ldlib.gui.editor.tips.corner_size。1": "The border of this texture will not be affected by scaling.",
@@ -102,6 +103,7 @@
   "ldlib.gui.editor.tips.progress_texture": "Can only accept a Progress Texture",
 
   "ldlib.gui.editor.register.texture.resource_texture": "Resource Texture",
+  "ldlib.gui.editor.register.texture.item_texture": "Item Texture",
   "ldlib.gui.editor.register.texture.border_texture": "Border Texture",
   "ldlib.gui.editor.register.texture.text_texture": "Text Texture",
   "ldlib.gui.editor.register.texture.color_rect_texture": "Color Rect Texture",
@@ -149,5 +151,13 @@
   "ldlib.gui.compass.magnetic": "Magnetic",
   "ldlib.gui.compass.add_node": "Add Node",
   "ldlib.gui.compass.remove_node": "Remove Node",
+  "ldlib.gui.compass.attach_items": "Attach Items",
+  "ldlib.gui.compass.attach_items.item": "Item",
+  "ldlib.gui.compass.attach_items.tag": "Tag",
+  "ldlib.gui.compass.set_button_texture": "Set Button Texture",
+  "ldlib.gui.compass.set_background": "Set Background",
+  "ldlib.gui.compass.set_hover_background": "Set Hover Background",
+  "ldlib.gui.compass.default": "default",
+  "ldlib.gui.compass.refresh": "refresh",
   "ldlib.compass.c_press": "Press [C] open compass"
 }

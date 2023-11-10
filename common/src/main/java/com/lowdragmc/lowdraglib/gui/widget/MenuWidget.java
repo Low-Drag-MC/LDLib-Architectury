@@ -215,7 +215,8 @@ public class MenuWidget<K, T> extends WidgetGroup {
                                 .setLeafTexture(leafTexture)
                                 .setOnNodeClicked(onNodeClicked)
                                 .setKeyIconSupplier(keyIconSupplier)
-                                .setKeyNameSupplier(keyNameSupplier);
+                                .setKeyNameSupplier(keyNameSupplier)
+                                .setCrossLinePredicate(crossLinePredicate);
                         addWidget(opened.setBackground(backgroundTexture));
                     }
                     return true;

@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.gui.compass;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
@@ -12,6 +13,7 @@ import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +23,7 @@ import org.w3c.dom.NodeList;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.List;
 
 import static com.lowdragmc.lowdraglib.gui.compass.CompassManager.*;
 
@@ -48,13 +51,19 @@ public class CompassView extends WidgetGroup {
         super(0, 0, 10, 10);
         setClientSideWidget();
         this.modID = modID;
-        this.config = INSTANCE.getConfig(modID);
+        if (LDLib.isClient()) {
+            this.config = INSTANCE.getConfig(modID);
+        } else {
+            this.config = null;
+        }
     }
 
     public CompassView(CompassNode compassNode) {
         this(compassNode.section.sectionName.getNamespace());
-        this.openedSection = compassNode.section.getSectionName();
-        this.openedNode = compassNode.getNodeName();
+        if (LDLib.isClient()) {
+            this.openedSection = compassNode.section.getSectionName();
+            this.openedNode = compassNode.getNodeName();
+        }
     }
 
     @Override
@@ -124,6 +133,9 @@ public class CompassView extends WidgetGroup {
         mainView.clearAllWidgets();
         // page
         var pageWidget = new LayoutPageWidget(mainView.getSize().width, mainView.getSize().height);
+        if (INSTANCE.devMode) { // always reload page in dev mode
+            INSTANCE.nodePages.clear();
+        }
         var map = INSTANCE.nodePages.computeIfAbsent(node.getPage(), x -> new HashMap<>());
         var lang = Minecraft.getInstance().getLanguageManager().getSelected().getCode();
         var document = map.computeIfAbsent(lang, langKey -> {
@@ -189,6 +201,14 @@ public class CompassView extends WidgetGroup {
                     .setHoverTooltips(compassNode.getChatComponent()));
         }
         mainView.addWidget(nodeList);
+
+        // buttons
+        if (INSTANCE.devMode) {
+            // Reset View
+            mainView.addWidget(new ButtonWidget(10, 10, 20, 20,
+                    new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture(), Icons.ROTATION),
+                    cd -> openNodeContent(node)).setHoverTooltips(Component.translatable("ldlib.gui.compass.refresh")));
+        }
     }
 
     @Environment(EnvType.CLIENT)

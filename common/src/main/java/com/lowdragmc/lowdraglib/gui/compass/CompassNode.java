@@ -12,6 +12,7 @@ import lombok.experimental.Accessors;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -39,9 +40,9 @@ public class CompassNode {
     protected Position position;
     @Getter
     protected int size;
-    @Getter @Nullable
+    @Getter @Setter @Nullable
     protected IGuiTexture background, hoverBackground;
-    @Getter
+    @Getter @Setter
     protected IGuiTexture buttonTexture;
     @Getter
     protected Set<CompassNode> preNodes = new HashSet<>();
@@ -65,6 +66,7 @@ public class CompassNode {
         pos.add(position.x);
         pos.add(position.y);
         config.add("position", pos);
+        config.addProperty("section", section.sectionName.toString());
         if (size != 24) {
             config.addProperty("size", size);
         } else {
@@ -126,9 +128,16 @@ public class CompassNode {
             items = new ArrayList<>();
             JsonArray items = GsonHelper.getAsJsonArray(config, "items", new JsonArray());
             for (JsonElement element : items) {
-                Item item = Registry.ITEM.get(new ResourceLocation(element.getAsString()));
-                if (item != Items.AIR) {
-                    this.items.add(item);
+                var data = element.getAsString();
+                if (ResourceLocation.isValidResourceLocation(data)) {
+                    Item item = Registry.ITEM.get(new ResourceLocation(data));
+                    if (item != Items.AIR) {
+                        this.items.add(item);
+                    }
+                } else if (data.startsWith("#") && ResourceLocation.isValidResourceLocation(data.substring(1))) {
+                    var tag = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(data.substring(1)));
+                    var tagCollection = Registry.ITEM.getTag(tag);
+                    tagCollection.ifPresent(named -> named.forEach(holder -> this.items.add(holder.value())));
                 }
             }
         }

@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.client.shader;
 import com.google.common.collect.ImmutableMap;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.shader.management.Shader;
+import com.lowdragmc.lowdraglib.gui.texture.ShaderTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -61,6 +62,7 @@ public class Shaders {
 		CACHE.clear();
 		init();
 		DrawerHelper.init();
+		ShaderTexture.clearCache();
 	}
 
 	public static Shader load(Shader.ShaderType shaderType, ResourceLocation resourceLocation) {

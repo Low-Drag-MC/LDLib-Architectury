@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.compass.component.animation;
 
-import com.lowdragmc.lowdraglib.client.scene.ISceneRenderHook;
+import com.lowdragmc.lowdraglib.client.scene.ISceneBlockRenderHook;
+import com.lowdragmc.lowdraglib.client.scene.ISceneEntityRenderHook;
 import com.lowdragmc.lowdraglib.client.scene.WorldSceneRenderer;
 import com.lowdragmc.lowdraglib.client.utils.RenderUtils;
 import com.lowdragmc.lowdraglib.gui.animation.Transform;
@@ -24,12 +25,16 @@ import lombok.val;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -41,10 +46,7 @@ import org.apache.commons.lang3.tuple.MutableTriple;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author KilaBash
@@ -52,7 +54,7 @@ import java.util.Map;
  * @implNote AnimationScene
  */
 @Environment(EnvType.CLIENT)
-public class CompassScene extends WidgetGroup implements ISceneRenderHook {
+public class CompassScene extends WidgetGroup implements ISceneBlockRenderHook, ISceneEntityRenderHook {
     @Getter
     protected final SceneWidget sceneWidget;
     @Getter
@@ -98,6 +100,7 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
 
             sceneWidget.getRenderer().setFov(30);
             sceneWidget.setRenderedCore(List.of(BlockPos.ZERO), this);
+            sceneWidget.getRenderer().setSceneEntityRenderHook(this);
             if (component.getZoom() > 0) {
                 sceneWidget.setZoom(component.getZoom());
             } else {
@@ -327,6 +330,11 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
     }
 
     @Override
+    public void applyEntity(Level world, Entity entity, PoseStack poseStack, float partialTicks) {
+        ISceneEntityRenderHook.super.applyEntity(world, entity, poseStack, partialTicks);
+    }
+
+    @Override
     public void applyBESR(Level world, BlockPos pos, BlockEntity blockEntity, PoseStack poseStack, float partialTicks) {
         if (isPause) partialTicks = 0;
         if (removedBlocks.containsKey(pos)) {
@@ -395,6 +403,34 @@ public class CompassScene extends WidgetGroup implements ISceneRenderHook {
         if (!useScene) return;
         highlightBlocks.put(key, duration);
     }
+
+    public void addEntity(EntityInfo entityInfo, double x, double y, double z, boolean update) {
+        Entity entity = null;
+        if (update) {
+            entity = world.entities.get(entityInfo.getId());
+        }
+        entity = (entity == null && entityInfo.getEntityType() != null) ? entityInfo.getEntityType().create(world) : entity;
+        if (entity == null && entityInfo.getEntityType() == EntityType.PLAYER) {
+            entity = new RemotePlayer(world.getAsClientWorld().get(), Minecraft.getInstance().player.getGameProfile(), null);
+        }
+        if (entity != null) {
+            entity.setId(entityInfo.getId());
+            entity.setPos(x, y, z);
+            if (entityInfo.getTag() != null) {
+                entity.load(entity.saveWithoutId(new CompoundTag()).copy().merge(entityInfo.getTag()));
+            }
+            world.addFreshEntity(entity);
+        }
+    }
+
+    public void removeEntity(EntityInfo entityInfo, boolean force) {
+        if (force) {
+            world.entities.remove(entityInfo.getId());
+        } else {
+            Optional.ofNullable(world.entities.get(entityInfo.getId())).ifPresent(Entity::kill);
+        }
+    }
+
 
     public void addTooltip(Vec3 pos, Tuple<XmlUtils.SizedIngredient, List<Component>> tuple, Vec2 middle, Integer time) {
         tooltipBlocks.put(pos, MutableTriple.of(tuple, middle, time));

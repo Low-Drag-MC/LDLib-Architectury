@@ -1,12 +1,20 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import com.google.common.base.Suppliers;
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.scene.ParticleManager;
+import com.lowdragmc.lowdraglib.utils.virtual.WrappedClientWorld;
+import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.core.*;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -42,6 +50,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Author: KilaBash
@@ -56,6 +65,8 @@ public class DummyWorld extends Level {
     protected Level level;
     protected final LevelLightEngine lighter;
     private final BlockPos.MutableBlockPos scratch = new BlockPos.MutableBlockPos();
+    @Getter
+    private Supplier<ClientLevel> asClientWorld = Suppliers.memoize(() -> WrappedClientWorld.of(this));
 
     public DummyWorld(Level level) {
         super((WritableLevelData) level.getLevelData(), level.dimension(), level.dimensionTypeRegistration(), level::getProfiler,
@@ -292,6 +303,31 @@ public class DummyWorld extends Level {
 
     }
 
+    @Override
+    public void addParticle(ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        if (particleManager != null) {
+            var p = createParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
+            if (p != null) {
+                particleManager.addParticle(p);
+            }
+        }
+    }
+
+    @Override
+    public void addParticle(ParticleOptions particleData, boolean forceAlwaysRender, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
+    }
+
+    @Override
+    public void addAlwaysVisibleParticle(ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
+    }
+
+    @Override
+    public void addAlwaysVisibleParticle(ParticleOptions particleData, boolean ignoreRange, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        addParticle(particleData, ignoreRange, x, y, z, xSpeed, ySpeed, zSpeed);
+    }
+
     @Environment(EnvType.CLIENT)
     private ParticleManager particleManager;
 
@@ -308,5 +344,15 @@ public class DummyWorld extends Level {
 
     public BlockState getBlockState(int x, int y, int z) {
         return getBlockState(scratch.set(x, y, z));
+    }
+
+    @Nullable
+    @Environment(EnvType.CLIENT)
+    public Particle createParticle(ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        ParticleProvider particleProvider = ClientProxy.getProvider(particleData.getType());
+        if (particleProvider == null) {
+            return null;
+        }
+        return particleProvider.createParticle(particleData, asClientWorld.get(), x, y, z, xSpeed, ySpeed, zSpeed);
     }
 }

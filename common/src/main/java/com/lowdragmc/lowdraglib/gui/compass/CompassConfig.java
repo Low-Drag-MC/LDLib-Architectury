@@ -11,7 +11,8 @@ import lombok.Setter;
  * @implNote CompassConfig
  */
 public class CompassConfig {
-
+    @Getter @Setter
+    public IGuiTexture sectionBackground = IGuiTexture.EMPTY;
     @Getter @Setter
     public IGuiTexture listViewBackground = ResourceBorderTexture.BORDERED_BACKGROUND_INVERSE;
     @Getter @Setter

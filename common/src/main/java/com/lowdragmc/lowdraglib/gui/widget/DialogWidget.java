@@ -14,6 +14,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
@@ -237,6 +239,32 @@ public class DialogWidget extends WidgetGroup {
         createButton(container, ((size.width / 2) - 60) / 2 + size.width / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.cancel", () -> {
             dialog.close();
             if (onClosed != null) onClosed.accept(false);
+        });
+
+        return dialog;
+    }
+
+    public static DialogWidget showItemSelector(WidgetGroup parent, String title, ItemStack init, Consumer<Item> itemConsumer) {
+        DialogWidget dialog = new DialogWidget(parent, true);
+
+        var container = createContainer(dialog, 200, 100, title);
+        var size = container.getSize();
+
+        AtomicReference<ItemStack> selected = new AtomicReference<>();
+        selected.set(init);
+
+        container.addWidget(new ItemStackSelectorWidget(10, size.height / 2 - 20, size.width - 2, false)
+                .setItemStack(init)
+                .setOnItemStackUpdate(selected::set));
+
+        createButton(container, ((size.width / 2) - 60) / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.confirm", () -> {
+            dialog.close();
+            if (itemConsumer != null) itemConsumer.accept(selected.get().getItem());
+        });
+
+        createButton(container, ((size.width / 2) - 60) / 2 + size.width / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.cancel", () -> {
+            dialog.close();
+            if (itemConsumer != null) itemConsumer.accept(null);
         });
 
         return dialog;
