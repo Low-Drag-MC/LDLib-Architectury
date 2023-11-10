@@ -36,7 +36,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float f1 = .04 / (abs(d1 - 0.));
 
     // Time varying pixel color
-    vec3 col = .5 + 0.5*cos(0.+uv.xyx+vec3(4.000,0.040,0.078));
+    vec3 col = .5 + 0.5*cos(iTime+uv.xyx+vec3(4.000,0.040,0.078));
 
     fragColor = vec4(f1 * col, length(f1 * col));
 }

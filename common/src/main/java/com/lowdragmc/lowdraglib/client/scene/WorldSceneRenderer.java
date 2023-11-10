@@ -20,7 +20,9 @@ import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -71,7 +73,7 @@ public abstract class WorldSceneRenderer {
     }
 
     public final Level world;
-    public final Map<Collection<BlockPos>, ISceneRenderHook> renderedBlocksMap;
+    public final Map<Collection<BlockPos>, ISceneBlockRenderHook> renderedBlocksMap;
     protected VertexBuffer[] vertexBuffers;
     protected Set<BlockPos> tileEntities;
     protected boolean useCache;
@@ -86,6 +88,8 @@ public abstract class WorldSceneRenderer {
     private Consumer<WorldSceneRenderer> beforeRender;
     private Consumer<WorldSceneRenderer> afterRender;
     private Consumer<BlockHitResult> onLookingAt;
+    @Setter @Nullable
+    private ISceneEntityRenderHook sceneEntityRenderHook;
     protected int clearColor;
     private BlockHitResult lastTraceResult;
     private Set<BlockPos> blocked;
@@ -184,7 +188,7 @@ public abstract class WorldSceneRenderer {
         return this;
     }
 
-    public WorldSceneRenderer addRenderedBlocks(Collection<BlockPos> blocks, ISceneRenderHook renderHook) {
+    public WorldSceneRenderer addRenderedBlocks(Collection<BlockPos> blocks, ISceneBlockRenderHook renderHook) {
         if (blocks != null) {
             this.renderedBlocksMap.put(blocks, renderHook);
         }
@@ -401,11 +405,20 @@ public abstract class WorldSceneRenderer {
         } else {
             BlockRenderDispatcher blockrendererdispatcher = mc.getBlockRenderer();
             try { // render com.lowdragmc.lowdraglib.test.block in each layer
-                renderedBlocksMap.forEach((renderedBlocks, hook) -> {
-                    for (RenderType layer : RenderType.chunkBufferLayers()) {
-                        layer.setupRenderState();
-                        Random random = new Random();
-                        PoseStack matrixstack = new PoseStack();
+                for (RenderType layer : RenderType.chunkBufferLayers()) {
+                    layer.setupRenderState();
+                    Random random = new Random();
+                    PoseStack matrixstack = new PoseStack();
+
+                    var buffers = mc.renderBuffers().bufferSource();
+
+                    if (layer == RenderType.translucent()) { // render tesr before translucent
+                        if (world instanceof TrackedDummyWorld level) {
+                            renderEntities(level, matrixstack, buffers, sceneEntityRenderHook, particleTicks);
+                        }
+                    }
+
+                    renderedBlocksMap.forEach((renderedBlocks, hook) -> {
                         if (hook != null) {
                             hook.apply(false, layer);
                         } else {
@@ -416,7 +429,8 @@ public abstract class WorldSceneRenderer {
                             if (hook != null) {
                                 hook.apply(true, layer);
                             }
-                            renderTESR(renderedBlocks, matrixstack, mc.renderBuffers().bufferSource(), hook, particleTicks);
+                            renderTESR(renderedBlocks, matrixstack, buffers, hook, particleTicks);
+                            buffers.endBatch();
                         }
 
                         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
@@ -426,8 +440,11 @@ public abstract class WorldSceneRenderer {
 
                         Tesselator.getInstance().end();
                         layer.clearRenderState();
-                    }
-                });
+                    });
+
+                    buffers.endBatch();
+                }
+
             } finally {
             }
         }
@@ -523,7 +540,12 @@ public abstract class WorldSceneRenderer {
 
                 RenderType layer = layers.get(i);
                 if (layer == RenderType.translucent() && tileEntities != null) { // render tesr before translucent
+                    var buffers = mc.renderBuffers().bufferSource();
+                    if (world instanceof TrackedDummyWorld level) {
+                        renderEntities(level, matrixstack, buffers, sceneEntityRenderHook, particleTicks);
+                    }
                     renderTESR(tileEntities, matrixstack, mc.renderBuffers().bufferSource(), null, particleTicks);
+                    buffers.endBatch();
                 }
 
                 layer.setupRenderState();
@@ -593,7 +615,7 @@ public abstract class WorldSceneRenderer {
         }
     }
 
-    private void renderBlocks(PoseStack poseStack, BlockRenderDispatcher blockrendererdispatcher, RenderType layer, VertexConsumerWrapper wrapperBuffer, Collection<BlockPos> renderedBlocks, @Nullable ISceneRenderHook hook, float partialTicks) {
+    private void renderBlocks(PoseStack poseStack, BlockRenderDispatcher blockrendererdispatcher, RenderType layer, VertexConsumerWrapper wrapperBuffer, Collection<BlockPos> renderedBlocks, @Nullable ISceneBlockRenderHook hook, float partialTicks) {
         for (BlockPos pos : renderedBlocks) {
             if (blocked != null && blocked.contains(pos)) {
                 continue;
@@ -642,8 +664,7 @@ public abstract class WorldSceneRenderer {
     }
 
 
-    private void renderTESR(Collection<BlockPos> poses, PoseStack poseStack, MultiBufferSource.BufferSource buffers, @Nullable ISceneRenderHook hook, float partialTicks) {
-        if (buffers == null) return;
+    private void renderTESR(Collection<BlockPos> poses, PoseStack poseStack, MultiBufferSource.BufferSource buffers, @Nullable ISceneBlockRenderHook hook, float partialTicks) {
         for (BlockPos pos : poses) {
             BlockEntity tile = world.getBlockEntity(pos);
             if (tile != null) {
@@ -664,8 +685,30 @@ public abstract class WorldSceneRenderer {
                 poseStack.popPose();
             }
         }
-        buffers.endBatch();
     }
+
+    private void renderEntities(TrackedDummyWorld level, PoseStack poseStack, MultiBufferSource buffer, @Nullable ISceneEntityRenderHook hook, float partialTicks) {
+        for (Entity entity : level.geAllEntities()) {
+            poseStack.pushPose();
+            if (entity.tickCount == 0) {
+                entity.xOld = entity.getX();
+                entity.yOld = entity.getY();
+                entity.zOld = entity.getZ();
+            }
+            double d0 = Mth.lerp((double) partialTicks, entity.xOld, entity.getX());
+            double d1 = Mth.lerp((double) partialTicks, entity.yOld, entity.getY());
+            double d2 = Mth.lerp((double) partialTicks, entity.zOld, entity.getZ());
+            float f = Mth.lerp(partialTicks, entity.yRotO, entity.getYRot());
+            var renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
+            int light = renderManager.getRenderer(entity).getPackedLightCoords(entity, partialTicks);
+            if (hook != null) {
+                hook.applyEntity(world, entity, poseStack, partialTicks);
+            }
+            renderManager.render(entity, d0, d1, d2, f, partialTicks, poseStack, buffer, light);
+            poseStack.popPose();
+        }
+    }
+
 
     public static void setDefaultRenderLayerState(RenderType layer) {
         RenderSystem.setShaderColor(1, 1, 1, 1);

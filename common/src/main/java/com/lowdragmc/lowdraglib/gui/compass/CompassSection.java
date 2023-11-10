@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -39,7 +40,7 @@ public class CompassSection {
         this.nodes = new HashMap<>();
         this.priority = JsonUtils.getIntOr("priority", config, 0);
         this.setButtonTexture(Suppliers.memoize(() -> SimpleIGuiTextureJsonUtils.fromJson(config.get("button_texture").getAsJsonObject())));
-        this.setBackgroundTexture(Suppliers.memoize(() -> SimpleIGuiTextureJsonUtils.fromJson(config.get("background_texture").getAsJsonObject())));
+        this.setBackgroundTexture(Suppliers.memoize(() -> config.has("background_texture") ? SimpleIGuiTextureJsonUtils.fromJson(config.get("background_texture").getAsJsonObject()): null));
     }
 
     public void addNode(CompassNode compassNode) {

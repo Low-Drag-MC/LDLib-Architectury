@@ -11,6 +11,7 @@
     "ModelBakeryMixin",
     "ModelManagerMixin",
     "ShaderInstanceMixin",
+    "accessor.ParticleEngineAccessor",
     "emi.MinecraftMixin",
     "rei.MinecraftMixin",
     "ItemMixin"

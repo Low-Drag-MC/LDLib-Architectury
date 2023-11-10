@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
@@ -13,6 +14,7 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -198,6 +200,23 @@ public class XmlUtils {
             } catch (Exception ignored) {}
         }
         return defaultValue;
+    }
+
+    public static EntityInfo getEntityInfo(Element element) {
+        int id = getAsInt(element, "id", LDLib.random.nextInt());
+        EntityType<?> entityType = null;
+        if (element.hasAttribute("type")) {
+            entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(element.getAttribute("type")));
+        }
+        CompoundTag tag = null;
+        NodeList nodeList = element.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            if (nodeList.item(i) instanceof Element subElement && subElement.getNodeName().equals("nbt")) {
+                tag = getCompoundTag(subElement);
+                break;
+            }
+        }
+        return new EntityInfo(id, entityType, tag);
     }
 
     public record SizedIngredient(Ingredient ingredient, int count) {};

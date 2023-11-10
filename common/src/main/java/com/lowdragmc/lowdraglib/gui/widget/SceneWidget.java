@@ -18,9 +18,7 @@ import lombok.Getter;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -269,7 +267,7 @@ public class SceneWidget extends WidgetGroup {
         return this;
     }
 
-    public SceneWidget setRenderedCore(Collection<BlockPos> blocks, ISceneRenderHook renderHook) {
+    public SceneWidget setRenderedCore(Collection<BlockPos> blocks, ISceneBlockRenderHook renderHook) {
         if (isRemote()) {
             core.clear();
             core.addAll(blocks);

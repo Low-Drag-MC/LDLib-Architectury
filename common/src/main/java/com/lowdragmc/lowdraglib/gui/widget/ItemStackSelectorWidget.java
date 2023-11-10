@@ -23,6 +23,10 @@ public class ItemStackSelectorWidget extends WidgetGroup {
     private ItemStack item = ItemStack.EMPTY;
 
     public ItemStackSelectorWidget(int x, int y, int width) {
+        this(x, y, width, true);
+    }
+
+    public ItemStackSelectorWidget(int x, int y, int width, boolean nbt) {
         super(x, y, width, 20);
         setClientSideWidget();
         itemField = (TextFieldWidget) new TextFieldWidget(22, 0, width - 46, 20, null, s -> {
@@ -43,25 +47,27 @@ public class ItemStackSelectorWidget extends WidgetGroup {
                 }).setBackgroundTexture(new ColorBorderTexture(1, -1)));
         addWidget(itemField);
 
-        addWidget(new ButtonWidget(width - 21, 0, 20, 20, null, cd -> {
-            if (item.isEmpty()) return;
-            TextFieldWidget nbtField;
-            new DialogWidget(getGui().mainGroup, isClientSideWidget)
-                    .setOnClosed(this::onUpdate)
-                    .addWidget(nbtField = new TextFieldWidget(10, 10, getGui().mainGroup.getSize().width - 50, 20, null, s -> {
-                        try {
-                            item.setTag(TagParser.parseTag(s));
-                            onUpdate();
-                        } catch (CommandSyntaxException ignored) {
+        if (nbt) {
+            addWidget(new ButtonWidget(width - 21, 0, 20, 20, null, cd -> {
+                if (item.isEmpty()) return;
+                TextFieldWidget nbtField;
+                new DialogWidget(getGui().mainGroup, isClientSideWidget)
+                        .setOnClosed(this::onUpdate)
+                        .addWidget(nbtField = new TextFieldWidget(10, 10, getGui().mainGroup.getSize().width - 50, 20, null, s -> {
+                            try {
+                                item.setTag(TagParser.parseTag(s));
+                                onUpdate();
+                            } catch (CommandSyntaxException ignored) {
 
-                        }
-                    }));
-            if (item.hasTag()) {
-                nbtField.setCurrentString(item.getTag().toString());
-            }
-        })
-                .setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("NBT", -1).setDropShadow(true))
-                .setHoverBorderTexture(1, -1).setHoverTooltips("ldlib.gui.tips.item_tag"));
+                            }
+                        }));
+                if (item.hasTag()) {
+                    nbtField.setCurrentString(item.getTag().toString());
+                }
+            })
+                    .setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("NBT", -1).setDropShadow(true))
+                    .setHoverBorderTexture(1, -1).setHoverTooltips("ldlib.gui.tips.item_tag"));
+        }
     }
 
     public ItemStack getItemStack() {

@@ -6,7 +6,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -29,7 +31,7 @@ public class ServerCommands {
                                     return 1;
                                 })
                         )
-                        .then(Commands.literal("copy_tag")
+                        .then(Commands.literal("copy_block_tag")
                                 .then(Commands.argument("pos", BlockPosArgument.blockPos())
                                         .executes(context -> {
                                             var pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
@@ -42,6 +44,16 @@ public class ServerCommands {
                                             } else {
                                                 context.getSource().sendSuccess(() -> Component.literal("No block entity at " + pos).withStyle(Style.EMPTY.withColor(ChatFormatting.RED)), true);
                                             }
+                                            return 1;
+                                        }))
+                        )
+                        .then(Commands.literal("copy_entity_tag")
+                                .then(Commands.argument("entity", EntityArgument.entity())
+                                        .executes(context -> {
+                                            var entity = EntityArgument.getEntity(context, "entity");
+                                            var tag = entity.saveWithoutId(new CompoundTag());
+                                            var value = NbtUtils.structureToSnbt(tag);
+                                            context.getSource().sendSuccess(() -> Component.literal("[Copy to clipboard]").withStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, value))).append(NbtUtils.toPrettyComponent(tag)), true);
                                             return 1;
                                         }))
                         )

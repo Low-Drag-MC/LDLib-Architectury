@@ -17,10 +17,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @LDLRegister(name = "shader_texture", group = "texture")
 public class ShaderTexture extends TransformTexture {
+    private static final Map<ResourceLocation, ShaderTexture> CACHE = new HashMap<>();
 
     @Configurable(name = "ldlib.gui.editor.name.resource", tips = "ldlib.gui.editor.tips.shader_location")
     public ResourceLocation location;
@@ -60,6 +63,11 @@ public class ShaderTexture extends TransformTexture {
         }
     }
 
+    public static void clearCache() {
+        CACHE.values().forEach(ShaderTexture::dispose);
+        CACHE.clear();
+    }
+
     public void dispose() {
         if (isRaw && shader != null) {
             shader.deleteShader();
@@ -80,6 +88,7 @@ public class ShaderTexture extends TransformTexture {
     @ConfigSetter(field = "location")
     public void updateShader(ResourceLocation location) {
         if (LDLib.isRemote() && ShaderManager.allowedShader()) {
+            this.location = location;
             dispose();
             Shader shader = Shaders.load(Shader.ShaderType.FRAGMENT, location);
             if (shader == null) return;
@@ -118,10 +127,14 @@ public class ShaderTexture extends TransformTexture {
     }
 
     public static ShaderTexture createShader(ResourceLocation location) {
+        if (CACHE.containsKey(location) && CACHE.get(location).shader != null) {
+            return CACHE.get(location);
+        }
         ShaderTexture texture;
         if (LDLib.isRemote() && ShaderManager.allowedShader()) {
             Shader shader = Shaders.load(Shader.ShaderType.FRAGMENT, location);
             texture = new ShaderTexture(shader, false);
+            CACHE.put(location, texture);
         } else {
             texture = new ShaderTexture(false);
         }
@@ -198,14 +211,15 @@ public class ShaderTexture extends TransformTexture {
                 return;
             }
 
+            RenderSystem.enableBlend();
             Tesselator tessellator = Tesselator.getInstance();
             BufferBuilder buffer = tessellator.getBuilder();
             var mat = graphics.pose().last().pose();
-            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-            buffer.vertex(mat, x, y + height, 0).color(color).uv(0, 0).endVertex();
-            buffer.vertex(mat, x + width, y + height, 0).color(color).uv(1, 0).endVertex();
-            buffer.vertex(mat, x + width, y, 0).color(color).uv(1, 1).endVertex();
-            buffer.vertex(mat, x, y, 0).color(color).uv(0, 1).endVertex();
+            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            buffer.vertex(mat, x, y + height, 0).uv(0, 0).color(color).endVertex();
+            buffer.vertex(mat, x + width, y + height, 0).uv(1, 0).color(color).endVertex();
+            buffer.vertex(mat, x + width, y, 0).uv(1, 1).color(color).endVertex();
+            buffer.vertex(mat, x, y, 0).uv(0, 1).color(color).endVertex();
             BufferUploader.draw(buffer.end());
 
             program.release();

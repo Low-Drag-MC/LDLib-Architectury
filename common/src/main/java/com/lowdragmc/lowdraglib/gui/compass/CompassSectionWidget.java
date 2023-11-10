@@ -1,12 +1,12 @@
 package com.lowdragmc.lowdraglib.gui.compass;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.utils.RenderBufferUtils;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
-import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
@@ -14,7 +14,6 @@ import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
-import com.lowdragmc.lowdraglib.utils.Vector3fHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -25,23 +24,28 @@ import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 
-import javax.swing.*;
-import java.io.File;
-import java.util.HashSet;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * @author KilaBash
@@ -80,19 +84,23 @@ public class CompassSectionWidget extends WidgetGroup {
 
     public CompassSectionWidget(CompassView compassView, CompassSection section) {
         super(0, 0, compassView.getSize().width - CompassView.LIST_WIDTH, compassView.getSize().height);
-        this.setBackground(section.getBackgroundTexture().get());
+        this.setBackground(section.getBackgroundTexture().get() == null ? compassView.config.getSectionBackground() : section.getBackgroundTexture().get());
         this.compassView = compassView;
         this.section = section;
         this.resetFitScale();
+        // Reset View
         addWidget(new ButtonWidget(10, 10, 20, 20,
                 new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture(), Icons.ROTATION),
                 cd -> resetFitScale()).setHoverTooltips(Component.translatable("ldlib.gui.compass.reset_view")));
 
-        //Edit Mode
-        addWidget(new SwitchWidget(40, 10, 20, 20, (cd, isPressed) -> setEditMode(isPressed))
-                .setTexture(new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture(), Icons.EDIT_OFF),
-                        new GuiTextureGroup(ColorPattern.T_CYAN.rectTexture(), Icons.EDIT_ON))
-                .setHoverTooltips(Component.translatable("ldlib.gui.compass.edit_mode")));
+        // Edit Mode
+        if (CompassManager.INSTANCE.devMode) {
+            addWidget(new SwitchWidget(40, 10, 20, 20, (cd, isPressed) -> setEditMode(isPressed))
+                    .setTexture(new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture(), Icons.EDIT_OFF),
+                            new GuiTextureGroup(ColorPattern.T_CYAN.rectTexture(), Icons.EDIT_ON))
+                    .setHoverTooltips(Component.translatable("ldlib.gui.compass.edit_mode")));
+        }
+
         addWidget(editModeWidget = new WidgetGroup(0, 0, getSize().width, getSize().height));
         editModeWidget.setVisible(false);
         editModeWidget.setActive(false);
@@ -130,6 +138,16 @@ public class CompassSectionWidget extends WidgetGroup {
             }
         }
 
+        for (CompassNode removedNode : removedNodes) {
+            var file = new File(path, removedNode.getNodeName().getPath() + ".json");
+            if (file.exists()) {
+                if (!file.delete()) {
+                    LDLib.LOGGER.error("Failed to delete file %s".formatted(file));
+                }
+            }
+        }
+        removedNodes.clear();
+
         for (CompassNode node : section.nodes.values()) {
             var file = new File(path, node.getNodeName().getPath() + ".json");
             FileUtility.saveJson(file, node.updateJson());
@@ -140,6 +158,8 @@ public class CompassSectionWidget extends WidgetGroup {
                 Util.getPlatform().openFile(path);
             }
         });
+
+        CompassManager.INSTANCE.onResourceManagerReload(Minecraft.getInstance().getResourceManager());
     }
 
     protected void setEditMode(boolean editMode) {
@@ -179,7 +199,7 @@ public class CompassSectionWidget extends WidgetGroup {
     }
 
     @Nullable
-    protected TreeBuilder.Menu createMenu() {
+    protected TreeBuilder.Menu createMenu(double mouseX, double mouseY) {
         var menu = TreeBuilder.Menu.start()
                 .branch(Icons.GRID, "ldlib.gui.compass.grid_size", m -> m
                         .leaf(gridWidth == 0 ? Icons.CHECK : IGuiTexture.EMPTY, "close", () -> gridWidth = 0)
@@ -192,18 +212,18 @@ public class CompassSectionWidget extends WidgetGroup {
             case CURSOR -> {
                 menu.crossLine().leaf(Icons.ADD, "ldlib.gui.compass.add_node", () -> {
                     var newId = 0;
-                    while (section.nodes.containsKey(new ResourceLocation("ldlib:%s/new_node_%d".formatted(section.sectionName.getNamespace(), newId)))) {
+                    while (section.nodes.containsKey(new ResourceLocation("%s:%s/new_node_%d".formatted(section.sectionName.getNamespace(), section.sectionName.getPath(), newId)))) {
                         newId++;
                     }
-                    var id = new ResourceLocation("ldlib:%s/new_node_%d".formatted(section.sectionName.getNamespace(), newId));
+                    var id = new ResourceLocation("%s:%s/new_node_%d".formatted(section.sectionName.getNamespace(), section.sectionName.getPath(), newId));
                     DialogWidget.showStringEditorDialog(compassView, "ldlib.gui.editor.tips.add_node", id.toString(),
                             s -> ResourceLocation.isValidResourceLocation(s) && !section.nodes.containsKey(new ResourceLocation(s)), s -> {
                                 if (s == null || !ResourceLocation.isValidResourceLocation(s) || section.nodes.containsKey(new ResourceLocation(s))) return;
-                                var x = (int) ((lastMouseX - this.getPosition().x + this.getSize().width / 2) / scale + xOffset);
-                                var y = (int) ((lastMouseY - this.getPosition().y + this.getSize().height / 2) / scale + yOffset);
+                                int newMouseX = (int) ((mouseX - this.getPosition().x) / scale + xOffset);
+                                int newMouseY = (int) ((mouseY - this.getPosition().y) / scale + yOffset);
                                 var config = LDLib.GSON.fromJson("""
                                         {
-                                          "section": "ldlib:section_1",
+                                          "section": "%s",
                                           "button_texture": {
                                             "type": "item",
                                             "res": "minecraft:tnt"
@@ -212,17 +232,18 @@ public class CompassSectionWidget extends WidgetGroup {
                                             %d,
                                             %d
                                           ],
-                                          "page": "ldlib:test_node1",
+                                          "page": "%s",
                                           "items": [
                                           ]
                                         }
-                                        """.formatted(x, y), JsonObject.class);
+                                        """.formatted(section.sectionName.toString(), newMouseX, newMouseY, s), JsonObject.class);
                                 var node = new CompassNode(new ResourceLocation(s), config);
+                                node.setSection(section);
                                 section.nodes.put(node.getNodeName(), node);
                             });
                 });
                 if (selectedNode == null) yield menu;
-                yield menu.leaf(Icons.REMOVE, "ldlib.gui.compass.remove_node", () -> {
+                menu.leaf(Icons.REMOVE, "ldlib.gui.compass.remove_node", () -> {
                     if (selectedNode != null) {
                         section.nodes.remove(selectedNode.getNodeName());
                         for (CompassNode node : section.nodes.values()) {
@@ -234,13 +255,103 @@ public class CompassSectionWidget extends WidgetGroup {
                     }
                 }).leaf("ldlib.gui.editor.menu.rename", () -> {
                     if (selectedNode != null) {
-                        DialogWidget.showStringEditorDialog(Editor.INSTANCE, "ldlib.gui.editor.tips.rename", selectedNode.getNodeName().toString(),
+                        DialogWidget.showStringEditorDialog(compassView, "ldlib.gui.editor.tips.rename", selectedNode.getNodeName().toString(),
                                 ResourceLocation::isValidResourceLocation, s -> {
                                     if (s == null || !ResourceLocation.isValidResourceLocation(s)) return;
                                     selectedNode.setNodeName(new ResourceLocation(s));
                                 });
                     }
+                }).branch("ldlib.gui.editor.group.size", m -> m
+                        .leaf(selectedNode.size == 20 ? Icons.CHECK : IGuiTexture.EMPTY, "20", () -> selectedNode.size = 20)
+                        .leaf(selectedNode.size == 24 ? Icons.CHECK : IGuiTexture.EMPTY, "24", () -> selectedNode.size = 24)
+                        .leaf(selectedNode.size == 30 ? Icons.CHECK : IGuiTexture.EMPTY, "30", () -> selectedNode.size = 30)
+                        .leaf(selectedNode.size == 40 ? Icons.CHECK : IGuiTexture.EMPTY, "40", () -> selectedNode.size = 40)
+                        .leaf(selectedNode.size == 60 ? Icons.CHECK : IGuiTexture.EMPTY, "60", () -> selectedNode.size = 60)
+                        .leaf(selectedNode.size == 80 ? Icons.CHECK : IGuiTexture.EMPTY, "80", () -> selectedNode.size = 80)
+                        .leaf(selectedNode.size == 100 ? Icons.CHECK : IGuiTexture.EMPTY, "100", () -> selectedNode.size = 100)
+                        .leaf(selectedNode.size == 150 ? Icons.CHECK : IGuiTexture.EMPTY, "150", () -> selectedNode.size = 150)
+                ).branch("ldlib.gui.compass.attach_items", m -> {
+                    m.branch(Icons.ADD, "ldlib.gui.editor.tips.add_item", m2 -> m2
+                            .leaf("ldlib.gui.compass.attach_items.item", () -> DialogWidget.showItemSelector(compassView, "ldlib.gui.editor.tips.add_item", ItemStack.EMPTY, item -> {
+                                if (item != null && item != Items.AIR) {
+                                    var items = GsonHelper.getAsJsonArray(selectedNode.config, "items", new JsonArray());
+                                    items.add(BuiltInRegistries.ITEM.getKey(item).toString());
+                                    selectedNode.config.add("items", items);
+                                }
+                            }))
+                            .leaf("ldlib.gui.compass.attach_items.tag", () -> DialogWidget.showStringEditorDialog(compassView, "ldlib.gui.compass.attach_items.tag", "minecraft:planks", ResourceLocation::isValidResourceLocation, s -> {
+                                if (s == null || !ResourceLocation.isValidResourceLocation(s)) return;
+                                var items = GsonHelper.getAsJsonArray(selectedNode.config, "items", new JsonArray());
+                                items.add("#"+s);
+                                selectedNode.config.add("items", items);
+                            })));
+                    var items = GsonHelper.getAsJsonArray(selectedNode.config, "items", new JsonArray());
+                    if (!items.isEmpty()) {
+                        m.crossLine();
+                        for (var element : items) {
+                            var data = element.getAsString();
+                            if (ResourceLocation.isValidResourceLocation(data)) {
+                                Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(data));
+                                if (item != Items.AIR) {
+                                    m.leaf(new ItemStackTexture(item), LocalizationUtils.format("ldlib.gui.editor.tips.remove_item") + ": " + LocalizationUtils.format(item.getDescriptionId()), () -> items.remove(element));
+                                }
+                            } else if (data.startsWith("#") && ResourceLocation.isValidResourceLocation(data.substring(1))) {
+                                var tag = TagKey.create(Registries.ITEM, new ResourceLocation(data.substring(1)));
+                                var tagCollection = BuiltInRegistries.ITEM.getTag(tag);
+                                tagCollection.ifPresent(named -> {
+                                    var itemList = new ArrayList<Item>();
+                                    named.forEach(holder -> itemList.add(holder.value()));
+                                    m.leaf(new ItemStackTexture(itemList.stream().map(ItemStack::new).toArray(ItemStack[]::new)), LocalizationUtils.format("ldlib.gui.editor.tips.remove_tag") + ": " + data, () -> items.remove(element));
+                                });
+                            }
+                        }
+                    }
+                }).leaf(Icons.EDIT_FILE, "ldlib.gui.editor.menu.edit", () -> {
+                    var file = new File(LDLib.getLDLibDir(), "assets/%s/compass/pages/en_us/%s.xml".formatted(selectedNode.getNodeName().getNamespace(), selectedNode.getNodeName().getPath()));
+                    if (!file.exists()) {
+                        if (!file.getParentFile().isDirectory()) {
+                            file.getParentFile().mkdirs();
+                        }
+                        var pageLocation = selectedNode.getPage();
+                        var resourceManager = Minecraft.getInstance().getResourceManager();
+                        var path = "compass/pages/en_us/%s.xml".formatted(pageLocation.getPath());
+                        var option = resourceManager.getResource(new ResourceLocation(pageLocation.getNamespace(), path));
+                        var resource = option.orElseGet(() -> resourceManager.getResource(LDLib.location("compass/pages/en_us/missing.xml")).orElseThrow());
+                        String content;
+                        try (var inputStream = resource.open()) {
+                            content = FileUtility.readInputStream(inputStream);
+                        } catch (Exception e) {
+                            content = """
+                                        <page>
+                                            <h1>Page Title</h1>
+                                            <text>
+                                                Page Content
+                                            </text>
+                                        </page>
+                                        """;
+                        }
+                        try (var writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+                            writer.write(content);
+                        } catch (Exception ignored) {
+                            LDLib.LOGGER.error("Failed to create file %s".formatted(file));
+                            return;
+                        }
+                    }
+                    Util.getPlatform().openFile(file);
                 });
+                createTextureMenu(menu, "ldlib.gui.compass.set_button_texture",
+                        selectedNode.getButtonTexture(),
+                        new ItemStackTexture(Items.TNT),
+                        texture -> selectedNode.setButtonTexture(texture));
+                createTextureMenu(menu, "ldlib.gui.compass.set_background",
+                        Optional.ofNullable(selectedNode.getBackground()).orElse(compassView.config.getNodeBackground()),
+                        compassView.config.getNodeBackground(),
+                        texture -> selectedNode.setBackground(texture == compassView.config.getNodeBackground() ? null : texture));
+                createTextureMenu(menu, "ldlib.gui.compass.set_hover_background",
+                        Optional.ofNullable(selectedNode.getHoverBackground()).orElse(compassView.config.getNodeHoverBackground()),
+                        compassView.config.getNodeHoverBackground(),
+                        texture -> selectedNode.setHoverBackground(texture == compassView.config.getNodeHoverBackground() ? null : texture));
+                yield menu;
             }
             case MOVE -> menu.crossLine().leaf(magnetic ? Icons.CHECK : IGuiTexture.EMPTY, "ldlib.gui.compass.magnetic", () -> magnetic = !magnetic);
             case LINK -> selectedLink == null ? menu : menu.crossLine().leaf(Icons.REMOVE, "ldlib.gui.editor.menu.remove", () -> {
@@ -253,6 +364,26 @@ public class CompassSectionWidget extends WidgetGroup {
                 }
             });
         };
+    }
+
+    protected void createTextureMenu(TreeBuilder.Menu menu, String title, IGuiTexture initial, IGuiTexture defaultTexture, Consumer<IGuiTexture> consumer) {
+        menu.branch(initial, title, m -> m
+                .leaf(defaultTexture == initial ? defaultTexture : IGuiTexture.EMPTY, "ldlib.gui.compass.default", () -> consumer.accept(defaultTexture))
+                .leaf((defaultTexture != initial && initial instanceof ResourceTexture) ? initial : IGuiTexture.EMPTY, "ldlib.gui.editor.register.texture.resource_texture", () -> DialogWidget.showStringEditorDialog(compassView, title, "ldlib:textures/gui/icon.png", ResourceLocation::isValidResourceLocation, s -> {
+                    if (s != null && ResourceLocation.isValidResourceLocation(s)) {
+                        consumer.accept(new ResourceTexture(s));
+                    }
+                }))
+                .leaf((defaultTexture != initial && initial instanceof ItemStackTexture) ? initial : IGuiTexture.EMPTY, "ldlib.gui.editor.register.texture.item_texture", () -> DialogWidget.showItemSelector(compassView, title, ItemStack.EMPTY, item -> {
+                    if (item != null && item != Items.AIR) {
+                        consumer.accept(new ItemStackTexture(item));
+                    }
+                }))
+                .leaf((defaultTexture != initial && initial instanceof ShaderTexture) ? initial : IGuiTexture.EMPTY, "ldlib.gui.editor.register.texture.shader_texture", () -> DialogWidget.showStringEditorDialog(compassView, title, "ldlib:compass_node", ResourceLocation::isValidResourceLocation, s -> {
+                    if (s != null && ResourceLocation.isValidResourceLocation(s)) {
+                        consumer.accept(ShaderTexture.createShader(new ResourceLocation(s)));
+                    }
+                })));
     }
 
     @Override
@@ -269,6 +400,7 @@ public class CompassSectionWidget extends WidgetGroup {
                         if (isNodeOver(node, newMouseX, newMouseY)) {
                             switch (mode) {
                                 case CURSOR -> {
+                                    selectedNode = node;
                                     continue;
                                 }
                                 case MOVE -> {
@@ -286,16 +418,19 @@ public class CompassSectionWidget extends WidgetGroup {
                         for (CompassNode node : this.section.nodes.values()) {
                             for (CompassNode preNode : node.preNodes) {
                                 var vec = new Vector2f(node.getPosition().x - preNode.getPosition().x, node.getPosition().y - preNode.getPosition().y);
-                                var mouseVec = new Vector2f(newMouseX - preNode.getPosition().x, newMouseY - preNode.getPosition().y);
+                                var mid = new Vector2f((node.getPosition().x + preNode.getPosition().x) / 2f, (node.getPosition().y + preNode.getPosition().y) / 2f);
+                                var mouseVec = new Vector2f(newMouseX, newMouseY).sub(mid);
                                 var project = new Vector2f(0f, 0f);
                                 float l = vec.lengthSquared();
                                 if (l != 0.0D) {
                                     project.set(vec).mul(mouseVec.dot(vec) / l);
                                 }
-                                var dist = project.sub(mouseVec).length();
-                                if (dist < 10) {
-                                    selectedLink = Pair.of(preNode, node);
-                                    return true;
+                                if (project.lengthSquared() < vec.lengthSquared() / 4f) {
+                                    var dist = project.sub(mouseVec).length();
+                                    if (dist < 10) {
+                                        selectedLink = Pair.of(preNode, node);
+                                        return true;
+                                    }
                                 }
                             }
                         }
@@ -304,7 +439,7 @@ public class CompassSectionWidget extends WidgetGroup {
                 isDragging = true;
             } else if (button == 1) {
                 if (editMode) {
-                    var menu = createMenu();
+                    var menu = createMenu(mouseX, mouseY);
                     if (menu != null) {
                         compassView.waitToAdded(new MenuWidget<>((int) mouseX, (int) mouseY, 14, menu.build())
                                 .setNodeTexture(MenuWidget.NODE_TEXTURE)
@@ -327,7 +462,9 @@ public class CompassSectionWidget extends WidgetGroup {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         var lastSelectedNode = selectedNode;
         isDragging = false;
-        selectedNode = null;
+        if (!editMode || mode != Mode.CURSOR) {
+            selectedNode = null;
+        }
         if (isMouseOverElement(mouseX, mouseY)) {
             int newMouseX = (int) ((mouseX - this.getPosition().x) / scale + xOffset);
             int newMouseY = (int) ((mouseY - this.getPosition().y) / scale + yOffset);
@@ -337,13 +474,6 @@ public class CompassSectionWidget extends WidgetGroup {
                         if (lastSelectedNode != node && isNodeOver(node, newMouseX, newMouseY)) {
                             node.preNodes.add(lastSelectedNode);
                             lastSelectedNode.childNodes.add(node);
-                            return true;
-                        }
-                    }
-                } else if (mode == Mode.CURSOR) {
-                    for (CompassNode node : this.section.nodes.values()) {
-                        if (isNodeOver(node, newMouseX, newMouseY)) {
-                            selectedNode = node;
                             return true;
                         }
                     }
@@ -474,6 +604,7 @@ public class CompassSectionWidget extends WidgetGroup {
                 (node.getBackground() == null ? compassView.config.getNodeBackground() : node.getBackground());
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
+//        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
         texture.draw(graphics, mouseX, mouseY, nodePosition.x - node.size / 2f, nodePosition.y - node.size / 2f, node.size, node.size);
         node.getButtonTexture().draw(graphics, mouseX, mouseY, nodePosition.x - node.size * 8f / 24, nodePosition.y - node.size * 8f / 24, node.size * 16 / 24, node.size * 16 / 24);
     }
