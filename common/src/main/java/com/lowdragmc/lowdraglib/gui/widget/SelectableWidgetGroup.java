@@ -19,7 +19,7 @@ public class SelectableWidgetGroup extends WidgetGroup implements DraggableScrol
     protected IGuiTexture selectedTexture;
     protected Consumer<SelectableWidgetGroup> onSelected;
     protected Consumer<SelectableWidgetGroup> onUnSelected;
-    @Getter @Setter
+    @Setter
     private Object prefab;
 
     public SelectableWidgetGroup(int x, int y, int width, int height) {

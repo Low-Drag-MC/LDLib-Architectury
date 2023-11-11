@@ -6,7 +6,6 @@ import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -41,7 +40,7 @@ public class CompassSelectorWidget extends WidgetGroup {
                 var background = node.getBackground();
                 var hoverBackground = node.getHoverBackground();
                 var buttonTexture = node.getButtonTexture();
-                var config = CompassManager.INSTANCE.getConfig(node.getSection().getSectionName().getNamespace());
+                var config = CompassManager.INSTANCE.getUIConfig(node.getSection().getSectionName().getNamespace());
                 if (background == null) {
                     background = config.getNodeBackground();
                 }

@@ -1,10 +1,7 @@
 package com.lowdragmc.lowdraglib.test;
 
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.gui.compass.CompassConfig;
 import com.lowdragmc.lowdraglib.gui.compass.CompassView;
-import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
-import com.lowdragmc.lowdraglib.gui.editor.ui.UIEditor;
 import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;

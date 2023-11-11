@@ -55,7 +55,7 @@ public class SceneAction extends Action {
                     case "remove" -> removedBlocks.add(new BlockAnima(blockPos, XmlUtils.getAsVec3(data, "offset", new Vec3(0, 0.7, 0)), XmlUtils.getAsInt(data, "duration", 15)));
                     case "modify" -> modifiedTags.put(blockPos, XmlUtils.getBlockInfo(data));
                     case "add-entity" -> addedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), pos));
-                    case "modify-entity" -> modifiedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), pos));
+                    case "modify-entity" -> modifiedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), XmlUtils.getAsVec3(data, "pos", null)));
                     case "remove-entity" -> removedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), XmlUtils.getAsBoolean(data, "force", false)));
                     case "rotation" -> rotation = XmlUtils.getAsFloat(data, "degree", 0f);
                     case "highlight" -> highlightedBlocks.put(new BlockPosFace(blockPos, XmlUtils.getAsEnum(data, "face", Direction.class, null)), XmlUtils.getAsInt(data, "duration", 40));
@@ -146,11 +146,11 @@ public class SceneAction extends Action {
         }
         for (var tuple : addedEntities) {
             var pos = tuple.getB();
-            scene.addEntity(tuple.getA(), pos.x(), pos.y(), pos.z(), false);
+            scene.addEntity(tuple.getA(), pos, false);
         }
         for (var tuple : modifiedEntities) {
             var pos = tuple.getB();
-            scene.addEntity(tuple.getA(), pos.x(), pos.y(), pos.z(), true);
+            scene.addEntity(tuple.getA(), pos, true);
         }
         for (var tuple : removedEntities) {
             scene.removeEntity(tuple.getA(), tuple.getB());
