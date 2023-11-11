@@ -44,7 +44,7 @@ public class CompassView extends WidgetGroup {
     public static final int LIST_WIDTH = 150;
 
     public final String modID;
-    public final CompassConfig config;
+    public final ICompassUIConfig config;
 
     @Getter
     protected final Map<ResourceLocation, CompassSection> sections = new LinkedHashMap<>();
@@ -64,7 +64,7 @@ public class CompassView extends WidgetGroup {
         setClientSideWidget();
         this.modID = modID;
         if (LDLib.isClient()) {
-            this.config = INSTANCE.getConfig(modID);
+            this.config = INSTANCE.getUIConfig(modID);
         } else {
             this.config = null;
         }

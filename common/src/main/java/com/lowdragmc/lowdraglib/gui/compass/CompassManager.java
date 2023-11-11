@@ -31,7 +31,6 @@ import javax.annotation.Nullable;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -51,7 +50,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
     public boolean devMode = Platform.isDevEnv();
     private final Map<String, Supplier<ILayoutComponent>> COMPONENTS = new HashMap<>();
     private final Map<String, Function<Element, Action>> ACTION_CREATORS = new HashMap<>();
-    private final Map<String, CompassConfig> CONFIGS = new HashMap<>();
+    private final Map<String, ICompassUIConfig> CONFIGS = new HashMap<>();
 
     private final Map<Item, Set<ResourceLocation>> itemLookup = new HashMap<>();
     public final Map<String, Map<ResourceLocation, CompassSection>> sections = new HashMap<>();
@@ -69,7 +68,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
         COMPONENTS.put(name, clazz);
     }
 
-    public void registerConfig(String modID, CompassConfig config) {
+    public void registerUIConfig(String modID, ICompassUIConfig config) {
         CONFIGS.put(modID, config);
     }
 
@@ -89,8 +88,8 @@ public final class CompassManager implements ResourceManagerReloadListener {
         return creator == null ? null : creator.apply(element);
     }
 
-    public CompassConfig getConfig(String modID) {
-        return CONFIGS.getOrDefault(modID, new CompassConfig());
+    public ICompassUIConfig getUIConfig(String modID) {
+        return CONFIGS.getOrDefault(modID, ICompassUIConfig.getDefault());
     }
 
     public void init() {
