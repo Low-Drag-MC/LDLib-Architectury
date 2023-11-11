@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
+import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -36,6 +37,10 @@ public class TextTexture extends TransformTexture{
     @Configurable(tips = "ldlib.gui.editor.tips.image_text_width")
     @NumberRange(range = {1, Integer.MAX_VALUE})
     public int width;
+    @Configurable
+    @NumberRange(range = {0, Integer.MAX_VALUE})
+    @Setter
+    public float rollSpeed = 1;
     @Configurable
     public boolean dropShadow;
 
@@ -145,68 +150,78 @@ public class TextTexture extends TransformTexture{
         if (type == TextType.NORMAL) {
             textH *= texts.size();
             for (int i = 0; i < texts.size(); i++) {
-                String resultText = texts.get(i);
-                int textW = fontRenderer.width(resultText);
-                float _x = x + (width - textW) / 2f;
+                String line = texts.get(i);
+                int lineWidth = fontRenderer.width(line);
+                float _x = x + (width - lineWidth) / 2f;
                 float _y = y + (height - textH) / 2f + i * fontRenderer.lineHeight;
-                graphics.drawString(fontRenderer, resultText, (int) _x, (int) _y, color, dropShadow);
+                graphics.drawString(fontRenderer, line, (int) _x, (int) _y, color, dropShadow);
             }
-        } else if (type == TextType.HIDE) {
-            int i = -1;
-            if (Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY)) {
-                i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
-            }
-            String resultText = i >= 0 ? texts.get(i) : (texts.get(0) + (texts.size() > 1 ? ".." : ""));
-            drawTextLine(graphics, x, y, width, height, fontRenderer, textH, resultText);
-        } else if (type == TextType.ROLL || type == TextType.ROLL_ALWAYS) {
-            int i = 0;
-            if (type == TextType.ROLL_ALWAYS || Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY)) {
-                i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
-            }
-            String resultText = texts.get(i);
-            drawTextLine(graphics, x, y, width, height, fontRenderer, textH, resultText);
         } else if (type == TextType.LEFT) {
             textH *= texts.size();
             for (int i = 0; i < texts.size(); i++) {
-                String resultText = texts.get(i);
+                String line = texts.get(i);
                 float _y = y + (height - textH) / 2f + i * fontRenderer.lineHeight;
-                graphics.drawString(fontRenderer, resultText, (int) x, (int) _y, color, dropShadow);
+                graphics.drawString(fontRenderer, line, (int) x, (int) _y, color, dropShadow);
             }
         } else if (type == TextType.RIGHT) {
             textH *= texts.size();
             for (int i = 0; i < texts.size(); i++) {
-                String resultText = texts.get(i);
-                int textW = fontRenderer.width(resultText);
+                String line = texts.get(i);
+                int lineWidth = fontRenderer.width(line);
                 float _y = y + (height - textH) / 2f + i * fontRenderer.lineHeight;
-                graphics.drawString(fontRenderer, resultText, (int) (x + width - textW), (int) _y, color, dropShadow);
+                graphics.drawString(fontRenderer, line, (int) (x + width - lineWidth), (int) _y, color, dropShadow);
+            }
+        } else if (type == TextType.HIDE) {
+            if (Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY) && texts.size() > 1) {
+                drawRollTextLine(graphics, x, y, width, height, fontRenderer, textH, text);
+            } else {
+                String line = texts.get(0) + (texts.size() > 1 ? ".." : "");
+                drawTextLine(graphics, x, y, width, height, fontRenderer, textH, line);
+            }
+        } else if (type == TextType.ROLL || type == TextType.ROLL_ALWAYS) {
+            if (texts.size() > 1 && (type == TextType.ROLL_ALWAYS || Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY))) {
+                drawRollTextLine(graphics, x, y, width, height, fontRenderer, textH, text);
+            } else {
+                drawTextLine(graphics, x, y, width, height, fontRenderer, textH, texts.get(0));
             }
         } else if (type == TextType.LEFT_HIDE) {
-            int i = -1;
-            if (Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY)) {
-                i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
+            if (Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY) && texts.size() > 1) {
+                drawRollTextLine(graphics, x, y, width, height, fontRenderer, textH, text);
+            } else {
+                String line = texts.get(0) + (texts.size() > 1 ? ".." : "");
+                float _y = y + (height - textH) / 2f;
+                graphics.drawString(fontRenderer, line, (int) x, (int) _y, color, dropShadow);
             }
-            String resultText = i >= 0 ? texts.get(i) : (texts.get(0) + (texts.size() > 1 ? ".." : ""));
-            float _y = y + (height - textH) / 2f;
-            graphics.drawString(fontRenderer, resultText, (int) x, (int) _y, color, dropShadow);
         } else if (type == TextType.LEFT_ROLL || type == TextType.LEFT_ROLL_ALWAYS) {
-            int i = 0;
-            if (type == TextType.LEFT_ROLL_ALWAYS || Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY)) {
-                i = (int) (Math.abs(System.currentTimeMillis() / 1000) % texts.size());
+            if (texts.size() > 1 && (type == TextType.LEFT_ROLL_ALWAYS || Widget.isMouseOver((int) x, (int) y, width, height, mouseX, mouseY))) {
+                drawRollTextLine(graphics, x, y, width, height, fontRenderer, textH, text);
+            } else {
+                float _y = y + (height - textH) / 2f;
+                graphics.drawString(fontRenderer, texts.get(0), (int) x, (int) _y, color, dropShadow);
             }
-            String resultText = texts.get(i);
-            float _y = y + (height - textH) / 2f;
-            graphics.drawString(fontRenderer, resultText, (int) x, (int) _y, color, dropShadow);
         }
         graphics.pose().popPose();
         RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 
     @Environment(EnvType.CLIENT)
-    private void drawTextLine(GuiGraphics graphics, float x, float y, int width, int height, Font fontRenderer, int textH, String resultText) {
-        int textW = fontRenderer.width(resultText);
+    private void drawRollTextLine(GuiGraphics graphics, float x, float y, int width, int height, Font fontRenderer, int textH, String line) {
+        float _y = y + (height - textH) / 2f;
+        int textW = fontRenderer.width(line);
+        int totalW = width + textW + 10;
+        float from = x + width;
+        graphics.enableScissor((int) x, (int) y, (int) (x + width), (int) (y + height));
+        var t = rollSpeed > 0 ? ((rollSpeed * ((Math.abs(System.currentTimeMillis()) / 10) % (totalW))) / (totalW * rollSpeed)) : 0.5;
+        graphics.drawString(fontRenderer, line, (int) (from - t * totalW), (int) _y, color, dropShadow);
+        graphics.disableScissor();
+    }
+
+    @Environment(EnvType.CLIENT)
+    private void drawTextLine(GuiGraphics graphics, float x, float y, int width, int height, Font fontRenderer, int textH, String line) {
+        int textW = fontRenderer.width(line);
         float _x = x + (width - textW) / 2f;
         float _y = y + (height - textH) / 2f;
-        graphics.drawString(fontRenderer, resultText, (int) _x, (int) _y, color, dropShadow);
+        graphics.drawString(fontRenderer, line, (int) _x, (int) _y, color, dropShadow);
     }
 
     public enum TextType{

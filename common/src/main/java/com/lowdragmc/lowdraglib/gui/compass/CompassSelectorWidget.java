@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -47,9 +48,9 @@ public class CompassSelectorWidget extends WidgetGroup {
                 if (hoverBackground == null) {
                     hoverBackground = config.getNodeHoverBackground();
                 }
-                listGroup.addWidget(new ButtonWidget(x + 2, y + 2, 20, 20, new GuiTextureGroup(background, buttonTexture), cd -> {
+                listGroup.addWidget(new ButtonWidget(x + 2, y + 2, 20, 20, new GuiTextureGroup(background, new GuiTextureGroup(buttonTexture).scale(0.8f)), cd -> {
                     CompassManager.INSTANCE.openCompass(node);
-                }).setHoverTexture(new GuiTextureGroup(hoverBackground, buttonTexture)).setHoverTooltips(node.getNodeName().toLanguageKey("compass.node")));
+                }).setHoverTexture(new GuiTextureGroup(hoverBackground, new GuiTextureGroup(buttonTexture).scale(0.8f))).setHoverTooltips(node.getNodeName().toLanguageKey("compass.node")));
                 x += 25;
                 if (x > 175) {
                     x = 0;

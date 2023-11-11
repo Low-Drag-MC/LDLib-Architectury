@@ -98,6 +98,46 @@ public class DialogWidget extends WidgetGroup {
 
     @Override
     @Environment(EnvType.CLIENT)
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (!isMouseOverElement(mouseX, mouseY)) {
+            return false;
+        }
+        super.mouseReleased(mouseX, mouseY, button);
+        return true;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean mouseWheelMove(double mouseX, double mouseY, double wheelDelta) {
+        if (!isMouseOverElement(mouseX, mouseY)) {
+            return false;
+        }
+        super.mouseWheelMove(mouseX, mouseY, wheelDelta);
+        return true;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (!isMouseOverElement(mouseX, mouseY)) {
+            return false;
+        }
+        super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return true;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean mouseMoved(double mouseX, double mouseY) {
+        if (!isMouseOverElement(mouseX, mouseY)) {
+            return false;
+        }
+        super.mouseMoved(mouseX, mouseY);
+        return true;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!super.keyPressed(keyCode, scanCode, modifiers) && keyCode == GLFW.GLFW_KEY_ESCAPE) {
             writeClientAction(-1, x->{});
