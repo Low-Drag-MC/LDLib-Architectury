@@ -150,7 +150,9 @@
   "ldlib.gui.compass.grid_size": "Grid Size",
   "ldlib.gui.compass.magnetic": "Magnetic",
   "ldlib.gui.compass.add_node": "Add Node",
+  "ldlib.gui.compass.add_section": "Add Section",
   "ldlib.gui.compass.remove_node": "Remove Node",
+  "ldlib.gui.compass.remove_section": "Remove Section",
   "ldlib.gui.compass.attach_items": "Attach Items",
   "ldlib.gui.compass.attach_items.item": "Item",
   "ldlib.gui.compass.attach_items.tag": "Tag",
@@ -159,5 +161,8 @@
   "ldlib.gui.compass.set_hover_background": "Set Hover Background",
   "ldlib.gui.compass.default": "default",
   "ldlib.gui.compass.refresh": "refresh",
+  "ldlib.gui.compass.section.edit_mode.tooltip": "right-click the section to open the edit menu",
+  "ldlib.gui.editor.menu.move_up": "Move Up",
+  "ldlib.gui.editor.menu.move_down": "Move Down",
   "ldlib.compass.c_press": "Press [C] open compass"
 }

@@ -84,7 +84,6 @@ public class CompassSectionWidget extends WidgetGroup {
 
     public CompassSectionWidget(CompassView compassView, CompassSection section) {
         super(0, 0, compassView.getSize().width - CompassView.LIST_WIDTH, compassView.getSize().height);
-        this.setBackground(section.getBackgroundTexture().get() == null ? compassView.config.getSectionBackground() : section.getBackgroundTexture().get());
         this.compassView = compassView;
         this.section = section;
         this.resetFitScale();
@@ -96,6 +95,7 @@ public class CompassSectionWidget extends WidgetGroup {
         // Edit Mode
         if (CompassManager.INSTANCE.devMode) {
             addWidget(new SwitchWidget(40, 10, 20, 20, (cd, isPressed) -> setEditMode(isPressed))
+                    .setSupplier(() -> editMode)
                     .setTexture(new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture(), Icons.EDIT_OFF),
                             new GuiTextureGroup(ColorPattern.T_CYAN.rectTexture(), Icons.EDIT_ON))
                     .setHoverTooltips(Component.translatable("ldlib.gui.compass.edit_mode")));
@@ -177,6 +177,12 @@ public class CompassSectionWidget extends WidgetGroup {
 
     protected void resetFitScale() {
         int minX, minY, maxX, maxY;
+        if (this.section.nodes.isEmpty()) {
+            this.xOffset = 0;
+            this.yOffset = 0;
+            this.scale = 1;
+            return;
+        }
         minX = minY = Integer.MAX_VALUE;
         maxX = maxY = Integer.MIN_VALUE;
         for (CompassNode node : this.section.nodes.values()) {
@@ -551,7 +557,8 @@ public class CompassSectionWidget extends WidgetGroup {
     @Override
     @Environment(EnvType.CLIENT)
     public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        drawBackgroundTexture(poseStack, mouseX, mouseY);
+        this.setBackground(section.getBackgroundTexture() == null ? compassView.config.getSectionBackground() : section.getBackgroundTexture());
+        this.drawBackgroundTexture(poseStack, mouseX, mouseY);
         var pos = getPosition();
         var size = getSize();
         RenderUtils.useScissor(poseStack, pos.x, pos.y, size.width, size.height, () -> {

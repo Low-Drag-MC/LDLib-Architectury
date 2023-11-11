@@ -6,6 +6,8 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.vertex.PoseStack;
+import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -17,6 +19,8 @@ public class SelectableWidgetGroup extends WidgetGroup implements DraggableScrol
     protected IGuiTexture selectedTexture;
     protected Consumer<SelectableWidgetGroup> onSelected;
     protected Consumer<SelectableWidgetGroup> onUnSelected;
+    @Getter @Setter
+    private Object prefab;
 
     public SelectableWidgetGroup(int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -79,4 +83,9 @@ public class SelectableWidgetGroup extends WidgetGroup implements DraggableScrol
         isSelected = false;
         if (onUnSelected != null) onUnSelected.accept(this);
     }
+
+    public <T> T getPrefab() {
+        return (T) prefab;
+    }
+
 }
