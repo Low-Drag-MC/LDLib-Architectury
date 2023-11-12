@@ -405,48 +405,51 @@ public abstract class WorldSceneRenderer {
         } else {
             BlockRenderDispatcher blockrendererdispatcher = mc.getBlockRenderer();
             try { // render com.lowdragmc.lowdraglib.test.block in each layer
-                for (RenderType layer : RenderType.chunkBufferLayers()) {
-                    layer.setupRenderState();
-                    Random random = new Random();
-                    PoseStack matrixstack = new PoseStack();
+                renderedBlocksMap.forEach((renderedBlocks, hook) -> {
+                    for (RenderType layer : RenderType.chunkBufferLayers()) {
+                        layer.setupRenderState();
+                        Random random = new Random();
+                        PoseStack poseStack = new PoseStack();
 
-                    var buffers = mc.renderBuffers().bufferSource();
+                        if (layer == RenderType.translucent()) { // render tesr before translucent
+                            if (hook != null) {
+                                hook.apply(true, layer);
+                            } else {
+                                setDefaultRenderLayerState(layer);
+                            }
 
-                    if (layer == RenderType.translucent()) { // render tesr before translucent
-                        if (world instanceof TrackedDummyWorld level) {
-                            renderEntities(level, matrixstack, buffers, sceneEntityRenderHook, particleTicks);
+                            var buffers = mc.renderBuffers().bufferSource();
+                            renderTESR(renderedBlocks, poseStack, buffers, hook, particleTicks);
+
+                            if (hook != null) {
+                                buffers.endBatch();
+                            }
                         }
-                    }
 
-                    renderedBlocksMap.forEach((renderedBlocks, hook) -> {
                         if (hook != null) {
                             hook.apply(false, layer);
                         } else {
                             setDefaultRenderLayerState(layer);
                         }
 
-                        if (layer == RenderType.translucent()) { // render tesr before translucent
-                            if (hook != null) {
-                                hook.apply(true, layer);
-                            }
-                            renderTESR(renderedBlocks, matrixstack, buffers, hook, particleTicks);
-                            buffers.endBatch();
-                        }
-
                         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
                         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
-                        renderBlocks(matrixstack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), renderedBlocks, hook, particleTicks);
+                        renderBlocks(poseStack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), renderedBlocks, hook, particleTicks);
 
                         Tesselator.getInstance().end();
                         layer.clearRenderState();
-                    });
-
-                    buffers.endBatch();
-                }
-
+                    }
+                });
             } finally {
             }
+        }
+
+        if (world instanceof TrackedDummyWorld level) {
+            PoseStack poseStack = new PoseStack();
+            var buffers = mc.renderBuffers().bufferSource();
+            renderEntities(level, poseStack, buffers, sceneEntityRenderHook, particleTicks);
+            buffers.endBatch();
         }
 
         if (particleManager != null) {
