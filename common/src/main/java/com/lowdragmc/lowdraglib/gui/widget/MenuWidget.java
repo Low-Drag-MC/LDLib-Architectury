@@ -10,12 +10,12 @@ import com.lowdragmc.lowdraglib.gui.util.TreeNode;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 
 import javax.annotation.Nullable;
@@ -32,9 +32,9 @@ public class MenuWidget<K, T> extends WidgetGroup {
     public static IGuiTexture NODE_TEXTURE = new IGuiTexture() {
         @Override
         @Environment(EnvType.CLIENT)
-        public void draw(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
-            ColorPattern.BLACK.rectTexture().draw(graphics, mouseX, mouseY, x, y, width, height);
-            Icons.RIGHT.draw(graphics, mouseX, mouseY, x + width - height + 3, y + 3, height - 6, height - 6);
+        public void draw(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+            ColorPattern.BLACK.rectTexture().draw(stack, mouseX, mouseY, x, y, width, height);
+            Icons.RIGHT.draw(stack, mouseX, mouseY, x + width - height + 3, y + 3, height - 6, height - 6);
         }
     };
     public static IGuiTexture LEAF_TEXTURE = ColorPattern.BLACK.rectTexture();

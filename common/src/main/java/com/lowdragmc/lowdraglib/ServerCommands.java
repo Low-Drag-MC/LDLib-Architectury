@@ -53,7 +53,7 @@ public class ServerCommands {
                                             var entity = EntityArgument.getEntity(context, "entity");
                                             var tag = entity.saveWithoutId(new CompoundTag());
                                             var value = NbtUtils.structureToSnbt(tag);
-                                            context.getSource().sendSuccess(() -> Component.literal("[Copy to clipboard]").withStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, value))).append(NbtUtils.toPrettyComponent(tag)), true);
+                                            context.getSource().sendSuccess(Component.literal("[Copy to clipboard]").withStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, value))).append(NbtUtils.toPrettyComponent(tag)), true);
                                             return 1;
                                         }))
                         )

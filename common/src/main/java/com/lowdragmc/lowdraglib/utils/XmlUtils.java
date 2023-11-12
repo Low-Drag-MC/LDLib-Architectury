@@ -205,7 +205,7 @@ public class XmlUtils {
         int id = getAsInt(element, "id", LDLib.random.nextInt());
         EntityType<?> entityType = null;
         if (element.hasAttribute("type")) {
-            entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(element.getAttribute("type")));
+            entityType = Registry.ENTITY_TYPE.get(new ResourceLocation(element.getAttribute("type")));
         }
         CompoundTag tag = null;
         NodeList nodeList = element.getChildNodes();
