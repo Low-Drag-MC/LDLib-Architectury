@@ -135,6 +135,10 @@ public class SceneAction extends Action {
             scene.addBlock(tuple.getA().pos(), blockInfo, anima ? tuple.getA() : null);
         }
 
+        for (BlockInfo blockInfo : modifiedTags.values()) {
+            blockInfo.clearBlockEntityCache();
+        }
+
         for (var block : removedBlocks) {
             scene.removeBlock(block.pos(), anima ? block : null);
         }
