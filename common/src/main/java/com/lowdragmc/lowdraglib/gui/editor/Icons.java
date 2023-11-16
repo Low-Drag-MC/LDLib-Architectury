@@ -30,6 +30,10 @@ public class Icons {
     public static ResourceTexture WIDGET_GROUP = icon("widget_group");
     public static ResourceTexture WIDGET_CONTAINER = icon("widget_container");
     public static ResourceTexture WIDGET_CUSTOM = icon("widget_custom");
+    public static ResourceTexture CURSOR = icon("cursor");
+    public static ResourceTexture MOVE = icon("move");
+    public static ResourceTexture LINK = icon("link");
+    public static ResourceTexture GRID = icon("grid");
     public static ResourceTexture ADD = icon("add");
     public static ResourceTexture SAVE = icon("save");
     public static ResourceTexture HELP = icon("help");
@@ -44,6 +48,8 @@ public class Icons {
     public static ResourceTexture ADD_FILE = icon("add_file");
     public static ResourceTexture EDIT_FILE = icon("edit_file");
     public static ResourceTexture REMOVE_FILE = icon("remove_file");
+    public static ResourceTexture EDIT_ON = icon("edit_on");
+    public static ResourceTexture EDIT_OFF = icon("edit_off");
     public static ResourceTexture CHECK = icon("check");
     public static ResourceTexture HISTORY = icon("history");
     public static ResourceTexture INFORMATION = icon("information");

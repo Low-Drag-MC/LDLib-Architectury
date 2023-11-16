@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.gui.compass.component.animation;
 
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.BlockPosFace;
+import com.lowdragmc.lowdraglib.utils.EntityInfo;
 import com.lowdragmc.lowdraglib.utils.XmlUtils;
 import com.mojang.math.Vector3f;
 import lombok.val;
@@ -29,6 +30,9 @@ public class SceneAction extends Action {
     private final List<BlockAnima> removedBlocks = new ArrayList<>();
     private final Map<BlockPos, BlockInfo> modifiedTags = new HashMap<>();
     private final Map<BlockPosFace, Integer> highlightedBlocks = new HashMap<>();
+    private final List<Tuple<EntityInfo, Vec3>> addedEntities = new ArrayList<>();
+    private final List<Tuple<EntityInfo, Vec3>> modifiedEntities = new ArrayList<>();
+    private final List<Tuple<EntityInfo, Boolean>> removedEntities = new ArrayList<>();
     private final Map<Vec3, MutableTriple<Tuple<XmlUtils.SizedIngredient, List<Component>>, Vec2, Integer>> tooltipBlocks = new HashMap<>();
     private Float rotation;
     //runtime
@@ -42,16 +46,20 @@ public class SceneAction extends Action {
         final var nodes = element.getChildNodes();
         for (int i = 0; i < nodes.getLength(); i++) {
             final var node = nodes.item(i);
-            if (node instanceof Element blockElement) {
-                val nodeName = blockElement.getNodeName();
-                val blockPos = XmlUtils.getAsBlockPos(blockElement, "pos", BlockPos.ZERO);
+            if (node instanceof Element data) {
+                val nodeName = data.getNodeName();
+                val blockPos = XmlUtils.getAsBlockPos(data, "pos", BlockPos.ZERO);
+                val pos = XmlUtils.getAsVec3(data, "pos", Vec3.ZERO);
                 switch (nodeName) {
-                    case "add" -> addedBlocks.add(new Tuple<>(new BlockAnima(blockPos, XmlUtils.getAsVec3(blockElement, "offset", new Vec3(0, 0.7, 0)), XmlUtils.getAsInt(blockElement, "duration", 15)), XmlUtils.getBlockInfo(blockElement)));
-                    case "remove" -> removedBlocks.add(new BlockAnima(blockPos, XmlUtils.getAsVec3(blockElement, "offset", new Vec3(0, 0.7, 0)), XmlUtils.getAsInt(blockElement, "duration", 15)));
-                    case "modify" -> modifiedTags.put(blockPos, XmlUtils.getBlockInfo(blockElement));
-                    case "rotation" -> rotation = XmlUtils.getAsFloat(blockElement, "degree", 0f);
-                    case "highlight" -> highlightedBlocks.put(new BlockPosFace(blockPos, XmlUtils.getAsEnum(blockElement, "face", Direction.class, null)), XmlUtils.getAsInt(blockElement, "duration", 40));
-                    case "tooltip" -> tooltipBlocks.put(XmlUtils.getAsVec3(blockElement, "pos", new Vec3(0, 0, 0)), MutableTriple.of(new Tuple<>(XmlUtils.getIngredient(blockElement), new ArrayList<>(XmlUtils.getComponents(blockElement, Style.EMPTY))), XmlUtils.getAsVec2(blockElement, "screen-offset", new Vec2(0.3f, 0.3f)), XmlUtils.getAsInt(blockElement, "duration", 40)));
+                    case "add" -> addedBlocks.add(new Tuple<>(new BlockAnima(blockPos, XmlUtils.getAsVec3(data, "offset", new Vec3(0, 0.7, 0)), XmlUtils.getAsInt(data, "duration", 15)), XmlUtils.getBlockInfo(data)));
+                    case "remove" -> removedBlocks.add(new BlockAnima(blockPos, XmlUtils.getAsVec3(data, "offset", new Vec3(0, 0.7, 0)), XmlUtils.getAsInt(data, "duration", 15)));
+                    case "modify" -> modifiedTags.put(blockPos, XmlUtils.getBlockInfo(data));
+                    case "add-entity" -> addedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), pos));
+                    case "modify-entity" -> modifiedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), XmlUtils.getAsVec3(data, "pos", null)));
+                    case "remove-entity" -> removedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), XmlUtils.getAsBoolean(data, "force", false)));
+                    case "rotation" -> rotation = XmlUtils.getAsFloat(data, "degree", 0f);
+                    case "highlight" -> highlightedBlocks.put(new BlockPosFace(blockPos, XmlUtils.getAsEnum(data, "face", Direction.class, null)), XmlUtils.getAsInt(data, "duration", 40));
+                    case "tooltip" -> tooltipBlocks.put(XmlUtils.getAsVec3(data, "pos", new Vec3(0, 0, 0)), MutableTriple.of(new Tuple<>(XmlUtils.getIngredient(data), new ArrayList<>(XmlUtils.getComponents(data, Style.EMPTY))), XmlUtils.getAsVec2(data, "screen-offset", new Vec2(0.3f, 0.3f)), XmlUtils.getAsInt(data, "duration", 40)));
                 }
             }
         }
@@ -79,6 +87,21 @@ public class SceneAction extends Action {
 
     public SceneAction highlightedBlock(BlockPos pos, Direction face, int duration) {
         highlightedBlocks.put(new BlockPosFace(pos, face), duration);
+        return this;
+    }
+
+    public SceneAction addedEntity(EntityInfo entityInfo, Vec3 pos) {
+        addedEntities.add(new Tuple<>(entityInfo, pos));
+        return this;
+    }
+
+    public SceneAction modifiedEntity(EntityInfo entityInfo, Vec3 pos) {
+        modifiedEntities.add(new Tuple<>(entityInfo, pos));
+        return this;
+    }
+
+    public SceneAction removedEntity(EntityInfo entityInfo, boolean force) {
+        removedEntities.add(new Tuple<>(entityInfo, force));
         return this;
     }
 
@@ -115,11 +138,26 @@ public class SceneAction extends Action {
             scene.addBlock(tuple.getA().pos(), blockInfo, anima ? tuple.getA() : null);
         }
 
+        for (BlockInfo blockInfo : modifiedTags.values()) {
+            blockInfo.clearBlockEntityCache();
+        }
+
         for (var block : removedBlocks) {
             scene.removeBlock(block.pos(), anima ? block : null);
         }
         for (var entry : modifiedTags.entrySet()) {
             scene.addBlock(entry.getKey(), entry.getValue(), null);
+        }
+        for (var tuple : addedEntities) {
+            var pos = tuple.getB();
+            scene.addEntity(tuple.getA(), pos, false);
+        }
+        for (var tuple : modifiedEntities) {
+            var pos = tuple.getB();
+            scene.addEntity(tuple.getA(), pos, true);
+        }
+        for (var tuple : removedEntities) {
+            scene.removeEntity(tuple.getA(), tuple.getB());
         }
         if (anima) {
             for (var entry : highlightedBlocks.entrySet()) {

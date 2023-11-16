@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.client.shader;
 import com.google.common.collect.ImmutableMap;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.shader.management.Shader;
+import com.lowdragmc.lowdraglib.gui.texture.ShaderTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -61,6 +62,7 @@ public class Shaders {
 		CACHE.clear();
 		init();
 		DrawerHelper.init();
+		ShaderTexture.clearCache();
 	}
 
 	public static Shader load(Shader.ShaderType shaderType, ResourceLocation resourceLocation) {
@@ -85,6 +87,8 @@ public class Shaders {
 	private static ShaderInstance blitShader;
 	@Getter
 	private static ShaderInstance hsbShader;
+	@Getter
+	private static ShaderInstance compassLineShader;
 
 	/**
 	 * the vertex format for HSB color, three four of float
@@ -108,7 +112,10 @@ public class Shaders {
 							shaderInstance -> blitShader = shaderInstance),
 					Pair.of(new ShaderInstance(resourceManager,
 									new ResourceLocation(LDLib.MOD_ID, "hsb_block").toString(), HSB_VERTEX_FORMAT),
-							shaderInstance -> hsbShader = shaderInstance)
+							shaderInstance -> hsbShader = shaderInstance),
+					Pair.of(new ShaderInstance(resourceManager,
+									new ResourceLocation(LDLib.MOD_ID, "compass_line").toString(), DefaultVertexFormat.POSITION_TEX_COLOR),
+							shaderInstance -> compassLineShader = shaderInstance)
 			);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

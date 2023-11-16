@@ -1,12 +1,16 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
+import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
+import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.TreeNode;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
@@ -24,6 +28,19 @@ import java.util.function.Predicate;
 
 @Accessors(chain = true)
 public class MenuWidget<K, T> extends WidgetGroup {
+
+    public static IGuiTexture NODE_TEXTURE = new IGuiTexture() {
+        @Override
+        @Environment(EnvType.CLIENT)
+        public void draw(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+            ColorPattern.BLACK.rectTexture().draw(stack, mouseX, mouseY, x, y, width, height);
+            Icons.RIGHT.draw(stack, mouseX, mouseY, x + width - height + 3, y + 3, height - 6, height - 6);
+        }
+    };
+    public static IGuiTexture LEAF_TEXTURE = ColorPattern.BLACK.rectTexture();
+    public static IGuiTexture NODE_HOVER_TEXTURE = ColorPattern.T_GRAY.rectTexture();
+    public static IGuiTexture BACKGROUND = new GuiTextureGroup(new ColorRectTexture(0xff3C4146), ColorPattern.GRAY.borderTexture(1));
+
     protected final TreeNode<K, T> root;
     protected final int nodeHeight;
 
@@ -90,7 +107,7 @@ public class MenuWidget<K, T> extends WidgetGroup {
                 var group = new WidgetGroup(0, maxHeight, maxWidth, nodeHeight);
                 children.put(child, group);
                 if (child.isLeaf()) {
-                    group.setBackground(Objects.requireNonNullElseGet(leafTexture, () -> new ColorRectTexture(0xff222222)));
+                    group.setBackground(Objects.requireNonNullElseGet(leafTexture, () -> LEAF_TEXTURE));
                     group.addWidget(new ButtonWidget(0, 0, maxWidth, nodeHeight, null, cd -> {
                         if (onNodeClicked != null) {
                             onNodeClicked.accept(child);
@@ -105,11 +122,11 @@ public class MenuWidget<K, T> extends WidgetGroup {
                                 p = p.parent;
                             }
                         }
-                    }).setHoverTexture(Objects.requireNonNullElseGet(nodeHoverTexture, () -> new ColorRectTexture(0x44aaaaaa))));
+                    }).setHoverTexture(Objects.requireNonNullElseGet(nodeHoverTexture, () -> NODE_HOVER_TEXTURE)));
 
                 } else {
-                    group.setBackground(Objects.requireNonNullElseGet(nodeTexture, () -> new ColorRectTexture(0xff222222)));
-                    group.addWidget(new ButtonWidget(0, 0, maxWidth, nodeHeight, null).setHoverTexture(Objects.requireNonNullElseGet(nodeHoverTexture, () -> new ColorRectTexture(0x44aaaaaa))));
+                    group.setBackground(Objects.requireNonNullElseGet(nodeTexture, () -> NODE_TEXTURE));
+                    group.addWidget(new ButtonWidget(0, 0, maxWidth, nodeHeight, null).setHoverTexture(Objects.requireNonNullElseGet(nodeHoverTexture, () -> NODE_HOVER_TEXTURE)));
                 }
                 if (keyIconSupplier != null) {
                     group.addWidget(new ImageWidget(2, 1, nodeHeight - 2, nodeHeight - 2, keyIconSupplier.apply(child.getKey())));
@@ -198,7 +215,8 @@ public class MenuWidget<K, T> extends WidgetGroup {
                                 .setLeafTexture(leafTexture)
                                 .setOnNodeClicked(onNodeClicked)
                                 .setKeyIconSupplier(keyIconSupplier)
-                                .setKeyNameSupplier(keyNameSupplier);
+                                .setKeyNameSupplier(keyNameSupplier)
+                                .setCrossLinePredicate(crossLinePredicate);
                         addWidget(opened.setBackground(backgroundTexture));
                     }
                     return true;

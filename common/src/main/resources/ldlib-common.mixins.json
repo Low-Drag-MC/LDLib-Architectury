@@ -6,6 +6,7 @@
   "plugin": "com.lowdragmc.lowdraglib.core.mixins.LDLibMixinPlugin",
   "client": [
     "BlockEntityRendererDispatcherMixin",
+    "ClientPacketListenerMixin",
     "ItemModelShaperMixin",
     "ItemRendererMixin",
     "LanguageMixin",
@@ -29,6 +30,7 @@
     "ReloadableResourceManagerMixin",
     "WorldLoaderMixin",
     "accessor.AbstractContainerMenuAccessor",
+    "accessor.EntityAccessor",
     "accessor.ServerPlayerAccessor",
     "accessor.SlotAccessor",
     "emi.EmiRenderHelperMixin",

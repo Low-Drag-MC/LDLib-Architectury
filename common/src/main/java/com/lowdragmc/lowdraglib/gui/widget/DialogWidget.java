@@ -8,11 +8,14 @@ import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.FileNode;
 import com.lowdragmc.lowdraglib.gui.util.TreeNode;
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
@@ -95,6 +98,46 @@ public class DialogWidget extends WidgetGroup {
 
     @Override
     @Environment(EnvType.CLIENT)
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (!isMouseOverElement(mouseX, mouseY)) {
+            return false;
+        }
+        super.mouseReleased(mouseX, mouseY, button);
+        return true;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean mouseWheelMove(double mouseX, double mouseY, double wheelDelta) {
+        if (!isMouseOverElement(mouseX, mouseY)) {
+            return false;
+        }
+        super.mouseWheelMove(mouseX, mouseY, wheelDelta);
+        return true;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (!isMouseOverElement(mouseX, mouseY)) {
+            return false;
+        }
+        super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return true;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean mouseMoved(double mouseX, double mouseY) {
+        if (!isMouseOverElement(mouseX, mouseY)) {
+            return false;
+        }
+        super.mouseMoved(mouseX, mouseY);
+        return true;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!super.keyPressed(keyCode, scanCode, modifiers) && keyCode == GLFW.GLFW_KEY_ESCAPE) {
             writeClientAction(-1, x->{});
@@ -156,6 +199,12 @@ public class DialogWidget extends WidgetGroup {
         return textFieldWidget;
     }
 
+    public static TextTexture createText(WidgetGroup parent, int x, int y, int width, int height) {
+        TextTexture textTexture;
+        parent.addWidget(new ImageWidget(x, y, width, height, textTexture = new TextTexture().setWidth(width)));
+        return textTexture;
+    }
+
     public static ButtonWidget createButton(WidgetGroup parent, int x, int y, int width, int height, String text, Runnable onClick) {
         ButtonWidget buttonWidget;
         parent.addWidget(buttonWidget = new ButtonWidget(x, y, width, height,
@@ -186,6 +235,76 @@ public class DialogWidget extends WidgetGroup {
         createButton(container, ((size.width / 2) - 60) / 2 + size.width / 2, size.height / 2 + 20 - 7, 60, 15, "ldlib.gui.tips.cancel", () -> {
             dialog.close();
             if (result != null) result.accept(null);
+        });
+
+        return dialog;
+    }
+    public static DialogWidget showNotification(WidgetGroup parent, String title, String info) {
+        return showNotification(parent, title, info, 200, 100, null);
+    }
+
+    public static DialogWidget showNotification(WidgetGroup parent, String title, String info, int width, int height, Runnable onClosed) {
+        DialogWidget dialog = new DialogWidget(parent, true);
+        var container = createContainer(dialog, width, height, title);
+        var size = container.getSize();
+
+        var text = createText(container, 10, size.height / 2 - 10 -5, size.width - 20, 10);
+        text.setSupplier(() -> info);
+
+        createButton(container, (size.width - 60) / 2, size.height / 2 + 20 - 7, 60, 15, "ldlib.gui.tips.confirm", () -> {
+            dialog.close();
+            if (onClosed != null) onClosed.run();
+        });
+
+        return dialog;
+    }
+
+    public static DialogWidget showCheckBox(WidgetGroup parent, String title, String info, BooleanConsumer onClosed) {
+        return showCheckBox(parent, title, info, 200, 100, onClosed);
+    }
+
+    public static DialogWidget showCheckBox(WidgetGroup parent, String title, String info, int width, int height, BooleanConsumer onClosed) {
+        DialogWidget dialog = new DialogWidget(parent, true);
+        var container = createContainer(dialog, width, height, title);
+        var size = container.getSize();
+
+        var text = createText(container, 10, size.height / 2 - 10 -5, size.width - 20, 10);
+        text.setSupplier(() -> info);
+
+        createButton(container, ((size.width / 2) - 60) / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.confirm", () -> {
+            dialog.close();
+            if (onClosed != null) onClosed.accept(true);
+        });
+
+        createButton(container, ((size.width / 2) - 60) / 2 + size.width / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.cancel", () -> {
+            dialog.close();
+            if (onClosed != null) onClosed.accept(false);
+        });
+
+        return dialog;
+    }
+
+    public static DialogWidget showItemSelector(WidgetGroup parent, String title, ItemStack init, Consumer<Item> itemConsumer) {
+        DialogWidget dialog = new DialogWidget(parent, true);
+
+        var container = createContainer(dialog, 200, 100, title);
+        var size = container.getSize();
+
+        AtomicReference<ItemStack> selected = new AtomicReference<>();
+        selected.set(init);
+
+        container.addWidget(new ItemStackSelectorWidget(10, size.height / 2 - 20, size.width - 2, false)
+                .setItemStack(init)
+                .setOnItemStackUpdate(selected::set));
+
+        createButton(container, ((size.width / 2) - 60) / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.confirm", () -> {
+            dialog.close();
+            if (itemConsumer != null) itemConsumer.accept(selected.get().getItem());
+        });
+
+        createButton(container, ((size.width / 2) - 60) / 2 + size.width / 2, size.height - 20 + 3, 60, 15, "ldlib.gui.tips.cancel", () -> {
+            dialog.close();
+            if (itemConsumer != null) itemConsumer.accept(null);
         });
 
         return dialog;

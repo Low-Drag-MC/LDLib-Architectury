@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix crash
+* support entity particle in the compass

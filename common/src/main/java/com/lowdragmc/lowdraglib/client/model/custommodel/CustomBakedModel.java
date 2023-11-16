@@ -77,13 +77,10 @@ public class CustomBakedModel implements BakedModel {
         for (int i = 0; i < base.size(); i++) {
             BakedQuad quad = base.get(i);
             var section = LDLMetadataSection.getMetadata(quad.getSprite());
-            List<Quad> quads = bakeConnectionQuads(quad, connections, section == null ? null :
-                    section.connection == null ? null :
+            List<Quad> quads = bakeConnectionQuads(quad, connections, section.connection == null ? null :
                             ModelFactory.getBlockSprite(section.connection), offset * i);
-            if (section != null) {
-                if (section.emissive) {
-                    quads = quads.stream().map(q -> q.setLight(15, 15)).toList();
-                }
+            if (section.emissive) {
+                quads = quads.stream().map(q -> q.setLight(15, 15)).toList();
             }
             for (Quad q : quads) {
                 result.add(q.rebake());

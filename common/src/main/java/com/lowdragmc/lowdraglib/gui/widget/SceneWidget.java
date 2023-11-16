@@ -263,7 +263,7 @@ public class SceneWidget extends WidgetGroup {
         return this;
     }
 
-    public SceneWidget setRenderedCore(Collection<BlockPos> blocks, ISceneRenderHook renderHook) {
+    public SceneWidget setRenderedCore(Collection<BlockPos> blocks, ISceneBlockRenderHook renderHook) {
         if (isRemote()) {
             core.clear();
             core.addAll(blocks);

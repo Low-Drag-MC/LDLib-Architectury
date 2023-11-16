@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -107,7 +109,11 @@ public class XmlUtils {
     public static int getAsColor(Element element, String name, int defaultValue) {
         if (element.hasAttribute(name)) {
             try {
-                return Long.decode(element.getAttribute(name)).intValue();
+                var value = Long.decode(element.getAttribute(name)).intValue();
+                if (value != 0 && ((value & 0xff000000) == 0)) {
+                    value = value | 0xff000000;
+                }
+                return value;
             } catch (Exception ignored) {
 
             }
@@ -193,6 +199,23 @@ public class XmlUtils {
             } catch (Exception ignored) {}
         }
         return defaultValue;
+    }
+
+    public static EntityInfo getEntityInfo(Element element) {
+        int id = getAsInt(element, "id", LDLib.random.nextInt());
+        EntityType<?> entityType = null;
+        if (element.hasAttribute("type")) {
+            entityType = Registry.ENTITY_TYPE.get(new ResourceLocation(element.getAttribute("type")));
+        }
+        CompoundTag tag = null;
+        NodeList nodeList = element.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            if (nodeList.item(i) instanceof Element subElement && subElement.getNodeName().equals("nbt")) {
+                tag = getCompoundTag(subElement);
+                break;
+            }
+        }
+        return new EntityInfo(id, entityType, tag);
     }
 
     public record SizedIngredient(Ingredient ingredient, int count) {};
@@ -361,7 +384,7 @@ public class XmlUtils {
                         component = Component.empty();
                     }
                     case "style" -> {
-                        Style newStyle = style;
+                        Style newStyle = style.withColor(style.getColor());
                         if (nodeElement.hasAttribute("color")) {
                             newStyle = newStyle.withColor(getAsColor(nodeElement, "color", 0XFFFFFFFF));
                         }
@@ -388,6 +411,9 @@ public class XmlUtils {
                         }
                         if (nodeElement.hasAttribute("link")) {
                             newStyle = newStyle.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "@!" + nodeElement.getAttribute("link")));
+                        }
+                        if (nodeElement.hasAttribute("url-link")) {
+                            newStyle = newStyle.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "@#" + nodeElement.getAttribute("url-link")));
                         }
                         var components = getComponents(nodeElement, newStyle);
                         for (int j = 0; j < components.size(); j++) {

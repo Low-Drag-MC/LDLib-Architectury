@@ -215,7 +215,8 @@ public class RenderBufferUtils {
                     .endVertex();
             lastPoint = point;
         }
-        builder.vertex(mat, point.x + (float) vec.x, point.y + (float) vec.y, 0).uv(1,0)
+        vec.multiply(-1);
+        builder.vertex(mat, (float) (point.x + vec.x), (float) (point.y + vec.y), 0).uv(1,0)
                 .color(sr + er, sg + eg, sb + eb, sa + ea)
                 .endVertex();
         vec.multiply(-1);

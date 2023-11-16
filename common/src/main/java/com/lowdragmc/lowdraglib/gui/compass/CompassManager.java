@@ -31,7 +31,6 @@ import javax.annotation.Nullable;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -51,7 +50,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
     public boolean devMode = Platform.isDevEnv();
     private final Map<String, Supplier<ILayoutComponent>> COMPONENTS = new HashMap<>();
     private final Map<String, Function<Element, Action>> ACTION_CREATORS = new HashMap<>();
-    private final Map<String, CompassConfig> CONFIGS = new HashMap<>();
+    private final Map<String, ICompassUIConfig> CONFIGS = new HashMap<>();
 
     private final Map<Item, Set<ResourceLocation>> itemLookup = new HashMap<>();
     public final Map<String, Map<ResourceLocation, CompassSection>> sections = new HashMap<>();
@@ -69,7 +68,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
         COMPONENTS.put(name, clazz);
     }
 
-    public void registerConfig(String modID, CompassConfig config) {
+    public void registerUIConfig(String modID, ICompassUIConfig config) {
         CONFIGS.put(modID, config);
     }
 
@@ -89,8 +88,8 @@ public final class CompassManager implements ResourceManagerReloadListener {
         return creator == null ? null : creator.apply(element);
     }
 
-    public CompassConfig getConfig(String modID) {
-        return CONFIGS.getOrDefault(modID, new CompassConfig());
+    public ICompassUIConfig getUIConfig(String modID) {
+        return CONFIGS.getOrDefault(modID, ICompassUIConfig.getDefault());
     }
 
     public void init() {
@@ -173,7 +172,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
 
     public void onCPressed(ItemStack itemStack) {
         var tick = Minecraft.getInstance().level.getGameTime();
-        if (ItemStack.isSameItemSameTags(lastStack, itemStack)) {
+        if (!ItemStack.isSameItemSameTags(lastStack, itemStack)) {
             lastStack = itemStack;
             cHoverTick = 0;
             startedTick = tick;
@@ -181,11 +180,12 @@ public final class CompassManager implements ResourceManagerReloadListener {
             cHoverTick = (int) (tick - startedTick);
         }
         if (cHoverTick < 0 || cHoverTick > MAX_HOBER_TICK) {
+            lastStack = ItemStack.EMPTY;
             cHoverTick = 0;
             startedTick = tick;
         }
         if (cHoverTick == MAX_HOBER_TICK) {
-            openCompass(getNodesByItem(itemStack.getItem()).get(0));
+            openCompass(getNodesByItem(itemStack.getItem()).toArray(new CompassNode[0]));
         }
     }
 
@@ -206,10 +206,8 @@ public final class CompassManager implements ResourceManagerReloadListener {
         }
     }
 
-    public void openCompass(CompassNode compassNode) {
-        Minecraft minecraft = Minecraft.getInstance();
-        LocalPlayer entityPlayer = minecraft.player;
-        ModularUI uiTemplate = new ModularUI(new IUIHolder() {
+    public void openCompass(CompassNode... compassNodes) {
+        var holder = new IUIHolder() {
             @Override
             public ModularUI createUI(Player entityPlayer) {
                 return null;
@@ -229,7 +227,20 @@ public final class CompassManager implements ResourceManagerReloadListener {
             public void markAsDirty() {
 
             }
-        }, entityPlayer).widget(new CompassView(compassNode));
+        };
+
+        ModularUI uiTemplate;
+        Minecraft minecraft = Minecraft.getInstance();
+        LocalPlayer entityPlayer = minecraft.player;
+
+        if (compassNodes.length == 1) {
+            uiTemplate = new ModularUI(holder, entityPlayer).widget(new CompassView(compassNodes[0]));
+        } else if (compassNodes.length > 1) {
+            uiTemplate = new ModularUI(210, 100, holder, entityPlayer).widget(new CompassSelectorWidget(Arrays.asList(compassNodes)));
+        } else {
+            return;
+        }
+
         uiTemplate.initWidgets();
         ModularUIGuiContainer ModularUIGuiContainer = new ModularUIGuiContainer(uiTemplate, entityPlayer.containerMenu.containerId);
         minecraft.setScreen(ModularUIGuiContainer);
