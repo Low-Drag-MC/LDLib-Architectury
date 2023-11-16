@@ -52,11 +52,9 @@ public class ManagedArrayLikeRef extends ManagedRef implements IArrayRef {
                 dirty.clear();
                 return true;
             }
-            Object[] a = (Object[]) oldValue;
-            Object[] b = (Object[]) newValue;
             var dirty = false;
-            for (int i = 0; i < a.length; i++) {
-                if (SyncUtils.isChanged(a[i], b[i])) {
+            for (int i = 0; i < Array.getLength(oldValue); i++) {
+                if (SyncUtils.isChanged(Array.get(oldValue, i), Array.get(newValue, i))) {
                     setChanged(i);
                     dirty = true;
                 }
@@ -69,11 +67,10 @@ public class ManagedArrayLikeRef extends ManagedRef implements IArrayRef {
                 dirty.clear();
                 return true;
             }
-            var array = (Object[]) oldValue;
             int i = 0;
             var dirty = false;
             for (var item : collection) {
-                var oldItem = array[i];
+                var oldItem = Array.get(oldValue, i);
                 if ((oldItem == null && item != null) || (oldItem != null && item == null) || (oldItem != null && SyncUtils.isChanged(oldItem, item))) {
                     setChanged(i);
                     dirty = true;
