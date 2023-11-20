@@ -1,3 +1,3 @@
 # ChangeLog
 
-* support entity particle in the compass
+* fix crash when loading ReloadableResourceManager on server
