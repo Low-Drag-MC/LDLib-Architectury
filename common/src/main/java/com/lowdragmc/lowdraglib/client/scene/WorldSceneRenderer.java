@@ -19,10 +19,12 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -128,7 +130,7 @@ public abstract class WorldSceneRenderer {
     }
 
     public WorldSceneRenderer useCacheBuffer(boolean useCache) {
-        if (this.useCache || !Minecraft.getInstance().isSameThread() || LDLib.isModLoaded(LDLib.MODID_RUBIDIUM)) return this;
+        if (this.useCache || !Minecraft.getInstance().isSameThread()) return this;
         deleteCacheBuffer();
         if (useCache) {
             List<RenderType> layers = RenderType.chunkBufferLayers();
@@ -557,10 +559,10 @@ public abstract class WorldSceneRenderer {
 
                 ShaderInstance shaderInstance = RenderSystem.getShader();
 
-//                for(int j = 0; j < 12; ++j) {
-//                    int k = RenderSystem.getShaderTexture(j);
-//                    shaderInstance.setSampler("Sampler" + j, k);
-//                }
+                for(int j = 0; j < 12; ++j) {
+                    int k = RenderSystem.getShaderTexture(j);
+                    shaderInstance.setSampler("Sampler" + j, k);
+                }
 
                 // setup shader uniform
                 if (shaderInstance.MODEL_VIEW_MATRIX != null) {
