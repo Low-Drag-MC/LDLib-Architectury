@@ -6,18 +6,13 @@ import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.chunk.UpgradeData;
+import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -33,11 +28,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class VirtualChunk extends ChunkAccess {
+public class VirtualChunk extends LevelChunk {
 
 	final DummyWorld world;
 	boolean needsLight;
@@ -47,7 +41,7 @@ public class VirtualChunk extends ChunkAccess {
 	private final LevelChunkSection[] sections;
 
 	public VirtualChunk(DummyWorld world, int x, int z) {
-		super(new ChunkPos(x, z), UpgradeData.EMPTY, world, world.registryAccess().registryOrThrow(Registries.BIOME), 0L, null, null);
+		super(world, new ChunkPos(x, z));
 
 		this.world = world;
 		this.needsLight = true;
@@ -61,11 +55,6 @@ public class VirtualChunk extends ChunkAccess {
 			sections[i] = new VirtualChunkSection(this, i << 4);
 		}
 
-		// TODO START LIGHT
-//		Mods.STARLIGHT.executeIfInstalled(() -> () -> {
-//			((ExtendedChunk)this).setBlockNibbles(StarLightEngine.getFilledEmptyLight(this));
-//			((ExtendedChunk)this).setSkyNibbles(StarLightEngine.getFilledEmptyLight(this));
-//		});
 	}
 
 	@Override
@@ -109,11 +98,6 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public int getHeight(Heightmap.Types p_201576_1_, int p_201576_2_, int p_201576_3_) {
-		return 0;
-	}
-
-	@Override
 	public void setUnsaved(boolean p_177427_1_) {}
 
 	@Override
@@ -122,7 +106,9 @@ public class VirtualChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void removeBlockEntity(BlockPos p_177425_1_) {}
+	public void removeBlockEntity(BlockPos pos) {
+		world.removeBlockEntity(pos);
+	}
 
 	@Override
 	public ShortList[] getPostProcessing() {
@@ -167,7 +153,7 @@ public class VirtualChunk extends ChunkAccess {
 	@Nullable
 	@Override
 	public BlockEntity getBlockEntity(BlockPos pos) {
-		return null;
+		return world.getBlockEntity(pos);
 	}
 
 	@Override
@@ -215,11 +201,6 @@ public class VirtualChunk extends ChunkAccess {
 
 	@Override
 	public void setAllReferences(Map<Structure, LongSet> structureReferences) {
-	}
-
-	@Override
-	public int getHeight() {
-		return world.getHeight();
 	}
 
 	@Override
