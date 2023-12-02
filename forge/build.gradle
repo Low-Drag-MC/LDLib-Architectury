@@ -109,7 +109,7 @@ dependencies {
     modCompileOnly("dev.latvian.mods:kubejs-forge:${kjs_version}")
 
     //oculus
-    modCompileOnly("maven.modrinth:embeddium:${embeddium_version}")
+    modCompileOnly("maven.modrinth:rubidium:${rubidium_version}")
     modCompileOnly("maven.modrinth:oculus:${oculus_version}")
 }
 
