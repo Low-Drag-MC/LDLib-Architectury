@@ -5,15 +5,12 @@ import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
-import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IIngredientVisibility;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.ingredients.RecipeSlot;
@@ -181,8 +178,13 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     private Optional<ITypedIngredient<?>> getDisplayIngredient() {
-        if (widget instanceof IRecipeIngredientSlot slot && slot.getJEIIngredient() != null) {
-            return TypedIngredient.createAndFilterInvalid(((RecipeSlotAccessor) this).getIngredientManager(), slot.getJEIIngredient());
+        if (widget instanceof IRecipeIngredientSlot slot) {
+            var ingredients = slot.getXEIIngredients();
+            for (Object ingredient : ingredients) {
+                if (ingredient != null) {
+                    return TypedIngredient.createAndFilterInvalid(((RecipeSlotAccessor) this).getIngredientManager(), ingredient);
+                }
+            }
         }
         return Optional.empty();
     }

@@ -13,7 +13,6 @@ import com.lowdragmc.lowdraglib.gui.texture.WidgetTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.Rect2i;
@@ -345,13 +344,13 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     @Override
-    public Object getIngredientOverMouse(double mouseX, double mouseY) {
+    public Object getXEIIngredientOverMouse(double mouseX, double mouseY) {
         if (!isVisible()) {
             return null;
         }
         for (Widget widget : widgets) {
             if (widget.isVisible() && widget instanceof IIngredientSlot ingredientSlot) {
-                Object result = ingredientSlot.getIngredientOverMouse(mouseX, mouseY);
+                Object result = ingredientSlot.getXEIIngredientOverMouse(mouseX, mouseY);
                 if (result != null) return result;
             }
         }

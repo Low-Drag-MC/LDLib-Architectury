@@ -373,8 +373,8 @@ public class SceneWidget extends WidgetGroup {
     }
 
     @Override
-    public Object getIngredientOverMouse(double mouseX, double mouseY) {
-        Object result = super.getIngredientOverMouse(mouseX, mouseY);
+    public Object getXEIIngredientOverMouse(double mouseX, double mouseY) {
+        Object result = super.getXEIIngredientOverMouse(mouseX, mouseY);
         if (result == null && hoverItem != null && !hoverItem.isEmpty()) {
             if (LDLib.isReiLoaded()) {
                 return EntryStacks.of(hoverItem);

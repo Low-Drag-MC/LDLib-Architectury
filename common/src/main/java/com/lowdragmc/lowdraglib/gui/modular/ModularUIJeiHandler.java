@@ -21,7 +21,7 @@ public class ModularUIJeiHandler implements IGuiContainerHandler<ModularUIGuiCon
     @Nullable
     @Override
     public Object getIngredientUnderMouse(ModularUIGuiContainer gui, double mouseX, double mouseY) {
-        return gui.modularUI.mainGroup.getIngredientOverMouse(mouseX, mouseY);
+        return gui.modularUI.mainGroup.getXEIIngredientOverMouse(mouseX, mouseY);
     }
 
     @Nonnull

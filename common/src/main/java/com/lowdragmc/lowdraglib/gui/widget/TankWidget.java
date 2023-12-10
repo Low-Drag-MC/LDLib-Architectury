@@ -45,6 +45,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -79,9 +80,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     protected IGuiTexture overlay;
     @Setter
     protected BiConsumer<TankWidget, List<Component>> onAddedTooltips;
-    @Setter
+    @Setter @Getter
     protected IngredientIO ingredientIO = IngredientIO.RENDER_ONLY;
-
+    @Setter @Getter
+    protected float XEIChance = 1f;
     protected FluidStack lastFluidInTank;
     protected long lastTankCapacity;
     @Setter
@@ -138,21 +140,37 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return this;
     }
 
+    @Nullable
     @Override
-    public Object getJEIIngredient() {
-        if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return null;
-        if (LDLib.isReiLoaded()) {
-            return lastFluidInTank.isEmpty() ? null : EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
+    public Object getXEIIngredientOverMouse(double mouseX, double mouseY) {
+        if (self().isMouseOverElement(mouseX, mouseY)) {
+            if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return null;
+            if (LDLib.isJeiLoaded()) {
+                return FluidHelper.toRealFluidStack(lastFluidInTank);
+            }
+            if (LDLib.isReiLoaded()) {
+                return EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
+            }
+            if (LDLib.isEmiLoaded()) {
+                return new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance);
+            }
         }
-        if (LDLib.isEmiLoaded()) {
-            return lastFluidInTank.isEmpty() ? null : new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount());
-        }
-        return lastFluidInTank.isEmpty() ? null : FluidHelper.toRealFluidStack(lastFluidInTank);
+        return null;
     }
 
     @Override
-    public IngredientIO getIngredientIO() {
-        return ingredientIO;
+    public List<Object> getXEIIngredients() {
+        if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return Collections.emptyList();
+        if (LDLib.isJeiLoaded()) {
+            return List.of(FluidHelper.toRealFluidStack(lastFluidInTank));
+        }
+        if (LDLib.isReiLoaded()) {
+            return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag())));
+        }
+        if (LDLib.isEmiLoaded()) {
+            return List.of(new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance));
+        }
+        return List.of(FluidHelper.toRealFluidStack(lastFluidInTank));
     }
 
     private List<Component> getToolTips(List<Component> list) {

@@ -22,11 +22,12 @@ public class ModularSlotEntryWidget extends EntryWidget {
         } else {
             unmarkInputOrOutput();
         }
-        var ingredient = slot.getJEIIngredient();
-        if (ingredient instanceof EntryStack<?> entryStack) {
-            entry(entryStack);
-        } else if (ingredient instanceof EntryIngredient entryStacks) {
-            entries(entryStacks);
+        for (Object ingredient : slot.getXEIIngredients()) {
+            if (ingredient instanceof EntryStack<?> entryStack) {
+                entry(entryStack);
+            } else if (ingredient instanceof EntryIngredient entryStacks) {
+                entries(entryStacks);
+            }
         }
     }
 

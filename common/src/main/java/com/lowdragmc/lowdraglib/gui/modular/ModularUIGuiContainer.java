@@ -129,8 +129,12 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         if (Platform.isForge()) ForgeEventHooks.postRenderBackgroundEvent(this, poseStack, mouseX, mouseY);
 
         if (LDLib.isEmiLoaded()) {
+            RenderSystem.enableDepthTest();
+            RenderSystem.depthMask(true);
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             EmiScreenManager.render(EmiDrawContext.wrap(poseStack), mouseX, mouseY, partialTicks);
+            RenderSystem.disableDepthTest();
+            RenderSystem.depthMask(false);
         }
 
         modularUI.mainGroup.drawInForeground(poseStack, mouseX, mouseY, partialTicks);
@@ -161,6 +165,14 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
         RenderSystem.applyModelViewMatrix();
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(true);
+
+        if (LDLib.isEmiLoaded()) {
+            posestack.pushPose();
+            posestack.translate(0, 0, 200);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            EmiScreenManager.drawForeground(EmiDrawContext.wrap(poseStack), mouseX, mouseY, partialTicks);
+            posestack.popPose();
+        }
     }
 
     public void setHoveredSlot(Slot hoveredSlot) {

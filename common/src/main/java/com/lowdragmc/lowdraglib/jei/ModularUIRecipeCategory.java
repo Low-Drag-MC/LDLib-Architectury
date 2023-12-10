@@ -9,6 +9,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.MethodsReturnNonnullByDefault;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
@@ -27,22 +28,35 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
         for (int i = 0; i < flatVisibleWidgetCollection.size(); i++) {
             Widget widget = flatVisibleWidgetCollection.get(i);
             if (widget instanceof IRecipeIngredientSlot slot) {
-                IRecipeSlotBuilder slotBuilder = builder.addSlot(mapToRole(slot.getIngredientIO()), i, -1);
-                Object ingredient = slot.getJEIIngredient();
-                if (ingredient != null) {
-                    slotBuilder.addIngredientsUnsafe(List.of(ingredient));
+
+                var role = mapToRole(slot.getIngredientIO());
+                if (role == null) { // both
+                    addJEISlot(builder, slot, RecipeIngredientRole.INPUT, i);
+                    addJEISlot(builder, slot, RecipeIngredientRole.OUTPUT, i);
+                } else {
+                    addJEISlot(builder, slot, role, i);
                 }
             }
         }
 
     }
 
+    private static void addJEISlot(IRecipeLayoutBuilder builder, IRecipeIngredientSlot slot, RecipeIngredientRole role, int index) {
+        var ingredients = slot.getXEIIngredients();
+        if (!ingredients.isEmpty()) {
+            IRecipeSlotBuilder slotBuilder = builder.addSlot(role, index, -1);
+            slotBuilder.addIngredientsUnsafe(ingredients);
+        }
+    }
+
+    @Nullable
     private RecipeIngredientRole mapToRole(IngredientIO ingredientIO) {
         return switch (ingredientIO) {
             case INPUT -> RecipeIngredientRole.INPUT;
             case OUTPUT -> RecipeIngredientRole.OUTPUT;
             case CATALYST -> RecipeIngredientRole.CATALYST;
             case RENDER_ONLY -> RecipeIngredientRole.RENDER_ONLY;
+            case BOTH -> null;
         };
     }
 

@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import net.minecraft.network.chat.Component;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
@@ -16,15 +17,21 @@ public interface IRecipeIngredientSlot extends IIngredientSlot{
 
     @Nullable
     @Override
-    default Object getIngredientOverMouse(double mouseX, double mouseY) {
+    default Object getXEIIngredientOverMouse(double mouseX, double mouseY) {
         if (self().isMouseOverElement(mouseX, mouseY)) {
-            return getJEIIngredient();
+            var ingredients = getXEIIngredients();
+            if (!ingredients.isEmpty()) {
+                return ingredients.get(0);
+            }
         }
         return null;
     }
 
-    @Nullable
-    Object getJEIIngredient();
+    List<Object> getXEIIngredients();
+
+    default float getXEIChance() {
+        return 1.0f;
+    }
 
     default IngredientIO getIngredientIO(){
         return IngredientIO.RENDER_ONLY;

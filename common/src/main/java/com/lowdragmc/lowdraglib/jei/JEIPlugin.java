@@ -1,13 +1,17 @@
 package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.core.mixins.jei.RecipesGuiAccessor;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIJeiHandler;
+import com.lowdragmc.lowdraglib.test.TestJEIPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
+import mezz.jei.api.registration.IRecipeCategoryRegistration;
+import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
 import mezz.jei.gui.recipes.RecipesGui;
 import mezz.jei.library.gui.recipes.RecipeLayout;
@@ -57,5 +61,19 @@ public class JEIPlugin implements IModPlugin {
     @Nonnull
     public ResourceLocation getPluginUid() {
         return new ResourceLocation(LDLib.MOD_ID, "jei_plugin");
+    }
+
+    @Override
+    public void registerCategories(IRecipeCategoryRegistration registration) {
+        if (Platform.isDevEnv()) {
+            TestJEIPlugin.registerCategories(registration);
+        }
+    }
+
+    @Override
+    public void registerRecipes(IRecipeRegistration registration) {
+        if (Platform.isDevEnv()) {
+            TestJEIPlugin.registerRecipes(registration);
+        }
     }
 }

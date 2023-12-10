@@ -41,7 +41,7 @@ public final class ModularUIEmiHandlers {
     };
     public static final EmiExclusionArea<ModularUIGuiContainer> EXCLUSION_AREA = (screen, consumer) -> screen.getGuiExtraAreas().stream().map(rect2 -> new Bounds(rect2.getX(), rect2.getY(), rect2.getWidth(), rect2.getHeight())).forEach(consumer);
     public static final EmiStackProvider<ModularUIGuiContainer> STACK_PROVIDER = (screen, x, y) -> {
-        var target = screen.modularUI.mainGroup.getIngredientOverMouse(x, y);
+        var target = screen.modularUI.mainGroup.getXEIIngredientOverMouse(x, y);
         if (target instanceof EmiStackInteraction entryStack) {
             return entryStack;
         } else if (target instanceof EmiIngredient entryStacks) {

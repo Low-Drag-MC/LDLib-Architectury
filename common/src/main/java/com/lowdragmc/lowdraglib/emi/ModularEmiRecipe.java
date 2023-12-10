@@ -10,6 +10,7 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.WidgetHolder;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +25,19 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
     public static final List<ModularWrapper<?>> CACHE_OPENED = new ArrayList<>();
 
     protected Supplier<T> widget;
+    @Getter
     protected List<EmiIngredient> inputs;
+    @Getter
     protected List<EmiStack> outputs;
+    @Getter
+    protected List<EmiIngredient> catalysts;
     protected int width, height;
 
     public ModularEmiRecipe(Supplier<T> widget) {
         this.widget = widget;
         this.inputs = new ArrayList<>();
         this.outputs = new ArrayList<>();
+        this.catalysts = new ArrayList<>();
         var widgetT = widget.get();
         this.width = widgetT.getSize().width;
         this.height = widgetT.getSize().height;
@@ -40,12 +46,17 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
         for (Widget w : flatVisibleWidgetCollection) {
             if (w instanceof IRecipeIngredientSlot slot) {
                 var io = slot.getIngredientIO();
-                Object ingredient = slot.getJEIIngredient();
-                if (ingredient instanceof EmiIngredient emiIngredient) {
-                    if (io == IngredientIO.INPUT) {
-                        inputs.add(emiIngredient);
-                    } else if (io == IngredientIO.OUTPUT) {
-                        outputs.addAll(emiIngredient.getEmiStacks());
+                for (Object ingredient : slot.getXEIIngredients()) {
+                    if (ingredient instanceof EmiIngredient emiIngredient) {
+                        if (io == IngredientIO.INPUT || io == IngredientIO.BOTH) {
+                            inputs.add(emiIngredient);
+                        }
+                        if (io == IngredientIO.OUTPUT || io == IngredientIO.BOTH) {
+                            outputs.addAll(emiIngredient.getEmiStacks());
+                        }
+                        if (io == IngredientIO.CATALYST) {
+                            catalysts.add(emiIngredient);
+                        }
                     }
                 }
             }
@@ -65,16 +76,6 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
             widgetList.add(widgetIn);
         }
         return widgetList;
-    }
-
-    @Override
-    public List<EmiIngredient> getInputs() {
-        return inputs;
-    }
-
-    @Override
-    public List<EmiStack> getOutputs() {
-        return outputs;
     }
 
     @Override
@@ -100,8 +101,8 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
         for (Widget w : getFlatWidgetCollection(widget)) {
             if (w instanceof IRecipeIngredientSlot slot) {
                 var io = slot.getIngredientIO();
-                if (slot.getJEIIngredient() instanceof EmiIngredient ingredient && (io == IngredientIO.INPUT || io == IngredientIO.OUTPUT)) {
-                    slots.add(new ModularSlotWidget(ingredient,
+                if (io == IngredientIO.BOTH || io == IngredientIO.INPUT || io == IngredientIO.OUTPUT || io == IngredientIO.CATALYST) {
+                    slots.add(new ModularSlotWidget(slot,
                             new Bounds(w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height),
                             this));
                 }

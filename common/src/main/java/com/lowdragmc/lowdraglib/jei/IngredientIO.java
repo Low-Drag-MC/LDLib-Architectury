@@ -7,6 +7,7 @@ public enum IngredientIO {
 
     INPUT,
     OUTPUT,
+    BOTH,
     CATALYST,
     RENDER_ONLY
 
