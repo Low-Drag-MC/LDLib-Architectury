@@ -1,8 +1,12 @@
 package com.lowdragmc.lowdraglib.rei;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIReiHandlers;
+import com.lowdragmc.lowdraglib.test.TestREIPlugin;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 
@@ -22,5 +26,19 @@ public class REIPlugin implements REIClientPlugin {
     @Override
     public void registerExclusionZones(ExclusionZones zones) {
         zones.register(ModularUIGuiContainer.class, ModularUIReiHandlers.EXCLUSION_ZONES_PROVIDER);
+    }
+
+    @Override
+    public void registerCategories(CategoryRegistry registry) {
+        if (Platform.isDevEnv()) {
+            TestREIPlugin.registerCategories(registry);
+        }
+    }
+
+    @Override
+    public void registerDisplays(DisplayRegistry registry) {
+        if (Platform.isDevEnv()) {
+            TestREIPlugin.registerDisplays(registry);
+        }
     }
 }

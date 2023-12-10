@@ -23,33 +23,46 @@ public class ModularDisplay<T extends Widget> implements Display {
     protected Supplier<T> widget;
     protected List<EntryIngredient> inputs;
     protected List<EntryIngredient> outputs;
+    protected List<EntryIngredient> catalysts;
     protected final CategoryIdentifier<?> category;
 
     public ModularDisplay(Supplier<T> widget, CategoryIdentifier<?> category) {
         this.widget = widget;
         this.inputs = new ArrayList<>();
         this.outputs = new ArrayList<>();
+        this.catalysts = new ArrayList<>();
         this.category = category;
 
         List<Widget> flatVisibleWidgetCollection = getFlatWidgetCollection(widget.get());
         for (Widget w : flatVisibleWidgetCollection) {
             if (w instanceof IRecipeIngredientSlot slot) {
                 var io = slot.getIngredientIO();
-                Object ingredient = slot.getJEIIngredient();
-                if (ingredient instanceof EntryStack<?> entryType) {
-                    if (io == IngredientIO.INPUT) {
-                        inputs.add(EntryIngredient.builder().add(entryType).build());
-                    } else if (io == IngredientIO.OUTPUT) {
-                        outputs.add(EntryIngredient.builder().add(entryType).build());
-                    }
-                } else if (ingredient instanceof EntryIngredient entryStacks) {
-                    if (io == IngredientIO.INPUT) {
-                        for (EntryStack<?> entryStack : entryStacks) {
-                            inputs.add(EntryIngredient.builder().add(entryStack).build());
+                for (Object ingredient : slot.getXEIIngredients()) {
+                    if (ingredient instanceof EntryStack<?> entryType) {
+                        if (io == IngredientIO.INPUT || io == IngredientIO.BOTH) {
+                            inputs.add(EntryIngredient.builder().add(entryType).build());
                         }
-                    } else if (io == IngredientIO.OUTPUT) {
-                        for (EntryStack<?> entryStack : entryStacks) {
-                            outputs.add(EntryIngredient.builder().add(entryStack).build());
+                        if (io == IngredientIO.OUTPUT || io == IngredientIO.BOTH) {
+                            outputs.add(EntryIngredient.builder().add(entryType).build());
+                        }
+                        if (io == IngredientIO.CATALYST) {
+                            catalysts.add(EntryIngredient.builder().add(entryType).build());
+                        }
+                    } else if (ingredient instanceof EntryIngredient entryStacks) {
+                        if (io == IngredientIO.INPUT || io == IngredientIO.BOTH) {
+                            for (EntryStack<?> entryStack : entryStacks) {
+                                inputs.add(EntryIngredient.builder().add(entryStack).build());
+                            }
+                        }
+                        if (io == IngredientIO.OUTPUT || io == IngredientIO.BOTH) {
+                            for (EntryStack<?> entryStack : entryStacks) {
+                                outputs.add(EntryIngredient.builder().add(entryStack).build());
+                            }
+                        }
+                        if (io == IngredientIO.CATALYST) {
+                            for (EntryStack<?> entryStack : entryStacks) {
+                                catalysts.add(EntryIngredient.builder().add(entryStack).build());
+                            }
                         }
                     }
                 }
@@ -104,6 +117,13 @@ public class ModularDisplay<T extends Widget> implements Display {
     @Override
     public List<EntryIngredient> getOutputEntries() {
         return outputs;
+    }
+
+    @Override
+    public List<EntryIngredient> getRequiredEntries() {
+        var required = new ArrayList<>(catalysts);
+        required.addAll(inputs);
+        return required;
     }
 
     @Override

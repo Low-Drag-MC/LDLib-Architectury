@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
+import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
@@ -118,8 +119,10 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
                     if (slotWidget.slotInteraction(bind -> bind.matchesKey(pKeyCode, pScanCode))) {
                         return true;
                     }
-                    return EmiScreenManager.stackInteraction(new EmiStackInteraction(slotWidget.getStack(), slotWidget.getRecipe(), true),
-                            bind -> bind.matchesKey(pKeyCode, pScanCode));
+                    if (slotWidget.getSlot().getXEIIngredientOverMouse(lastX + modular.getLeft(), lastY + modular.getTop()) instanceof EmiIngredient ingredient) {
+                        return EmiScreenManager.stackInteraction(new EmiStackInteraction(ingredient, slotWidget.getRecipe(), true),
+                                bind -> bind.matchesKey(pKeyCode, pScanCode));
+                    }
                 }
             }
         }

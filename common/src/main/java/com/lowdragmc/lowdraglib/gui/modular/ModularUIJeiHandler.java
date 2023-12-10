@@ -24,7 +24,7 @@ public class ModularUIJeiHandler implements IGuiContainerHandler<ModularUIGuiCon
 
     @Override
     public Optional<IClickableIngredient<?>> getClickableIngredientUnderMouse(ModularUIGuiContainer gui, double mouseX, double mouseY) {
-        if (gui.modularUI.mainGroup.getIngredientOverMouse(mouseX, mouseY) instanceof IClickableIngredient<?> clickableIngredient) {
+        if (gui.modularUI.mainGroup.getXEIIngredientOverMouse(mouseX, mouseY) instanceof IClickableIngredient<?> clickableIngredient) {
             return Optional.of(clickableIngredient);
         }
         return Optional.empty();

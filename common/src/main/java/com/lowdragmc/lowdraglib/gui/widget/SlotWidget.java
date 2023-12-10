@@ -17,24 +17,22 @@ import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
+import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.emi.emi.api.stack.ItemEmiStack;
+import dev.emi.emi.api.stack.ListEmiIngredient;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.common.input.ClickableIngredient;
-import mezz.jei.common.util.ImmutableRect2i;
-import mezz.jei.library.ingredients.TypedIngredient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -49,11 +47,11 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @LDLRegister(name = "item_slot", group = "widget.container")
 @Accessors(chain = true)
@@ -87,8 +85,10 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     protected BiConsumer<SlotWidget, List<Component>> onAddedTooltips;
     @Setter
     protected Function<ItemStack, ItemStack> itemHook;
-    @Setter
+    @Setter @Getter
     protected IngredientIO ingredientIO = IngredientIO.RENDER_ONLY;
+    @Setter @Getter
+    protected float XEIChance = 1f;
     @NotNull
     public List<Consumer<List<Component>>> tooltipCallbacks = new ArrayList<>();
 
@@ -350,29 +350,60 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         this.tooltipCallbacks.clear();
     }
 
+    @Nullable
     @Override
-    public Object getJEIIngredient() {
-        if (slotReference == null || slotReference.getItem().isEmpty()) return null;
-        if (LDLib.isJeiLoaded()) {
-            return JEIPlugin.getItemIngredient(getHandle().getItem(), getPosition().x, getPosition().y, getSize().width, getSize().height);
+    public Object getXEIIngredientOverMouse(double mouseX, double mouseY) {
+        if (self().isMouseOverElement(mouseX, mouseY)) {
+            var handler = getHandle();
+            if (handler == null) return null;
+            if (LDLib.isJeiLoaded()) {
+                return JEIPlugin.getItemIngredient(getRealStack(handler.getItem()), getPosition().x, getPosition().y, getSize().width, getSize().height);
+            }
+            if (LDLib.isReiLoaded()) {
+                return EntryStacks.of(getRealStack(handler.getItem()));
+            }
+            if (LDLib.isEmiLoaded()) {
+                return new ItemEmiStack(getRealStack(handler.getItem()));
+            }
+            return getRealStack(handler.getItem());
         }
-        if (LDLib.isReiLoaded()) {
-            return EntryStacks.of(getRealStack(getHandle().getItem()));
-        }
-        if (LDLib.isEmiLoaded()) {
-            return new ItemEmiStack(getRealStack(getHandle().getItem()));
-        }
-        return getRealStack(getHandle().getItem());
+        return null;
     }
 
     @Override
-    public IngredientIO getIngredientIO() {
-        return ingredientIO;
+    public List<Object> getXEIIngredients() {
+        if (slotReference == null || slotReference.getItem().isEmpty()) return Collections.emptyList();
+        var handler = getHandle();
+        if (handler == null) return Collections.emptyList();
+        // if CycleItemStackHandler
+        if (handler instanceof WidgetSlotItemTransfer widgetSlotItemTransfer && widgetSlotItemTransfer.itemHandler instanceof CycleItemStackHandler cycleItemStackHandler) {
+            var stream = cycleItemStackHandler.getStackList(widgetSlotItemTransfer.index).stream().map(this::getRealStack);
+            if (LDLib.isJeiLoaded()) {
+                return stream.map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+            }
+            if (LDLib.isReiLoaded()) {
+                return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
+            }
+            if (LDLib.isEmiLoaded()) {
+                return List.of(new ListEmiIngredient(stream.map(ItemEmiStack::new).toList(), getRealStack(handler.getItem()).getCount()).setChance(getXEIChance()));
+            }
+        }
+
+        if (LDLib.isJeiLoaded()) {
+            return List.of(JEIPlugin.getItemIngredient(getRealStack(handler.getItem()), getPosition().x, getPosition().y, getSize().width, getSize().height));
+        }
+        if (LDLib.isReiLoaded()) {
+            return List.of(EntryStacks.of(getRealStack(handler.getItem())));
+        }
+        if (LDLib.isEmiLoaded()) {
+            return List.of(new ItemEmiStack(getRealStack(handler.getItem())));
+        }
+        return List.of(getRealStack(handler.getItem()));
     }
 
     public ItemStack getRealStack(ItemStack itemStack) {
         if (itemHook != null) return itemHook.apply(itemStack);
-        return  itemStack;
+        return itemStack;
     }
 
 

@@ -169,8 +169,13 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     private Optional<ITypedIngredient<?>> getDisplayIngredient() {
-        if (widget instanceof IRecipeIngredientSlot slot && slot.getJEIIngredient() instanceof IClickableIngredient<?> clickableIngredient) {
-            return Optional.of(clickableIngredient.getTypedIngredient());
+        if (widget instanceof IRecipeIngredientSlot slot) {
+            var ingredients = slot.getXEIIngredients();
+            for (Object ingredient : ingredients) {
+                if (ingredient instanceof IClickableIngredient clickableIngredient) {
+                    return Optional.of(clickableIngredient.getTypedIngredient());
+                }
+            }
         }
         return Optional.empty();
     }

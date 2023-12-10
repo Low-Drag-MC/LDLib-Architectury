@@ -2,7 +2,6 @@ package com.lowdragmc.lowdraglib.rei;
 
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -23,11 +22,12 @@ public class ModularSlotEntryWidget extends EntryWidget {
         } else {
             unmarkInputOrOutput();
         }
-        var ingredient = slot.getJEIIngredient();
-        if (ingredient instanceof EntryStack<?> entryStack) {
-            entry(entryStack);
-        } else if (ingredient instanceof EntryIngredient entryStacks) {
-            entries(entryStacks);
+        for (Object ingredient : slot.getXEIIngredients()) {
+            if (ingredient instanceof EntryStack<?> entryStack) {
+                entry(entryStack);
+            } else if (ingredient instanceof EntryIngredient entryStacks) {
+                entries(entryStacks);
+            }
         }
     }
 

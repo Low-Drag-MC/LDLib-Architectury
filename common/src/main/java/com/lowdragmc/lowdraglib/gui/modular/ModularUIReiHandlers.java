@@ -26,7 +26,7 @@ public final class ModularUIReiHandlers  {
     public static final ExclusionZonesProvider<ModularUIGuiContainer> EXCLUSION_ZONES_PROVIDER = screen -> screen.getGuiExtraAreas().stream().map(rect2 -> new Rectangle(rect2.getX(), rect2.getY(), rect2.getWidth(), rect2.getHeight())).toList();
     public static final FocusedStackProvider FOCUSED_STACK_PROVIDER = (screen, mouse) -> {
         if (screen instanceof ModularUIGuiContainer containerScreen) {
-            var target = containerScreen.modularUI.mainGroup.getIngredientOverMouse(mouse.getX(), mouse.getY());
+            var target = containerScreen.modularUI.mainGroup.getXEIIngredientOverMouse(mouse.getX(), mouse.getY());
             if (target instanceof EntryStack<?> entryStack) {
                 return CompoundEventResult.interruptTrue(entryStack);
             } else if (target instanceof EntryIngredient entryStacks && entryStacks.size() > 0) {

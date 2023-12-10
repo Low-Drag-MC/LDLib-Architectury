@@ -44,6 +44,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -78,9 +79,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     protected IGuiTexture overlay;
     @Setter
     protected BiConsumer<TankWidget, List<Component>> onAddedTooltips;
-    @Setter
+    @Setter @Getter
     protected IngredientIO ingredientIO = IngredientIO.RENDER_ONLY;
-
+    @Setter @Getter
+    protected float XEIChance = 1f;
     protected FluidStack lastFluidInTank;
     protected long lastTankCapacity;
     @Setter
@@ -137,29 +139,42 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return this;
     }
 
+    @Nullable
     @Override
-    public Object getJEIIngredient() {
-        if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return null;
+    public Object getXEIIngredientOverMouse(double mouseX, double mouseY) {
+        if (self().isMouseOverElement(mouseX, mouseY)) {
+            if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return null;
+            if (LDLib.isJeiLoaded()) {
+                return getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
+            }
+            if (LDLib.isReiLoaded()) {
+                return EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
+            }
+            if (LDLib.isEmiLoaded()) {
+                return new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<Object> getXEIIngredients() {
+        if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return Collections.emptyList();
         if (LDLib.isJeiLoaded()) {
-            return getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
+            return List.of(getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize()));
         }
         if (LDLib.isReiLoaded()) {
-            return lastFluidInTank.isEmpty() ? null : EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
+            return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag())));
         }
         if (LDLib.isEmiLoaded()) {
-            return lastFluidInTank.isEmpty() ? null : new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount());
+            return List.of(new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance));
         }
-        return lastFluidInTank.isEmpty() ? null : FluidHelper.toRealFluidStack(lastFluidInTank);
+        return List.of(FluidHelper.toRealFluidStack(lastFluidInTank));
     }
 
     @ExpectPlatform
     public static Object getPlatformFluidTypeForJEI(FluidStack fluidStack, Position pos, Size size) {
         throw new  AssertionError();
-    }
-
-    @Override
-    public IngredientIO getIngredientIO() {
-        return ingredientIO;
     }
 
     private List<Component> getToolTips(List<Component> list) {

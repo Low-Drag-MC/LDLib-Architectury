@@ -1,4 +1,6 @@
 # ChangeLog
 
-* fix crash when loading ReloadableResourceManager on server
-* make WorldSceneRenderer compatible with iris/oculus
+* refactoring xei integration
+* add the ingredient chance for emi
+* fix emi tooltips
+* fix emi checkup

@@ -1,5 +1,7 @@
 package com.lowdragmc.lowdraglib.emi;
 
+import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
+import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStackInteraction;
@@ -27,13 +29,13 @@ public class ModularSlotWidget extends Widget {
     @Getter
     private Bounds bounds;
     @Getter
-    private final EmiIngredient stack;
+    private final IRecipeIngredientSlot slot;
     @Getter
     private final EmiRecipe recipe;
 
-    public ModularSlotWidget(EmiIngredient stack, Bounds bounds, EmiRecipe recipe) {
+    public ModularSlotWidget(IRecipeIngredientSlot slot, Bounds bounds, EmiRecipe recipe) {
         this.bounds = bounds;
-        this.stack = stack;
+        this.slot = slot;
         this.recipe = recipe;
     }
 
@@ -54,8 +56,12 @@ public class ModularSlotWidget extends Widget {
             if (slotInteraction(bind -> bind.matchesMouse(button))) {
                 return true;
             }
-            return EmiScreenManager.stackInteraction(new EmiStackInteraction(getStack(), getRecipe(), true),
-                    bind -> bind.matchesMouse(button));
+            if (slot.self().getGui().getModularUIGui() instanceof ModularWrapper modularWrapper) {
+                if (slot.getXEIIngredientOverMouse(mouseX + modularWrapper.getLeft(), mouseY + modularWrapper.getTop()) instanceof EmiIngredient ingredient) {
+                    return EmiScreenManager.stackInteraction(new EmiStackInteraction(ingredient, getRecipe(), true),
+                            bind -> bind.matchesMouse(button));
+                }
+            }
         }
         return false;
     }

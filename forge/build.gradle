@@ -20,7 +20,7 @@ def rei_version = getConfig("rei_version")
 //def kjs_version = getConfig("kjs_version")
 def embeddium_version = getConfig("embeddium_version")
 def oculus_version = getConfig("oculus_version")
-
+def ae2_version = getConfig("ae2_version")
 
 architectury {
     platformSetupLoomIde()
@@ -105,6 +105,9 @@ dependencies {
     // EMI
     modCompileOnly("dev.emi:emi-forge:${emi_version}:api")
     modCompileOnly("dev.emi:emi-forge:${emi_version}")
+
+    // AE2
+    modImplementation("appeng:appliedenergistics2-forge:${ae2_version}")
 
     // KJS
     modImplementation("dev.latvian.mods:kubejs-forge:${kjs_version}")
