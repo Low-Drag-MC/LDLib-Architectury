@@ -1,0 +1,47 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.lowdragmc.lowdraglib.core.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "plugin": "com.lowdragmc.lowdraglib.core.mixins.LDLibMixinPlugin",
+  "client": [
+    "BlockEntityRendererDispatcherMixin",
+    "ClientPacketListenerMixin",
+    "ItemModelShaperMixin",
+    "ItemRendererMixin",
+    "LanguageMixin",
+    "ModelBakeryMixin",
+    "ParticleEngineMixin",
+    "SpriteResourceLoaderMixin",
+    "TextureAtlasMixin",
+    "WorldRendererMixin",
+    "BlockRenderDispatcherMixin",
+    "ParticleEngineAccessor",
+    "accessor.AbstractContainerScreenAccessor",
+    "accessor.MouseHandlerAccessor",
+    "accessor.VertexFormatAccessor",
+    "emi.RecipeScreenMixin",
+    "emi.WidgetGroupAccessor",
+    "emi.WidgetGroupMixin",
+    "jei.RecipesGuiAccessor",
+    "jei.RecipesGuiMixin",
+    "jei.RecipeSlotAccessor"
+  ],
+  "mixins": [
+    "BlockEntityMixin",
+    "PackConfigMixin",
+    "ReloadableResourceManagerMixin",
+    "WorldLoaderMixin",
+    "accessor.AbstractContainerMenuAccessor",
+    "accessor.EntityAccessor",
+    "accessor.ServerPlayerAccessor",
+    "accessor.SlotAccessor",
+    "emi.EmiRenderHelperMixin",
+    "jei.JeiRecipeLayoutMixin",
+    "jei.RecipeLayoutAccessor",
+    "jei.RecipeSlotsAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "ldlib.gui.tips.confirm": "Подтвердить",
+  "ldlib.gui.tips.cancel": "Отмена",
+  "ldlib.fluid.empty": "Пусто",
+  "ldlib.fluid.amount": "§9Количество: %d/%d",
+  "ldlib.fluid.temperature": "§cТемпература: %d K",
+  "ldlib.fluid.state_gas": "§aСостояние: Газообразное",
+  "ldlib.fluid.state_liquid": "§aСостояние: Жидкость"
+}
