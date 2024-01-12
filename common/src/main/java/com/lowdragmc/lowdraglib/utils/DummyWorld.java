@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.scene.ParticleManager;
+import com.lowdragmc.lowdraglib.core.mixins.accessor.ParticleEngineAccessor;
 import com.lowdragmc.lowdraglib.utils.virtual.WrappedClientWorld;
 import lombok.Getter;
 import net.fabricmc.api.EnvType;
@@ -318,7 +319,7 @@ public class DummyWorld extends Level {
     @Override
     public void addParticle(ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
         if (particleManager != null) {
-            var p = createParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
+            var p = ((ParticleEngineAccessor)Minecraft.getInstance().particleEngine).invokeMakeParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
             if (p != null) {
                 particleManager.addParticle(p);
             }
@@ -356,15 +357,5 @@ public class DummyWorld extends Level {
 
     public BlockState getBlockState(int x, int y, int z) {
         return getBlockState(scratch.set(x, y, z));
-    }
-
-    @Nullable
-    @Environment(EnvType.CLIENT)
-    public Particle createParticle(ParticleOptions particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-        ParticleProvider particleProvider = ClientProxy.getProvider(particleData.getType());
-        if (particleProvider == null) {
-            return null;
-        }
-        return particleProvider.createParticle(particleData, asClientWorld.get(), x, y, z, xSpeed, ySpeed, zSpeed);
     }
 }

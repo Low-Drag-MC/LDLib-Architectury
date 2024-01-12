@@ -4,8 +4,7 @@
   "package": "com.lowdragmc.lowdraglib.forge.core.mixins",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "BlockRenderDispatcherMixin",
-    "ParticleEnginAccessor"
+    "BlockRenderDispatcherMixin"
   ],
   "mixins": [
   ],

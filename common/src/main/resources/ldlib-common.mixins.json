@@ -17,6 +17,7 @@
     "WorldRendererMixin",
     "accessor.AbstractContainerScreenAccessor",
     "accessor.MouseHandlerAccessor",
+    "accessor.ParticleEngineAccessor",
     "accessor.VertexFormatAccessor",
     "emi.RecipeScreenMixin",
     "emi.WidgetGroupAccessor",

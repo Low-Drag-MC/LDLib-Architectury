@@ -1,3 +1,3 @@
 # ChangeLog
 
-* better NBTToJsonConverter
+* fixed particle engine breaking with remapping
