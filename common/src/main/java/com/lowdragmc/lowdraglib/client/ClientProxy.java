@@ -21,9 +21,4 @@ public class ClientProxy {
         CompassManager.INSTANCE.init();
     }
 
-    @ExpectPlatform
-    public static ParticleProvider getProvider(ParticleType<?> type) {
-        throw new AssertionError();
-    }
-
 }
