@@ -7,7 +7,7 @@ plugins {
 }
 
 version = mod_version
-group = "com.lowdragmc.lowdraglib"
+group = "com.lowdragmc.ldlib"
 
 repositories {
     mavenLocal()
