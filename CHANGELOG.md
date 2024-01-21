@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fixed particle engine breaking with remapping
+* added extra parameters to PipeNetWalker

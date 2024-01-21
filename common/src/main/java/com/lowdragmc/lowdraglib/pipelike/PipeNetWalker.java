@@ -1,10 +1,14 @@
 package com.lowdragmc.lowdraglib.pipelike;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -19,7 +23,7 @@ import java.util.*;
 public abstract class PipeNetWalker<NodeDataType, Net extends PipeNet<NodeDataType>> {
     protected PipeNetWalker<NodeDataType, Net> root;
     protected final Net pipeNet;
-    protected final Set<Long> walked = new HashSet<>();
+    protected final LongSet walked = new LongOpenHashSet();
     protected final List<Direction> pipes = new ArrayList<>();
     protected List<PipeNetWalker<NodeDataType, Net>> walkers;
     protected final BlockPos.MutableBlockPos currentPos;
@@ -46,7 +50,7 @@ public abstract class PipeNetWalker<NodeDataType, Net extends PipeNet<NodeDataTy
      * @return new sub walker
      */
     @Nonnull
-    protected abstract PipeNetWalker<NodeDataType, Net> createSubWalker(Net pipeNet, BlockPos nextPos, int walkedBlocks);
+    protected abstract PipeNetWalker<NodeDataType, Net> createSubWalker(Net pipeNet, Direction facingToNextPos, BlockPos nextPos, int walkedBlocks);
 
     /**
      * Checks the neighbour of the current pos
@@ -54,8 +58,9 @@ public abstract class PipeNetWalker<NodeDataType, Net extends PipeNet<NodeDataTy
      * @param pipePos         current pos. Note!! its a mutable pos.
      * @param faceToNeighbour face to neighbour
      * @param pipeNode        pipeNode
+     * @param neighbourTile   the neighboring BlockEntity. Might not be a pipe.
      */
-    protected void checkNeighbour(Node<NodeDataType> pipeNode, BlockPos pipePos, Direction faceToNeighbour) {
+    protected void checkNeighbour(Node<NodeDataType> pipeNode, BlockPos pipePos, Direction faceToNeighbour, @Nullable BlockEntity neighbourTile) {
 
     }
 
@@ -68,6 +73,15 @@ public abstract class PipeNetWalker<NodeDataType, Net extends PipeNet<NodeDataTy
      */
     protected boolean checkPipe(Node<NodeDataType> pipeNode, BlockPos pos) {
         return true;
+    }
+
+    /**
+     * The directions that this net can traverse from this pipe
+     *
+     * @return the array of valid Directions
+     */
+    protected Direction[] getSurroundingPipeSides() {
+        return Direction.values();
     }
 
     /**
@@ -115,7 +129,7 @@ public abstract class PipeNetWalker<NodeDataType, Net extends PipeNet<NodeDataTy
 
             walkers = new ArrayList<>();
             for (Direction side : pipes) {
-                var walker = createSubWalker(pipeNet, currentPos.relative(side), walkedBlocks + 1);
+                var walker = createSubWalker(pipeNet, side, currentPos.relative(side), walkedBlocks + 1);
                 walker.root = root;
                 walkers.add(walker);
             }
@@ -139,14 +153,14 @@ public abstract class PipeNetWalker<NodeDataType, Net extends PipeNet<NodeDataTy
         var pipeNode = pipeNet.getNodeAt(currentPos);
 
         if (pipeNode != null) {
-            if (!checkPipe(pipeNet.getNodeAt(currentPos), currentPos)) {
+            if (!checkPipe(pipeNode, currentPos)) {
                 return;
             }
 
             root.walked.add(currentPos.asLong());
 
             // check for surrounding for next walk
-            for (Direction accessSide : Direction.values()) {
+            for (Direction accessSide : getSurroundingPipeSides()) {
 
                 // is walked.
                 if (isWalked(currentPos.relative(accessSide)) || pipeNode.isBlocked(accessSide)) {
@@ -159,7 +173,7 @@ public abstract class PipeNetWalker<NodeDataType, Net extends PipeNet<NodeDataTy
                     continue;
                 }
 
-                checkNeighbour(pipeNode, currentPos, accessSide);
+                checkNeighbour(pipeNode, currentPos, accessSide, pipeNet.getLevel().getBlockEntity(currentPos));
             }
         }
     }
