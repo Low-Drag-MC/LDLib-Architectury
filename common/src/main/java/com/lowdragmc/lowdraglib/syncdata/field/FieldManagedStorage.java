@@ -1,10 +1,18 @@
 package com.lowdragmc.lowdraglib.syncdata.field;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.syncdata.*;
+import com.lowdragmc.lowdraglib.syncdata.annotation.RequireRerender;
+import com.lowdragmc.lowdraglib.syncdata.annotation.UpdateListener;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
+import net.minecraft.Util;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiFunction;
 
 public class FieldManagedStorage implements IManagedStorage {
 
@@ -87,6 +95,9 @@ public class FieldManagedStorage implements IManagedStorage {
 
             nonLazyFields = result.nonLazyFields();
             fieldMap = result.fieldRefMap();
+            if (LDLib.isClient()) {
+                initEnhancedFeature();
+            }
             initialized = true;
         } finally {
             lock.unlock();
@@ -130,5 +141,43 @@ public class FieldManagedStorage implements IManagedStorage {
     public IRef[] getNonLazyFields() {
         init();
         return nonLazyFields;
+    }
+
+    final static BiFunction<Field, Class<?>, Method> METHOD_CACHES = Util.memoize((rawField, clazz) -> {
+        var methodName = rawField.getAnnotation(UpdateListener.class).methodName();
+        Method method = null;
+        while (clazz != null && method == null) {
+            try {
+                method = clazz.getDeclaredMethod(methodName, rawField.getType(), rawField.getType());
+                method.setAccessible(true);
+            } catch (NoSuchMethodException ignored) {
+            }
+            clazz = clazz.getSuperclass();
+        }
+        if (method == null) {
+            LDLib.LOGGER.error("couldn't find the listener method {} for synced field {}", methodName, rawField.getName());
+        }
+        return method;
+    });
+
+    public void initEnhancedFeature() {
+        for (IRef syncField : getSyncFields()) {
+            var rawField = syncField.getKey().getRawField();
+            if (rawField.isAnnotationPresent(RequireRerender.class) && owner instanceof IEnhancedManaged enhancedManaged) {
+                addSyncUpdateListener(syncField.getKey(),  enhancedManaged::scheduleRender);
+            }
+            if (rawField.isAnnotationPresent(UpdateListener.class)) {
+                final var method = METHOD_CACHES.apply(rawField, owner.getClass());
+                if (method != null) {
+                    addSyncUpdateListener(syncField.getKey(), (name, newValue, oldValue) -> {
+                        try {
+                            method.invoke(owner, newValue, oldValue);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
+            }
+        }
     }
 }
