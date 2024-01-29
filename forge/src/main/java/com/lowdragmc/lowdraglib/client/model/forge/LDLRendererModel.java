@@ -94,25 +94,28 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
         }
 
         // forge
-
         public static final ModelProperty<IRenderer> IRENDERER = new ModelProperty<>();
         public static final ModelProperty<BlockAndTintGetter> WORLD = new ModelProperty<>();
         public static final ModelProperty<BlockPos> POS = new ModelProperty<>();
-        //TODO Model Data
-//        public static final ModelProperty<ModelData> MODEL_DATA = new ModelProperty<>();
+        public static final ModelProperty<ModelData> MODEL_DATA = new ModelProperty<>();
 
+        public static final ThreadLocal<ModelData> CURRENT_MODEL_DATA = new ThreadLocal<>();
+        public static final ThreadLocal<RenderType> CURRENT_RENDER_TYPE = new ThreadLocal<>();
 
         @Override
         public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
             IRenderer renderer = data.get(IRENDERER);
             BlockAndTintGetter world = data.get(WORLD);
             BlockPos pos = data.get(POS);
-//            ModelData modelData = data.get(MODEL_DATA);
             if (renderer != null) {
+                CURRENT_MODEL_DATA.set(data);
+                CURRENT_RENDER_TYPE.set(renderType);
                 var quads = renderer.renderModel(world, pos, state, side, rand);
                 if (renderer.reBakeCustomQuads() && state != null && world != null && pos != null) {
                     return CustomBakedModel.reBakeCustomQuads(quads, world, pos, state, side, renderer.reBakeCustomQuadsOffset());
                 }
+                CURRENT_MODEL_DATA.remove();
+                CURRENT_RENDER_TYPE.remove();
                 return quads;
             }
             return Collections.emptyList();
@@ -139,7 +142,7 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
                             .with(IRENDERER, renderer)
                             .with(WORLD, level)
                             .with(POS, pos)
-//                            .with(MODEL_DATA, modelData)
+                            .with(MODEL_DATA, modelData)
                             .build();
                 }
             }
@@ -150,7 +153,10 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
         public TextureAtlasSprite getParticleIcon(@NotNull ModelData data) {
             IRenderer renderer = data.get(IRENDERER);
             if (renderer != null) {
-                return renderer.getParticleTexture();
+                CURRENT_MODEL_DATA.set(data);
+                var texture = renderer.getParticleTexture();
+                CURRENT_MODEL_DATA.remove();
+                return texture;
             }
             return BakedModel.super.getParticleIcon(data);
         }
