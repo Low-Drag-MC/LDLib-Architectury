@@ -95,10 +95,10 @@ public class FieldManagedStorage implements IManagedStorage {
 
             nonLazyFields = result.nonLazyFields();
             fieldMap = result.fieldRefMap();
+            initialized = true;
             if (LDLib.isClient()) {
                 initEnhancedFeature();
             }
-            initialized = true;
         } finally {
             lock.unlock();
         }
