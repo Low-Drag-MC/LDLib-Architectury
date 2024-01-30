@@ -1,3 +1,3 @@
 # ChangeLog
 
-* added extra parameters to PipeNetWalker
+* fix JEI crash when clicking a slot in a GUI

@@ -378,19 +378,16 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             }
             if (LDLib.isReiLoaded()) {
                 return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
-            }
-            if (LDLib.isEmiLoaded()) {
+            } else if (LDLib.isEmiLoaded()) {
                 return List.of(new ListEmiIngredient(stream.map(ItemEmiStack::new).toList(), getRealStack(handler.getItem()).getCount()).setChance(getXEIChance()));
             }
         }
 
         if (LDLib.isJeiLoaded()) {
             return List.of(getRealStack(handler.getItem()));
-        }
-        if (LDLib.isReiLoaded()) {
+        } else if (LDLib.isReiLoaded()) {
             return List.of(EntryStacks.of(getRealStack(handler.getItem())));
-        }
-        if (LDLib.isEmiLoaded()) {
+        } else if (LDLib.isEmiLoaded()) {
             return List.of(new ItemEmiStack(getRealStack(handler.getItem())));
         }
         return List.of(getRealStack(handler.getItem()));
@@ -442,12 +439,10 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     protected class WidgetSlotItemTransfer extends Slot {
         private static final Container emptyInventory = new SimpleContainer(0);
         private final IItemTransfer itemHandler;
-        private final int index;
 
         public WidgetSlotItemTransfer(IItemTransfer itemHandler, int index, int xPosition, int yPosition) {
             super(emptyInventory, index, xPosition, yPosition);
             this.itemHandler = itemHandler;
-            this.index = index;
         }
 
         @Override
