@@ -439,10 +439,13 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     protected class WidgetSlotItemTransfer extends Slot {
         private static final Container emptyInventory = new SimpleContainer(0);
         private final IItemTransfer itemHandler;
+        private final int index;
+
 
         public WidgetSlotItemTransfer(IItemTransfer itemHandler, int index, int xPosition, int yPosition) {
             super(emptyInventory, index, xPosition, yPosition);
             this.itemHandler = itemHandler;
+            this.index = index;
         }
 
         @Override
