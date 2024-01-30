@@ -356,13 +356,11 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (self().isMouseOverElement(mouseX, mouseY)) {
             var handler = getHandle();
             if (handler == null) return null;
-            if (LDLib.isJeiLoaded()) {
+            if (LDLib.isJeiLoaded() && !getRealStack(handler.getItem()).isEmpty()) {
                 return JEIPlugin.getItemIngredient(getRealStack(handler.getItem()), getPosition().x, getPosition().y, getSize().width, getSize().height);
-            }
-            if (LDLib.isReiLoaded()) {
+            } else if (LDLib.isReiLoaded()) {
                 return EntryStacks.of(getRealStack(handler.getItem()));
-            }
-            if (LDLib.isEmiLoaded()) {
+            } else if (LDLib.isEmiLoaded()) {
                 return new ItemEmiStack(getRealStack(handler.getItem()));
             }
             return getRealStack(handler.getItem());
@@ -379,23 +377,19 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (handler instanceof WidgetSlotItemTransfer widgetSlotItemTransfer && widgetSlotItemTransfer.itemHandler instanceof CycleItemStackHandler cycleItemStackHandler) {
             var stream = cycleItemStackHandler.getStackList(widgetSlotItemTransfer.index).stream().map(this::getRealStack);
             if (LDLib.isJeiLoaded()) {
-                return stream.map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
-            }
-            if (LDLib.isReiLoaded()) {
+                return stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+            } else if (LDLib.isReiLoaded()) {
                 return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
-            }
-            if (LDLib.isEmiLoaded()) {
+            } else if (LDLib.isEmiLoaded()) {
                 return List.of(new ListEmiIngredient(stream.map(ItemEmiStack::new).toList(), getRealStack(handler.getItem()).getCount()).setChance(getXEIChance()));
             }
         }
 
         if (LDLib.isJeiLoaded()) {
             return List.of(JEIPlugin.getItemIngredient(getRealStack(handler.getItem()), getPosition().x, getPosition().y, getSize().width, getSize().height));
-        }
-        if (LDLib.isReiLoaded()) {
+        } else if (LDLib.isReiLoaded()) {
             return List.of(EntryStacks.of(getRealStack(handler.getItem())));
-        }
-        if (LDLib.isEmiLoaded()) {
+        } else if (LDLib.isEmiLoaded()) {
             return List.of(new ItemEmiStack(getRealStack(handler.getItem())));
         }
         return List.of(getRealStack(handler.getItem()));
@@ -447,12 +441,10 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     protected class WidgetSlotItemTransfer extends Slot {
         private static final Container emptyInventory = new SimpleContainer(0);
         private final IItemTransfer itemHandler;
-        private final int index;
 
         public WidgetSlotItemTransfer(IItemTransfer itemHandler, int index, int xPosition, int yPosition) {
             super(emptyInventory, index, xPosition, yPosition);
             this.itemHandler = itemHandler;
-            this.index = index;
         }
 
         @Override
