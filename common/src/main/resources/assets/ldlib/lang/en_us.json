@@ -22,6 +22,7 @@
   "ldlib.gui.text_field.resourcelocation": "allow [0-9][a-z][_-./]",
 
   "ldlib.gui.editor.configurator": "Configurator",
+  "ldlib.gui.editor.toggle_configurable.tooltip": "Enable / Disable",
 
   "ldlib.gui.editor.group.focused_widget": "Focused Widget",
   "ldlib.gui.editor.group.basic_info": "Basic Info",
