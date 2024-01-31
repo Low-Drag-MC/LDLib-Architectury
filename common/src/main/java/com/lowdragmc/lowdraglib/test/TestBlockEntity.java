@@ -5,6 +5,8 @@ import com.lowdragmc.lowdraglib.gui.compass.CompassView;
 import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
+import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,7 +40,8 @@ public class TestBlockEntity extends BlockEntity implements IUIHolder {
     @Override
     public ModularUI createUI(Player entityPlayer) {
         return new ModularUI(this, entityPlayer)
-                .widget(new CompassView(LDLib.MOD_ID));
+                .widget(new CompassView(LDLib.MOD_ID))
+                .widget(new SlotWidget(new ItemStackTransfer(1), 0, 100, 0));
 //        return new ModularUI(this, entityPlayer).widget(new UIEditor(LDLib.location));
     }
 
