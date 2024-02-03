@@ -123,15 +123,17 @@ public class ResourcePanel extends WidgetGroup {
         }
 
         int offset = Minecraft.getInstance().font.width(LocalizationUtils.format("ldlib.gui.editor.group.resources")) + 8;
+        var maxWidth = (getSize().width - offset) / this.resources.resources.size();
         for (Resource<?> resource : this.resources.resources.values()) {
+            var width = Math.min(maxWidth, Minecraft.getInstance().font.width(LocalizationUtils.format(resource.name())) + 8);
             tabContainer.addTab(
-                    new TabButton(offset, -15, Minecraft.getInstance().font.width(LocalizationUtils.format(resource.name())) + 8, 15).setTexture(
-                            new TextTexture(resource.name()),
-                            new GuiTextureGroup(new TextTexture(resource.name(), ColorPattern.T_GREEN.color), ColorPattern.T_GRAY.rectTexture())
+                    new TabButton(offset, -15, width, 15).setTexture(
+                            new TextTexture(resource.name()).setType(TextTexture.TextType.ROLL).setWidth(width),
+                            new GuiTextureGroup(new TextTexture(resource.name(), ColorPattern.T_GREEN.color).setType(TextTexture.TextType.ROLL).setWidth(width), ColorPattern.T_GRAY.rectTexture())
                     ),
                     resource.createContainer(this)
             );
-            offset += 52;
+            offset += width;
         }
     }
 

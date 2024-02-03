@@ -4,6 +4,9 @@ import com.lowdragmc.lowdraglib.CommonProxy;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.ServerCommands;
+import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
+import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlockEntity;
+import com.lowdragmc.lowdraglib.client.renderer.block.forge.RendererBlockEntityImpl;
 import com.lowdragmc.lowdraglib.plugin.ILDLibPlugin;
 import com.lowdragmc.lowdraglib.plugin.LDLibPlugin;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
@@ -30,6 +33,8 @@ public class CommonProxyImpl {
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, LDLib.MOD_ID);
 
     public CommonProxyImpl() {
+        BLOCKS.register("renderer", () -> RendererBlock.BLOCK);
+        RendererBlockEntityImpl.TYPE = BLOCK_ENTITY_TYPES.register("renderer", () -> BlockEntityType.Builder.of(RendererBlockEntity::new, RendererBlock.BLOCK).build(null));
 
         if (Platform.isDevEnv()) {
             BLOCKS.register("test", () -> TestBlock.BLOCK);
