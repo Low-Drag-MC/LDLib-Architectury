@@ -41,6 +41,7 @@
   "ldlib.gui.editor.group.group": "Group Widgets",
   "ldlib.gui.editor.group.container": "Container Widgets",
   "ldlib.gui.editor.group.custom": "Custom Widgets",
+  "ldlib.gui.editor.group.renderer": "renderer",
 
   "ldlib.gui.editor.name.texture_type": "Texture Type",
   "ldlib.gui.editor.name.pos": "position",
