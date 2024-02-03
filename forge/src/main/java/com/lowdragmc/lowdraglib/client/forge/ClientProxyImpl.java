@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
 import com.lowdragmc.lowdraglib.forge.CommonProxyImpl;
@@ -47,6 +48,7 @@ public class ClientProxyImpl extends CommonProxyImpl {
             ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(CompassManager.INSTANCE);
             CompassManager.INSTANCE.onResourceManagerReload(Minecraft.getInstance().getResourceManager());
             ClientProxy.init();
+            ItemBlockRenderTypes.setRenderLayer(RendererBlock.BLOCK, RenderType.translucent());
             if (Platform.isDevEnv()) {
                 ItemBlockRenderTypes.setRenderLayer(TestBlock.BLOCK, RenderType.cutoutMipped());
             }

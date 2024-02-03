@@ -74,6 +74,9 @@
   "ldlib.gui.editor.menu.align.vd": "vertical distribute",
   "ldlib.gui.editor.menu.align.vt": "vertical top",
   "ldlib.gui.editor.menu.align.vb": "vertical bottom",
+  "ldlib.gui.editor.menu.add_renderer": "add a new renderer",
+
+  "ldlib.gui.editor.menu.view.window_size": "window size",
 
   "ldlib.gui.editor.tips.id": "Widget id, it doesn't have to be unique，and can be empty.",
   "ldlib.gui.editor.tips.pos": "Relative to the parent widget.",
@@ -86,6 +89,7 @@
   "ldlib.gui.editor.tips.corner_size。1": "The border of this texture will not be affected by scaling.",
   "ldlib.gui.editor.tips.image_size": "The size of the image, (I know it's a kind of annoying, why not automatically read?)",
   "ldlib.gui.editor.tips.select_image": "select an image",
+  "ldlib.gui.editor.tips.select_model": "select a model",
   "ldlib.gui.editor.tips.save_resource": "save resource",
   "ldlib.gui.editor.tips.save_project": "save project",
   "ldlib.gui.editor.tips.load_resource": "load resource",
@@ -165,5 +169,8 @@
   "ldlib.gui.compass.section.edit_mode.tooltip": "right-click the section to open the edit menu",
   "ldlib.gui.editor.menu.move_up": "Move Up",
   "ldlib.gui.editor.menu.move_down": "Move Down",
-  "ldlib.compass.c_press": "Press [C] open compass"
+  "ldlib.compass.c_press": "Press [C] open compass",
+
+  "ldlib.renderer.json_model": "Json Model",
+  "ldlib.renderer.block_model": "BlockState Model"
 }

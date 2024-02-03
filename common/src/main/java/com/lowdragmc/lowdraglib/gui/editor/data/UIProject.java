@@ -1,15 +1,11 @@
 package com.lowdragmc.lowdraglib.gui.editor.data;
 
-import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.editor.ui.MainPanel;
 import com.lowdragmc.lowdraglib.gui.editor.ui.tool.WidgetToolBox;
-import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
-import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
-import com.lowdragmc.lowdraglib.gui.widget.TabButton;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -86,10 +82,7 @@ public class UIProject implements IProject {
     @Override
     public void onLoad(Editor editor) {
         IProject.super.onLoad(editor);
-        editor.getTabPages().addTab(new TabButton(50, 16, 60, 14).setTexture(
-                new GuiTextureGroup(ColorPattern.T_GREEN.rectTexture().setBottomRadius(10).transform(0, 0.4f), new TextTexture("Main")),
-                new GuiTextureGroup(ColorPattern.T_RED.rectTexture().setBottomRadius(10).transform(0, 0.4f), new TextTexture("Main"))
-        ), new MainPanel(editor, root));
+        editor.getTabPages().addTab("Main", new MainPanel(editor, root));
 
         for (WidgetToolBox.Default tab : WidgetToolBox.Default.TABS) {
             editor.getToolPanel().addNewToolBox("ldlib.gui.editor.group." + tab.groupName, tab.icon, tab.createToolBox());

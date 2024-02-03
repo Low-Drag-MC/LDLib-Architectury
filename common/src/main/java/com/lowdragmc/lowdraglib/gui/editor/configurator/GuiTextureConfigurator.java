@@ -34,6 +34,9 @@ public class GuiTextureConfigurator extends ValueConfigurator<IGuiTexture>{
 
     public GuiTextureConfigurator(String name, Supplier<IGuiTexture> supplier, Consumer<IGuiTexture> onUpdate, boolean forceUpdate) {
         super(name, supplier, onUpdate, IGuiTexture.EMPTY, forceUpdate);
+        if (value == null) {
+            value = defaultValue;
+        }
     }
 
     @Override

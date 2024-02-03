@@ -1,9 +1,11 @@
 package com.lowdragmc.lowdraglib.gui.editor.runtime;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.client.renderer.ISerializableRenderer;
 import com.lowdragmc.lowdraglib.gui.editor.accessors.IConfiguratorAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
@@ -11,15 +13,16 @@ import com.lowdragmc.lowdraglib.gui.editor.ui.menu.MenuTab;
 import com.lowdragmc.lowdraglib.gui.editor.ui.view.FloatViewWidget;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author KilaBash
@@ -38,9 +41,18 @@ public class AnnotationDetector {
     public static final List<Wrapper<LDLRegister, FloatViewWidget>> REGISTER_FLOAT_VIEWS = scanClasses(LDLRegister.class, FloatViewWidget.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
     public static final List<Wrapper<LDLRegister, MenuTab>> REGISTER_MENU_TABS = scanClasses(LDLRegister.class, MenuTab.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
     public static final List<IProject> REGISTER_PROJECTS = scanClasses(LDLRegister.class, IProject.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::createNoArgsInstance, (a, b) -> 0, l -> {});
+    @Environment(EnvType.CLIENT)
+    public static final Map<String, Wrapper<LDLRegisterClient, ? extends ISerializableRenderer>> REGISTER_RENDERERS = new HashMap<>();
 
     public static void init() {
-
+        if (LDLib.isClient()) {
+            AnnotationDetector.scanClasses(
+                    LDLRegisterClient.class,
+                    ISerializableRenderer.class,
+                    AnnotationDetector::checkNoArgsConstructor,
+                    AnnotationDetector::toClientUINoArgsBuilder,
+                    AnnotationDetector::clientUIWrapperSorter, l -> REGISTER_RENDERERS.putAll(l.stream().collect(Collectors.toMap(w -> w.annotation().name(), w -> w))));
+        }
     }
 
     public static <A extends Annotation, T, C> List<C> scanClasses(Class<A> annotationClass, Class<T> baseClazz, BiPredicate<A, Class<? extends T>> predicate, Function<Class<? extends T>, C> mapping, Comparator<C> sorter, Consumer<List<C>> onFinished) {
@@ -93,6 +105,14 @@ public class AnnotationDetector {
 
     public static int UIWrapperSorter(Wrapper<LDLRegister, ?> a, Wrapper<LDLRegister, ?> b) {
         return b.annotation.priority() - a.annotation.priority();
+    }
+
+    public static <T> AnnotationDetector.Wrapper<LDLRegisterClient, T> toClientUINoArgsBuilder(Class<? extends T> clazz) {
+        return new AnnotationDetector.Wrapper<>(clazz.getAnnotation(LDLRegisterClient.class), clazz, () -> AnnotationDetector.createNoArgsInstance(clazz));
+    }
+
+    public static int clientUIWrapperSorter(AnnotationDetector.Wrapper<LDLRegisterClient, ?> a, AnnotationDetector.Wrapper<LDLRegisterClient, ?> b) {
+        return b.annotation().priority() - a.annotation().priority();
     }
 
 }

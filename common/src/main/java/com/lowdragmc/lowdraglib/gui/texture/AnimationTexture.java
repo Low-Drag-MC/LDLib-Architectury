@@ -156,7 +156,7 @@ public class AnimationTexture extends TransformTexture {
         widgetGroup.addWidget(imageWidget = new ImageWidget(0, 0, 100, 100, new GuiTextureGroup(new ResourceTexture(imageLocation.toString()), this::drawGuides)).setBorder(2, ColorPattern.T_WHITE.color));
         widgetGroup.addWidget(new ButtonWidget(0, 0, 100, 100, IGuiTexture.EMPTY, cd -> {
             if (Editor.INSTANCE == null) return;
-            File path = new File(Editor.INSTANCE.getWorkSpace(), "assets/ldlib/textures");
+            File path = new File(Editor.INSTANCE.getWorkSpace(), "textures");
             DialogWidget.showFileDialog(Editor.INSTANCE, "ldlib.gui.editor.tips.select_image", path, true,
                     DialogWidget.suffixFilter(".png"), r -> {
                         if (r != null && r.isFile()) {
@@ -175,7 +175,8 @@ public class AnimationTexture extends TransformTexture {
     }
 
     private ResourceLocation getTextureFromFile(File path, File r){
-        return new ResourceLocation("ldlib:" + r.getPath().replace(path.getPath(), "textures").replace('\\', '/'));
+        var id = path.getPath().replace('\\', '/').split("assets/")[1].split("/")[0];
+        return new ResourceLocation(id, r.getPath().replace(path.getPath(), "textures").replace('\\', '/'));
     }
 
     @Environment(EnvType.CLIENT)

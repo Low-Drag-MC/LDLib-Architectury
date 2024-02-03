@@ -18,14 +18,12 @@ import lombok.experimental.Accessors;
 import net.minecraft.nbt.Tag;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.apache.commons.lang3.function.TriFunction;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * @author KilaBash
@@ -50,7 +48,7 @@ public class ResourceContainer<T, C extends Widget> extends WidgetGroup {
     @Setter
     protected Consumer<String> onEdit;
     protected Function<String, Object> draggingMapping;
-    protected Function<Object, IGuiTexture> draggingRenderer;
+    protected TriFunction<String, Object, Position, IGuiTexture> draggingRenderer;
     @Setter
     protected Supplier<String> nameSupplier;
     @Setter
@@ -69,7 +67,13 @@ public class ResourceContainer<T, C extends Widget> extends WidgetGroup {
 
     public <D> ResourceContainer<T, C> setDragging(Function<String, D> draggingMapping, Function<D, IGuiTexture> draggingRenderer) {
         this.draggingMapping = draggingMapping::apply;
-        this.draggingRenderer = o -> draggingRenderer.apply((D) o);
+        this.draggingRenderer = (k, o, p) -> draggingRenderer.apply((D) o);
+        return this;
+    }
+
+    public <D> ResourceContainer<T, C> setDragging(Function<String, D> draggingMapping, TriFunction<String, D, Position, IGuiTexture> draggingRenderer) {
+        this.draggingMapping = draggingMapping::apply;
+        this.draggingRenderer = (k, o, p) -> draggingRenderer.apply(k, (D) o, p);
         return this;
     }
 
@@ -94,7 +98,7 @@ public class ResourceContainer<T, C extends Widget> extends WidgetGroup {
             widgets.put(entry.getKey(), widget);
             Size size = widget.getSize();
             SelectableWidgetGroup selectableWidgetGroup = new SelectableWidgetGroup(0, 0, size.width, size.height + 14);
-            selectableWidgetGroup.setDraggingProvider(draggingMapping == null ? entry::getValue : () -> draggingMapping.apply(entry.getKey()), (c, p) -> draggingRenderer.apply(c));
+            selectableWidgetGroup.setDraggingProvider(draggingMapping == null ? entry::getValue : () -> draggingMapping.apply(entry.getKey()), (c, p) -> draggingRenderer == null ? new TextTexture(entry.getKey()) : draggingRenderer.apply(entry.getKey(), c, p));
             selectableWidgetGroup.addWidget(widget);
             selectableWidgetGroup.addWidget(new ImageWidget(0, size.height + 3, size.width, 10, new TextTexture(entry.getKey()).setWidth(size.width).setType(TextTexture.TextType.ROLL)));
             selectableWidgetGroup.setOnSelected(s -> selected = entry.getKey());

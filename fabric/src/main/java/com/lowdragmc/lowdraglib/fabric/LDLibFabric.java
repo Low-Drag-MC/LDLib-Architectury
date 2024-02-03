@@ -1,6 +1,9 @@
 package com.lowdragmc.lowdraglib.fabric;
 
 import com.lowdragmc.lowdraglib.*;
+import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
+import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlockEntity;
+import com.lowdragmc.lowdraglib.client.renderer.block.fabric.RendererBlockEntityImpl;
 import com.lowdragmc.lowdraglib.plugin.ILDLibPlugin;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.test.TestBlock;
@@ -19,6 +22,14 @@ public class LDLibFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         LDLib.init();
+
+        Registry.register(BuiltInRegistries.BLOCK, LDLib.location("renderer"), RendererBlock.BLOCK);
+        RendererBlockEntityImpl.TYPE = Registry.register(
+                BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                LDLib.location("renderer"),
+                FabricBlockEntityTypeBuilder.create(RendererBlockEntity::new, RendererBlock.BLOCK).build()
+        );
+
         if (Platform.isDevEnv()) {
             Registry.register(Registry.BLOCK, LDLib.location("test"), TestBlock.BLOCK);
             Registry.register(Registry.ITEM, LDLib.location("test"), TestItem.ITEM);

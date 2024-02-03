@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.client.ClientCommands;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.model.fabric.LDLRendererModel;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
 import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
 import com.lowdragmc.lowdraglib.gui.util.WidgetTooltipComponent;
@@ -24,10 +25,6 @@ import net.fabricmc.fabric.api.event.client.ClientSpriteRegistryCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -59,6 +56,7 @@ public class ClientProxyImpl implements ClientModInitializer, SimpleSynchronousR
         ClientSpriteRegistryCallback.event(InventoryMenu.BLOCK_ATLAS).register((atlas, registry) -> IRenderer.EVENT_REGISTERS.forEach(renderer -> renderer.onPrepareTextureAtlas(InventoryMenu.BLOCK_ATLAS, registry::register)));
 
         // render types
+        BlockRenderLayerMap.INSTANCE.putBlock(RendererBlock.BLOCK, RenderType.translucent());
         if (Platform.isDevEnv()) {
             BlockRenderLayerMap.INSTANCE.putBlock(TestBlock.BLOCK, RenderType.cutoutMipped());
         }

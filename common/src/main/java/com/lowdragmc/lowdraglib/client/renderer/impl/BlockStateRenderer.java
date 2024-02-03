@@ -1,11 +1,12 @@
 package com.lowdragmc.lowdraglib.client.renderer.impl;
 
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.lowdragmc.lowdraglib.client.renderer.ISerializableRenderer;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.FacadeBlockWorld;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -40,9 +41,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class BlockStateRenderer implements IRenderer {
+//@LDLRegisterClient(name = "block_model", group = "renderer")
+public class BlockStateRenderer implements ISerializableRenderer {
 
-    public final BlockInfo blockInfo;
+    @Getter
+    protected BlockInfo blockInfo;
     @Environment(EnvType.CLIENT)
     private BakedModel itemModel;
 
@@ -82,10 +85,6 @@ public class BlockStateRenderer implements IRenderer {
         return state;
     }
 
-    public BlockInfo getBlockInfo() {
-        return blockInfo;
-    }
-
     @Environment(EnvType.CLIENT)
     protected BakedModel getItemModel(ItemStack renderItem) {
         if (itemModel == null) {
@@ -101,13 +100,12 @@ public class BlockStateRenderer implements IRenderer {
         ItemStack renderItem = getBlockInfo().getItemStackForm();
         BakedModel model = getItemModel(renderItem);
         if (model == null) {
-            return IRenderer.super.getParticleTexture();
+            return ISerializableRenderer.super.getParticleTexture();
         }
         return model.getParticleIcon();
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
     public void renderItem(ItemStack stack, ItemTransforms.TransformType transformType, boolean leftHand, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, BakedModel model) {
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         ItemStack renderItem = getBlockInfo().getItemStackForm();
@@ -223,7 +221,7 @@ public class BlockStateRenderer implements IRenderer {
     public boolean isGui3d() {
         var model = getItemModel(getBlockInfo().getItemStackForm());
         if (model == null) {
-            return IRenderer.super.isGui3d();
+            return ISerializableRenderer.super.isGui3d();
         }
         return model.isGui3d();
     }

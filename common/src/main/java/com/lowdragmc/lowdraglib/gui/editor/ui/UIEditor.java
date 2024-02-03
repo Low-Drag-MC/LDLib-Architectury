@@ -14,4 +14,8 @@ public class UIEditor extends Editor {
     public UIEditor(File workSpace) {
         super(workSpace);
     }
+
+    public UIEditor(String modID) {
+        super(modID);
+    }
 }

@@ -4,7 +4,9 @@ import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.editor.ui.view.FloatViewWidget;
+import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
@@ -20,7 +22,20 @@ public class ViewMenu extends MenuTab {
     public final Map<String, FloatViewWidget> openedViews = new HashMap<>();
 
     protected TreeBuilder.Menu createMenu() {
-        var viewMenu = TreeBuilder.Menu.start();
+        var viewMenu = TreeBuilder.Menu.start().branch("ldlib.gui.editor.menu.view.window_size", menu -> {
+            Minecraft minecraft = Minecraft.getInstance();
+            var guiScale = minecraft.options.guiScale();
+            var maxScale =  !minecraft.isRunning() ? 0x7FFFFFFE : minecraft.getWindow().calculateScale(0, minecraft.isEnforceUnicode());
+            for (int i = 0; i <= maxScale; i++) {
+                var finalI = i;
+                menu.leaf(guiScale.get() == i ? Icons.CHECK : IGuiTexture.EMPTY, i == 0 ? "options.guiScale.auto" : i + "", () -> {
+                    if (guiScale.get() != finalI) {
+                        guiScale.set(finalI);
+                        Minecraft.getInstance().resizeDisplay();
+                    }
+                });
+            }
+        });
         for (AnnotationDetector.Wrapper<LDLRegister, FloatViewWidget> wrapper : AnnotationDetector.REGISTER_FLOAT_VIEWS) {
             if (editor.name().startsWith(wrapper.annotation().group())) {
                 String translateKey = "ldlib.gui.editor.register.%s.%s".formatted(wrapper.annotation().group(), wrapper.annotation().name());
