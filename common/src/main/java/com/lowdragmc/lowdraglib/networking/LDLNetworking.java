@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.networking;
 
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.networking.both.PacketRPCMethodPayload;
+import com.lowdragmc.lowdraglib.networking.s2c.SPacketRPCMethodPayload;
 import com.lowdragmc.lowdraglib.networking.c2s.CPacketUIClientAction;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIOpen;
@@ -27,10 +27,9 @@ public class LDLNetworking {
         NETWORK.registerS2C(SPacketUIOpen.class);
         NETWORK.registerS2C(SPacketUIWidgetUpdate.class);
         NETWORK.registerS2C(SPacketManagedPayload.class);
+        NETWORK.registerS2C(SPacketRPCMethodPayload.class);
 
         NETWORK.registerC2S(CPacketUIClientAction.class);
-
-        NETWORK.registerBoth(PacketRPCMethodPayload.class);
     }
 
 }

@@ -1,8 +1,9 @@
-package com.lowdragmc.lowdraglib.networking.both;
+package com.lowdragmc.lowdraglib.networking.s2c;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.networking.IHandlerContext;
 import com.lowdragmc.lowdraglib.networking.IPacket;
+import com.lowdragmc.lowdraglib.networking.PacketIntLocation;
 import com.lowdragmc.lowdraglib.syncdata.IManaged;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IRPCBlockEntity;
@@ -10,7 +11,6 @@ import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.rpc.RPCSender;
 import lombok.NoArgsConstructor;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -24,18 +24,18 @@ import java.util.Objects;
  * a packet that contains payload for managed fields
  */
 @NoArgsConstructor
-public class PacketRPCMethodPayload extends PacketIntLocation implements IPacket {
+public class SPacketRPCMethodPayload extends PacketIntLocation implements IPacket {
     private BlockEntityType<?> blockEntityType;
     private ITypedPayload<?>[] payloads;
 
     private String methodName;
     private int managedId;
 
-    public PacketRPCMethodPayload(FriendlyByteBuf buffer) {
+    public SPacketRPCMethodPayload(FriendlyByteBuf buffer) {
         decode(buffer);
     }
 
-    public PacketRPCMethodPayload(int managedId, BlockEntityType<?> type, BlockPos pos, String methodName, ITypedPayload<?>[] payloads) {
+    public SPacketRPCMethodPayload(int managedId, BlockEntityType<?> type, BlockPos pos, String methodName, ITypedPayload<?>[] payloads) {
         super(pos);
         this.managedId = managedId;
         blockEntityType = type;
@@ -43,7 +43,7 @@ public class PacketRPCMethodPayload extends PacketIntLocation implements IPacket
         this.payloads = payloads;
     }
 
-    public static PacketRPCMethodPayload of(IManaged managed, IRPCBlockEntity tile, String methodName, Object... args) {
+    public static SPacketRPCMethodPayload of(IManaged managed, IRPCBlockEntity tile, String methodName, Object... args) {
         var index = Arrays.stream(tile.getRootStorage().getManaged()).toList().indexOf(managed);
         if (index < 0) {
             throw new IllegalArgumentException("No such rpc managed: " + methodName);
@@ -53,7 +53,7 @@ public class PacketRPCMethodPayload extends PacketIntLocation implements IPacket
             throw new IllegalArgumentException("No such RPC method: " + methodName);
         }
         var payloads = rpcMethod.serializeArgs(args);
-        return new PacketRPCMethodPayload(index, tile.getBlockEntityType(), tile.getCurrentPos(), methodName, payloads);
+        return new SPacketRPCMethodPayload(index, tile.getBlockEntityType(), tile.getCurrentPos(), methodName, payloads);
     }
 
     public void processPacket(@NotNull BlockEntity blockEntity, RPCSender sender) {
@@ -65,18 +65,18 @@ public class PacketRPCMethodPayload extends PacketIntLocation implements IPacket
             LDLib.LOGGER.error("Received managed payload packet for block entity that does not implement IRPCBlockEntity: " + blockEntity);
             return;
         }
-        if (tile.getRootStorage().getManaged().length >= managedId) {
+        if (tile.getRootStorage().getManaged().length <= managedId) {
             LDLib.LOGGER.error("Received managed couldn't be found in IRPCBlockEntity: " + blockEntity);
             return;
         }
-        var rpcMethod = tile.getRPCMethod(tile.getRootStorage().getManaged()[managedId], methodName);
+        var managed = tile.getRootStorage().getManaged()[managedId];
+        var rpcMethod = tile.getRPCMethod(managed, methodName);
         if (rpcMethod == null) {
             LDLib.LOGGER.error("Cannot find RPC method: " + methodName);
             return;
         }
 
-        rpcMethod.invoke(tile, sender, payloads);
-
+        rpcMethod.invoke(managed, sender, payloads);
     }
 
     @Override

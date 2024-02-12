@@ -1,4 +1,4 @@
-package com.lowdragmc.lowdraglib.networking.both;
+package com.lowdragmc.lowdraglib.networking;
 
 import com.lowdragmc.lowdraglib.networking.IPacket;
 import lombok.NoArgsConstructor;

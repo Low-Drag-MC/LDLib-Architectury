@@ -38,7 +38,7 @@ public class IRendererConfigurator extends ValueConfigurator<IRenderer>{
     @Override
     public void computeHeight() {
         super.computeHeight();
-        setSize(new Size(getSize().width, 15 + frame.getSize().height + 4));
+        setSize(new Size(getSize().width, 15 + frame.getSize().height + 6));
     }
 
     @Override
