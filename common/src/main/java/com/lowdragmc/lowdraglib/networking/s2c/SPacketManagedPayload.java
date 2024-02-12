@@ -3,7 +3,7 @@ package com.lowdragmc.lowdraglib.networking.s2c;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.networking.IHandlerContext;
 import com.lowdragmc.lowdraglib.networking.IPacket;
-import com.lowdragmc.lowdraglib.networking.both.PacketIntLocation;
+import com.lowdragmc.lowdraglib.networking.PacketIntLocation;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.syncdata.accessor.IManagedAccessor;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;

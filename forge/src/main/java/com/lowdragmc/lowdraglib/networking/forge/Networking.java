@@ -93,8 +93,7 @@ public class Networking implements INetworking {
     }
 
     public <MSG extends IPacket> void registerBoth(Class<MSG> clazz) {
-        registerS2C(clazz);
-        registerC2S(clazz);
+        this.register(clazz, null);
     }
 
     public <T> void send(PacketDistributor.PacketTarget target, T packet) {
