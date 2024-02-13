@@ -23,9 +23,9 @@ public class LDLibFabric implements ModInitializer {
     public void onInitialize() {
         LDLib.init();
 
-        Registry.register(BuiltInRegistries.BLOCK, LDLib.location("renderer"), RendererBlock.BLOCK);
+        Registry.register(Registry.BLOCK, LDLib.location("renderer"), RendererBlock.BLOCK);
         RendererBlockEntityImpl.TYPE = Registry.register(
-                BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                Registry.BLOCK_ENTITY_TYPE,
                 LDLib.location("renderer"),
                 FabricBlockEntityTypeBuilder.create(RendererBlockEntity::new, RendererBlock.BLOCK).build()
         );
