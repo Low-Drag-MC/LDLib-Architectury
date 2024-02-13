@@ -232,7 +232,7 @@ public class TextTexture extends TransformTexture{
         int totalW = width + textW + 10;
         float from = x + width;
         RenderUtils.useScissor(poseStack, (int) x, (int) y, (int) width, (int) height, () -> {
-            var t = rollSpeed > 0 ? ((rollSpeed * ((Math.abs(System.currentTimeMillis()) / 10) % (totalW))) / (totalW * rollSpeed)) : 0.5;
+            var t = rollSpeed > 0 ? ((((rollSpeed * Math.abs((int)(System.currentTimeMillis() % 1000000)) / 10) % (totalW))) / (totalW)) : 0.5;
             if (dropShadow) {
                 fontRenderer.drawShadow(poseStack, line, (int) (from - t * totalW), (int) _y, color);
             } else {
