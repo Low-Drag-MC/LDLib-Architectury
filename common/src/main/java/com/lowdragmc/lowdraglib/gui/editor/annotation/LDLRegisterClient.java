@@ -15,7 +15,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-@Environment(EnvType.CLIENT)
 public @interface LDLRegisterClient {
     /**
      * Should be unique in the same type of ui element
