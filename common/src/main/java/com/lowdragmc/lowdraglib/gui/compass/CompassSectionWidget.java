@@ -222,7 +222,7 @@ public class CompassSectionWidget extends WidgetGroup {
                         newId++;
                     }
                     var id = new ResourceLocation("%s:%s/new_node_%d".formatted(section.sectionName.getNamespace(), section.sectionName.getPath(), newId));
-                    DialogWidget.showStringEditorDialog(compassView, "ldlib.gui.editor.tips.add_node", id.toString(),
+                    DialogWidget.showStringEditorDialog(compassView, "ldlib.gui.compass.add_node", id.toString(),
                             s -> ResourceLocation.isValidResourceLocation(s) && !section.nodes.containsKey(new ResourceLocation(s)), s -> {
                                 if (s == null || !ResourceLocation.isValidResourceLocation(s) || section.nodes.containsKey(new ResourceLocation(s))) return;
                                 int newMouseX = (int) ((mouseX - this.getPosition().x) / scale + xOffset);
