@@ -29,12 +29,23 @@ public abstract class ValueConfigurator<T> extends Configurator {
         this.name = name;
     }
 
+    /**
+     * when you update value, you have to call it to notify changes.
+     * if necessary you should call {@link #onValueUpdate(T)} to update the value. (e.g. do some widget update in the method)
+     */
     protected void updateValue() {
         if (onUpdate != null) {
             onUpdate.accept(value);
         }
     }
 
+    /**
+     * it will be called when the value is updated and be detected passively.
+     * <br/>
+     * you can update widget or do something else in this method.
+     * <br/>
+     * to update the value, call {@link #updateValue()} as well
+     */
     protected void onValueUpdate(T newValue) {
         value = newValue;
     }
