@@ -136,7 +136,6 @@
   "ldlib.gui.editor.register.widget.container.phantom_fluid_slot": "Phantom Fluid Slot",
   "ldlib.gui.editor.register.widget.custom.player_inventory": "Player Inventory",
 
-
   "ldlib.gui.editor.register.view.history_view": "History View",
 
   "ldlib.gui.editor.register.editor.ui.ui": "UI Project",
@@ -173,5 +172,7 @@
   "ldlib.compass.c_press": "Press [C] open compass",
 
   "ldlib.renderer.json_model": "Json Model",
-  "ldlib.renderer.block_model": "BlockState Model"
+  "ldlib.renderer.block_model": "BlockState Model",
+  "ldlib.gui.editor.config_panel.tabs.widget": "basic configurator",
+  "ldlib.gui.editor.config_panel.tabs.resource": "resource configurator"
 }
