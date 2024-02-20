@@ -47,7 +47,7 @@ import java.util.function.Consumer;
 @LDLRegisterClient(name = "json_model", group = "renderer")
 public class IModelRenderer implements ISerializableRenderer {
     @Getter
-    @Configurable
+    @Configurable(forceUpdate = false)
     protected ResourceLocation modelLocation;
     @Environment(EnvType.CLIENT)
     protected BakedModel itemModel;

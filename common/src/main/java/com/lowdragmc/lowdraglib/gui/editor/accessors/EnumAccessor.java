@@ -51,7 +51,7 @@ public class EnumAccessor implements IConfiguratorAccessor<Enum> {
                 ConfigSelector configSelector = field.getAnnotation(ConfigSelector.class);
                 var candidate = configSelector.candidate();
                 if (candidate.length > 0) {
-                    candidates.filter(e -> ArrayUtils.contains(candidate, getEnumName(e)));
+                    candidates = candidates.filter(e -> ArrayUtils.contains(candidate, getEnumName(e)));
                 }
             }
             return new SelectorConfigurator<>(name, supplier, consumer, defaultValue(field, type), forceUpdate, candidates.toList(), EnumAccessor::getEnumName);

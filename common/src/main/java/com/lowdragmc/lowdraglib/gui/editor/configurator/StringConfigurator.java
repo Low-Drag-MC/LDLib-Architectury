@@ -19,6 +19,8 @@ public class StringConfigurator extends ValueConfigurator<String>{
     protected TextFieldWidget textFieldWidget;
     @Setter
     protected boolean isResourceLocation;
+    @Setter
+    protected boolean isCompoundTag;
 
     public StringConfigurator(String name, Supplier<String> supplier, Consumer<String> onUpdate, @Nonnull String defaultValue, boolean forceUpdate) {
         super(name, supplier, onUpdate, defaultValue, forceUpdate);
@@ -54,6 +56,9 @@ public class StringConfigurator extends ValueConfigurator<String>{
         textFieldWidget.setBordered(false);
         if (isResourceLocation) {
             textFieldWidget.setResourceLocationOnly();
+        }
+        if (isCompoundTag) {
+            textFieldWidget.setCompoundTagOnly();
         }
     }
 

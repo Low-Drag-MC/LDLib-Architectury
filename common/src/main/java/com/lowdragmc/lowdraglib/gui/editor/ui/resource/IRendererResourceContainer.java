@@ -15,6 +15,7 @@ import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 
 import java.util.Collections;
@@ -73,6 +74,7 @@ public class IRendererResourceContainer extends ResourceContainer<IRenderer, Wid
                         });
                     }
                 })
-                .leaf(Icons.REMOVE_FILE, "ldlib.gui.editor.menu.remove", this::removeSelectedResource);
+                .leaf(Icons.REMOVE_FILE, "ldlib.gui.editor.menu.remove", this::removeSelectedResource)
+                .leaf(Icons.ROTATION, "ldlib.gui.editor.menu.reload_resource", () -> Minecraft.getInstance().reloadResourcePacks());
     }
 }
