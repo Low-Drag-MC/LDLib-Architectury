@@ -20,9 +20,13 @@
   "ldlib.gui.text_field.number.3": "any number",
   "ldlib.gui.text_field.number.wheel": "§ascroll wheel adjusts number§r (%s)",
   "ldlib.gui.text_field.resourcelocation": "allow [0-9][a-z][_-./]",
+  "ldlib.gui.text_field.compound_tag": "compound(nbt) tag",
 
   "ldlib.gui.editor.configurator": "Configurator",
   "ldlib.gui.editor.toggle_configurable.tooltip": "Enable / Disable",
+  "ldlib.gui.editor.configurator.count": "count",
+  "ldlib.gui.editor.configurator.amount": "amount",
+  "ldlib.gui.editor.configurator.nbt": "NBT",
 
   "ldlib.gui.editor.group.focused_widget": "Focused Widget",
   "ldlib.gui.editor.group.basic_info": "Basic Info",
@@ -57,6 +61,7 @@
   "ldlib.gui.editor.menu.add_resource": "add a new resource",
   "ldlib.gui.editor.menu.remove": "remove",
   "ldlib.gui.editor.menu.rename": "rename",
+  "ldlib.gui.editor.menu.reload_resource": "reload resource",
   "ldlib.gui.editor.menu.cut": "cut",
   "ldlib.gui.editor.menu.copy": "copy",
   "ldlib.gui.editor.menu.paste": "paste",

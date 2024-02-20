@@ -69,6 +69,7 @@ public class ToolPanel extends WidgetGroup {
     public void clearAllWidgets() {
         toolBoxes.clear();
         tabContainer.clearAllWidgets();
+        tabsBackground.setSize(new Size(20, 0));
     }
 
     public void addNewToolBox(String name, ResourceTexture texture, WidgetGroup toolBox) {

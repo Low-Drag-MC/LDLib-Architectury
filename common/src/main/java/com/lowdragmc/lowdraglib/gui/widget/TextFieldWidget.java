@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -276,6 +277,18 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
 
     public TextFieldWidget setValidator(Function<String, String> validator) {
         this.textValidator = validator;
+        return this;
+    }
+
+    public TextFieldWidget setCompoundTagOnly() {
+        setValidator(s -> {
+            try {
+                TagParser.parseTag(s);
+                return s;
+            } catch (Exception ignored) { }
+            return this.currentString;
+        });
+        hover = Component.translatable("ldlib.gui.text_field.compound_tag");
         return this;
     }
 
