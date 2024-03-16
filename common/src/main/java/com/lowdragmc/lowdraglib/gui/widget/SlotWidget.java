@@ -468,11 +468,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         @Override
         public void set(@Nonnull ItemStack stack) {
             this.itemHandler.setStackInSlot(index, stack);
-            this.itemHandler.onContentsChanged();
             this.setChanged();
-            if (changeListener != null) {
-                changeListener.run();
-            }
         }
 
         @Override
@@ -510,6 +506,10 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
         @Override
         public void setChanged() {
+            this.itemHandler.onContentsChanged();
+            if (changeListener != null) {
+                changeListener.run();
+            }
             SlotWidget.this.onSlotChanged();
         }
 
