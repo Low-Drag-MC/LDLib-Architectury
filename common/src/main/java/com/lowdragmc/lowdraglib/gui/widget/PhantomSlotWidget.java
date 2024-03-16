@@ -98,6 +98,16 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
     }
 
     @Override
+    public boolean canTakeStack(Player player) {
+        return false;
+    }
+
+    @Override
+    public boolean canPutStack(ItemStack stack) {
+        return false;
+    }
+
+    @Override
     @Environment(EnvType.CLIENT)
     public List<Target> getPhantomTargets(Object ingredient) {
         if (LDLib.isEmiLoaded() && ingredient instanceof ItemEmiStack itemEmiStack) {
