@@ -85,7 +85,7 @@ public class UIProject implements IProject {
         editor.getTabPages().addTab("Main", new MainPanel(editor, root));
 
         for (WidgetToolBox.Default tab : WidgetToolBox.Default.TABS) {
-            editor.getToolPanel().addNewToolBox("ldlib.gui.editor.group." + tab.groupName, tab.icon, tab.createToolBox());
+            editor.getToolPanel().addNewToolBox("ldlib.gui.editor.group." + tab.groupName, tab.icon, tab::createToolBox);
         }
 
     }

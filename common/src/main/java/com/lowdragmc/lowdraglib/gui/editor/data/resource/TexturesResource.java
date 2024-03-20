@@ -9,6 +9,8 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
+import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
+import com.lowdragmc.lowdraglib.gui.widget.TankWidget;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 
@@ -33,8 +35,8 @@ public class TexturesResource extends Resource<IGuiTexture> {
     public void buildDefault() {
         data.put("border background", ResourceBorderTexture.BORDERED_BACKGROUND);
         data.put("button", ResourceBorderTexture.BUTTON_COMMON);
-        data.put("slot", new ResourceTexture("ldlib:textures/gui/slot.png"));
-        data.put("fluid slot", new ResourceTexture("ldlib:textures/gui/fluid_slot.png"));
+        data.put("slot", SlotWidget.ITEM_SLOT_TEXTURE.copy());
+        data.put("fluid slot", TankWidget.FLUID_SLOT_TEXTURE.copy());
         data.put("tab", TABS_LEFT.getSubTexture(0, 0, 0.5f, 1f / 3));
         data.put("tab pressed", TABS_LEFT.getSubTexture(0.5f, 0, 0.5f, 1f / 3));
         for (var wrapper : AnnotationDetector.REGISTER_TEXTURES) {

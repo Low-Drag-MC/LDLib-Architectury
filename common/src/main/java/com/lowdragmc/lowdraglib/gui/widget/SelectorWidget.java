@@ -25,17 +25,17 @@ import java.util.function.Supplier;
 @LDLRegister(name = "selector", group = "widget.basic")
 public class SelectorWidget extends WidgetGroup {
     protected List<SelectableWidgetGroup> selectables;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.candidates")
     protected List<String> candidates;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.currentValue")
     protected String currentValue;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.maxCount")
     @NumberRange(range = {1, 20})
     protected int maxCount = 5;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.color")
     @NumberColor
     protected int fontColor = -1;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.showUp")
     protected boolean showUp;
     protected boolean isShow;
     protected IGuiTexture popUpTexture = new ColorRectTexture(0xAA000000);

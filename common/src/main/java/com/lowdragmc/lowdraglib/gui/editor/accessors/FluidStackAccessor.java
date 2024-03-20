@@ -39,7 +39,7 @@ public class FluidStackAccessor extends TypesAccessor<FluidStack> {
         ConfiguratorGroup group = new ConfiguratorGroup(name);
         var fluidStorage = new FluidStorage(supplier.get());
         var tank = new TankWidget(fluidStorage, 0, 0, 18, 18, false, false);
-        tank.setBackground(new ResourceTexture("ldlib:textures/gui/fluid_slot.png"));
+        tank.setBackground(TankWidget.FLUID_SLOT_TEXTURE);
         tank.setClientSideWidget();
         Consumer<FluidStack> updateStack = stack -> {
             consumer.accept(stack);

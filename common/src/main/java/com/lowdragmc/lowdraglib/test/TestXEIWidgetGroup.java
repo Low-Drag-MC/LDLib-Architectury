@@ -17,21 +17,21 @@ public class TestXEIWidgetGroup extends WidgetGroup {
         super(0, 0, 170, 60);
         setClientSideWidget();
         var input = new SlotWidget(new ItemStackTransfer(new ItemStack(Items.APPLE, 10)), 0, 20, 20, false, false)
-                .setBackgroundTexture(new ResourceTexture("ldlib:textures/gui/slot.png"))
+                .setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.INPUT);
         var output = new SlotWidget(new ItemStackTransfer(new ItemStack(Items.DIAMOND, 23)), 0, 130, 20, false, false)
-                .setBackgroundTexture(new ResourceTexture("ldlib:textures/gui/slot.png"))
+                .setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.OUTPUT);
 
         var both = new SlotWidget(new ItemStackTransfer(new ItemStack(Items.ANDESITE, 23)), 0, 60, 20, false, false)
-                .setBackgroundTexture(new ResourceTexture("ldlib:textures/gui/slot.png"))
+                .setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.BOTH);
 
         var inputFluid = new TankWidget(new FluidStorage(FluidStack.create(Fluids.WATER, 1000)), 20, 40, 20, 20, false, false)
-                .setBackground(new ResourceTexture("ldlib:textures/gui/fluid_slot.png"))
+                .setBackground(TankWidget.FLUID_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.INPUT);
         var outputFluid = new TankWidget(new FluidStorage(FluidStack.create(Fluids.LAVA, 1000)), 130, 40, 20, 20, false, false)
-                .setBackground(new ResourceTexture("ldlib:textures/gui/fluid_slot.png"))
+                .setBackground(TankWidget.FLUID_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.OUTPUT);
         addWidget(input);
         addWidget(output);

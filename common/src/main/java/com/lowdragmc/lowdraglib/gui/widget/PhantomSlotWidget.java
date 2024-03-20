@@ -34,7 +34,7 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
 
     private boolean clearSlotOnRightClick;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.maxStackSize")
     @NumberRange(range = {0, 64})
     @Setter
     private int maxStackSize = 64;

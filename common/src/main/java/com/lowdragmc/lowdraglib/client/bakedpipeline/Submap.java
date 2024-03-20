@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 @Getter
 @AllArgsConstructor
 public class Submap implements ISubmap {
+    // Submap split a cube face to four sub faces.
     public static final Submap[] uvs = new Submap[]{
             new Submap(4.0F, 4.0F, 0.0F, 0.0F),
             new Submap(4.0F, 4.0F, 4.0F, 0.0F),

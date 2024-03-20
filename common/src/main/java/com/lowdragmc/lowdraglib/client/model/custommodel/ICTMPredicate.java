@@ -23,8 +23,13 @@ public interface ICTMPredicate {
 
     /**
      * Can texture connected to model.
-     * @param coreState core block
-     * @param adjacentState checking state
+     * @param level world
+     * @param state current blockstate
+     * @param pos block position
+     * @param sourceState adjacent blockstate
+     * @param sourcePos adjacent block position
+     * @param side adjacent side
+     * @return is connected
      */
     boolean isConnected(BlockAndTintGetter level, BlockState state, BlockPos pos, BlockState sourceState, BlockPos sourcePos, Direction side);
 
