@@ -16,6 +16,10 @@ public class Size {
         this.height = height;
     }
 
+    public static Size of(int width, int height) {
+        return new Size(width, height);
+    }
+
     public int getWidth() {
         return width;
     }

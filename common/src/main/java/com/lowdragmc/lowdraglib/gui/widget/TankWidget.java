@@ -10,7 +10,7 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.WrapperConfigurator;
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ProgressTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.TextFormattingUtil;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
@@ -52,29 +52,30 @@ import java.util.function.Consumer;
 @LDLRegister(name = "fluid_slot", group = "widget.container")
 @Accessors(chain = true)
 public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfigurableWidget {
+    public final static ResourceBorderTexture FLUID_SLOT_TEXTURE = new ResourceBorderTexture("ldlib:textures/gui/fluid_slot.png", 18, 18, 1, 1);
 
     @Nullable
     @Getter
     protected IFluidStorage fluidTank;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.showAmount")
     @Setter
     protected boolean showAmount;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.allowClickFilled")
     @Setter
     protected boolean allowClickFilled;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.allowClickDrained")
     @Setter
     protected boolean allowClickDrained;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.drawHoverOverlay")
     @Setter
     public boolean drawHoverOverlay = true;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.drawHoverTips")
     @Setter
     protected boolean drawHoverTips;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.fillDirection")
     @Setter
     protected ProgressTexture.FillDirection fillDirection = ProgressTexture.FillDirection.ALWAYS_FULL;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
     @Setter
     protected IGuiTexture overlay;
     @Setter
@@ -96,7 +97,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     public void initTemplate() {
-        setBackground(new ResourceTexture("ldlib:textures/gui/fluid_slot.png"));
+        setBackground(FLUID_SLOT_TEXTURE);
         setFillDirection(ProgressTexture.FillDirection.DOWN_TO_UP);
     }
 

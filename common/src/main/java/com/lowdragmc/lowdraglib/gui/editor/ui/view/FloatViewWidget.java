@@ -5,8 +5,10 @@ import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
+import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Size;
 import net.fabricmc.api.EnvType;
@@ -40,14 +42,19 @@ public class FloatViewWidget extends WidgetGroup implements ILDLRegister {
         if (!isFixedView) {
             addWidget(title = new WidgetGroup(0, 0, getSize().width, 15));
             title.setBackground(new GuiTextureGroup(ColorPattern.T_RED.rectTexture().setTopRadius(5f), ColorPattern.GRAY.borderTexture(-1).setTopRadius(5f)));
-            title.addWidget(new ButtonWidget(2, 2, 11, 11, getIcon(), this::collapse).setHoverTexture(getIcon().setColor(ColorPattern.GREEN.color)));
+            title.addWidget(new ButtonWidget(2, 2, 11, 11, getIcon(), this::collapse)
+                    .setHoverTexture(getHoverIcon()));
+            title.addWidget(new ImageWidget(12, 2, title.getSize().width - 12, 11,
+                    new TextTexture().setSupplier(() -> isCollapse ? "" : getTitle())
+                            .setWidth(title.getSize().width - 12)
+                            .setType(TextTexture.TextType.ROLL)));
             addWidget(content = new WidgetGroup(0, 15, getSize().width, getSize().height - 15));
             content.setBackground(new GuiTextureGroup(ColorPattern.BLACK.rectTexture().setBottomRadius(5f), ColorPattern.GRAY.borderTexture(-1).setBottomRadius(5f)));
         }
         super.initWidget();
     }
 
-    private void collapse(ClickData clickData) {
+    protected void collapse(ClickData clickData) {
         isCollapse = !isCollapse;
         if (isCollapse) {
             title.setSize(new Size(15, 15));
@@ -64,6 +71,14 @@ public class FloatViewWidget extends WidgetGroup implements ILDLRegister {
 
     public IGuiTexture getIcon() {
         return IGuiTexture.EMPTY;
+    }
+
+    public IGuiTexture getHoverIcon() {
+        return getIcon().setColor(ColorPattern.GREEN.color);
+    }
+
+    public String getTitle() {
+        return getTranslateKey();
     }
 
     @Override

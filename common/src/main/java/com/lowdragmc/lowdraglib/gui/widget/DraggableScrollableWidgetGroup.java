@@ -22,27 +22,27 @@ import java.util.List;
 public class DraggableScrollableWidgetGroup extends WidgetGroup {
     protected int scrollXOffset;
     protected int scrollYOffset;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.x_bar_height")
     @NumberRange(range = {0, Integer.MAX_VALUE})
     protected int xBarHeight;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.y_bar_width")
     @NumberRange(range = {0, Integer.MAX_VALUE})
     protected int yBarWidth;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.draggable")
     protected boolean draggable;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.scrollable")
     protected boolean scrollable = true;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.use_scissor")
     protected boolean useScissor;
     protected int maxHeight;
     protected int maxWidth;
-    @Configurable(name = "X Bar Background")
+    @Configurable(name = "ldlib.gui.editor.name.x_bar_background")
     protected IGuiTexture xBarB;
-    @Configurable(name = "X Bar Texture")
+    @Configurable(name = "ldlib.gui.editor.name.x_bar_foreground")
     protected IGuiTexture xBarF;
-    @Configurable(name = "Y Bar Background")
+    @Configurable(name = "ldlib.gui.editor.name.y_bar_background")
     protected IGuiTexture yBarB;
-    @Configurable(name = "Y Bar Texture")
+    @Configurable(name = "ldlib.gui.editor.name.y_bar_foreground")
     protected IGuiTexture yBarF;
     protected Widget draggedWidget;
     protected Widget selectedWidget;

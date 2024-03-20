@@ -36,20 +36,20 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
     @Environment(EnvType.CLIENT)
     protected EditBox textField;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.maxStringLength")
     @NumberRange(range = {0, Integer.MAX_VALUE})
     protected int maxStringLength = Integer.MAX_VALUE;
     protected Function<String, String> textValidator = (s)->s;
     protected Supplier<String> textSupplier;
     protected Consumer<String> textResponder;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.currentString")
     protected String currentString;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.isBordered")
     protected boolean isBordered;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.color")
     @NumberColor
     protected int textColor = -1;
 

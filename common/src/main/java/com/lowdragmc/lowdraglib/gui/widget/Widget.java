@@ -45,7 +45,7 @@ import java.util.function.Supplier;
  * It's information is also synced to client
  */
 @SuppressWarnings("UnusedReturnValue")
-@Configurable(name = "ldlib.gui.editor.group.basic_info")
+@Configurable(name = "ldlib.gui.editor.group.basic_info", collapse = false)
 public class Widget {
 
     protected ModularUI gui;
@@ -58,7 +58,7 @@ public class Widget {
     @Configurable(name = "ldlib.gui.editor.name.pos", tips = "ldlib.gui.editor.tips.pos")
     private Position selfPosition;
     private Position position;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.size")
     private Size size;
     private boolean isVisible;
     private boolean isActive;
@@ -194,6 +194,18 @@ public class Widget {
         }
     }
 
+    public final void setSelfPosition(int x, int y) {
+        setSelfPosition(new Position(x, y));
+    }
+
+    public final void setSelfPositionX(int x) {
+        setSelfPosition(x, getSelfPosition().y);
+    }
+
+    public final void setSelfPositionY(int y) {
+        setSelfPosition(getSelfPosition().x, y);
+    }
+
     public Position addSelfPosition(int addX, int addY) {
         setSelfPosition(new Position(selfPosition.x + addX, selfPosition.y + addY));
         return this.selfPosition;
@@ -201,6 +213,14 @@ public class Widget {
 
     public Position getSelfPosition() {
         return selfPosition;
+    }
+
+    public final int getSelfPositionX() {
+        return getSelfPosition().x;
+    }
+
+    public final int getSelfPositionY() {
+        return getSelfPosition().y;
     }
 
     @ConfigSetter(field = "size")
@@ -213,12 +233,40 @@ public class Widget {
         }
     }
 
+    public final void setSize(int width, int height) {
+        setSize(new Size(width, height));
+    }
+
+    public final void setSizeWidth(int width) {
+        setSize(width, getSize().height);
+    }
+
+    public final void setSizeHeight(int height) {
+        setSize(getSize().width, height);
+    }
+
     public final Position getPosition() {
         return position;
     }
 
+    public final int getPositionX() {
+        return getPosition().x;
+    }
+
+    public final int getPositionY() {
+        return getPosition().y;
+    }
+
     public final Size getSize() {
         return size;
+    }
+
+    public final int getSizeWidth() {
+        return getSize().width;
+    }
+
+    public final int getSizeHeight() {
+        return getSize().height;
     }
 
     public final Rect getRect() {

@@ -91,6 +91,12 @@ public class ConfigPanel extends WidgetGroup {
         }
     }
 
+    public void clearAllConfigurators() {
+        for (var tab : this.configurators.keySet()) {
+            clearAllConfigurators(tab);
+        }
+    }
+
     public void clearAllConfigurators(Tab tab) {
         this.focus.remove(tab);
         configuratorGroup.get(tab).clearAllWidgets();

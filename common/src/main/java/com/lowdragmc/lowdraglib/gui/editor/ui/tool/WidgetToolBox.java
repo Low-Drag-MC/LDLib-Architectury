@@ -13,6 +13,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SelectableWidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Position;
+import com.lowdragmc.lowdraglib.utils.Size;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +41,13 @@ public class WidgetToolBox extends DraggableScrollableWidgetGroup {
             TABS.add(this);
         }
 
+        @Deprecated
         public WidgetToolBox createToolBox() {
-            return new WidgetToolBox(groupName);
+            return new WidgetToolBox(groupName, new Size(ToolPanel.WIDTH, 100));
+        }
+
+        public WidgetToolBox createToolBox(Size size) {
+            return new WidgetToolBox(groupName, size);
         }
 
         public static Default registerTab(String groupName, ResourceTexture icon) {
@@ -49,8 +55,8 @@ public class WidgetToolBox extends DraggableScrollableWidgetGroup {
         }
     }
 
-    public WidgetToolBox(String groupName) {
-        super(0, 0, ToolPanel.WIDTH, 100);
+    public WidgetToolBox(String groupName, Size size) {
+        super(0, 0, size.width, size.height);
         int yOffset = 3;
         setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(2).transform(-0.5f, 0));
         for (AnnotationDetector.Wrapper<LDLRegister, IConfigurableWidget> wrapper : AnnotationDetector.REGISTER_WIDGETS) {
@@ -59,8 +65,8 @@ public class WidgetToolBox extends DraggableScrollableWidgetGroup {
                 var widget = wrapper.creator().get();
                 widget.initTemplate();
                 widget.widget().setSelfPosition(new Position(0, 0));
-                SelectableWidgetGroup selectableWidgetGroup = new SelectableWidgetGroup(0, yOffset, ToolPanel.WIDTH - 2, 50 + 14);
-                selectableWidgetGroup.addWidget(new ImageWidget((ToolPanel.WIDTH - 2 - 45) / 2, 17, 45, 30, new WidgetTexture(widget.widget())));
+                SelectableWidgetGroup selectableWidgetGroup = new SelectableWidgetGroup(0, yOffset, size.width - 2, 50 + 14);
+                selectableWidgetGroup.addWidget(new ImageWidget((size.width - 2 - 45) / 2, 17, 45, 30, new WidgetTexture(widget.widget())));
                 selectableWidgetGroup.addWidget(new LabelWidget(3, 3, widget.getTranslateKey()));
                 selectableWidgetGroup.setSelectedTexture(ColorPattern.T_GRAY.rectTexture());
                 selectableWidgetGroup.setDraggingProvider(() -> {

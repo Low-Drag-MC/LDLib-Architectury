@@ -36,11 +36,11 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
     @Configurable(name = "ldlib.gui.editor.name.text")
     private String lastTextValue = "";
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.color")
     @NumberColor
     private int color;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.isShadow")
     private boolean dropShadow;
 
     public LabelWidget() {

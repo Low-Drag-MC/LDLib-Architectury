@@ -146,6 +146,9 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
         currentProject = project;
         tabPages.clearAllWidgets();
         toolPanel.clearAllWidgets();
+        toolPanel.hide(false);
+        configPanel.clearAllConfigurators();
+        resourcePanel.clear();
 
         if (currentProject != null) {
             currentProject.onLoad(this);

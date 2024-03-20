@@ -108,6 +108,10 @@ public class ResourcePanel extends WidgetGroup {
         }
     }
 
+    public void clear() {
+        tabContainer.clearAllWidgets();
+    }
+
     public void loadResource(Resources resources, boolean merge) {
         tabContainer.clearAllWidgets();
 

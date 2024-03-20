@@ -2,6 +2,10 @@ package com.lowdragmc.lowdraglib.gui.widget;
 
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.utils.ColorUtils;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -23,7 +27,8 @@ import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
 @Accessors(chain = true)
-public class HsbColorWidget extends Widget {
+@LDLRegister(name = "color", group = "widget.basic")
+public class HsbColorWidget extends Widget implements IConfigurableWidget {
 
 	/**
 	 * all supported pick mode
@@ -46,11 +51,15 @@ public class HsbColorWidget extends Widget {
 	 * the length between the main and slide
 	 */
 	@Setter
+	@Configurable(name = "ldlib.gui.editor.name.gap")
+	@NumberRange(range = {0, Integer.MAX_VALUE})
 	private int gap;
 	/**
 	 * the slide width
 	 */
 	@Setter
+	@Configurable(name = "ldlib.gui.editor.name.barWidth")
+	@NumberRange(range = {0, Integer.MAX_VALUE})
 	private int barWidth;
 	/**
 	 * hue component, must range from 0f to 360f
@@ -82,7 +91,16 @@ public class HsbColorWidget extends Widget {
 	private IntConsumer onChanged;
 	@Setter
 	@Getter
-	private boolean showRGB = true, showAlpha = true;
+	@Configurable(name = "ldlib.gui.editor.name.showRGB")
+	private boolean showRGB = true;
+	@Setter
+	@Getter
+	@Configurable(name = "ldlib.gui.editor.name.showAlpha")
+	private boolean showAlpha = true;
+
+	public HsbColorWidget() {
+		this(0, 0, 100, 100);
+	}
 
 	public HsbColorWidget(int x, int y, int width, int height) {
 		super(x, y, width, height);

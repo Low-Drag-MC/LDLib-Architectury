@@ -19,19 +19,19 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @Configurable(name = "ldlib.gui.editor.register.widget.switch", collapse = false)
-@LDLRegister(name = "switch", group = "widget.container")
+@LDLRegister(name = "switch", group = "widget.basic")
 public class SwitchWidget extends Widget implements IConfigurableWidget {
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.baseTexture")
     protected IGuiTexture baseTexture;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.pressedTexture")
     protected IGuiTexture pressedTexture;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.hoverTexture")
     protected IGuiTexture hoverTexture;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.isPressed")
     protected boolean isPressed;
 
     protected BiConsumer<ClickData, Boolean> onPressCallback;
