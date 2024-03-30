@@ -5,7 +5,7 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.Configurator;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.FluidConfigurator;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -26,7 +26,7 @@ public class FluidAccessor extends TypesAccessor<Fluid> {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
             if (annotation.stringValue().length > 0) {
-                return BuiltInRegistries.FLUID.get(new ResourceLocation(annotation.stringValue()[0]));
+                return Registry.FLUID.get(new ResourceLocation(annotation.stringValue()[0]));
             }
         }
         return Fluids.EMPTY;

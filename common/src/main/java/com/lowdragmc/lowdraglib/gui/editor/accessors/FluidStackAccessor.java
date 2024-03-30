@@ -4,11 +4,10 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.TankWidget;
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluids;
@@ -28,7 +27,7 @@ public class FluidStackAccessor extends TypesAccessor<FluidStack> {
     public FluidStack defaultValue(Field field, Class<?> type) {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
-            return FluidStack.create(BuiltInRegistries.FLUID.get(new ResourceLocation(annotation.stringValue()[0])), (long) annotation.numberValue()[0]);
+            return FluidStack.create(Registry.FLUID.get(new ResourceLocation(annotation.stringValue()[0])), (long) annotation.numberValue()[0]);
 
         }
         return FluidStack.empty();

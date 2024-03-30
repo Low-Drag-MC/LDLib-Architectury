@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SearchComponentWidget;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -29,7 +29,7 @@ public class ItemConfigurator extends ValueConfigurator<Item> implements SearchC
         if (newValue == null) newValue = defaultValue;
         if (value == newValue) return;
         super.onValueUpdate(newValue);
-        searchComponent.setCurrentString(BuiltInRegistries.ITEM.getKey(value == null ? defaultValue : value).toString());
+        searchComponent.setCurrentString(Registry.ITEM.getKey(value == null ? defaultValue : value).toString());
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ItemConfigurator extends ValueConfigurator<Item> implements SearchC
 
     @Override
     public String resultDisplay(Item item) {
-        return BuiltInRegistries.ITEM.getKey(item).toString();
+        return Registry.ITEM.getKey(item).toString();
     }
 
     @Override
@@ -74,7 +74,7 @@ public class ItemConfigurator extends ValueConfigurator<Item> implements SearchC
     @Override
     public void search(String word, Consumer<Item> find) {
         var wordLower = word.toLowerCase();
-        for (var itemEntry : BuiltInRegistries.ITEM.entrySet()) {
+        for (var itemEntry : Registry.ITEM.entrySet()) {
             var item = itemEntry.getValue();
             var id = itemEntry.getKey().location();
             if (id.toString().contains(wordLower)) {

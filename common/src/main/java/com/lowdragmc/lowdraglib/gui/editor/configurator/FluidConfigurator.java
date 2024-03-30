@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SearchComponentWidget;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.material.Fluid;
 
 import javax.annotation.Nonnull;
@@ -27,7 +27,7 @@ public class FluidConfigurator extends ValueConfigurator<Fluid> implements Searc
         if (newValue == null) newValue = defaultValue;
         if (value == newValue) return;
         super.onValueUpdate(newValue);
-        searchComponent.setCurrentString(BuiltInRegistries.FLUID.getKey(value == null ? defaultValue : value).toString());
+        searchComponent.setCurrentString(Registry.FLUID.getKey(value == null ? defaultValue : value).toString());
     }
 
     @Override
@@ -60,7 +60,7 @@ public class FluidConfigurator extends ValueConfigurator<Fluid> implements Searc
 
     @Override
     public String resultDisplay(Fluid fluid) {
-        return BuiltInRegistries.FLUID.getKey(fluid).toString();
+        return Registry.FLUID.getKey(fluid).toString();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class FluidConfigurator extends ValueConfigurator<Fluid> implements Searc
     @Override
     public void search(String word, Consumer<Fluid> find) {
         var wordLower = word.toLowerCase();
-        for (var entry : BuiltInRegistries.FLUID.entrySet()) {
+        for (var entry : Registry.FLUID.entrySet()) {
             var fluid = entry.getValue();
             var id = entry.getKey().location();
             if (id.toString().contains(wordLower)) {

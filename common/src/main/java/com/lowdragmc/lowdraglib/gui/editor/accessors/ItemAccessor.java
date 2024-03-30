@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -25,7 +25,7 @@ public class ItemAccessor extends TypesAccessor<Item> {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
             if (annotation.stringValue().length > 0) {
-                return BuiltInRegistries.ITEM.get(new ResourceLocation(annotation.stringValue()[0])).asItem();
+                return Registry.ITEM.get(new ResourceLocation(annotation.stringValue()[0])).asItem();
             }
         }
         return Items.AIR;

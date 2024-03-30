@@ -6,7 +6,7 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +27,7 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
     public ItemStack defaultValue(Field field, Class<?> type) {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
-            return new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation(annotation.stringValue()[0])).asItem(), (int) annotation.numberValue()[0]);
+            return new ItemStack(Registry.ITEM.get(new ResourceLocation(annotation.stringValue()[0])).asItem(), (int) annotation.numberValue()[0]);
         }
         return ItemStack.EMPTY;
     }
@@ -60,7 +60,11 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
         }
         group.addConfigurators(new NumberConfigurator("ldlib.gui.editor.configurator.count",
                 () -> supplier.get().getCount(),
-                count -> updateStack.accept(supplier.get().copyWithCount(count.intValue())), 1, forceUpdate)
+                count -> {
+                    ItemStack copy = supplier.get().copy();
+                    copy.setCount(count.intValue());
+                    updateStack.accept(copy);
+                }, 1, forceUpdate)
                 .setRange(min, max));
         group.addConfigurators(new CompoundTagAccessor().create("ldlib.gui.editor.configurator.nbt",
                 () -> supplier.get().hasTag() ? supplier.get().getTag() : new CompoundTag(),
