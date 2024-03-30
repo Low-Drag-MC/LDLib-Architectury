@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix server crash
+* fix crash on AMD gpus

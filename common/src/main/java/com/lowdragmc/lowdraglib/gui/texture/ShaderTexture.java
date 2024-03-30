@@ -110,7 +110,7 @@ public class ShaderTexture extends TransformTexture {
     }
 
     public String getRawShader() {
-        if (LDLib.isRemote() && ShaderManager.allowedShader() && shader !=null) {
+        if (LDLib.isRemote() && ShaderManager.allowedShader() && shader != null) {
             return shader.source;
         }
         return "";
