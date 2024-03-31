@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.widget.custom;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
@@ -56,13 +57,15 @@ public class PlayerInventoryWidget extends WidgetGroup {
     public void initWidget() {
         super.initWidget();
         for (int i = 0; i < widgets.size(); i++) {
-            if (widgets.get(i) instanceof  SlotWidget slotWidget) {
+            if (widgets.get(i) instanceof SlotWidget slotWidget) {
                 slotWidget.setContainerSlot(gui.entityPlayer.getInventory(), i);
                 slotWidget.setLocationInfo(true, i < 9);
                 slotWidget.setBackground(slotBackground);
-                if (Editor.INSTANCE != null) {
-                    slotWidget.setCanPutItems(false);
-                    slotWidget.setCanTakeItems(false);
+                if (LDLib.isClient()) {
+                    if (Editor.INSTANCE != null) {
+                        slotWidget.setCanPutItems(false);
+                        slotWidget.setCanTakeItems(false);
+                    }
                 }
             }
         }
