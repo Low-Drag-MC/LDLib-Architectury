@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[${forge_version},)"
-#issueTrackerURL = ""
+issueTrackerURL = "https://github.com/Low-Drag-MC/LDLib-Architectury/issues"
 license = "${mod_license}"
 
 [[mods]]

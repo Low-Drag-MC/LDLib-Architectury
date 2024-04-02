@@ -1,19 +1,25 @@
 package com.lowdragmc.lowdraglib.client.shader.management;
 
+import com.google.common.base.Charsets;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.apache.commons.io.IOUtils;
+import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL20C;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 @OnlyIn(Dist.CLIENT)
@@ -46,7 +52,7 @@ public class Shader {
 
     public Shader compileShader() {
         if (!this.isCompiled && shaderId != 0) {
-            GL20.glShaderSource(this.shaderId, source);
+            Shader.setShaderSourceHackForAmd(this.shaderId, this.source);
             GL20.glCompileShader(this.shaderId);
             if (GL20.glGetShaderi(this.shaderId, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
                 int maxLength = GL20.glGetShaderi(this.shaderId, GL20.GL_INFO_LOG_LENGTH);
@@ -58,26 +64,61 @@ public class Shader {
         return this;
     }
 
+    // Evil hack for AMD
+    private static void setShaderSourceHackForAmd(int shaderId, String source) {
+        // Load shader source as bytes
+        byte[] bs = source.getBytes(Charsets.UTF_8);
+        ByteBuffer byteBuffer = MemoryUtil.memAlloc(bs.length + 1);
+        byteBuffer.put(bs);
+        byteBuffer.put((byte)0);
+        byteBuffer.flip();
+
+        try {
+            MemoryStack memoryStack = MemoryStack.stackPush();
+            try {
+                // Use unsafe shader load method for loading because safe version fails on AMD GPUs.
+                PointerBuffer pointerBuffer = memoryStack.mallocPointer(1);
+                pointerBuffer.put(byteBuffer);
+                GL20C.nglShaderSource(shaderId, 1, pointerBuffer.address0(), 0L);
+            } catch (Throwable err1) {
+                if (memoryStack != null) {
+                    try {
+                        memoryStack.close();
+                    } catch (Throwable err2) {
+                        err1.addSuppressed(err2);
+                    }
+                }
+                throw err1;
+            }
+
+            if (memoryStack != null) {
+                memoryStack.close();
+            }
+        } finally {
+            MemoryUtil.memFree(byteBuffer);
+        }
+    }
+
     public static Shader loadShader(ShaderType type, String rawShader) {
         return new Shader(type, rawShader).compileShader();
     }
 
     public static Shader loadShader(ShaderType type, ResourceLocation resourceLocation) throws IOException {
-        var resource = Minecraft.getInstance().getResourceManager().getResource(resourceLocation);
-        if (resource.isPresent()) {
-            var iresource = resource.get();
-            InputStream stream = iresource.open();
-            StringBuilder sb = new StringBuilder();
-            BufferedReader bin = new BufferedReader(new InputStreamReader(stream));
+        var maybeResource = Minecraft.getInstance().getResourceManager().getResource(resourceLocation);
+        if (maybeResource.isPresent()) {
+            var resource = maybeResource.get();
+            InputStream stream = resource.open();
+            StringBuilder stringBuilder = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             String line;
-            while((line = bin.readLine()) != null) {
-                sb.append(line).append('\n');
+            while((line = reader.readLine()) != null) {
+                stringBuilder.append(line).append('\n');
             }
             stream.close();
             IOUtils.closeQuietly(stream);
-            return loadShader(type, sb.toString());
+            return loadShader(type, stringBuilder.toString());
         }
-        throw new IOException("find no resource " + resourceLocation);
+        throw new IOException("found no resource with ID " + resourceLocation);
     }
 
     public enum ShaderType {

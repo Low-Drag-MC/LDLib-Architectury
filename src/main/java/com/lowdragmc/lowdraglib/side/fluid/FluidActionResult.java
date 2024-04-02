@@ -19,13 +19,11 @@ public class FluidActionResult {
     @Getter
     public final ItemStack result;
 
-    public FluidActionResult(@Nonnull ItemStack result)
-    {
+    public FluidActionResult(@Nonnull ItemStack result) {
         this(true, result);
     }
 
-    private FluidActionResult(boolean success, @Nonnull ItemStack result)
-    {
+    private FluidActionResult(boolean success, @Nonnull ItemStack result) {
         this.success = success;
         this.result = result;
     }

@@ -49,14 +49,7 @@ import java.util.function.Predicate;
  */
 public class FluidTransferHelper {
     public static IFluidHandler getFluidTransfer(Level level, BlockPos pos, @Nullable Direction direction) {
-        BlockState state = level.getBlockState(pos);
-        if (state.hasBlockEntity()) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity != null) {
-                return Capabilities.FluidHandler.BLOCK.getCapability(level, pos, blockEntity.getBlockState(), blockEntity, direction);
-            }
-        }
-        return null;
+        return level.getCapability(Capabilities.FluidHandler.BLOCK, pos, direction);
     }
 
     public static IFluidHandler getFluidTransfer(IItemHandler itemTransfer, int slot) {

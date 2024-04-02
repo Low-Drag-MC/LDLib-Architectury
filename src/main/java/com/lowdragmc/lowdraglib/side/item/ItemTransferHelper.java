@@ -23,13 +23,7 @@ import java.util.function.Predicate;
  */
 public class ItemTransferHelper {
     public static IItemHandler getItemTransfer(Level level, BlockPos pos, @Nullable Direction direction) {
-        if (level.getBlockState(pos).hasBlockEntity()) {
-            var blockEntity = level.getBlockEntity(pos);
-            if (blockEntity != null) {
-                return Capabilities.ItemHandler.BLOCK.getCapability(level, pos, blockEntity.getBlockState(), blockEntity, direction);
-            }
-        }
-        return null;
+        return level.getCapability(Capabilities.ItemHandler.BLOCK, pos, direction);
     }
 
     public static void exportToTarget(IItemHandler source, int maxAmount, Predicate<ItemStack> predicate, Level level, BlockPos pos, @Nullable Direction direction) {
