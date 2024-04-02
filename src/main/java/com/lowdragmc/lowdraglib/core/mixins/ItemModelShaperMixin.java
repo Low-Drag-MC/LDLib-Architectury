@@ -29,7 +29,7 @@ public class ItemModelShaperMixin {
     private final static Map<IRenderer, BakedModel> SHAPES_CACHE = new HashMap<>();
 
     @Inject(method = "getItemModel(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/client/resources/model/BakedModel;", at = @At("HEAD"), cancellable = true)
-    public void injectGetModel(ItemStack stack, CallbackInfoReturnable<BakedModel> cir) {
+    public void ldlib$injectGetModel(ItemStack stack, CallbackInfoReturnable<BakedModel> cir) {
         if (stack.getItem() instanceof IItemRendererProvider provider) {
             IRenderer renderer = provider.getRenderer(stack);
             if(renderer != null) {

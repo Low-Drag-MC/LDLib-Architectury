@@ -12,6 +12,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -33,20 +35,20 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
     @OnlyIn(Dist.CLIENT)
     protected EditBox textField;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.maxStringLength")
     @NumberRange(range = {0, Integer.MAX_VALUE})
     protected int maxStringLength = Integer.MAX_VALUE;
     protected Function<String, String> textValidator = (s)->s;
     protected Supplier<String> textSupplier;
     protected Consumer<String> textResponder;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.currentString")
     protected String currentString;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.isBordered")
     protected boolean isBordered;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.color")
     @NumberColor
     protected int textColor = -1;
 
@@ -275,6 +277,18 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
 
     public TextFieldWidget setValidator(Function<String, String> validator) {
         this.textValidator = validator;
+        return this;
+    }
+
+    public TextFieldWidget setCompoundTagOnly() {
+        setValidator(s -> {
+            try {
+                TagParser.parseTag(s);
+                return s;
+            } catch (Exception ignored) { }
+            return this.currentString;
+        });
+        hover = Component.translatable("ldlib.gui.text_field.compound_tag");
         return this;
     }
 

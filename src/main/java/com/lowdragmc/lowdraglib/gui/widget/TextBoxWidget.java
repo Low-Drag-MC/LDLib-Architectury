@@ -25,23 +25,23 @@ import java.util.List;
 public class TextBoxWidget extends Widget implements IConfigurableWidget {
 
     // config
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.content")
     public final List<String> content = new ArrayList<>();
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.space")
     public int space = 1;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.fontSize")
     public int fontSize = 9;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.color")
     @NumberColor
     public int fontColor = 0xff000000;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.isShadow")
     public boolean isShadow = false;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.isCenter")
     public boolean isCenter = false;
 
     private transient List<String> textLines;

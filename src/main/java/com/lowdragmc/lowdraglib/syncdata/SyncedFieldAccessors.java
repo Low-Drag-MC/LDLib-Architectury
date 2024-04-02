@@ -30,6 +30,7 @@ public class SyncedFieldAccessors {
     public static final IAccessor GUI_TEXTURE_ACCESSOR = new IGuiTextureAccessor();
     public static final IAccessor RESOURCE_LOCATION_ACCESSOR = new ResourceLocationAccessor();
     public static final IAccessor RANGE_ACCESSOR = new RangeAccessor();
+    public static final IAccessor RENDERER_ACCESSOR = new IRendererAccessor();
 
 
     private static final BiFunction<IAccessor, Class<?>, IAccessor> ARRAY_ACCESSOR_FACTORY = Util.memoize(ArrayAccessor::new);

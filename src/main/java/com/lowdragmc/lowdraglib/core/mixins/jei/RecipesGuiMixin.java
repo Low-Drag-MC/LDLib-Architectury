@@ -24,8 +24,8 @@ public abstract class RecipesGuiMixin extends Screen {
         super(title);
     }
 
-    @Inject(method = "mouseClicked", at = @At(value = "HEAD"), cancellable = true)
-    private void injectClick(double mouseX, double mouseY, int mouseButton, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "m_6375_", at = @At(value = "HEAD"), cancellable = true)
+    private void ldlib$injectClick(double mouseX, double mouseY, int mouseButton, CallbackInfoReturnable<Boolean> cir) {
         var recipesGui = RecipesGui.class.cast(this);
         for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {
             Object recipe = recipeLayout.getRecipe();
@@ -62,12 +62,12 @@ public abstract class RecipesGuiMixin extends Screen {
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
-    @Inject(method = "mouseScrolled", at = @At(value = "HEAD"), cancellable = true)
-    private void injectMouseScroll(double scrollX, double scrollY, double scrollDelta, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "m_6050_", at = @At(value = "HEAD"), cancellable = true)
+    private void ldlib$injectMouseScroll(double scrollX, double scrollY, double horizontal, double vertical, CallbackInfoReturnable<Boolean> cir) {
         var recipesGui = RecipesGui.class.cast(this);
         for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {
             if (recipeLayout instanceof RecipeLayoutWrapper<?> recipeLayoutWrapper){
-                if (recipeLayoutWrapper.getWrapper().mouseScrolled(scrollX, scrollY, scrollDelta, scrollDelta)) {
+                if (recipeLayoutWrapper.getWrapper().mouseScrolled(scrollX, scrollY, horizontal, vertical)) {
                     recipeLayoutWrapper.onPositionUpdate();
                     cir.setReturnValue(true);
                 }
@@ -75,8 +75,8 @@ public abstract class RecipesGuiMixin extends Screen {
         }
     }
 
-    @Inject(method = "keyPressed", at = @At(value = "HEAD"), cancellable = true)
-    private void injectKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "m_7933_", at = @At(value = "HEAD"), cancellable = true)
+    private void ldlib$injectKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         var recipesGui = RecipesGui.class.cast(this);
         for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {
             Object recipe = recipeLayout.getRecipe();

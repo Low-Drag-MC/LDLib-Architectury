@@ -6,12 +6,15 @@ import com.lowdragmc.lowdraglib.gui.compass.CompassView;
 import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
+import com.lowdragmc.lowdraglib.gui.widget.custom.PlayerInventoryWidget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
 /**
@@ -26,7 +29,7 @@ public class TestBlockEntity extends BlockEntity implements IUIHolder {
     }
 
     public void use(Player player) {
-        if (!isRemote()) {
+        if (!getLevel().isClientSide) {
             BlockEntityUIFactory.INSTANCE.openUI(this, (ServerPlayer) player);
         }
     }
@@ -34,7 +37,8 @@ public class TestBlockEntity extends BlockEntity implements IUIHolder {
     @Override
     public ModularUI createUI(Player entityPlayer) {
         return new ModularUI(this, entityPlayer)
-                .widget(new CompassView(LDLib.MOD_ID));
+                .widget(new CompassView(LDLib.MOD_ID))
+                .widget(new SlotWidget(new ItemStackHandler(1), 0, 100, 0));
 //        return new ModularUI(this, entityPlayer).widget(new UIEditor(LDLib.location));
     }
 

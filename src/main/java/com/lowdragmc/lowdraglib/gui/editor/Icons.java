@@ -75,11 +75,11 @@ public class Icons {
         registerFileIcon(JSON, "json", "nbt");
     }
 
-    private static ResourceTexture icon(String name) {
-        return CACHE.apply("assets/ldlib", name);
+    public static ResourceTexture icon(String name) {
+        return icon("ldlib", name);
     }
 
-    private static ResourceTexture icon(String modId, String name) {
+    public static ResourceTexture icon(String modId, String name) {
         return CACHE.apply(modId, name);
     }
 

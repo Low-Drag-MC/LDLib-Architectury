@@ -10,7 +10,7 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.WrapperConfigurator;
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ProgressTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.TextFormattingUtil;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
@@ -23,6 +23,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import mezz.jei.api.neoforge.NeoForgeTypes;
+import mezz.jei.common.input.ClickableIngredient;
+import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.library.ingredients.TypedIngredient;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -53,29 +57,30 @@ import java.util.function.Consumer;
 @LDLRegister(name = "fluid_slot", group = "widget.container")
 @Accessors(chain = true)
 public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfigurableWidget {
+    public final static ResourceBorderTexture FLUID_SLOT_TEXTURE = new ResourceBorderTexture("ldlib:textures/gui/fluid_slot.png", 18, 18, 1, 1);
 
     @Nullable
     @Getter
     protected IFluidHandler fluidTank;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.showAmount")
     @Setter
     protected boolean showAmount;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.allowClickFilled")
     @Setter
     protected boolean allowClickFilled;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.allowClickDrained")
     @Setter
     protected boolean allowClickDrained;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.drawHoverOverlay")
     @Setter
     public boolean drawHoverOverlay = true;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.drawHoverTips")
     @Setter
     protected boolean drawHoverTips;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.fillDirection")
     @Setter
     protected ProgressTexture.FillDirection fillDirection = ProgressTexture.FillDirection.ALWAYS_FULL;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
     @Setter
     protected IGuiTexture overlay;
     @Setter
@@ -97,7 +102,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     public void initTemplate() {
-        setBackground(new ResourceTexture("ldlib:textures/gui/fluid_slot.png"));
+        setBackground(FLUID_SLOT_TEXTURE);
         setFillDirection(ProgressTexture.FillDirection.DOWN_TO_UP);
     }
 
@@ -146,8 +151,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (self().isMouseOverElement(mouseX, mouseY)) {
             if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return null;
             if (LDLib.isJeiLoaded()) {
-                return null;
-                //return getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
+                return PlatformFluidTypeGetter.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
             }
             if (LDLib.isReiLoaded()) {
                 return EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
@@ -163,7 +167,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public List<Object> getXEIIngredients() {
         if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return Collections.emptyList();
         if (LDLib.isJeiLoaded()) {
-            return List.of(/*getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize())*/);
+            return List.of(PlatformFluidTypeGetter.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize()));
         }
         if (LDLib.isReiLoaded()) {
             return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag())));
@@ -174,12 +178,12 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return List.of(FluidHelper.toRealFluidStack(lastFluidInTank));
     }
 
-    /*
-    public static Object getPlatformFluidTypeForJEI(FluidStack fluidStack, Position pos, Size size) {
-        return new ClickableIngredient<>(TypedIngredient.createUnvalidated(ForgeTypes.FLUID_STACK, new net.neoforged.neoforge.fluids.FluidStack(fluidStack.getFluid(), (int) fluidStack.getAmount(), fluidStack.getTag())),
-                new ImmutableRect2i(pos.x, pos.y, size.width, size.height));
+    protected static class PlatformFluidTypeGetter {
+        public static Object getPlatformFluidTypeForJEI(FluidStack fluidStack, Position pos, Size size) {
+            return new ClickableIngredient<>(TypedIngredient.createUnvalidated(NeoForgeTypes.FLUID_STACK, new FluidStack(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag())),
+                    new ImmutableRect2i(pos.x, pos.y, size.width, size.height));
+        }
     }
-    */
 
     private List<Component> getToolTips(List<Component> list) {
         if (this.onAddedTooltips != null) {

@@ -22,7 +22,6 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.lwjgl.glfw.GLFW;
 
@@ -95,6 +94,16 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
 
     @Override
     public boolean canMergeSlot(ItemStack stack) {
+        return false;
+    }
+
+    @Override
+    public boolean canTakeStack(Player player) {
+        return false;
+    }
+
+    @Override
+    public boolean canPutStack(ItemStack stack) {
         return false;
     }
 

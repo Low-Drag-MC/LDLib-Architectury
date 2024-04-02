@@ -22,27 +22,27 @@ import java.util.List;
 public class DraggableScrollableWidgetGroup extends WidgetGroup {
     protected int scrollXOffset;
     protected int scrollYOffset;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.x_bar_height")
     @NumberRange(range = {0, Integer.MAX_VALUE})
     protected int xBarHeight;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.y_bar_width")
     @NumberRange(range = {0, Integer.MAX_VALUE})
     protected int yBarWidth;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.draggable")
     protected boolean draggable;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.scrollable")
     protected boolean scrollable = true;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.use_scissor")
     protected boolean useScissor;
     protected int maxHeight;
     protected int maxWidth;
-    @Configurable(name = "X Bar Background")
+    @Configurable(name = "ldlib.gui.editor.name.x_bar_background")
     protected IGuiTexture xBarB;
-    @Configurable(name = "X Bar Texture")
+    @Configurable(name = "ldlib.gui.editor.name.x_bar_foreground")
     protected IGuiTexture xBarF;
-    @Configurable(name = "Y Bar Background")
+    @Configurable(name = "ldlib.gui.editor.name.y_bar_background")
     protected IGuiTexture yBarB;
-    @Configurable(name = "Y Bar Texture")
+    @Configurable(name = "ldlib.gui.editor.name.y_bar_foreground")
     protected IGuiTexture yBarF;
     protected Widget draggedWidget;
     protected Widget selectedWidget;
@@ -443,21 +443,25 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         } else if (draggedOnYScrollBar && (getMaxHeight() - getSize().height > 0 || scrollYOffset > getMaxHeight() - getSize().height)) {
             setScrollYOffset((int) Mth.clamp(scrollYOffset + deltaY * getMaxHeight() / getSize().height, 0, getMaxHeight() - getSize().height));
             return true;
-        } else if (draggedWidget != null) {
-            if (((IDraggable)draggedWidget).dragging(mouseX, mouseY, deltaX, deltaY)) {
-                if (draggedWidget.getPosition().x < getPosition().x) {
-                    deltaX = getPosition().x - draggedWidget.getPosition().x;
-                } else if (draggedWidget.getPosition().x + draggedWidget.getSize().width + scrollXOffset > getPosition().x + getSize().width) {
-                    deltaX = (getPosition().x + getSize().width) - (draggedWidget.getPosition().x + draggedWidget.getSize().width + scrollXOffset);
+        } else if (draggedWidget instanceof IDraggable draggableWidget) {
+            if (draggableWidget.dragging(mouseX, mouseY, deltaX, deltaY)) {
+                if (!draggableWidget.canDragOutRange()) {
+                    if (draggedWidget.getPosition().x < getPosition().x) {
+                        deltaX = getPosition().x - draggedWidget.getPosition().x;
+                    } else if (draggedWidget.getPosition().x + draggedWidget.getSize().width + scrollXOffset > getPosition().x + getSize().width) {
+                        deltaX = (getPosition().x + getSize().width) - (draggedWidget.getPosition().x + draggedWidget.getSize().width + scrollXOffset);
+                    }
+                    if (draggedWidget.getPosition().y < getPosition().y) {
+                        deltaY = getPosition().y - draggedWidget.getPosition().y;
+                    } else if (draggedWidget.getPosition().y + draggedWidget.getSize().height + scrollYOffset > getPosition().y + getSize().height) {
+                        deltaY = (getPosition().y + getSize().height) - (draggedWidget.getPosition().y + draggedWidget.getSize().height + scrollYOffset);
+                    }
+                    isComputingMax = true;
+                    draggedWidget.addSelfPosition((int) deltaX, (int) deltaY);
+                    isComputingMax = false;
+                } else {
+                    draggedWidget.addSelfPosition((int) deltaX, (int) deltaY);
                 }
-                if (draggedWidget.getPosition().y < getPosition().y) {
-                    deltaY = getPosition().y - draggedWidget.getPosition().y;
-                } else if (draggedWidget.getPosition().y + draggedWidget.getSize().height + scrollYOffset > getPosition().y + getSize().height) {
-                    deltaY = (getPosition().y + getSize().height) - (draggedWidget.getPosition().y + draggedWidget.getSize().height + scrollYOffset);
-                }
-                isComputingMax = true;
-                draggedWidget.addSelfPosition((int) deltaX, (int) deltaY);
-                isComputingMax = false;
             }
             computeMax();
             return true;
@@ -540,6 +544,13 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         default void startDrag(double mouseX, double mouseY) {}
         default boolean dragging(double mouseX, double mouseY, double deltaX, double deltaY) {return true;}
         default void endDrag(double mouseX, double mouseY) {}
+
+        /**
+         * @return if false, can not be dragged out of container size
+         */
+        default boolean canDragOutRange() {
+            return false;
+        }
     }
 
     public interface ISelected {

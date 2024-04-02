@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.Blocks;
 public class ServerCommands {
 	public static List<LiteralArgumentBuilder<CommandSourceStack>> createServerCommands() {
 		return List.of(
-				Commands.literal("assets/ldlib")
+				Commands.literal("ldlib")
 						.then(Commands.literal("ui_editor")
 								.executes(context -> {
 									UIEditorFactory.INSTANCE.openUI(UIEditorFactory.INSTANCE,

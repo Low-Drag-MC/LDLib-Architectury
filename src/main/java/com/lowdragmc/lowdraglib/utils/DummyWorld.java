@@ -216,7 +216,7 @@ public class DummyWorld extends Level {
 
     @Override
     public TickRateManager tickRateManager() {
-        return null;
+        return new TickRateManager();
     }
 
     @Override

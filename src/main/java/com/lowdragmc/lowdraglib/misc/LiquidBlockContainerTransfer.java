@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.misc;
 
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
+import com.lowdragmc.lowdraglib.side.fluid.IFluidHandlerModifiable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -75,7 +76,7 @@ public class LiquidBlockContainerTransfer implements IFluidHandler {
         return FluidStack.EMPTY;
     }
 
-    public static class BlockWrapper implements IFluidHandler {
+    public static class BlockWrapper implements IFluidHandlerModifiable {
 
         protected final BlockState state;
         protected final Level world;
@@ -96,6 +97,11 @@ public class LiquidBlockContainerTransfer implements IFluidHandler {
         @Override
         public FluidStack getFluidInTank(int tank) {
             return FluidStack.EMPTY;
+        }
+
+        @Override
+        public void setFluidInTank(int tank, FluidStack stack) {
+            fill(stack, FluidAction.EXECUTE);
         }
 
         @Override

@@ -1,15 +1,13 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui;
 
-import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
 import com.lowdragmc.lowdraglib.gui.util.TreeNode;
 import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
 import com.lowdragmc.lowdraglib.gui.widget.MenuWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
@@ -36,7 +34,7 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
     @Getter
     protected MenuPanel menuPanel;
     @Getter
-    protected TabContainer tabPages;
+    protected StringTabContainer tabPages;
     @Getter
     protected ConfigPanel configPanel;
     @Getter
@@ -49,6 +47,15 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
     protected String copyType;
     @Getter
     protected Object copied;
+
+    public Editor(String modID) {
+        this(new File(LDLib.getLDLibDir(), "assets/" + modID));
+        if (LDLib.isClient()) {
+            if (!this.workSpace.exists() && !this.workSpace.mkdirs()) {
+                LDLib.LOGGER.error("Failed to create work space for mod: " + modID);
+            }
+        }
+    }
 
     public Editor(File workSpace) {
         super(0, 0, 10, 10);
@@ -80,12 +87,19 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
     }
 
     public void initEditorViews() {
-        addWidget(tabPages = new TabContainer(0, 0, getSize().width, getSize().height));
-        addWidget(toolPanel = new ToolPanel(this));
-        addWidget(configPanel = new ConfigPanel(this));
-        addWidget(resourcePanel = new ResourcePanel(this));
-        addWidget(menuPanel = new MenuPanel(this));
-        addWidget(floatView = new WidgetGroup(0, 0, getSize().width, getSize().height));
+        this.toolPanel = new ToolPanel(this);
+        this.configPanel = new ConfigPanel(this);
+        this.tabPages = new StringTabContainer(this);
+        this.resourcePanel = new ResourcePanel(this);
+        this.menuPanel = new MenuPanel(this);
+        this.floatView = new WidgetGroup(0, 0, this.getSize().width, this.getSize().height);
+
+        this.addWidget(this.tabPages);
+        this.addWidget(this.toolPanel);
+        this.addWidget(this.configPanel);
+        this.addWidget(this.resourcePanel);
+        this.addWidget(this.menuPanel);
+        this.addWidget(this.floatView);
     }
 
     public DialogWidget openDialog(DialogWidget dialog) {
@@ -132,6 +146,9 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
         currentProject = project;
         tabPages.clearAllWidgets();
         toolPanel.clearAllWidgets();
+        toolPanel.hide(false);
+        configPanel.clearAllConfigurators();
+        resourcePanel.clear();
 
         if (currentProject != null) {
             currentProject.onLoad(this);

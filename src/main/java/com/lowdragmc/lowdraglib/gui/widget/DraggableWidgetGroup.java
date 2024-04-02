@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
 
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
@@ -13,14 +15,19 @@ import net.minecraft.client.gui.GuiGraphics;
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
+@LDLRegister(name = "draggable_widget_group", group = "widget.group")
 public class DraggableWidgetGroup extends WidgetGroup implements DraggableScrollableWidgetGroup.IDraggable {
     protected boolean isSelected;
+    @Configurable(name = "ldlib.gui.editor.name.selected_texture")
     protected IGuiTexture selectedTexture;
     protected Consumer<DraggableWidgetGroup> onSelected;
     protected Consumer<DraggableWidgetGroup> onUnSelected;
     protected Consumer<DraggableWidgetGroup> onStartDrag;
     protected Consumer<DraggableWidgetGroup> onDragging;
     protected Consumer<DraggableWidgetGroup> onEndDrag;
+
+    public DraggableWidgetGroup() {
+    }
 
     public DraggableWidgetGroup(int x, int y, int width, int height) {
         super(x, y, width, height);

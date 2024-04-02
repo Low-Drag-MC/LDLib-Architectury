@@ -32,7 +32,6 @@ public class AnnotationDetector {
 
     public record Wrapper<A extends Annotation, T>(A annotation, Class<? extends T> clazz, Supplier<T> creator) { }
 
-
     public static final List<IConfiguratorAccessor<?>> CONFIGURATOR_ACCESSORS = scanClasses(ConfigAccessor.class, IConfiguratorAccessor.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::createNoArgsInstance, (a, b) -> 0, l -> {});
     public static final List<Wrapper<LDLRegister, IGuiTexture>> REGISTER_TEXTURES = scanClasses(LDLRegister.class, IGuiTexture.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
     public static final List<Wrapper<LDLRegister, Resource>> REGISTER_RESOURCES = scanClasses(LDLRegister.class, Resource.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
@@ -51,7 +50,6 @@ public class AnnotationDetector {
                     AnnotationDetector::toClientUINoArgsBuilder,
                     AnnotationDetector::clientUIWrapperSorter, l -> REGISTER_RENDERERS.putAll(l.stream().collect(Collectors.toMap(w -> w.annotation().name(), w -> w))));
         }
-
     }
 
     public static <A extends Annotation, T, C> List<C> scanClasses(Class<A> annotationClass, Class<T> baseClazz, BiPredicate<A, Class<? extends T>> predicate, Function<Class<? extends T>, C> mapping, Comparator<C> sorter, Consumer<List<C>> onFinished) {

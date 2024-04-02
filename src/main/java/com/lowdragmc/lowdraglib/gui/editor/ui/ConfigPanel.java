@@ -9,7 +9,9 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.Position;
+import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Getter;
+import net.minecraft.network.chat.Component;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -22,69 +24,77 @@ import java.util.function.Consumer;
 public class ConfigPanel extends WidgetGroup {
     public static final int WIDTH = 252;
     public static class Tab {
-        public static List<Tab> TABS = new ArrayList<>();
-        public static final Tab WIDGET = registerTab(Icons.WIDGET_SETTING);
-        public static final Tab RESOURCE = registerTab(Icons.RESOURCE_SETTING);
+        public static final Tab WIDGET = createTab(Icons.WIDGET_SETTING, Component.translatable("ldlib.gui.editor.config_panel.tabs.widget"));
+        public static final Tab RESOURCE = createTab(Icons.RESOURCE_SETTING, Component.translatable("ldlib.gui.editor.config_panel.tabs.resource"));
 
         public final ResourceTexture icon;
+        public final Component tooltip;
         public final Consumer<ConfiguratorGroup> configurable;
 
-        private Tab(ResourceTexture icon, Consumer<ConfiguratorGroup> configurable) {
+        private Tab(ResourceTexture icon, Component tooltip, Consumer<ConfiguratorGroup> configurable) {
             this.icon = icon;
+            this.tooltip = tooltip;
             this.configurable= configurable;
         }
 
-        public static Tab registerTab(ResourceTexture icon) {
-            return registerTab(icon, father -> {});
+        public static Tab createTab(ResourceTexture icon, Component tooltip) {
+            return createTab(icon, tooltip, father -> {});
         }
 
-        public static Tab registerTab(ResourceTexture icon, Consumer<ConfiguratorGroup> configurable) {
-            var tab = new Tab(icon, configurable);
-            TABS.add(tab);
-            return tab;
+        public static Tab createTab(ResourceTexture icon, Component tooltip, Consumer<ConfiguratorGroup> configurable) {
+            return new Tab(icon, tooltip, configurable);
         }
     }
 
     @Getter
     protected final Editor editor;
     @Getter
-    protected final Map<Tab, IConfigurable> focus = new HashMap<>(Tab.TABS.size());
-    protected final Map<Tab, DraggableScrollableWidgetGroup> configuratorGroup = new HashMap<>(Tab.TABS.size());
-    protected final Map<Tab, List<Configurator>> configurators = new HashMap<>(Tab.TABS.size());
+    protected final Map<Tab, IConfigurable> focus = new HashMap<>();
+    protected final Map<Tab, DraggableScrollableWidgetGroup> configuratorGroup = new HashMap<>();
+    protected final Map<Tab, List<Configurator>> configurators = new HashMap<>();
 
+    protected ImageWidget tabBackground;
     protected TabContainer tabContainer;
     @Getter
     protected HsbColorWidget palette;
 
-
-    public ConfigPanel(Editor editor) {
+    public ConfigPanel(Editor editor, List<Tab> tabs) {
         super(editor.getSize().getWidth() - WIDTH, 0, WIDTH, editor.getSize().height);
         setClientSideWidget();
         this.editor = editor;
+        addWidget(new ImageWidget(0, 10, WIDTH, 10, new TextTexture("ldlib.gui.editor.configurator").setWidth(202)));
+        addWidget(tabBackground = new ImageWidget(-20, 30, 20, 2 * 20, ColorPattern.T_BLACK.rectTexture().setLeftRadius(8)));
+        addWidget(tabContainer = new TabContainer(0, 0, WIDTH, editor.getSize().height));
+        reloadTabs(tabs);
     }
 
-    @Override
-    public void initWidget() {
-        this.setBackground(ColorPattern.T_BLACK.rectTexture());
-        addWidget(new ImageWidget(0, 10, WIDTH, 10, new TextTexture("ldlib.gui.editor.configurator").setWidth(202)));
-        addWidget(new ImageWidget(-20, 30, 20, Tab.TABS.size() * 20, ColorPattern.T_BLACK.rectTexture().setLeftRadius(8)));
+    public ConfigPanel(Editor editor) {
+        this(editor, List.of(Tab.WIDGET, Tab.RESOURCE));
+    }
 
-        addWidget(tabContainer = new TabContainer(0, 0, WIDTH, editor.getSize().height));
+    public void reloadTabs(List<Tab> tabs) {
+        tabBackground.setSize(new Size(20, tabs.size() * 20));
+        tabContainer.clearAllWidgets();
+        configurators.clear();
+        configuratorGroup.clear();
         int y = 34;
-
-        for (Tab tab : Tab.TABS) {
-            tabContainer.addTab(new TabButton(-16, y, 12, 12).setTexture(
+        for (Tab tab : tabs) {
+            tabContainer.addTab((TabButton) new TabButton(-16, y, 12, 12).setTexture(
                             tab.icon,
                             tab.icon.copy().setColor(ColorPattern.T_GREEN.color)
-                    ),
+                    ).setHoverTooltips(tab.tooltip),
                     configuratorGroup.computeIfAbsent(tab, key -> new DraggableScrollableWidgetGroup(0, 25, WIDTH, editor.getSize().height - 25)
                             .setYScrollBarWidth(2).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(1)))
             );
             configurators.put(tab, new ArrayList<>());
             y += 20;
         }
+    }
 
-        super.initWidget();
+    public void clearAllConfigurators() {
+        for (var tab : this.configurators.keySet()) {
+            clearAllConfigurators(tab);
+        }
     }
 
     public void clearAllConfigurators(Tab tab) {

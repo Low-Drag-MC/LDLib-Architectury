@@ -46,6 +46,10 @@ public class MenuPanel extends WidgetGroup {
         super.initWidget();
     }
 
+    public <T extends MenuTab> T getTab(String name) {
+        return (T) tabs.get(name);
+    }
+
     protected void initTabs() {
         int x = 20;
         var tag = new CompoundTag();

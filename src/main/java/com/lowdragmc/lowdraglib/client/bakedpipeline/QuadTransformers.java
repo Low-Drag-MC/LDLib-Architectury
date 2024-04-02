@@ -12,8 +12,12 @@ import java.util.Arrays;
  * @implNote QuadTransformers
  */
 public class QuadTransformers {
+
+    // do nothing
     private static final IQuadTransformer EMPTY = (quad) -> {
     };
+
+    // modify lightmap for emissive
     private static final IQuadTransformer[] EMISSIVE_TRANSFORMERS = Util.make(new IQuadTransformer[16], (array) ->
             Arrays.setAll(array, (i) -> applyingLightmap(LightTexture.pack(i, i)))
     );

@@ -10,11 +10,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.levelgen.ThreadSafeLegacyRandomSource;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
+import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +37,7 @@ public class LDLib {
             .registerTypeAdapter(ItemStack.class, ItemStackTypeAdapter.INSTANCE)
             .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
             .create();
-    @Deprecated
-    public static File location;
+    private static File location;
 
     public LDLib(IEventBus eventBus) {
         LDLib.init();
@@ -58,7 +57,7 @@ public class LDLib {
         if (location == null) {
             location = new File(Platform.getGamePath().toFile(), "assets/ldlib");
             if (location.mkdir()) {
-                LOGGER.info("create ldlib config folder");
+                LOGGER.info("Created ldlib config folder");
             }
         }
         return location;

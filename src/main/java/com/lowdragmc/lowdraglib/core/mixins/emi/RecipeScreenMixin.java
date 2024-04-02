@@ -57,14 +57,14 @@ public abstract class RecipeScreenMixin {
     }
 
     @Inject(method = "mouseScrolled", at = @At(value = "HEAD"), cancellable = true)
-    private void initMouseScrolled(double mouseX, double mouseY, double horizontal, double amount, CallbackInfoReturnable<Boolean> cir) {
+    private void initMouseScrolled(double mouseX, double mouseY, double horizontal, double vertical, CallbackInfoReturnable<Boolean> cir) {
         for (var widgetGroup : currentPage) {
             if (widgetGroup instanceof WidgetGroupAccessor accessor) {
                 for (Widget widget : accessor.getWidgets()) {
                     if (widget instanceof ModularWrapperWidget wrapperWidget) {
                         int ox = (int) (mouseX - accessor.getPositionX());
                         int oy = (int) (mouseY - accessor.getPositionY());
-                        if (wrapperWidget.mouseScrolled(mouseX, mouseY, horizontal, amount)) {
+                        if (wrapperWidget.mouseScrolled(mouseX, mouseY, horizontal, vertical)) {
                             cir.setReturnValue(true);
                         }
                     }

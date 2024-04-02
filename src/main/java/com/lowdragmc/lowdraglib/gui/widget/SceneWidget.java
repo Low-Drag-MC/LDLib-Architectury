@@ -52,6 +52,7 @@ public class SceneWidget extends WidgetGroup {
     protected boolean renderSelect = true;
     protected boolean draggable = true;
     protected boolean scalable = true;
+    protected boolean intractable = true;
     protected boolean hoverTips;
     protected int currentMouseX;
     protected int currentMouseY;
@@ -262,6 +263,11 @@ public class SceneWidget extends WidgetGroup {
         return this;
     }
 
+    public SceneWidget setIntractable(boolean intractable) {
+        this.intractable = intractable;
+        return this;
+    }
+
     public SceneWidget setHoverTips(boolean hoverTips) {
         this.hoverTips = hoverTips;
         return this;
@@ -458,6 +464,7 @@ public class SceneWidget extends WidgetGroup {
         if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
+        if (!intractable) return false;
         if (isMouseOverElement(mouseX, mouseY)) {
             if (draggable) {
                 dragging = true;
@@ -487,6 +494,7 @@ public class SceneWidget extends WidgetGroup {
     @Override
     @OnlyIn(Dist.CLIENT)
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (!intractable) return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
         if (dragging) {
             rotationPitch += dragX + 360;
             rotationPitch = rotationPitch % 360;
@@ -502,6 +510,7 @@ public class SceneWidget extends WidgetGroup {
     @Override
     @OnlyIn(Dist.CLIENT)
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (!intractable) return super.mouseReleased(mouseX, mouseY, button);
         dragging = false;
         if (hoverPosFace != null && hoverPosFace.equals(clickPosFace)) {
             selectedPosFace = hoverPosFace;

@@ -3,8 +3,27 @@ package com.lowdragmc.lowdraglib.client.renderer.impl;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.model.ModelFactory;
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
-import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.lowdragmc.lowdraglib.client.renderer.ISerializableRenderer;
+import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
+import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlockEntity;
+import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegisterClient;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.WrapperConfigurator;
+import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
+import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
+import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
+import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
+import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.mojang.blaze3d.vertex.PoseStack;
+import lombok.Getter;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -25,21 +44,23 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-
-public class IModelRenderer implements IRenderer {
-
-    public final ResourceLocation modelLocation;
+@LDLRegisterClient(name = "json_model", group = "renderer")
+public class IModelRenderer implements ISerializableRenderer {
+    @Getter
+    @Configurable(forceUpdate = false)
+    protected ResourceLocation modelLocation;
     @OnlyIn(Dist.CLIENT)
     protected BakedModel itemModel;
     @OnlyIn(Dist.CLIENT)
     protected Map<Direction, BakedModel> blockModels;
 
     protected IModelRenderer() {
-        modelLocation = null;
+        modelLocation = new ResourceLocation("block/furnace");
     }
 
     public IModelRenderer(ResourceLocation modelLocation) {
@@ -56,7 +77,7 @@ public class IModelRenderer implements IRenderer {
     public TextureAtlasSprite getParticleTexture() {
         BakedModel model = getItemBakedModel();
         if (model == null) {
-            return IRenderer.super.getParticleTexture();
+            return ISerializableRenderer.super.getParticleTexture();
         }
         return model.getParticleIcon();
     }
@@ -173,8 +194,68 @@ public class IModelRenderer implements IRenderer {
     public boolean isGui3d() {
         var model = getItemBakedModel();
         if (model == null) {
-            return IRenderer.super.isGui3d();
+            return ISerializableRenderer.super.isGui3d();
         }
         return model.isGui3d();
+    }
+
+    // ISerializableRenderer
+    public void initRenderer() {
+        if (this.modelLocation != null) {
+            if (LDLib.isClient()) {
+                blockModels = new ConcurrentHashMap<>();
+                registerEvent();
+            }
+        }
+    }
+
+    @ConfigSetter(field = "modelLocation")
+    @SuppressWarnings("unused")
+    public void updateModelWithoutReloadingResource(ResourceLocation modelLocation) {
+        this.modelLocation = modelLocation;
+        if (LDLib.isClient()) {
+            itemModel = null;
+            blockModels.clear();
+        }
+    }
+
+    @Override
+    public void createPreview(ConfiguratorGroup father) {
+        var preview = new WidgetGroup(0, 0, 100, 120);
+        var level = new TrackedDummyWorld();
+        level.addBlock(BlockPos.ZERO, BlockInfo.fromBlock(RendererBlock.BLOCK));
+        Optional.ofNullable(level.getBlockEntity(BlockPos.ZERO)).ifPresent(blockEntity -> {
+            if (blockEntity instanceof RendererBlockEntity holder) {
+                holder.setRenderer(this);
+            }
+        });
+
+        var sceneWidget = new SceneWidget(0, 0, 100, 100, level);
+        sceneWidget.setRenderFacing(false);
+        sceneWidget.setRenderSelect(false);
+        sceneWidget.createScene(level);
+        sceneWidget.getRenderer().setOnLookingAt(null); // better performance
+        sceneWidget.setRenderedCore(Collections.singleton(BlockPos.ZERO), null);
+        sceneWidget.setBackground(new ColorBorderTexture(2, ColorPattern.T_WHITE.color));
+
+        preview.addWidget(new ButtonWidget(5, 110, 90, 10,
+                new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture().setRadius(5), new TextTexture("ldlib.gui.editor.tips.select_model")), cd -> {
+            if (Editor.INSTANCE == null) return;
+            File path = new File(Editor.INSTANCE.getWorkSpace(), "models");
+            DialogWidget.showFileDialog(Editor.INSTANCE, "ldlib.gui.editor.tips.select_model", path, true,
+                    DialogWidget.suffixFilter(".json"), r -> {
+                        if (r != null && r.isFile()) {
+                            updateModelWithoutReloadingResource(getModelFromFile(path, r));
+                        }
+                    });
+        }));
+
+        preview.addWidget(sceneWidget);
+        father.addConfigurators(new WrapperConfigurator("ldlib.gui.editor.group.preview", preview));
+    }
+
+    private static ResourceLocation getModelFromFile(File path, File r){
+        var id = path.getPath().replace('\\', '/').split("assets/")[1].split("/")[0];
+        return new ResourceLocation(id, r.getPath().replace(path.getPath(), "").replace(".json", "").replace('\\', '/'));
     }
 }

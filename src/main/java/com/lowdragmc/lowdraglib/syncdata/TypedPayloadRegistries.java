@@ -190,6 +190,7 @@ public class TypedPayloadRegistries {
         register(StringPayload.class, StringPayload::new, SyncedFieldAccessors.RESOURCE_LOCATION_ACCESSOR, -1);
 
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.GUI_TEXTURE_ACCESSOR, 1000);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.RENDERER_ACCESSOR, 1000);
         register(StringPayload.class, StringPayload::new, SyncedFieldAccessors.COMPONENT_ACCESSOR, 1000);
     }
 

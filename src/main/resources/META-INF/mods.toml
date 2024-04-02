@@ -1,6 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[${forge_version},)"
-issueTrackerURL = "https://github.com/Low-Drag-MC/LDLib-Architectury/issues"
+loaderVersion = "[${loader_version},)"
 license = "${mod_license}"
 
 [[mods]]
@@ -11,6 +10,11 @@ authors = "KilaBash, WarmthDawn"
 description = "${mod_description}"
 logoFile = "icon.png"
 displayURL = "${mod_url}"
+issueTrackerURL = "https://github.com/Low-Drag-MC/LDLib-Architectury/issues"
+[[mixins]]
+config="${mod_id}.mixins.json"
+[[accessTransformers]]
+file="META-INF/accesstransformer.cfg"
 
 [[dependencies.${mod_id}]]
     modId = "neoforge"

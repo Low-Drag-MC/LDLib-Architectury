@@ -45,6 +45,7 @@ public class CommonProxy {
 
         // used for forge events (ClientProxy + CommonProxy)
         eventBus.register(this);
+        eventBus.addListener(FMLLoadCompleteEvent.class, CommonProxy::loadComplete);
         eventBus.addListener(LDLNetworking::registerPayloads);
         // register server commands
         NeoForge.EVENT_BUS.addListener(this::registerCommand);
@@ -71,8 +72,7 @@ public class CommonProxy {
         TypedPayloadRegistries.init();
     }
 
-    @SubscribeEvent
-    public void loadComplete(FMLLoadCompleteEvent e) {
+    public static void loadComplete(FMLLoadCompleteEvent e) {
         e.enqueueWork(TypedPayloadRegistries::postInit);
     }
 

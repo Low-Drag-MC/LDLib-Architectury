@@ -35,10 +35,10 @@ public class ProgressWidget extends Widget implements IConfigurableWidget {
     public DoubleSupplier progressSupplier;
     @Setter
     private Function<Double, String> dynamicHoverTips;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.progressTexture")
     @Setter
     private IGuiTexture progressTexture;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
     @Setter
     private IGuiTexture overlayTexture;
 

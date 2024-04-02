@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.misc;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.side.fluid.IFluidHandlerModifiable;
 import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -18,7 +19,7 @@ import java.util.function.Predicate;
  * @date 2023/2/25
  * @implNote FluidTransferList
  */
-public class FluidTransferList implements IFluidHandler, INBTSerializable<CompoundTag> {
+public class FluidTransferList implements IFluidHandlerModifiable, INBTSerializable<CompoundTag> {
     public final IFluidHandler[] transfers;
     @Setter
     protected Predicate<FluidStack> filter = fluid -> true;
@@ -47,6 +48,20 @@ public class FluidTransferList implements IFluidHandler, INBTSerializable<Compou
             index += transfer.getTanks();
         }
         return FluidStack.EMPTY;
+    }
+
+    @Override
+    public void setFluidInTank(int tank, @NotNull FluidStack fluidStack) {
+        int index = 0;
+        for (IFluidHandler transfer : transfers) {
+            if (transfer instanceof IFluidHandlerModifiable modifiable) {
+                if (tank - index < transfer.getTanks()) {
+                    modifiable.setFluidInTank(tank - index, fluidStack);
+                    return;
+                }
+            }
+            index += transfer.getTanks();
+        }
     }
 
     @Override
@@ -155,7 +170,6 @@ public class FluidTransferList implements IFluidHandler, INBTSerializable<Compou
         }
     }
 
-    /*
     @Override
     public boolean supportsFill(int tank) {
         for (IFluidHandler transfer : transfers) {
@@ -164,10 +178,12 @@ public class FluidTransferList implements IFluidHandler, INBTSerializable<Compou
                 continue;
             }
 
-            return transfer.supportsFill(tank);
+            if (transfer instanceof IFluidHandlerModifiable modifiable) {
+                return modifiable.supportsFill(tank);
+            }
         }
 
-        return false;
+        return true;
     }
 
     @Override
@@ -178,10 +194,11 @@ public class FluidTransferList implements IFluidHandler, INBTSerializable<Compou
                 continue;
             }
 
-            return transfer.supportsDrain(tank);
+            if (transfer instanceof IFluidHandlerModifiable modifiable) {
+                return modifiable.supportsDrain(tank);
+            }
         }
 
-        return false;
+        return true;
     }
-    */
 }

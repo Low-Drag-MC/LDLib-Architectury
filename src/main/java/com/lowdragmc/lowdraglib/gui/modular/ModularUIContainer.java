@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.core.mixins.accessor.AbstractContainerMenuAccess
 import com.lowdragmc.lowdraglib.gui.util.PerTickIntCounter;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import com.lowdragmc.lowdraglib.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib.networking.c2s.CPacketUIClientAction;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
 import io.netty.buffer.Unpooled;

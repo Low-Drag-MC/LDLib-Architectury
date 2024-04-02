@@ -9,6 +9,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 
@@ -78,7 +79,7 @@ public class ShaderProgram {
 		if (unLinked) {
 			this.uniformCache.invalidate();
 			GL20.glLinkProgram(programId);
-			if (GL20.glGetProgrami(programId, GL20.GL_LINK_STATUS) == 0) {
+			if (GL20.glGetProgrami(programId, GL20.GL_LINK_STATUS) == GL11.GL_FALSE) {
 				throw new RuntimeException(String.format("ShaderProgram validation has failed!\n%s", GL20.glGetProgramInfoLog(programId, GL20.glGetProgrami(programId, 35716))));
 			}
 			this.unLinked = false;

@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
@@ -57,26 +58,28 @@ import java.util.function.Function;
 @LDLRegister(name = "item_slot", group = "widget.container")
 @Accessors(chain = true)
 public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfigurableWidget {
+    public final static ResourceBorderTexture ITEM_SLOT_TEXTURE = new ResourceBorderTexture("ldlib:textures/gui/slot.png", 18, 18, 1, 1);
+
     @Nullable
     protected static Slot HOVER_SLOT = null;
     @Nullable
     protected Slot slotReference;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.canTakeItems")
     @Setter
     protected boolean canTakeItems;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.canPutItems")
     @Setter
     protected boolean canPutItems;
     public boolean isPlayerContainer;
     public boolean isPlayerHotBar;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.drawHoverOverlay")
     @Setter
     public boolean drawHoverOverlay = true;
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.drawHoverTips")
     @Setter
     public boolean drawHoverTips = true;
 
-    @Configurable
+    @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
     @Setter
     protected IGuiTexture overlay;
 
@@ -99,14 +102,14 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     public void initTemplate() {
-        setBackgroundTexture(new ResourceTexture("ldlib:textures/gui/slot.png"));
+        setBackgroundTexture(ITEM_SLOT_TEXTURE);
         this.canTakeItems = true;
         this.canPutItems = true;
     }
 
     public SlotWidget(Container inventory, int slotIndex, int xPosition, int yPosition, boolean canTakeItems, boolean canPutItems) {
         super(new Position(xPosition, yPosition), new Size(18, 18));
-        setBackgroundTexture(new ResourceTexture("ldlib:textures/gui/slot.png"));
+        setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE);
         this.canTakeItems = canTakeItems;
         this.canPutItems = canPutItems;
         setContainerSlot(inventory, slotIndex);
@@ -114,7 +117,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     public SlotWidget(IItemHandlerModifiable itemHandler, int slotIndex, int xPosition, int yPosition, boolean canTakeItems, boolean canPutItems) {
         super(new Position(xPosition, yPosition), new Size(18, 18));
-        setBackgroundTexture(new ResourceTexture("ldlib:textures/gui/slot.png"));
+        setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE);
         this.canTakeItems = canTakeItems;
         this.canPutItems = canPutItems;
         setHandlerSlot(itemHandler, slotIndex);
@@ -357,13 +360,11 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (self().isMouseOverElement(mouseX, mouseY)) {
             var handler = getHandle();
             if (handler == null) return null;
-            if (LDLib.isJeiLoaded()) {
+            if (LDLib.isJeiLoaded() && !getRealStack(handler.getItem()).isEmpty()) {
                 return JEIPlugin.getItemIngredient(getRealStack(handler.getItem()), getPosition().x, getPosition().y, getSize().width, getSize().height);
-            }
-            if (LDLib.isReiLoaded()) {
+            } else if (LDLib.isReiLoaded()) {
                 return EntryStacks.of(getRealStack(handler.getItem()));
-            }
-            if (LDLib.isEmiLoaded()) {
+            } else if (LDLib.isEmiLoaded()) {
                 return new ItemEmiStack(getRealStack(handler.getItem()));
             }
             return getRealStack(handler.getItem());
@@ -380,23 +381,19 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (handler instanceof WidgetSlotItemTransfer widgetSlotItemTransfer && widgetSlotItemTransfer.itemHandler instanceof CycleItemStackHandler cycleItemStackHandler) {
             var stream = cycleItemStackHandler.getStackList(widgetSlotItemTransfer.index).stream().map(this::getRealStack);
             if (LDLib.isJeiLoaded()) {
-                return stream.map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
-            }
-            if (LDLib.isReiLoaded()) {
+                return stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+            } else if (LDLib.isReiLoaded()) {
                 return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
-            }
-            if (LDLib.isEmiLoaded()) {
+            } else if (LDLib.isEmiLoaded()) {
                 return List.of(new ListEmiIngredient(stream.map(ItemEmiStack::new).toList(), getRealStack(handler.getItem()).getCount()).setChance(getXEIChance()));
             }
         }
 
         if (LDLib.isJeiLoaded()) {
             return List.of(JEIPlugin.getItemIngredient(getRealStack(handler.getItem()), getPosition().x, getPosition().y, getSize().width, getSize().height));
-        }
-        if (LDLib.isReiLoaded()) {
+        } else if (LDLib.isReiLoaded()) {
             return List.of(EntryStacks.of(getRealStack(handler.getItem())));
-        }
-        if (LDLib.isEmiLoaded()) {
+        } else if (LDLib.isEmiLoaded()) {
             return List.of(new ItemEmiStack(getRealStack(handler.getItem())));
         }
         return List.of(getRealStack(handler.getItem()));
@@ -428,13 +425,13 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         public void set(@Nonnull ItemStack stack) {
 //            if(!SlotWidget.this.canPutStack(stack)) return;
             super.set(stack);
-            if (changeListener != null) {
-                changeListener.run();
-            }
         }
 
         @Override
         public void setChanged() {
+            if (changeListener != null) {
+                changeListener.run();
+            }
             SlotWidget.this.onSlotChanged();
         }
 
@@ -477,9 +474,6 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         public void set(@Nonnull ItemStack stack) {
             this.itemHandler.setStackInSlot(index, stack);
             this.setChanged();
-            if (changeListener != null) {
-                changeListener.run();
-            }
         }
 
         @Override
@@ -517,6 +511,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
         @Override
         public void setChanged() {
+            if (changeListener != null) {
+                changeListener.run();
+            }
             SlotWidget.this.onSlotChanged();
         }
 

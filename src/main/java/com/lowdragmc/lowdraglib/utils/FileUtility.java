@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
  * Description:
  */
 public class FileUtility {
-    public static final JsonParser jsonParser = new JsonParser();
     public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
 
     private FileUtility() {
@@ -44,7 +43,7 @@ public class FileUtility {
     public static JsonObject tryExtractFromFile(Path filePath) {
         try (InputStream fileStream = Files.newInputStream(filePath)) {
             InputStreamReader streamReader = new InputStreamReader(fileStream);
-            return jsonParser.parse(streamReader).getAsJsonObject();
+            return JsonParser.parseReader(streamReader).getAsJsonObject();
         } catch (Exception ignored) {
         }
 
@@ -55,7 +54,7 @@ public class FileUtility {
         try {
             if (!file.isFile()) return null;
             Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8);
-            JsonElement json = jsonParser.parse(new JsonReader(reader));
+            JsonElement json = JsonParser.parseReader(new JsonReader(reader));
             reader.close();
             return json;
         } catch (Exception ignored) {

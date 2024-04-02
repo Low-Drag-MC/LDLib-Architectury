@@ -48,6 +48,11 @@ public class ModelFactory {
     public static ModelBaker getModelBaker() {
         return new ModelBaker() {
             @Override
+            public UnbakedModel getModel(ResourceLocation location) {
+                return getUnBakedModel(location);
+            }
+
+            @Override
             public @Nullable BakedModel bake(ResourceLocation location, ModelState state, Function<Material, TextureAtlasSprite> sprites) {
                 UnbakedModel unbakedmodel = this.getModel(location);
                 if (unbakedmodel instanceof BlockModel blockmodel) {
@@ -61,11 +66,6 @@ public class ModelFactory {
             @Override
             public Function<Material, TextureAtlasSprite> getModelTextureGetter() {
                 return Material::sprite;
-            }
-
-            @Override
-            public UnbakedModel getModel(ResourceLocation location) {
-                return getUnBakedModel(location);
             }
 
             @Override

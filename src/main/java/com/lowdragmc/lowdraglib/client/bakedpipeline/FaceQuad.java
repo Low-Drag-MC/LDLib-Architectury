@@ -21,9 +21,21 @@ import org.joml.Vector3f;
  * @implNote FaceQuadBuilder
  */
 @OnlyIn(Dist.CLIENT)
+
 public class FaceQuad {
     public static final AABB BLOCK = new AABB(0, 0, 0, 1, 1, 1);
 
+    /**
+     * bake a quad of specific face.
+     * @param cube cube model
+     * @param face face of the quad
+     * @param sprite texture
+     * @param rotation additional rotation
+     * @param tintIndex tint color index
+     * @param emissivity emissivity
+     * @param cull whether cull the face
+     * @param shade whether shade the face
+     */
     public static BakedQuad bakeFace(AABB cube, Direction face, TextureAtlasSprite sprite, ModelState rotation, int tintIndex, int emissivity, boolean cull, boolean shade) {
         return new FaceQuadBakery().bakeQuad(
                 new Vector3f((float) cube.minX * 16f, (float) cube.minY * 16f, (float) cube.minZ * 16f),
@@ -102,6 +114,9 @@ public class FaceQuad {
             return this;
         }
 
+        /**
+         * Making texture uv cut by the cube size.
+         */
         public Builder cubeUV() {
             return switch (face) {
                 case UP -> uv0(from.x(), from.z()).uv1(to.x(), to.z());
@@ -129,3 +144,4 @@ public class FaceQuad {
     }
 
 }
+
