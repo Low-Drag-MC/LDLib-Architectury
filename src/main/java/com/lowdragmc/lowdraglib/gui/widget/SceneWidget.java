@@ -481,7 +481,7 @@ public class SceneWidget extends WidgetGroup {
     public boolean mouseWheelMove(double mouseX, double mouseY, double scrollX, double scrollY) {
         var result = super.mouseWheelMove(mouseX, mouseY, scrollX, scrollY);
         if (!result && isMouseOverElement(mouseX, mouseY) && scalable) {
-            zoom = (float) Mth.clamp(zoom + (scrollX < 0 ? 0.5 : -0.5), 0.1, 999);
+            zoom = (float) Mth.clamp(zoom + (scrollY < 0 ? 0.5 : -0.5), 0.1, 999);
             if (renderer != null) {
                 renderer.setCameraOrtho(range * zoom, range * zoom, range * zoom);
                 renderer.setCameraLookAt(center, camZoom(), Math.toRadians(rotationPitch), Math.toRadians(rotationYaw));

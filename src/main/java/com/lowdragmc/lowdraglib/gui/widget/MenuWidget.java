@@ -234,7 +234,7 @@ public class MenuWidget<K, T> extends WidgetGroup {
         var size = getSize();
         var screenHeight = getGui().getScreenHeight();
         if (screenHeight < size.height && isMouseOverElement(mouseX, mouseY)) {
-            var offsetY = Mth.clamp(pos.getY() + (scrollX > 0 ? -nodeHeight : nodeHeight), 0, screenHeight - size.height);
+            var offsetY = Mth.clamp(pos.getY() + (scrollY > 0 ? -nodeHeight : nodeHeight), 0, screenHeight - size.height);
             addSelfPosition(0, offsetY - pos.getY());
             return true;
         }

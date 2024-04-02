@@ -416,7 +416,7 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
             if (scrollable) {
                 setFocus(true);
                 if (isFocus()) {
-                    int moveDelta = (int) (-Mth.clamp(scrollX, -1, 1) * 13);
+                    int moveDelta = (int) (-Mth.clamp(scrollY, -1, 1) * 13);
                     if (getMaxHeight() - getSize().height > 0 || scrollYOffset > getMaxHeight() - getSize().height) {
                         setScrollYOffset(Mth.clamp(scrollYOffset + moveDelta, 0, getMaxHeight() - getSize().height));
                     }

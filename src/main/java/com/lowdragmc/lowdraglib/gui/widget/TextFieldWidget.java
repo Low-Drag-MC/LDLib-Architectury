@@ -395,7 +395,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
     public boolean mouseWheelMove(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (wheelDur > 0 && numberInstance != null && isMouseOverElement(mouseX, mouseY) && isFocus()) {
             try {
-                onTextChanged(numberInstance.format(Float.parseFloat(getCurrentString()) + (scrollX > 0 ? 1 : -1) * wheelDur));
+                onTextChanged(numberInstance.format(Float.parseFloat(getCurrentString()) + (scrollY > 0 ? 1 : -1) * wheelDur));
             } catch (Exception ignored) {
             }
             setFocus(true);

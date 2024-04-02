@@ -524,7 +524,7 @@ public class CompassSectionWidget extends WidgetGroup {
     @OnlyIn(Dist.CLIENT)
     public boolean mouseWheelMove(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (isMouseOverElement(mouseX, mouseY)) {
-            var newScale = (float) Mth.clamp(scale + (scrollX + scrollY) * 0.1f, 0.1f, 10f);
+            var newScale = (float) Mth.clamp(scale + scrollY * 0.1f, 0.1f, 10f);
             if (newScale != scale) {
                 xOffset += (float) (mouseX - this.getPosition().x) / scale - (float) (mouseX - this.getPosition().x) / newScale;
                 yOffset += (float) (mouseY - this.getPosition().y) / scale - (float) (mouseY - this.getPosition().y) / newScale;
