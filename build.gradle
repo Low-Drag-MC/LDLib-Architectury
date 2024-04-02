@@ -123,10 +123,9 @@ dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
 
     // JEI
-    // TODO update once the 1.20.4 ver is out
-    compileOnly("mezz.jei:jei-${minecraft_version_OLD}-common-api:${jei_version}") { transitive = false }
-    compileOnly("mezz.jei:jei-${minecraft_version_OLD}-forge-api:${jei_version}") { transitive = false }
-    compileOnly("mezz.jei:jei-${minecraft_version_OLD}-forge:${jei_version}")
+    compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
+    compileOnly("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}") { transitive = false }
+    compileOnly("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
     // REI
     compileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}")
