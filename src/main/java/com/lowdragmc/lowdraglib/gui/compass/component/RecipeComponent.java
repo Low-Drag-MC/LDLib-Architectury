@@ -42,9 +42,9 @@ public class RecipeComponent extends AbstractComponent {
     private static final List<RecipeViewCreator> RECIPE_VIEW_CREATORS = new ArrayList<>();
 
     public interface RecipeViewCreator extends Predicate<Recipe<?>> {
-        ItemStack getWorkstation(Recipe<?> recipe);
+        ItemStack getWorkstation(RecipeHolder<?> recipe);
 
-        WidgetGroup getViewWidget(Recipe<?> recipe);
+        WidgetGroup getViewWidget(RecipeHolder<?> recipe);
     }
 
     public static void registerRecipeViewCreator(RecipeViewCreator recipeViewCreator) {
@@ -52,7 +52,7 @@ public class RecipeComponent extends AbstractComponent {
     }
 
     @Nullable
-    protected Recipe<?> recipe;
+    protected RecipeHolder<?> recipe;
 
     @Override
     public ILayoutComponent fromXml(Element element) {
@@ -61,7 +61,7 @@ public class RecipeComponent extends AbstractComponent {
             var recipeID = new ResourceLocation(element.getAttribute("id"));
             for (RecipeHolder<?> recipe : Minecraft.getInstance().getConnection().getRecipeManager().getRecipes()) {
                 if (recipe.id().equals(recipeID)) {
-                    this.recipe = recipe.value();
+                    this.recipe = recipe;
                     return this;
                 }
             }
@@ -73,10 +73,10 @@ public class RecipeComponent extends AbstractComponent {
     protected LayoutPageWidget addWidgets(LayoutPageWidget currentPage) {
         if (recipe == null) return currentPage;
         Int2ObjectMap<Ingredient> inputs = new Int2ObjectArrayMap<>();
-        var output = recipe.getResultItem(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
-        var ingredients = recipe.getIngredients();
+        var output = recipe.value().getResultItem(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
+        var ingredients = recipe.value().getIngredients();
 
-        if (recipe instanceof ShapedRecipe shapedRecipe) {
+        if (recipe.value() instanceof ShapedRecipe shapedRecipe) {
             int w = shapedRecipe.getWidth();
             int h = shapedRecipe.getHeight();
             for (int i = 0; i < w; i++) {
@@ -93,17 +93,17 @@ public class RecipeComponent extends AbstractComponent {
         WidgetGroup recipeGroup = null;
         ItemStack workstation = ItemStack.EMPTY;
         for (RecipeViewCreator creator : RECIPE_VIEW_CREATORS) {
-            if (creator.test(recipe)) {
+            if (creator.test(recipe.value())) {
                 recipeGroup = creator.getViewWidget(recipe);
                 workstation = creator.getWorkstation(recipe);
                 break;
             }
         }
         if (recipeGroup == null) {
-            if (recipe instanceof CraftingRecipe) {
+            if (recipe.value() instanceof CraftingRecipe) {
                 recipeGroup = createCraftingRecipeWidget(inputs, output);
                 workstation = new ItemStack(Items.CRAFTING_TABLE);
-            } else if (recipe instanceof AbstractCookingRecipe) {
+            } else if (recipe.value() instanceof AbstractCookingRecipe) {
                 recipeGroup = createSmeltingRecipeWidget(inputs, output);
                 workstation = new ItemStack(Items.FURNACE);
             } else {
