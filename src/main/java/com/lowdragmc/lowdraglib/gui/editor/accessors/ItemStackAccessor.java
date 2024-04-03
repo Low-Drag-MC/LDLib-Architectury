@@ -36,7 +36,7 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
     @Override
     public Configurator create(String name, Supplier<ItemStack> supplier, Consumer<ItemStack> consumer, boolean forceUpdate, Field field) {
         ConfiguratorGroup group = new ConfiguratorGroup(name);
-        var itemHandler = new ItemStackHandler(NonNullList.of(supplier.get()));
+        var itemHandler = new ItemStackHandler(NonNullList.of(ItemStack.EMPTY, supplier.get()));
         var slot = new SlotWidget(itemHandler, 0, 0, 0, false, false);
         slot.setClientSideWidget();
         Consumer<ItemStack> updateStack = stack -> {

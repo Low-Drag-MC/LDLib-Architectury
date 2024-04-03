@@ -457,9 +457,9 @@ public class FluidTransferHelper {
         int fillableAmount = fluidDestination.fill(drainable, IFluidHandler.FluidAction.SIMULATE);
         if (fillableAmount > 0) {
             drainable.setAmount(fillableAmount);
-            var drained = fluidSource.drain(drainable, doTransfer ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE);
+            var drained = fluidSource.drain(drainable, doTransfer ? IFluidHandler.FluidAction.EXECUTE : IFluidHandler.FluidAction.SIMULATE);
             if (!drained.isEmpty()) {
-                drained.setAmount(fluidDestination.fill(drained, doTransfer ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE));
+                drained.setAmount(fluidDestination.fill(drained, doTransfer ? IFluidHandler.FluidAction.EXECUTE : IFluidHandler.FluidAction.SIMULATE));
                 return drained;
             }
         }
