@@ -19,7 +19,6 @@
     "accessor.ParticleEngineAccessor",
     "accessor.VertexFormatAccessor",
     "emi.RecipeScreenMixin",
-    "emi.WidgetGroupAccessor",
     "emi.WidgetGroupMixin",
     "jei.RecipesGuiAccessor",
     "jei.RecipesGuiMixin",

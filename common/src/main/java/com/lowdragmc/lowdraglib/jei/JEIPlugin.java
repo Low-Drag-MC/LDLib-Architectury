@@ -36,6 +36,11 @@ public class JEIPlugin implements IModPlugin {
         LDLib.LOGGER.debug("LDLib JEI Plugin created");
     }
 
+    public static Object getItemIngredient(ItemStack itemStack, int x, int y, int width, int height) {
+        return new ClickableIngredient<>(TypedIngredient.createUnvalidated(VanillaTypes.ITEM_STACK, itemStack),
+                new ImmutableRect2i(x, y, width, height));
+    }
+
     @Nonnull
     public static List<RecipeLayout<?>> getRecipeLayouts(RecipesGui recipesGui) {
         return new ArrayList<>(((RecipesGuiAccessor)recipesGui).getRecipeLayouts());

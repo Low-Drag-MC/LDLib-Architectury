@@ -111,6 +111,9 @@ dependencies {
     implementation("org.joml:joml:1.10.4")
     implementation('org.anarres:jcpp:1.4.14')
     implementation('io.github.douira:glsl-transformer:2.0.0-pre13')
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5"))
+    implementation(include("io.github.llamalad7:mixinextras-forge:0.3.5"))
 }
 
 processResources {

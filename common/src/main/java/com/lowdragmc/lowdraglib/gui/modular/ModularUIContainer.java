@@ -118,14 +118,14 @@ public class ModularUIContainer extends AbstractContainerMenu implements WidgetU
         return modularUI.getSlotMap().values().stream()
                 .filter(it -> it.canMergeSlot(itemStack))
                 .filter(it -> it.isPlayerContainer == fromContainer)
-                .sorted(Comparator.comparing(s -> (fromContainer ? -1 : 1) * s.getHandle().index))
+                .sorted(Comparator.comparing(s -> (fromContainer ? -1 : 1) * s.getHandler().index))
                 .collect(Collectors.toList());
     }
 
     @Override
     public boolean attemptMergeStack(ItemStack itemStack, boolean fromContainer, boolean simulate) {
         List<Slot> slots = getShiftClickSlots(itemStack, fromContainer).stream()
-                .map(SlotWidget::getHandle)
+                .map(SlotWidget::getHandler)
                 .collect(Collectors.toList());
         return mergeItemStack(itemStack, slots, simulate);
     }

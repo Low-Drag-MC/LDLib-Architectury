@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface IRecipeIngredientSlot extends IIngredientSlot{
+public interface IRecipeIngredientSlot extends IIngredientSlot {
 
     default Widget self() {
         return (Widget) this;

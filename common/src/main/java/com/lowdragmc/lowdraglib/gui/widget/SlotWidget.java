@@ -12,7 +12,6 @@ import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
@@ -20,8 +19,10 @@ import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import com.lowdragmc.lowdraglib.utils.TagItemStackTransfer;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.emi.emi.api.stack.EmiIngredient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.emi.emi.api.stack.ItemEmiStack;
 import dev.emi.emi.api.stack.ListEmiIngredient;
@@ -29,18 +30,24 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,6 +68,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Nullable
     protected static Slot HOVER_SLOT = null;
     @Nullable
+    @Getter
     protected Slot slotReference;
     @Configurable(name = "ldlib.gui.editor.name.canTakeItems")
     @Setter
@@ -322,7 +330,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     }
 
     @Nullable
-    public final Slot getHandle() {
+    public final Slot getHandler() {
         return slotReference;
     }
 
@@ -356,9 +364,39 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Override
     public Object getXEIIngredientOverMouse(double mouseX, double mouseY) {
         if (self().isMouseOverElement(mouseX, mouseY)) {
-            if (slotReference == null || slotReference.getItem().isEmpty()) return null;
-            if (LDLib.isReiLoaded()) {
-                return EntryStacks.of(getRealStack(getHandle().getItem()));
+            var handler = getHandler();
+            if (handler == null) return null;
+            ItemStack realStack = getRealStack(handler.getItem());
+
+            if (handler instanceof WidgetSlotItemTransfer widgetSlotItemTransfer) {
+                if (widgetSlotItemTransfer.itemHandler instanceof CycleItemStackHandler cycleItemStackHandler) {
+                    var stream = cycleItemStackHandler.getStackList(widgetSlotItemTransfer.index).stream().map(this::getRealStack);
+                    if (LDLib.isJeiLoaded()) {
+                        return stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+                    } else if (LDLib.isReiLoaded()) {
+                        return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
+                    } else if (LDLib.isEmiLoaded()) {
+                        return List.of(EmiIngredient.of(Ingredient.of(stream.toArray(ItemStack[]::new)), realStack.getCount()).setChance(getXEIChance()));
+                    }
+                } else if (widgetSlotItemTransfer.itemHandler instanceof TagItemStackTransfer tagItemStackTransfer) {
+                    TagKey<Item> tag = tagItemStackTransfer.getTag();
+                    int count = tagItemStackTransfer.getStackSize();
+                    if (LDLib.isJeiLoaded()) {
+                        return BuiltInRegistries.ITEM.getTag(tag).stream().flatMap(HolderSet.ListBacked::stream).map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), count)), getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+                    } else if (LDLib.isReiLoaded()) {
+                        return List.of(EntryIngredients.ofTag(tag, holder -> EntryStacks.of(getRealStack(new ItemStack(holder.value(), count)))));
+                    } else if (LDLib.isEmiLoaded()) {
+                        return List.of(EmiIngredient.of(tag, count).setChance(getXEIChance()));
+                    }
+                }
+            }
+
+            if (LDLib.isJeiLoaded() && !getRealStack(handler.getItem()).isEmpty()) {
+                return JEIPlugin.getItemIngredient(getRealStack(handler.getItem()), getPosition().x, getPosition().y, getSize().width, getSize().height);
+            } else if (LDLib.isReiLoaded()) {
+                return EntryStacks.of(getRealStack(handler.getItem()));
+            } else if (LDLib.isEmiLoaded()) {
+                return EmiIngredient.of(Ingredient.of(getRealStack(handler.getItem())));
             }
             if (LDLib.isEmiLoaded()) {
                 return new ItemEmiStack(getRealStack(getHandle().getItem()));
@@ -371,27 +409,39 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Override
     public List<Object> getXEIIngredients() {
         if (slotReference == null || slotReference.getItem().isEmpty()) return Collections.emptyList();
-        var handler = getHandle();
+        var handler = getHandler();
         if (handler == null) return Collections.emptyList();
-        // if CycleItemStackHandler
-        if (handler instanceof WidgetSlotItemTransfer widgetSlotItemTransfer && widgetSlotItemTransfer.itemHandler instanceof CycleItemStackHandler cycleItemStackHandler) {
-            var stream = cycleItemStackHandler.getStackList(widgetSlotItemTransfer.index).stream().map(this::getRealStack);
-            if (LDLib.isJeiLoaded()) {
-                return stream.map(Object.class::cast).toList();
-            }
-            if (LDLib.isReiLoaded()) {
-                return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
-            } else if (LDLib.isEmiLoaded()) {
-                return List.of(new ListEmiIngredient(stream.map(ItemEmiStack::new).toList(), getRealStack(handler.getItem()).getCount()).setChance(getXEIChance()));
+        ItemStack realStack = getRealStack(handler.getItem());
+
+        if (handler instanceof WidgetSlotItemTransfer widgetSlotItemTransfer) {
+            if (widgetSlotItemTransfer.itemHandler instanceof CycleItemStackHandler cycleItemStackHandler) {
+                var stream = cycleItemStackHandler.getStackList(widgetSlotItemTransfer.index).stream().map(this::getRealStack);
+                if (LDLib.isJeiLoaded()) {
+                    return stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+                } else if (LDLib.isReiLoaded()) {
+                    return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
+                } else if (LDLib.isEmiLoaded()) {
+                    return List.of(EmiIngredient.of(Ingredient.of(stream.toArray(ItemStack[]::new)), realStack.getCount()).setChance(getXEIChance()));
+                }
+            } else if (widgetSlotItemTransfer.itemHandler instanceof TagItemStackTransfer tagItemStackTransfer) {
+                TagKey<Item> tag = tagItemStackTransfer.getTag();
+                int count = tagItemStackTransfer.getStackSize();
+                if (LDLib.isJeiLoaded()) {
+                    return BuiltInRegistries.ITEM.getTag(tag).stream().flatMap(HolderSet.ListBacked::stream).map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), count)), getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+                } else if (LDLib.isReiLoaded()) {
+                    return List.of(EntryIngredients.ofTag(tag, holder -> EntryStacks.of(getRealStack(new ItemStack(holder.value(), count)))));
+                } else if (LDLib.isEmiLoaded()) {
+                    return List.of(EmiIngredient.of(tag, count).setChance(getXEIChance()));
+                }
             }
         }
 
         if (LDLib.isJeiLoaded()) {
-            return List.of(getRealStack(handler.getItem()));
+            return List.of(JEIPlugin.getItemIngredient(realStack, getPosition().x, getPosition().y, getSize().width, getSize().height));
         } else if (LDLib.isReiLoaded()) {
-            return List.of(EntryStacks.of(getRealStack(handler.getItem())));
+            return List.of(EntryStacks.of(realStack));
         } else if (LDLib.isEmiLoaded()) {
-            return List.of(new ItemEmiStack(getRealStack(handler.getItem())));
+            return List.of(EmiIngredient.of(Ingredient.of(realStack), realStack.getCount()));
         }
         return List.of(getRealStack(handler.getItem()));
     }
@@ -439,8 +489,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     }
 
-    protected class WidgetSlotItemTransfer extends Slot {
+    public class WidgetSlotItemTransfer extends Slot {
         private static final Container emptyInventory = new SimpleContainer(0);
+        @Getter
         private final IItemTransfer itemHandler;
         private final int index;
 
