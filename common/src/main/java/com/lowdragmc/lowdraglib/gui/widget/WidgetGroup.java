@@ -177,6 +177,23 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         }
     }
 
+    public <T extends Widget> List<T> getWidgetsByType(Class<T> clazz) {
+        List<T> list = new ArrayList<>();
+        getWidgetsByType(list, clazz);
+        return list;
+    }
+
+    private <T extends Widget> void getWidgetsByType(List<T> list, Class<T> clazz) {
+        for (Widget widget : widgets) {
+            if (clazz.isAssignableFrom(widget.getClass())) {
+                list.add((T) widget);
+            }
+            if (widget instanceof WidgetGroup group) {
+                group.getWidgetsByType(list, clazz);
+            }
+        }
+    }
+
     protected boolean recomputeSize() {
         if (isDynamicSized) {
             Size currentSize = getSize();

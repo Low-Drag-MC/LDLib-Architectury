@@ -20,6 +20,7 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.FluidEmiStack;
 import lombok.Getter;
 import lombok.Setter;
@@ -168,14 +169,14 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag())));
         }
         if (LDLib.isEmiLoaded()) {
-            return List.of(new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance));
+            return List.of(EmiStack.of(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance));
         }
         return List.of(FluidHelper.toRealFluidStack(lastFluidInTank));
     }
 
     @ExpectPlatform
     public static Object getPlatformFluidTypeForJEI(FluidStack fluidStack, Position pos, Size size) {
-        throw new  AssertionError();
+        throw new AssertionError();
     }
 
     private List<Component> getToolTips(List<Component> list) {

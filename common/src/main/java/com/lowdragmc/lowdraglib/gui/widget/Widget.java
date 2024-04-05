@@ -14,6 +14,7 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Rect;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.latvian.mods.rhino.util.RemapPrefixForJS;
 import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
@@ -45,6 +46,7 @@ import java.util.function.Supplier;
  * It's information is also synced to client
  */
 @SuppressWarnings("UnusedReturnValue")
+@RemapPrefixForJS("kjs$")
 @Configurable(name = "ldlib.gui.editor.group.basic_info", collapse = false)
 public class Widget {
 
@@ -64,6 +66,7 @@ public class Widget {
     private boolean isActive;
     private boolean isFocus;
     protected boolean isClientSideWidget;
+    @Getter
     @Configurable(name = "ldlib.gui.editor.name.hover_tips", tips = "ldlib.gui.editor.tips.hover_tips")
     protected final List<Component> tooltipTexts = new ArrayList<>();
     @Configurable(name = "ldlib.gui.editor.name.background")
@@ -121,7 +124,7 @@ public class Widget {
         return this;
     }
 
-    public Widget setKJSHoverTooltips(Component... tooltipText) {
+    public Widget kjs$setHoverTooltips(Component... tooltipText) {
         tooltipTexts.clear();
         Arrays.stream(tooltipText).filter(Objects::nonNull).forEach(tooltipTexts::add);
         return this;

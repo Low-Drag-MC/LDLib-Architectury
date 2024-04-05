@@ -1,18 +1,18 @@
 package com.lowdragmc.lowdraglib.jei;
 
-import com.lowdragmc.lowdraglib.client.scene.WorldSceneRenderer;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
+import lombok.Getter;
 import lombok.Setter;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
@@ -20,6 +20,7 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
+    @Getter
     protected T widget;
     @Setter
     protected boolean shouldRenderTooltips = false;
@@ -33,19 +34,8 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
     }
 
     private int lastTick;
+    @Getter
     private int left, top;
-
-    public T getWidget() {
-        return widget;
-    }
-
-    public int getLeft() {
-        return left;
-    }
-
-    public int getTop() {
-        return top;
-    }
 
     public String getUid() {
         return null;
@@ -63,7 +53,6 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
         modularUI.updateScreenSize(this.width, this.height);
         Position displayOffset = new Position(modularUI.getGuiLeft(), top);
         modularUI.mainGroup.setParentPosition(displayOffset);
-//        this.menu.slots.clear();
     }
 
     /**

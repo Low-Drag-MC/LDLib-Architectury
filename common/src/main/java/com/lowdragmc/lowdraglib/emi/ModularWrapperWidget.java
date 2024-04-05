@@ -2,11 +2,8 @@ package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
-import dev.emi.emi.api.stack.EmiIngredient;
-import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
-import dev.emi.emi.screen.EmiScreenManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -76,15 +73,7 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
 
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int button) {
-        if (modular.mouseClicked(mouseX + modular.getLeft(), mouseY + modular.getTop(), button)) {
-            return true;
-        }
-        for (Widget slot : slots) {
-            if (slot.mouseClicked(mouseX, mouseY, button)) {
-                return true;
-            }
-        }
-        return false;
+        return modular.mouseClicked(mouseX + modular.getLeft(), mouseY + modular.getTop(), button);
     }
 
     @Override
@@ -112,19 +101,6 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
         modular.focused = false;
         if (modular.modularUI.mainGroup.keyPressed(pKeyCode, pScanCode, pModifiers)) {
             return true;
-        }
-        for (Widget slot : slots) {
-            if (slot instanceof ModularSlotWidget slotWidget) {
-                if (slotWidget.getBounds().contains(lastX, lastY)) {
-                    if (slotWidget.slotInteraction(bind -> bind.matchesKey(pKeyCode, pScanCode))) {
-                        return true;
-                    }
-                    if (slotWidget.getSlot().getXEIIngredientOverMouse(lastX + modular.getLeft(), lastY + modular.getTop()) instanceof EmiIngredient ingredient) {
-                        return EmiScreenManager.stackInteraction(new EmiStackInteraction(ingredient, slotWidget.getRecipe(), true),
-                                bind -> bind.matchesKey(pKeyCode, pScanCode));
-                    }
-                }
-            }
         }
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
