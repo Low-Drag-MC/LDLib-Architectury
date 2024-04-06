@@ -35,15 +35,20 @@ public class TagOrCycleItemStackTransfer implements IItemTransfer {
     public List<List<ItemStack>> getUnwrapped() {
         if (unwrapped == null) {
             unwrapped = stacks.stream()
-                    .map(tagOrItem -> tagOrItem.map(
-                            tagList -> tagList
-                                    .stream()
-                                    .flatMap(pair -> BuiltInRegistries.ITEM.getTag(pair.getFirst())
-                                            .map(holderSet -> holderSet.stream()
-                                                    .map(holder -> new ItemStack(holder.value(), pair.getSecond())))
-                                            .orElseGet(Stream::empty))
-                                    .toList(),
-                            Function.identity()))
+                    .map(tagOrItem -> {
+                        if (tagOrItem == null) {
+                            return null;
+                        }
+                        return tagOrItem.map(
+                                tagList -> tagList
+                                        .stream()
+                                        .flatMap(pair -> BuiltInRegistries.ITEM.getTag(pair.getFirst())
+                                                .map(holderSet -> holderSet.stream()
+                                                        .map(holder -> new ItemStack(holder.value(), pair.getSecond())))
+                                                .orElseGet(Stream::empty))
+                                        .toList(),
+                                Function.identity());
+                    })
                     .collect(Collectors.toCollection(ArrayList::new));
         }
         return unwrapped;
