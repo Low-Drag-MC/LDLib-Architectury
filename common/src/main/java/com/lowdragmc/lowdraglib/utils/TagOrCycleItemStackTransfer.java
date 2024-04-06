@@ -10,23 +10,22 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TagOrCycleItemStackTransfer implements IItemTransfer {
     @Getter
-    private List<Either<Pair<TagKey<Item>, Integer>, List<ItemStack>>> stacks;
+    private List<Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>>> stacks;
 
     private List<List<ItemStack>> unwrapped = null;
 
 
-    public TagOrCycleItemStackTransfer(List<Either<Pair<TagKey<Item>, Integer>, List<ItemStack>>> stacks) {
+    public TagOrCycleItemStackTransfer(List<Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>>> stacks) {
         updateStacks(stacks);
     }
 
-    public void updateStacks(List<Either<Pair<TagKey<Item>, Integer>, List<ItemStack>>> stacks) {
+    public void updateStacks(List<Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>>> stacks) {
         this.stacks = stacks;
         this.unwrapped = null;
     }
@@ -34,15 +33,17 @@ public class TagOrCycleItemStackTransfer implements IItemTransfer {
     public List<List<ItemStack>> getUnwrapped() {
         if (unwrapped == null) {
             unwrapped = stacks.stream()
-                .map(
-                    tagOrItem -> tagOrItem.map(
-                        tag -> BuiltInRegistries.ITEM.getTag(tag.getFirst())
-                            .map(holderSet -> holderSet.stream()
-                                .map(holder -> new ItemStack(holder.value(), tag.getSecond()))
-                                .collect(Collectors.toList()))
-                            .orElseGet(ArrayList::new),
-                        Function.identity()))
-                .collect(Collectors.toList());
+                    .map(tagOrItem -> tagOrItem.map(
+                            tagList -> tagList
+                                    .getFirst()
+                                    .stream()
+                                    .flatMap(tag -> BuiltInRegistries.ITEM.getTag(tag)
+                                            .map(holderSet -> holderSet.stream()
+                                                    .map(holder -> new ItemStack(holder.value(), tagList.getSecond())))
+                                            .orElseGet(Stream::empty))
+                                    .toList(),
+                            list -> list))
+                    .collect(Collectors.toList());
         }
         return unwrapped;
     }
