@@ -35,15 +35,20 @@ public class TagOrCycleFluidTransfer implements IFluidTransfer {
     public List<List<FluidStack>> getUnwrapped() {
         if (unwrapped == null) {
             unwrapped = stacks.stream()
-                    .map(tagOrFluid -> tagOrFluid.map(
-                            tagList -> tagList
-                                    .stream()
-                                    .flatMap(pair -> BuiltInRegistries.FLUID.getTag(pair.getFirst())
-                                            .map(holderSet -> holderSet.stream()
-                                                    .map(holder -> FluidStack.create(holder.value(), pair.getSecond())))
-                                            .orElseGet(Stream::empty))
-                                    .toList(),
-                            Function.identity()))
+                    .map(tagOrFluid -> {
+                        if (tagOrFluid == null) {
+                            return null;
+                        }
+                        return tagOrFluid.map(
+                                tagList -> tagList
+                                        .stream()
+                                        .flatMap(pair -> BuiltInRegistries.FLUID.getTag(pair.getFirst())
+                                                .map(holderSet -> holderSet.stream()
+                                                        .map(holder -> FluidStack.create(holder.value(), pair.getSecond())))
+                                                .orElseGet(Stream::empty))
+                                        .toList(),
+                                Function.identity());
+                    })
                     .collect(Collectors.toList());
         }
         return unwrapped;
