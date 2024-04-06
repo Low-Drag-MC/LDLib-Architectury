@@ -18,16 +18,16 @@ import java.util.stream.Stream;
 
 public class TagOrCycleItemStackTransfer implements IItemTransfer {
     @Getter
-    private List<Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>>> stacks;
+    private List<Either<List<Pair<TagKey<Item>, Integer>>, List<ItemStack>>> stacks;
 
     private List<List<ItemStack>> unwrapped = null;
 
 
-    public TagOrCycleItemStackTransfer(List<Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>>> stacks) {
+    public TagOrCycleItemStackTransfer(List<Either<List<Pair<TagKey<Item>, Integer>>, List<ItemStack>>> stacks) {
         updateStacks(stacks);
     }
 
-    public void updateStacks(List<Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>>> stacks) {
+    public void updateStacks(List<Either<List<Pair<TagKey<Item>, Integer>>, List<ItemStack>>> stacks) {
         this.stacks = new ArrayList<>(stacks);
         this.unwrapped = null;
     }
@@ -37,11 +37,10 @@ public class TagOrCycleItemStackTransfer implements IItemTransfer {
             unwrapped = stacks.stream()
                     .map(tagOrItem -> tagOrItem.map(
                             tagList -> tagList
-                                    .getFirst()
                                     .stream()
-                                    .flatMap(tag -> BuiltInRegistries.ITEM.getTag(tag)
+                                    .flatMap(pair -> BuiltInRegistries.ITEM.getTag(pair.getFirst())
                                             .map(holderSet -> holderSet.stream()
-                                                    .map(holder -> new ItemStack(holder.value(), tagList.getSecond())))
+                                                    .map(holder -> new ItemStack(holder.value(), pair.getSecond())))
                                             .orElseGet(Stream::empty))
                                     .toList(),
                             Function.identity()))

@@ -17,7 +17,10 @@ import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.*;
-import com.lowdragmc.lowdraglib.utils.*;
+import com.lowdragmc.lowdraglib.utils.CycleFluidTransfer;
+import com.lowdragmc.lowdraglib.utils.Position;
+import com.lowdragmc.lowdraglib.utils.Size;
+import com.lowdragmc.lowdraglib.utils.TagOrCycleFluidTransfer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
@@ -40,6 +43,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -48,7 +52,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -62,10 +65,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 @LDLRegister(name = "fluid_slot", group = "widget.container")
 @Accessors(chain = true)
 public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfigurableWidget {
@@ -235,27 +238,25 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     }
 
     private List<Object> getXEIIngredientsFromTagOrCycleTransfer(TagOrCycleFluidTransfer transfer, int index) {
-        Either<Pair<List<TagKey<Fluid>>, Long>, List<FluidStack>> either = transfer
+        Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>> either = transfer
                 .getStacks()
                 .get(index);
         var ref = new Object() {
             List<Object> returnValue = null;
         };
-        either.ifLeft(pair -> {
-            List<TagKey<Fluid>> tags = pair.getFirst();
-            long count = pair.getSecond();
+        either.ifLeft(list -> {
             if (LDLib.isJeiLoaded()) {
-                ref.returnValue = tags.stream()
-                        .flatMap(tag -> Registry.FLUID
-                                .getTag(tag)
+                ref.returnValue = list.stream()
+                        .flatMap(pair -> Registry.FLUID
+                                .getTag(pair.getFirst())
                                 .stream()
                                 .flatMap(HolderSet.ListBacked::stream)
-                                .map(fluid -> JEICallWrapper.getPlatformFluidTypeForJEI(FluidStack.create(fluid.value(), count), getPosition(), getSize())))
+                                .map(fluid -> JEICallWrapper.getPlatformFluidTypeForJEI(FluidStack.create(fluid.value(), pair.getSecond()), getPosition(), getSize())))
                         .collect(Collectors.toList());
             } else if (LDLib.isReiLoaded()) {
-                ref.returnValue = REICallWrapper.getReiIngredients(tags, count);
+                ref.returnValue = REICallWrapper.getReiIngredients(list);
             } else if (LDLib.isEmiLoaded()) {
-                ref.returnValue = EMICallWrapper.getEmiIngredients(tags, count, getXEIChance());
+                ref.returnValue = EMICallWrapper.getEmiIngredients(list, getXEIChance());
             }
         }).ifRight(fluids -> {
             var stream = fluids.stream();
@@ -575,9 +576,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                     .map(EntryStacks::of)
                     .toList()));
         }
-        public static List<Object> getReiIngredients(List<TagKey<Fluid>> tags, long count) {
-            //noinspection unchecked
-            return (List<Object>) (List<?>) EntryIngredients.ofTags(tags, holder -> EntryStacks.of(dev.architectury.fluid.FluidStack.create(holder.value(), count)));
+        public static List<Object> getReiIngredients(List<Pair<TagKey<Fluid>, Long>> list) {
+            return list.stream()
+                    .map(pair -> EntryIngredients.ofTag(pair.getFirst(), holder -> EntryStacks.of(dev.architectury.fluid.FluidStack.create(holder.value(), pair.getSecond()))))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -585,9 +587,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         public static List<Object> getEmiIngredients(Stream<FluidStack> stream, float xeiChance) {
             return List.of(EmiIngredient.of(stream.map(fluidStack -> EmiStack.of(fluidStack.getFluid(), fluidStack.getTag(), fluidStack.getAmount())).toList()).setChance(xeiChance));
         }
-        public static List<Object> getEmiIngredients(List<TagKey<Fluid>> tags, long count, float xeiChance) {
-            return tags.stream()
-                    .map(tag -> EmiIngredient.of(tag, count).setChance(xeiChance))
+        public static List<Object> getEmiIngredients(List<Pair<TagKey<Fluid>, Long>> list, float xeiChance) {
+            return list.stream()
+                    .map(pair -> EmiIngredient.of(pair.getFirst(), pair.getSecond()).setChance(xeiChance))
                     .collect(Collectors.toList());
         }
     }

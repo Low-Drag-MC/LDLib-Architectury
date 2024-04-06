@@ -435,27 +435,25 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     }
 
     private List<Object> getXEIIngredientsFromTagOrCycleTransfer(TagOrCycleItemStackTransfer transfer, int index) {
-        Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>> either = transfer
+        Either<List<Pair<TagKey<Item>, Integer>>, List<ItemStack>> either = transfer
                 .getStacks()
                 .get(index);
         var ref = new Object() {
             List<Object> returnValue = null;
         };
-        either.ifLeft(pair -> {
-            List<TagKey<Item>> tags = pair.getFirst();
-            int count = pair.getSecond();
+        either.ifLeft(list -> {
             if (LDLib.isJeiLoaded()) {
-                ref.returnValue = tags.stream()
-                        .flatMap(tag -> Registry.ITEM
-                                .getTag(tag)
+                ref.returnValue = list.stream()
+                        .flatMap(pair -> Registry.ITEM
+                                .getTag(pair.getFirst())
                                 .stream()
                                 .flatMap(HolderSet.ListBacked::stream)
-                                .map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), count)), getPosition().x, getPosition().y, getSize().width, getSize().height)))
+                                .map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), pair.getSecond())), getPosition().x, getPosition().y, getSize().width, getSize().height)))
                         .collect(Collectors.toList());
             } else if (LDLib.isReiLoaded()) {
-                ref.returnValue = REICallWrapper.getReiIngredients(this::getRealStack, tags, count);
+                ref.returnValue = REICallWrapper.getReiIngredients(this::getRealStack, list);
             } else if (LDLib.isEmiLoaded()) {
-                ref.returnValue = EMICallWrapper.getEmiIngredients(tags, count, getXEIChance());
+                ref.returnValue = EMICallWrapper.getEmiIngredients(list, getXEIChance());
             }
         }).ifRight(items -> {
             var stream = items.stream().map(this::getRealStack);
@@ -622,9 +620,10 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         public static List<Object> getReiIngredients(Stream<ItemStack> stream) {
             return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
         }
-        public static List<Object> getReiIngredients(UnaryOperator<ItemStack> realStack, List<TagKey<Item>> tags, int count) {
-            //noinspection unchecked
-            return (List<Object>) (List<?>) EntryIngredients.ofTags(tags, holder -> EntryStacks.of(realStack.apply(new ItemStack(holder.value(), count))));
+        public static List<Object> getReiIngredients(UnaryOperator<ItemStack> realStack, List<Pair<TagKey<Item>, Integer>> list) {
+            return list.stream()
+                    .map(pair -> EntryIngredients.ofTag(pair.getFirst(), holder -> EntryStacks.of(realStack.apply(new ItemStack(holder.value(), pair.getSecond())))))
+                    .collect(Collectors.toList());
         }
         public static List<Object> getReiIngredients(ItemStack stack) {
             return List.of(EntryStacks.of(stack));
@@ -635,9 +634,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         public static List<Object> getEmiIngredients(Stream<ItemStack> stream, float xeiChance) {
             return List.of(EmiIngredient.of(stream.map(EmiStack::of).toList()).setChance(xeiChance));
         }
-        public static List<Object> getEmiIngredients(List<TagKey<Item>> tags, int count, float xeiChance) {
-            return tags.stream()
-                    .map(tag -> EmiIngredient.of(tag, count).setChance(xeiChance))
+        public static List<Object> getEmiIngredients(List<Pair<TagKey<Item>, Integer>> list, float xeiChance) {
+            return list.stream()
+                    .map(pair -> EmiIngredient.of(pair.getFirst(), pair.getSecond()).setChance(xeiChance))
                     .collect(Collectors.toList());
         }
         public static List<Object> getEmiIngredients(ItemStack stack, float xeiChance) {

@@ -18,16 +18,16 @@ import java.util.stream.Stream;
 
 public class TagOrCycleFluidTransfer implements IFluidTransfer {
     @Getter
-    private List<Either<Pair<List<TagKey<Fluid>>, Long>, List<FluidStack>>> stacks;
+    private List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> stacks;
 
     private List<List<FluidStack>> unwrapped = null;
 
 
-    public TagOrCycleFluidTransfer(List<Either<Pair<List<TagKey<Fluid>>, Long>, List<FluidStack>>> stacks) {
+    public TagOrCycleFluidTransfer(List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> stacks) {
         updateStacks(stacks);
     }
 
-    public void updateStacks(List<Either<Pair<List<TagKey<Fluid>>, Long>, List<FluidStack>>> stacks) {
+    public void updateStacks(List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> stacks) {
         this.stacks = new ArrayList<>(stacks);
         this.unwrapped = null;
     }
@@ -37,11 +37,10 @@ public class TagOrCycleFluidTransfer implements IFluidTransfer {
             unwrapped = stacks.stream()
                     .map(tagOrFluid -> tagOrFluid.map(
                             tagList -> tagList
-                                    .getFirst()
                                     .stream()
-                                    .flatMap(tag -> BuiltInRegistries.FLUID.getTag(tag)
+                                    .flatMap(pair -> BuiltInRegistries.FLUID.getTag(pair.getFirst())
                                             .map(holderSet -> holderSet.stream()
-                                                    .map(holder -> FluidStack.create(holder.value(), tagList.getSecond())))
+                                                    .map(holder -> FluidStack.create(holder.value(), pair.getSecond())))
                                             .orElseGet(Stream::empty))
                                     .toList(),
                             Function.identity()))
