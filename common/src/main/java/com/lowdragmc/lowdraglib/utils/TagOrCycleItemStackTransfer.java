@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import lombok.Getter;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -42,7 +42,7 @@ public class TagOrCycleItemStackTransfer implements IItemTransfer {
                         return tagOrItem.map(
                                 tagList -> tagList
                                         .stream()
-                                        .flatMap(pair -> BuiltInRegistries.ITEM.getTag(pair.getFirst())
+                                        .flatMap(pair -> Registry.ITEM.getTag(pair.getFirst())
                                                 .map(holderSet -> holderSet.stream()
                                                         .map(holder -> new ItemStack(holder.value(), pair.getSecond())))
                                                 .orElseGet(Stream::empty))

@@ -5,7 +5,7 @@ import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import lombok.Getter;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +42,7 @@ public class TagOrCycleFluidTransfer implements IFluidTransfer {
                         return tagOrFluid.map(
                                 tagList -> tagList
                                         .stream()
-                                        .flatMap(pair -> BuiltInRegistries.FLUID.getTag(pair.getFirst())
+                                        .flatMap(pair -> Registry.FLUID.getTag(pair.getFirst())
                                                 .map(holderSet -> holderSet.stream()
                                                         .map(holder -> FluidStack.create(holder.value(), pair.getSecond())))
                                                 .orElseGet(Stream::empty))

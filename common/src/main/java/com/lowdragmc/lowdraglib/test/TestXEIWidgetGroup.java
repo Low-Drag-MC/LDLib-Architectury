@@ -29,7 +29,7 @@ public class TestXEIWidgetGroup extends WidgetGroup {
         var input1 = new SlotWidget(new ItemStackTransfer(new ItemStack(Items.APPLE, 10)), 0, 20, 20, false, false)
                 .setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.INPUT);
-        List<Either<List<Pair<TagKey<Item>, Integer>>, List<ItemStack>>> itemsList = List.of(Either.left(List.of(Pair.of(ItemTags.AXES, 5))));
+        List<Either<List<Pair<TagKey<Item>, Integer>>, List<ItemStack>>> itemsList = List.of(Either.left(List.of(Pair.of(ItemTags.DIRT, 5))));
         var input2 = new SlotWidget(new TagOrCycleItemStackTransfer(itemsList), 0, 20, 0, false, false)
                 .setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.INPUT);
