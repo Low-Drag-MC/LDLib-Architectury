@@ -142,7 +142,7 @@ public class FluidStack {
     }
 
     public FluidStack copy() {
-        return create(getFluid(), getAmount(), getTag());
+        return create(getFluid(), getAmount(), getTag() == null ? null : getTag().copy());
     }
 
     public FluidStack copy(long amount) {

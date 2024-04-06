@@ -7,11 +7,20 @@ import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
-import com.lowdragmc.lowdraglib.utils.TagItemStackTransfer;
+import com.lowdragmc.lowdraglib.utils.TagOrCycleFluidTransfer;
+import com.lowdragmc.lowdraglib.utils.TagOrCycleItemStackTransfer;
+import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+
+import java.util.List;
 
 public class TestXEIWidgetGroup extends WidgetGroup {
     public TestXEIWidgetGroup() {
@@ -20,7 +29,8 @@ public class TestXEIWidgetGroup extends WidgetGroup {
         var input1 = new SlotWidget(new ItemStackTransfer(new ItemStack(Items.APPLE, 10)), 0, 20, 20, false, false)
                 .setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.INPUT);
-        var input2 = new SlotWidget(new TagItemStackTransfer(ItemTags.AXES, 5), 0, 20, 0, false, false)
+        List<Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>>> itemsList = List.of(Either.left(Pair.of(List.of(ItemTags.AXES), 5)));
+        var input2 = new SlotWidget(new TagOrCycleItemStackTransfer(itemsList), 0, 20, 0, false, false)
                 .setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.INPUT);
         var output = new SlotWidget(new ItemStackTransfer(new ItemStack(Items.DIAMOND, 23)), 0, 130, 20, false, false)
@@ -38,11 +48,18 @@ public class TestXEIWidgetGroup extends WidgetGroup {
                 .setBackground(TankWidget.FLUID_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.OUTPUT)
                 .setXEIChance(0.01f);
+
+        List<Either<Pair<List<TagKey<Fluid>>, Long>, List<FluidStack>>> fluidList = List.of(Either.left(Pair.of(List.of(FluidTags.LAVA), 10000L)));
+        var catalystFluid = new TankWidget(new TagOrCycleFluidTransfer(fluidList), 0, 110, 40, 20, 20, false, false)
+                .setBackground(TankWidget.FLUID_SLOT_TEXTURE)
+                .setIngredientIO(IngredientIO.CATALYST)
+                .setXEIChance(0.01f);
         addWidget(input1);
         addWidget(input2);
         addWidget(output);
         addWidget(both);
         addWidget(inputFluid);
         addWidget(outputFluid);
+        addWidget(catalystFluid);
     }
 }

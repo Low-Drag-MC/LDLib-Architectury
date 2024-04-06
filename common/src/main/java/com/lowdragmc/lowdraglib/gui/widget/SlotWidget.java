@@ -17,12 +17,16 @@ import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
-import com.lowdragmc.lowdraglib.utils.*;
+import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
+import com.lowdragmc.lowdraglib.utils.Position;
+import com.lowdragmc.lowdraglib.utils.Size;
+import com.lowdragmc.lowdraglib.utils.TagOrCycleItemStackTransfer;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import dev.emi.emi.api.stack.EmiIngredient;
+import dev.emi.emi.api.stack.EmiStack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -45,7 +49,6 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
@@ -371,11 +374,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
             if (handler instanceof WidgetSlotItemTransfer widgetSlotItemTransfer) {
                 if (widgetSlotItemTransfer.itemHandler instanceof CycleItemStackHandler cycleItemStackHandler) {
-                    return getXEIIngredientsFromCycleTransfer(realStack, cycleItemStackHandler, widgetSlotItemTransfer.index);
-                } else if (widgetSlotItemTransfer.itemHandler instanceof TagItemStackTransfer tagItemStackTransfer) {
-                    return getXEIIngredientsFromTagTransfer(tagItemStackTransfer);
+                    return getXEIIngredientsFromCycleTransfer(cycleItemStackHandler, widgetSlotItemTransfer.index);
                 } else if (widgetSlotItemTransfer.itemHandler instanceof TagOrCycleItemStackTransfer transfer) {
-                    return getXEIIngredientsFromTagOrCycleTransfer(realStack, transfer, widgetSlotItemTransfer.index);
+                    return getXEIIngredientsFromTagOrCycleTransfer(transfer, widgetSlotItemTransfer.index);
                 }
             }
 
@@ -384,7 +385,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             } else if (LDLib.isReiLoaded()) {
                 return REICallWrapper.getReiIngredients(realStack);
             } else if (LDLib.isEmiLoaded()) {
-                return EmiIngredient.of(Ingredient.of(realStack));
+                return EMICallWrapper.getEmiIngredients(realStack, getXEIChance());
             }
             return realStack;
         }
@@ -400,11 +401,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
         if (handler instanceof WidgetSlotItemTransfer widgetSlotItemTransfer) {
             if (widgetSlotItemTransfer.itemHandler instanceof CycleItemStackHandler cycleItemStackHandler) {
-                return getXEIIngredientsFromCycleTransfer(realStack, cycleItemStackHandler, widgetSlotItemTransfer.index);
-            } else if (widgetSlotItemTransfer.itemHandler instanceof TagItemStackTransfer tagItemStackTransfer) {
-                return getXEIIngredientsFromTagTransfer(tagItemStackTransfer);
+                return getXEIIngredientsFromCycleTransfer(cycleItemStackHandler, widgetSlotItemTransfer.index);
             } else if (widgetSlotItemTransfer.itemHandler instanceof TagOrCycleItemStackTransfer transfer) {
-                return getXEIIngredientsFromTagOrCycleTransfer(realStack, transfer, widgetSlotItemTransfer.index);
+                return getXEIIngredientsFromTagOrCycleTransfer(transfer, widgetSlotItemTransfer.index);
             }
         }
 
@@ -413,7 +412,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         } else if (LDLib.isReiLoaded()) {
             return REICallWrapper.getReiIngredients(realStack);
         } else if (LDLib.isEmiLoaded()) {
-            return List.of(EmiIngredient.of(Ingredient.of(realStack), realStack.getCount()));
+            return EMICallWrapper.getEmiIngredients(realStack, getXEIChance());
         }
         return List.of(realStack);
     }
@@ -423,32 +422,19 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return itemStack;
     }
 
-    private List<Object> getXEIIngredientsFromCycleTransfer(ItemStack realStack, CycleItemStackHandler transfer, int index) {
+    private List<Object> getXEIIngredientsFromCycleTransfer(CycleItemStackHandler transfer, int index) {
         var stream = transfer.getStackList(index).stream().map(this::getRealStack);
         if (LDLib.isJeiLoaded()) {
             return stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
         } else if (LDLib.isReiLoaded()) {
             return REICallWrapper.getReiIngredients(stream);
         } else if (LDLib.isEmiLoaded()) {
-            return List.of(EmiIngredient.of(Ingredient.of(stream.toArray(ItemStack[]::new)), realStack.getCount()).setChance(getXEIChance()));
+            return EMICallWrapper.getEmiIngredients(stream, getXEIChance());
         }
         return null;
     }
 
-    private List<Object> getXEIIngredientsFromTagTransfer(TagItemStackTransfer transfer) {
-        TagKey<Item> tag = transfer.getTag();
-        int count = transfer.getStackSize();
-        if (LDLib.isJeiLoaded()) {
-            return BuiltInRegistries.ITEM.getTag(tag).stream().flatMap(HolderSet.ListBacked::stream).map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), count)), getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
-        } else if (LDLib.isReiLoaded()) {
-            return REICallWrapper.getReiIngredients(this::getRealStack, tag, count);
-        } else if (LDLib.isEmiLoaded()) {
-            return List.of(EmiIngredient.of(tag, count).setChance(getXEIChance()));
-        }
-        return null;
-    }
-
-    private List<Object> getXEIIngredientsFromTagOrCycleTransfer(ItemStack realStack, TagOrCycleItemStackTransfer transfer, int index) {
+    private List<Object> getXEIIngredientsFromTagOrCycleTransfer(TagOrCycleItemStackTransfer transfer, int index) {
         Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>> either = transfer
                 .getStacks()
                 .get(index);
@@ -469,9 +455,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             } else if (LDLib.isReiLoaded()) {
                 ref.returnValue = REICallWrapper.getReiIngredients(this::getRealStack, tags, count);
             } else if (LDLib.isEmiLoaded()) {
-                ref.returnValue = tags.stream()
-                        .map(tag -> EmiIngredient.of(tag, count).setChance(getXEIChance()))
-                        .collect(Collectors.toList());
+                ref.returnValue = EMICallWrapper.getEmiIngredients(tags, count, getXEIChance());
             }
         }).ifRight(items -> {
             var stream = items.stream().map(this::getRealStack);
@@ -480,7 +464,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             } else if (LDLib.isReiLoaded()) {
                 ref.returnValue = REICallWrapper.getReiIngredients(stream);
             } else if (LDLib.isEmiLoaded()) {
-                ref.returnValue = List.of(EmiIngredient.of(Ingredient.of(stream.toArray(ItemStack[]::new)), realStack.getCount()).setChance(getXEIChance()));
+                ref.returnValue = EMICallWrapper.getEmiIngredients(stream, getXEIChance());
             }
         });
         return ref.returnValue;
@@ -633,16 +617,26 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         public static List<Object> getReiIngredients(Stream<ItemStack> stream) {
             return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
         }
-        public static List<Object> getReiIngredients(UnaryOperator<ItemStack> realStack, TagKey<Item> tag, int count) {
-            return List.of(EntryIngredients.ofTag(tag, holder -> EntryStacks.of(realStack.apply(new ItemStack(holder.value(), count)))));
-        }
         public static List<Object> getReiIngredients(UnaryOperator<ItemStack> realStack, List<TagKey<Item>> tags, int count) {
-            return tags.stream()
-                    .map(tag -> EntryIngredients.ofTag(tag, holder -> EntryStacks.of(realStack.apply(new ItemStack(holder.value(), count)))))
-                    .collect(Collectors.toList());
+            //noinspection unchecked
+            return (List<Object>) (List<?>) EntryIngredients.ofTags(tags, holder -> EntryStacks.of(realStack.apply(new ItemStack(holder.value(), count))));
         }
         public static List<Object> getReiIngredients(ItemStack stack) {
             return List.of(EntryStacks.of(stack));
+        }
+    }
+
+    public static final class EMICallWrapper {
+        public static List<Object> getEmiIngredients(Stream<ItemStack> stream, float xeiChance) {
+            return List.of(EmiIngredient.of(stream.map(EmiStack::of).toList()).setChance(xeiChance));
+        }
+        public static List<Object> getEmiIngredients(List<TagKey<Item>> tags, int count, float xeiChance) {
+            return tags.stream()
+                    .map(tag -> EmiIngredient.of(tag, count).setChance(xeiChance))
+                    .collect(Collectors.toList());
+        }
+        public static List<Object> getEmiIngredients(ItemStack stack, float xeiChance) {
+            return List.of(EmiStack.of(stack).setChance(xeiChance));
         }
     }
 }
