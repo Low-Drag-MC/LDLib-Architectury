@@ -17,7 +17,7 @@ def mod_url = getConfig("mod_url")
 def minecraft_version = getConfig("minecraft_version")
 def jei_version = getConfig("jei_version")
 def rei_version = getConfig("rei_version")
-//def kjs_version = getConfig("kjs_version")
+def kjs_version = getConfig("kjs_version")
 def embeddium_version = getConfig("embeddium_version")
 def oculus_version = getConfig("oculus_version")
 def ae2_version = getConfig("ae2_version")
@@ -100,11 +100,11 @@ dependencies {
     // REI
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-forge:${rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-forge:${rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
+    modImplementation("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
 
     // EMI
     modCompileOnly("dev.emi:emi-forge:${emi_version}:api")
-    modImplementation("dev.emi:emi-forge:${emi_version}")
+    modCompileOnly("dev.emi:emi-forge:${emi_version}")
 
     // AE2
     modImplementation("appeng:appliedenergistics2-forge:${ae2_version}")

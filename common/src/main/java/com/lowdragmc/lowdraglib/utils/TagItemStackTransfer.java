@@ -58,6 +58,16 @@ public class TagItemStackTransfer implements IItemTransfer {
         return getResolvedItems().get(Math.abs((int)(System.currentTimeMillis() / 1000) % resolvedItems.size()));
     }
 
+    @Override
+    public void setStackInSlot(int index, ItemStack stack) {
+        if (resolvedItems == null) {
+            resolvedItems = new ArrayList<>();
+        } else {
+            resolvedItems.clear();
+        }
+        resolvedItems.add(stack);
+    }
+
     @NotNull
     @Override
     public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate, boolean notifyChanges) {

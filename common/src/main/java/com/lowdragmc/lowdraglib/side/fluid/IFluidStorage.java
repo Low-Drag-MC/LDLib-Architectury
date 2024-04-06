@@ -10,6 +10,60 @@ import javax.annotation.Nonnull;
  * @implNote IFluidStorage
  */
 public interface IFluidStorage extends IFluidTransfer {
+    IFluidStorage EMPTY = new IFluidStorage() {
+        @NotNull
+        @Override
+        public FluidStack getFluid() {
+            return FluidStack.empty();
+        }
+
+        @Override
+        public void setFluid(FluidStack fluid) {
+
+        }
+
+        @Override
+        public long getCapacity() {
+            return 0;
+        }
+
+        @Override
+        public boolean isFluidValid(FluidStack stack) {
+            return false;
+        }
+
+        @Override
+        public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+            return 0;
+        }
+
+        @Override
+        public boolean supportsFill(int tank) {
+            return false;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+            return FluidStack.empty();
+        }
+
+        @Override
+        public boolean supportsDrain(int tank) {
+            return false;
+        }
+
+        @NotNull
+        @Override
+        public Object createSnapshot() {
+            return new Object();
+        }
+
+        @Override
+        public void restoreFromSnapshot(Object snapshot) {
+
+        }
+    };
 
     @Nonnull
     FluidStack getFluid();

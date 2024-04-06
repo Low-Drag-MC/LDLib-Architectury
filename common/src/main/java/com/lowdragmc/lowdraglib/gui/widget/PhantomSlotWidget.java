@@ -11,7 +11,7 @@ import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.emi.emi.api.stack.ItemEmiStack;
+import dev.emi.emi.api.stack.EmiStack;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -110,7 +110,7 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
     @Override
     @Environment(EnvType.CLIENT)
     public List<Target> getPhantomTargets(Object ingredient) {
-        if (LDLib.isEmiLoaded() && ingredient instanceof ItemEmiStack itemEmiStack) {
+        if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack itemEmiStack) {
             Item item = itemEmiStack.getKeyOfType(Item.class);
             ingredient = item == null ? null : new ItemStack(item, (int)itemEmiStack.getAmount());
             if (ingredient instanceof ItemStack itemStack) {
@@ -130,7 +130,7 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
 
             @Override
             public void accept(@Nonnull Object ingredient) {
-                if (LDLib.isEmiLoaded() && ingredient instanceof ItemEmiStack itemEmiStack) {
+                if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack itemEmiStack) {
                     Item item = itemEmiStack.getKeyOfType(Item.class);
                     ingredient = item == null ? null : new ItemStack(item, (int)itemEmiStack.getAmount());
                     if (ingredient instanceof ItemStack itemStack) {

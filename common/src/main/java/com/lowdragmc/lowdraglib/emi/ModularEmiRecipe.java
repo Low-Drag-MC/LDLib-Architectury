@@ -6,7 +6,8 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
-import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
+import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
+import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.mojang.datafixers.util.Pair;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
@@ -15,7 +16,6 @@ import dev.emi.emi.api.widget.SlotWidget;
 import dev.emi.emi.api.widget.WidgetHolder;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +47,7 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
         this.width = widget.getSize().width;
         this.height = widget.getSize().height;
 
-        List<Pair<WidgetGroup, Widget>> flatVisibleWidgetCollection = getFlatWidgetCollection(widget);
-        for (var pair : flatVisibleWidgetCollection) {
-            Widget w = pair.getSecond();
+        for (Widget w : getFlatWidgetCollection(widget)) {
             if (w instanceof IRecipeIngredientSlot slot) {
                 var io = slot.getIngredientIO();
                 for (Object ingredient : slot.getXEIIngredients()) {
@@ -69,19 +67,17 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
         }
     }
 
-    public List<Pair<WidgetGroup, Widget>> getFlatWidgetCollection(T widgetIn) {
-        List<Pair<WidgetGroup, Widget>> widgetList = new ArrayList<>();
+    public List<Widget> getFlatWidgetCollection(T widgetIn) {
+        List<Widget> widgetList = new ArrayList<>();
         if (widgetIn instanceof WidgetGroup group) {
             for (Widget widget : group.widgets) {
-                widgetList.add(Pair.of(group, widget));
+                widgetList.add(widget);
                 if (widget instanceof WidgetGroup group1) {
-                    widgetList.addAll(group1.getContainedWidgets(true).stream()
-                            .map(widget1 -> Pair.of(group1, widget1))
-                            .toList());
+                    widgetList.addAll(group1.getContainedWidgets(true));
                 }
             }
         } else {
-            widgetList.add(Pair.of(null, widgetIn));
+            widgetList.add(widgetIn);
         }
         return widgetList;
     }
@@ -106,8 +102,7 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
             CACHE_OPENED.add(modular);
         }
         List<dev.emi.emi.api.widget.Widget> slots = new ArrayList<>();
-        for (var pair : getFlatWidgetCollection(widget)) {
-            Widget w = pair.getSecond();
+        for (Widget w : getFlatWidgetCollection(widget)) {
             if (w instanceof IRecipeIngredientSlot slot) {
                 var io = slot.getIngredientIO();
                 if (io == IngredientIO.BOTH || io == IngredientIO.INPUT || io == IngredientIO.OUTPUT || io == IngredientIO.CATALYST) {
@@ -127,16 +122,12 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
                     slots.add(slotWidget);
 
                     // Clear the LDlib slots
-                    if (pair.getFirst() != null) {
-                        if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
-                            slotW.getSlotReference().set(ItemStack.EMPTY);
-                            slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
-                            //pair.getFirst().removeWidget(slotW);
-                        } else if (slot instanceof TankWidget tankW) {
-                            tankW.getFluidTank().setFluid(FluidStack.empty());
-                            tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
-                            //pair.getFirst().removeWidget(tankW);
-                        }
+                    if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
+                        slotW.setHandlerSlot(IItemTransfer.EMPTY, 0);
+                        slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
+                    } else if (slot instanceof TankWidget tankW) {
+                        tankW.setFluidTank(IFluidStorage.EMPTY);
+                        tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                     }
                 }
             }

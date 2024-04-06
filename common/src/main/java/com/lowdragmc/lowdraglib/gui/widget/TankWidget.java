@@ -14,18 +14,21 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.TextFormattingUtil;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
+import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.*;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.emi.emi.api.stack.EmiStack;
-import dev.emi.emi.api.stack.FluidEmiStack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import mezz.jei.api.helpers.IPlatformFluidHelper;
+import mezz.jei.common.input.ClickableIngredient;
+import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.library.ingredients.TypedIngredient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -147,13 +150,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (self().isMouseOverElement(mouseX, mouseY)) {
             if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return null;
             if (LDLib.isJeiLoaded()) {
-                return getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
+                return JEICallWrapper.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
             }
             if (LDLib.isReiLoaded()) {
                 return EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
             }
             if (LDLib.isEmiLoaded()) {
-                return new FluidEmiStack(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance);
+                return EmiStack.of(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance);
             }
         }
         return null;
@@ -163,7 +166,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public List<Object> getXEIIngredients() {
         if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return Collections.emptyList();
         if (LDLib.isJeiLoaded()) {
-            return List.of(getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize()));
+            return List.of(JEICallWrapper.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize()));
         }
         if (LDLib.isReiLoaded()) {
             return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag())));
@@ -172,11 +175,6 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return List.of(EmiStack.of(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance));
         }
         return List.of(FluidHelper.toRealFluidStack(lastFluidInTank));
-    }
-
-    @ExpectPlatform
-    public static Object getPlatformFluidTypeForJEI(FluidStack fluidStack, Position pos, Size size) {
-        throw new AssertionError();
     }
 
     private List<Component> getToolTips(List<Component> list) {
@@ -459,5 +457,20 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }.setAllowClickDrained(false).setAllowClickFilled(false).setFluidTank(handler)));
 
         IConfigurableWidget.super.buildConfigurator(father);
+    }
+
+    /**
+     * Wrapper for methods that use JEI classes so that classloading doesn't brick itself.
+     */
+    public static final class JEICallWrapper {
+        public static Object getPlatformFluidTypeForJEI(FluidStack fluidStack, Position pos, Size size) {
+            return _getPlatformFluidTypeForJEI(JEIPlugin.jeiRuntime.getJeiHelpers().getPlatformFluidHelper(), fluidStack, pos, size);
+        }
+
+        private static <T> Object _getPlatformFluidTypeForJEI(IPlatformFluidHelper<T> helper, FluidStack fluidStack, Position pos, Size size) {
+            T ingredient = helper.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
+            return new ClickableIngredient<>(TypedIngredient.createUnvalidated(helper.getFluidIngredientType(), ingredient),
+                    new ImmutableRect2i(pos.x, pos.y, size.width, size.height));
+        }
     }
 }

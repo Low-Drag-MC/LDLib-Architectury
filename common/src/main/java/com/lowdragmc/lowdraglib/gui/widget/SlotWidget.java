@@ -17,12 +17,11 @@ import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
-import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
-import com.lowdragmc.lowdraglib.utils.Position;
-import com.lowdragmc.lowdraglib.utils.Size;
-import com.lowdragmc.lowdraglib.utils.TagItemStackTransfer;
+import com.lowdragmc.lowdraglib.utils.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import dev.emi.emi.api.stack.EmiIngredient;
 import lombok.Getter;
 import lombok.Setter;
@@ -58,6 +57,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 @LDLRegister(name = "item_slot", group = "widget.container")
 @Accessors(chain = true)
@@ -67,7 +68,6 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Nullable
     protected static Slot HOVER_SLOT = null;
     @Nullable
-    @Getter
     protected Slot slotReference;
     @Configurable(name = "ldlib.gui.editor.name.canTakeItems")
     @Setter
@@ -373,7 +373,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                     if (LDLib.isJeiLoaded()) {
                         return stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
                     } else if (LDLib.isReiLoaded()) {
-                        return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
+                        return REICallWrapper.getReiIngredients(stream);
                     } else if (LDLib.isEmiLoaded()) {
                         return List.of(EmiIngredient.of(Ingredient.of(stream.toArray(ItemStack[]::new)), realStack.getCount()).setChance(getXEIChance()));
                     }
@@ -383,21 +383,49 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                     if (LDLib.isJeiLoaded()) {
                         return BuiltInRegistries.ITEM.getTag(tag).stream().flatMap(HolderSet.ListBacked::stream).map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), count)), getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
                     } else if (LDLib.isReiLoaded()) {
-                        return List.of(EntryIngredients.ofTag(tag, holder -> EntryStacks.of(getRealStack(new ItemStack(holder.value(), count)))));
+                        return REICallWrapper.getReiIngredients(this::getRealStack, tag, count);
                     } else if (LDLib.isEmiLoaded()) {
                         return List.of(EmiIngredient.of(tag, count).setChance(getXEIChance()));
                     }
+                } else if (widgetSlotItemTransfer.itemHandler instanceof TagOrCycleItemStackTransfer tagItemStackTransfer) {
+                    Either<Pair<TagKey<Item>, Integer>, List<ItemStack>> either = tagItemStackTransfer
+                            .getStacks()
+                            .get(widgetSlotItemTransfer.index);
+                    var ref = new Object() {
+                        List<Object> returnValue = null;
+                    };
+                    either.ifLeft(pair -> {
+                        TagKey<Item> tag = pair.getFirst();
+                        int count = pair.getSecond();
+                        if (LDLib.isJeiLoaded()) {
+                            ref.returnValue = BuiltInRegistries.ITEM.getTag(tag).stream().flatMap(HolderSet.ListBacked::stream).map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), count)), getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+                        } else if (LDLib.isReiLoaded()) {
+                            ref.returnValue = REICallWrapper.getReiIngredients(this::getRealStack, tag, count);
+                        } else if (LDLib.isEmiLoaded()) {
+                            ref.returnValue = List.of(EmiIngredient.of(tag, count).setChance(getXEIChance()));
+                        }
+                    }).ifRight(items -> {
+                        var stream = items.stream().map(this::getRealStack);
+                        if (LDLib.isJeiLoaded()) {
+                            ref.returnValue = stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+                        } else if (LDLib.isReiLoaded()) {
+                            ref.returnValue = REICallWrapper.getReiIngredients(stream);
+                        } else if (LDLib.isEmiLoaded()) {
+                            ref.returnValue = List.of(EmiIngredient.of(Ingredient.of(stream.toArray(ItemStack[]::new)), realStack.getCount()).setChance(getXEIChance()));
+                        }
+                    });
+                    return ref.returnValue;
                 }
             }
 
-            if (LDLib.isJeiLoaded() && !getRealStack(handler.getItem()).isEmpty()) {
-                return JEIPlugin.getItemIngredient(getRealStack(handler.getItem()), getPosition().x, getPosition().y, getSize().width, getSize().height);
+            if (LDLib.isJeiLoaded() && !realStack.isEmpty()) {
+                return JEIPlugin.getItemIngredient(realStack, getPosition().x, getPosition().y, getSize().width, getSize().height);
             } else if (LDLib.isReiLoaded()) {
-                return EntryStacks.of(getRealStack(handler.getItem()));
+                return REICallWrapper.getReiIngredients(realStack);
             } else if (LDLib.isEmiLoaded()) {
-                return EmiIngredient.of(Ingredient.of(getRealStack(handler.getItem())));
+                return EmiIngredient.of(Ingredient.of(realStack));
             }
-            return getRealStack(handler.getItem());
+            return realStack;
         }
         return null;
     }
@@ -415,7 +443,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 if (LDLib.isJeiLoaded()) {
                     return stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
                 } else if (LDLib.isReiLoaded()) {
-                    return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
+                    return REICallWrapper.getReiIngredients(stream);
                 } else if (LDLib.isEmiLoaded()) {
                     return List.of(EmiIngredient.of(Ingredient.of(stream.toArray(ItemStack[]::new)), realStack.getCount()).setChance(getXEIChance()));
                 }
@@ -425,21 +453,49 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 if (LDLib.isJeiLoaded()) {
                     return BuiltInRegistries.ITEM.getTag(tag).stream().flatMap(HolderSet.ListBacked::stream).map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), count)), getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
                 } else if (LDLib.isReiLoaded()) {
-                    return List.of(EntryIngredients.ofTag(tag, holder -> EntryStacks.of(getRealStack(new ItemStack(holder.value(), count)))));
+                    return REICallWrapper.getReiIngredients(this::getRealStack, tag, count);
                 } else if (LDLib.isEmiLoaded()) {
                     return List.of(EmiIngredient.of(tag, count).setChance(getXEIChance()));
                 }
+            } else if (widgetSlotItemTransfer.itemHandler instanceof TagOrCycleItemStackTransfer tagItemStackTransfer) {
+                Either<Pair<TagKey<Item>, Integer>, List<ItemStack>> either = tagItemStackTransfer
+                        .getStacks()
+                        .get(widgetSlotItemTransfer.index);
+                var ref = new Object() {
+                    List<Object> returnValue = null;
+                };
+                either.ifLeft(pair -> {
+                    TagKey<Item> tag = pair.getFirst();
+                    int count = pair.getSecond();
+                    if (LDLib.isJeiLoaded()) {
+                        ref.returnValue = BuiltInRegistries.ITEM.getTag(tag).stream().flatMap(HolderSet.ListBacked::stream).map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), count)), getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+                    } else if (LDLib.isReiLoaded()) {
+                        ref.returnValue = REICallWrapper.getReiIngredients(this::getRealStack, tag, count);
+                    } else if (LDLib.isEmiLoaded()) {
+                        ref.returnValue = List.of(EmiIngredient.of(tag, count).setChance(getXEIChance()));
+                    }
+                }).ifRight(items -> {
+                    var stream = items.stream().map(this::getRealStack);
+                    if (LDLib.isJeiLoaded()) {
+                        ref.returnValue = stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+                    } else if (LDLib.isReiLoaded()) {
+                        ref.returnValue = REICallWrapper.getReiIngredients(stream);
+                    } else if (LDLib.isEmiLoaded()) {
+                        ref.returnValue = List.of(EmiIngredient.of(Ingredient.of(stream.toArray(ItemStack[]::new)), realStack.getCount()).setChance(getXEIChance()));
+                    }
+                });
+                return ref.returnValue;
             }
         }
 
         if (LDLib.isJeiLoaded()) {
             return List.of(JEIPlugin.getItemIngredient(realStack, getPosition().x, getPosition().y, getSize().width, getSize().height));
         } else if (LDLib.isReiLoaded()) {
-            return List.of(EntryStacks.of(realStack));
+            return REICallWrapper.getReiIngredients(realStack);
         } else if (LDLib.isEmiLoaded()) {
             return List.of(EmiIngredient.of(Ingredient.of(realStack), realStack.getCount()));
         }
-        return List.of(getRealStack(handler.getItem()));
+        return List.of(realStack);
     }
 
     public ItemStack getRealStack(ItemStack itemStack) {
@@ -588,5 +644,17 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }.setCanPutItems(false).setCanTakeItems(false).setHandlerSlot(handler, 0)));
 
         IConfigurableWidget.super.buildConfigurator(father);
+    }
+
+    public static final class REICallWrapper {
+        public static List<Object> getReiIngredients(Stream<ItemStack> stream) {
+            return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
+        }
+        public static List<Object> getReiIngredients(UnaryOperator<ItemStack> realStack, TagKey<Item> tag, int count) {
+            return List.of(EntryIngredients.ofTag(tag, holder -> EntryStacks.of(realStack.apply(new ItemStack(holder.value(), count)))));
+        }
+        public static List<Object> getReiIngredients(ItemStack stack) {
+            return List.of(EntryStacks.of(stack));
+        }
     }
 }

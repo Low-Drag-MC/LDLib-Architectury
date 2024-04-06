@@ -5,6 +5,7 @@ import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.runtime.IClickableIngredient;
 import net.minecraft.client.renderer.Rect2i;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -30,8 +31,9 @@ public class ModularUIJeiHandler implements IGuiContainerHandler<ModularUIGuiCon
         return Optional.empty();
     }
 
+    @NotNull
     @Override
-    public <I> List<Target<I>> getTargetsTyped(ModularUIGuiContainer gui, ITypedIngredient<I> ingredient, boolean doStart) {
+    public <I> List<Target<I>> getTargetsTyped(ModularUIGuiContainer gui, @NotNull ITypedIngredient<I> ingredient, boolean doStart) {
         List<com.lowdragmc.lowdraglib.gui.ingredient.Target> targets = gui.modularUI.mainGroup.getPhantomTargets(ingredient);
         if (targets.isEmpty()) return Collections.emptyList();
         return targets.stream().map(target-> new JEITarget<I>(target)).collect(Collectors.toList());
@@ -41,7 +43,7 @@ public class ModularUIJeiHandler implements IGuiContainerHandler<ModularUIGuiCon
     public void onComplete() {
     }
 
-    public static class JEITarget<I> implements Target<I>{
+    public static class JEITarget<I> implements Target<I> {
         com.lowdragmc.lowdraglib.gui.ingredient.Target target;
 
         public JEITarget(com.lowdragmc.lowdraglib.gui.ingredient.Target target) {

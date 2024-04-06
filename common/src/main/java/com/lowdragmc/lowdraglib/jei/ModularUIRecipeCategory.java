@@ -2,11 +2,9 @@ package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
-import lombok.val;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.ingredients.IIngredientType;
-import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -49,12 +47,14 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
 
     private static void addJEISlot(IRecipeLayoutBuilder builder, IRecipeIngredientSlot slot, RecipeIngredientRole role, int index) {
         IRecipeSlotBuilder slotBuilder = builder.addSlot(role, index, -1);
+        //noinspection rawtypes
         Map<IIngredientType, List> map = new HashMap<>();
+        //noinspection unchecked
         slot.getXEIIngredients().stream()
                 .filter(IClickableIngredient.class::isInstance)
                 .map(IClickableIngredient.class::cast)
                 .forEach(clickableIngredient -> map.computeIfAbsent(clickableIngredient.getTypedIngredient().getType(), a -> new ArrayList<>()).add(clickableIngredient.getTypedIngredient().getIngredient()));
-        map.forEach((ingredient, list) -> slotBuilder.addIngredients(ingredient, list));
+        map.forEach(slotBuilder::addIngredients);
     }
 
     @Nullable

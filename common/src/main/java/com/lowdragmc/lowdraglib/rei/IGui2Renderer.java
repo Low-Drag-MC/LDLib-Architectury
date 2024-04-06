@@ -12,16 +12,9 @@ import net.minecraft.client.gui.GuiGraphics;
  */
 public interface IGui2Renderer {
     static Renderer toDrawable(IGuiTexture guiTexture) {
-        return new Renderer() {
-            int z = 0;
-            @Override
-            public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                if (guiTexture == null) return;
-                graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, z);
-                guiTexture.draw(graphics, mouseX, mouseY, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getWidth());
-                graphics.pose().popPose();
-            }
+        return (graphics, bounds, mouseX, mouseY, delta) -> {
+            if (guiTexture == null) return;
+            guiTexture.draw(graphics, mouseX, mouseY, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getWidth());
         };
     }
 }

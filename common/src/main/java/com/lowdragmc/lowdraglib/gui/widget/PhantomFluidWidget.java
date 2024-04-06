@@ -11,7 +11,7 @@ import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
-import dev.emi.emi.api.stack.FluidEmiStack;
+import dev.emi.emi.api.stack.EmiStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.Rect2i;
@@ -65,8 +65,8 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
     }
 
     public static FluidStack drainFrom(Object ingredient) {
-         if (ingredient instanceof Ingredient ingred) {
-            var items = ingred.getItems();
+         if (ingredient instanceof Ingredient ing) {
+            var items = ing.getItems();
             if (items.length > 0) {
                 ingredient = items[0];
             }
@@ -86,7 +86,7 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
         if (LDLib.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
             ingredient = FluidStack.create(fluidStack.getFluid(), fluidTank.getCapacity(), fluidStack.getTag());
         }
-        if (LDLib.isEmiLoaded() && ingredient instanceof FluidEmiStack fluidEmiStack) {
+        if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
             var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
             ingredient = fluid == null ? FluidStack.empty() : FluidStack.create(fluid, fluidTank.getCapacity(), fluidEmiStack.getNbt());
         }
@@ -109,12 +109,12 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                 if (LDLib.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
                     ingredient = FluidStack.create(fluidStack.getFluid(), fluidTank.getCapacity(), fluidStack.getTag());
                 }
-                if (LDLib.isEmiLoaded() && ingredient instanceof FluidEmiStack fluidEmiStack) {
+                if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
                     var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
                     ingredient = fluid == null ? FluidStack.empty() : FluidStack.create(fluid, fluidTank.getCapacity(), fluidEmiStack.getNbt());
                 }
-                if (ingredient instanceof FluidStack)
-                    ingredientStack = (FluidStack) ingredient;
+                if (ingredient instanceof FluidStack fluidStack)
+                    ingredientStack = fluidStack;
                 else
                     ingredientStack = drainFrom(ingredient);
 
