@@ -29,7 +29,7 @@ public class TestXEIWidgetGroup extends WidgetGroup {
         var input1 = new SlotWidget(new ItemStackTransfer(new ItemStack(Items.APPLE, 10)), 0, 20, 20, false, false)
                 .setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.INPUT);
-        List<Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>>> itemsList = List.of(Either.left(Pair.of(List.of(ItemTags.AXES), 5)));
+        List<Either<List<Pair<TagKey<Item>, Integer>>, List<ItemStack>>> itemsList = List.of(Either.left(List.of(Pair.of(ItemTags.AXES, 5))));
         var input2 = new SlotWidget(new TagOrCycleItemStackTransfer(itemsList), 0, 20, 0, false, false)
                 .setBackgroundTexture(SlotWidget.ITEM_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.INPUT);
@@ -49,7 +49,7 @@ public class TestXEIWidgetGroup extends WidgetGroup {
                 .setIngredientIO(IngredientIO.OUTPUT)
                 .setXEIChance(0.01f);
 
-        List<Either<Pair<List<TagKey<Fluid>>, Long>, List<FluidStack>>> fluidList = List.of(Either.left(Pair.of(List.of(FluidTags.LAVA), 10000L)));
+        List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> fluidList = List.of(Either.left(List.of(Pair.of(FluidTags.LAVA, 10000L))));
         var catalystFluid = new TankWidget(new TagOrCycleFluidTransfer(fluidList), 0, 110, 40, 20, 20, false, false)
                 .setBackground(TankWidget.FLUID_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.CATALYST)
