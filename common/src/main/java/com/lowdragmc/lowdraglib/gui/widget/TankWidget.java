@@ -17,15 +17,18 @@ import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.*;
-import com.lowdragmc.lowdraglib.side.fluid.FluidActionResult;
-import com.lowdragmc.lowdraglib.utils.Position;
-import com.lowdragmc.lowdraglib.utils.Size;
+import com.lowdragmc.lowdraglib.utils.*;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
+import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import mezz.jei.api.helpers.IPlatformFluidHelper;
 import mezz.jei.common.input.ClickableIngredient;
@@ -35,14 +38,19 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 import org.jetbrains.annotations.NotNull;
@@ -54,6 +62,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @LDLRegister(name = "fluid_slot", group = "widget.container")
 @Accessors(chain = true)
@@ -62,7 +73,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Nullable
     @Getter
-    protected IFluidStorage fluidTank;
+    protected IFluidTransfer fluidTank;
+    @Getter
+    protected int tank;
     @Configurable(name = "ldlib.gui.editor.name.showAmount")
     @Setter
     protected boolean showAmount;
@@ -114,6 +127,21 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public TankWidget(@Nullable IFluidStorage fluidTank, int x, int y, int width, int height, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
         super(new Position(x, y), new Size(width, height));
         this.fluidTank = fluidTank;
+        this.tank = 0;
+        this.showAmount = true;
+        this.allowClickFilled = allowClickContainerFilling;
+        this.allowClickDrained = allowClickContainerEmptying;
+        this.drawHoverTips = true;
+    }
+
+    public TankWidget(IFluidTransfer fluidTank, int tank, int x, int y, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
+        this(fluidTank, tank, x, y, 18, 18, allowClickContainerFilling, allowClickContainerEmptying);
+    }
+
+    public TankWidget(@Nullable IFluidTransfer fluidTank, int tank, int x, int y, int width, int height, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
+        super(new Position(x, y), new Size(width, height));
+        this.fluidTank = fluidTank;
+        this.tank = tank;
         this.showAmount = true;
         this.allowClickFilled = allowClickContainerFilling;
         this.allowClickDrained = allowClickContainerEmptying;
@@ -128,16 +156,24 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return this;
     }
 
+    public TankWidget setFluidTank(IFluidTransfer fluidTank, int tank) {
+        this.fluidTank = fluidTank;
+        this.tank = tank;
+        if (isClientSideWidget) {
+            setClientSideWidget();
+        }
+        return this;
+    }
+
     @Override
     public TankWidget setClientSideWidget() {
         super.setClientSideWidget();
         if (fluidTank != null) {
-            fluidTank.getFluid();
-            this.lastFluidInTank = fluidTank.getFluid().copy();
+            this.lastFluidInTank = fluidTank.getFluidInTank(tank).copy();
         } else {
             this.lastFluidInTank = null;
         }
-        this.lastTankCapacity = fluidTank != null ? fluidTank.getCapacity() : 0;
+        this.lastTankCapacity = fluidTank != null ? fluidTank.getTankCapacity(tank) : 0;
         return this;
     }
 
@@ -151,6 +187,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public Object getXEIIngredientOverMouse(double mouseX, double mouseY) {
         if (self().isMouseOverElement(mouseX, mouseY)) {
             if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return null;
+
+            if (this.fluidTank instanceof CycleFluidTransfer cycleItemStackHandler) {
+                return getXEIIngredientsFromCycleTransfer(cycleItemStackHandler, tank);
+            } else if (this.fluidTank instanceof TagOrCycleFluidTransfer transfer) {
+                return getXEIIngredientsFromTagOrCycleTransfer(transfer, tank);
+            }
+
             if (LDLib.isJeiLoaded()) {
                 return JEICallWrapper.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
             }
@@ -179,6 +222,54 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return List.of(FluidHelper.toRealFluidStack(lastFluidInTank));
     }
 
+    private List<Object> getXEIIngredientsFromCycleTransfer(CycleFluidTransfer transfer, int index) {
+        var stream = transfer.getStackList(index).stream();
+        if (LDLib.isJeiLoaded()) {
+            return stream.filter(fluid -> !fluid.isEmpty()).map(fluid -> JEICallWrapper.getPlatformFluidTypeForJEI(fluid, getPosition(), getSize())).toList();
+        } else if (LDLib.isReiLoaded()) {
+            return REICallWrapper.getReiIngredients(stream);
+        } else if (LDLib.isEmiLoaded()) {
+            return EMICallWrapper.getEmiIngredients(stream, getXEIChance());
+        }
+        return null;
+    }
+
+    private List<Object> getXEIIngredientsFromTagOrCycleTransfer(TagOrCycleFluidTransfer transfer, int index) {
+        Either<Pair<List<TagKey<Fluid>>, Long>, List<FluidStack>> either = transfer
+                .getStacks()
+                .get(index);
+        var ref = new Object() {
+            List<Object> returnValue = null;
+        };
+        either.ifLeft(pair -> {
+            List<TagKey<Fluid>> tags = pair.getFirst();
+            long count = pair.getSecond();
+            if (LDLib.isJeiLoaded()) {
+                ref.returnValue = tags.stream()
+                        .flatMap(tag -> Registry.FLUID
+                                .getTag(tag)
+                                .stream()
+                                .flatMap(HolderSet.ListBacked::stream)
+                                .map(fluid -> JEICallWrapper.getPlatformFluidTypeForJEI(FluidStack.create(fluid.value(), count), getPosition(), getSize())))
+                        .collect(Collectors.toList());
+            } else if (LDLib.isReiLoaded()) {
+                ref.returnValue = REICallWrapper.getReiIngredients(tags, count);
+            } else if (LDLib.isEmiLoaded()) {
+                ref.returnValue = EMICallWrapper.getEmiIngredients(tags, count, getXEIChance());
+            }
+        }).ifRight(fluids -> {
+            var stream = fluids.stream();
+            if (LDLib.isJeiLoaded()) {
+                ref.returnValue = stream.filter(fluid -> !fluid.isEmpty()).map(fluid -> JEICallWrapper.getPlatformFluidTypeForJEI(fluid, getPosition(), getSize())).toList();
+            } else if (LDLib.isReiLoaded()) {
+                ref.returnValue = REICallWrapper.getReiIngredients(stream);
+            } else if (LDLib.isEmiLoaded()) {
+                ref.returnValue = EMICallWrapper.getEmiIngredients(stream, getXEIChance());
+            }
+        });
+        return ref.returnValue;
+    }
+
     private List<Component> getToolTips(List<Component> list) {
         if (this.onAddedTooltips != null) {
             this.onAddedTooltips.accept(this, list);
@@ -205,9 +296,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
         if (isClientSideWidget && fluidTank != null) {
-            FluidStack fluidStack = fluidTank.getFluid();
-            if (fluidTank.getCapacity() != lastTankCapacity) {
-                this.lastTankCapacity = fluidTank.getCapacity();
+            FluidStack fluidStack = fluidTank.getFluidInTank(tank);
+            long capacity = fluidTank.getTankCapacity(tank);
+            if (capacity != lastTankCapacity) {
+                this.lastTankCapacity = capacity;
             }
             if (!fluidStack.isFluidEqual(lastFluidInTank)) {
                 this.lastFluidInTank = fluidStack.copy();
@@ -287,9 +379,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Override
     public void detectAndSendChanges() {
         if (fluidTank != null) {
-            FluidStack fluidStack = fluidTank.getFluid();
-            if (fluidTank.getCapacity() != lastTankCapacity) {
-                this.lastTankCapacity = fluidTank.getCapacity();
+            FluidStack fluidStack = fluidTank.getFluidInTank(tank);
+            long capacity = fluidTank.getTankCapacity(tank);
+            if (capacity != lastTankCapacity) {
+                this.lastTankCapacity = capacity;
                 writeUpdateInfo(0, buffer -> buffer.writeVarLong(lastTankCapacity));
             }
             if (!fluidStack.isFluidEqual(lastFluidInTank)) {
@@ -313,9 +406,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public void writeInitialData(FriendlyByteBuf buffer) {
         buffer.writeBoolean(fluidTank != null);
         if (fluidTank != null) {
-            this.lastTankCapacity = fluidTank.getCapacity();
+            this.lastTankCapacity = fluidTank.getTankCapacity(tank);
             buffer.writeVarLong(lastTankCapacity);
-            FluidStack fluidStack = fluidTank.getFluid();
+            FluidStack fluidStack = fluidTank.getFluidInTank(tank);
             this.lastFluidInTank = fluidStack.copy();
             buffer.writeNbt(fluidStack.saveToTag(new CompoundTag()));
         }
@@ -373,9 +466,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         var handler = FluidTransferHelper.getFluidTransfer(gui.entityPlayer, gui.getModularUIContainer());
         if (handler == null) return -1;
         int maxAttempts = isShiftKeyDown ? currentStack.getCount() : 1;
-        if (allowClickFilled && fluidTank.getFluidAmount() > 0) {
+        FluidStack initialFluid = fluidTank.getFluidInTank(tank);
+        if (allowClickFilled && initialFluid.getAmount() > 0) {
             boolean performedFill = false;
-            FluidStack initialFluid = fluidTank.getFluid();
             for (int i = 0; i < maxAttempts; i++) {
                 FluidActionResult result = FluidTransferHelper.tryFillContainer(currentStack, fluidTank, Integer.MAX_VALUE, null, false);
                 if (!result.isSuccess()) break;
@@ -410,7 +503,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                     break;
                 }
             }
-            var filledFluid = fluidTank.getFluid();
+            var filledFluid = fluidTank.getFluidInTank(tank);
             if (performedEmptying) {
                 SoundEvent soundevent = FluidHelper.getEmptySound(filledFluid);
                 if (soundevent != null) {
@@ -472,6 +565,30 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             T ingredient = helper.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
             return new ClickableIngredient<>(TypedIngredient.createUnvalidated(helper.getFluidIngredientType(), ingredient),
                     new ImmutableRect2i(pos.x, pos.y, size.width, size.height));
+        }
+    }
+
+    public static final class REICallWrapper {
+        public static List<Object> getReiIngredients(Stream<FluidStack> stream) {
+            return List.of(EntryIngredient.of(stream
+                    .map(fluidStack -> dev.architectury.fluid.FluidStack.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag()))
+                    .map(EntryStacks::of)
+                    .toList()));
+        }
+        public static List<Object> getReiIngredients(List<TagKey<Fluid>> tags, long count) {
+            //noinspection unchecked
+            return (List<Object>) (List<?>) EntryIngredients.ofTags(tags, holder -> EntryStacks.of(dev.architectury.fluid.FluidStack.create(holder.value(), count)));
+        }
+    }
+
+    public static final class EMICallWrapper {
+        public static List<Object> getEmiIngredients(Stream<FluidStack> stream, float xeiChance) {
+            return List.of(EmiIngredient.of(stream.map(fluidStack -> EmiStack.of(fluidStack.getFluid(), fluidStack.getTag(), fluidStack.getAmount())).toList()).setChance(xeiChance));
+        }
+        public static List<Object> getEmiIngredients(List<TagKey<Fluid>> tags, long count, float xeiChance) {
+            return tags.stream()
+                    .map(tag -> EmiIngredient.of(tag, count).setChance(xeiChance))
+                    .collect(Collectors.toList());
         }
     }
 }

@@ -43,29 +43,23 @@ public class ModularDisplay<T extends Widget> implements Display {
                 for (Object ingredient : slot.getXEIIngredients()) {
                     if (ingredient instanceof EntryStack<?> entryType) {
                         if (io == IngredientIO.INPUT || io == IngredientIO.BOTH) {
-                            inputs.add(EntryIngredient.builder().add(entryType).build());
+                            inputs.add(EntryIngredient.of(entryType));
                         }
                         if (io == IngredientIO.OUTPUT || io == IngredientIO.BOTH) {
-                            outputs.add(EntryIngredient.builder().add(entryType).build());
+                            outputs.add(EntryIngredient.of(entryType));
                         }
                         if (io == IngredientIO.CATALYST) {
-                            catalysts.add(EntryIngredient.builder().add(entryType).build());
+                            catalysts.add(EntryIngredient.of(entryType));
                         }
                     } else if (ingredient instanceof EntryIngredient entryStacks) {
                         if (io == IngredientIO.INPUT || io == IngredientIO.BOTH) {
-                            for (EntryStack<?> entryStack : entryStacks) {
-                                inputs.add(EntryIngredient.builder().add(entryStack).build());
-                            }
+                            inputs.add(entryStacks);
                         }
                         if (io == IngredientIO.OUTPUT || io == IngredientIO.BOTH) {
-                            for (EntryStack<?> entryStack : entryStacks) {
-                                outputs.add(EntryIngredient.builder().add(entryStack).build());
-                            }
+                            outputs.add(entryStacks);
                         }
                         if (io == IngredientIO.CATALYST) {
-                            for (EntryStack<?> entryStack : entryStacks) {
-                                catalysts.add(EntryIngredient.builder().add(entryStack).build());
-                            }
+                            catalysts.add(entryStacks);
                         }
                     }
                 }

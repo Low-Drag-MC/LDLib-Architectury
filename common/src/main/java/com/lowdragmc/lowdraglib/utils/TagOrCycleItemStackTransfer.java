@@ -10,7 +10,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,7 +28,7 @@ public class TagOrCycleItemStackTransfer implements IItemTransfer {
     }
 
     public void updateStacks(List<Either<Pair<List<TagKey<Item>>, Integer>, List<ItemStack>>> stacks) {
-        this.stacks = stacks;
+        this.stacks = new ArrayList<>(stacks);
         this.unwrapped = null;
     }
 
@@ -42,8 +44,8 @@ public class TagOrCycleItemStackTransfer implements IItemTransfer {
                                                     .map(holder -> new ItemStack(holder.value(), tagList.getSecond())))
                                             .orElseGet(Stream::empty))
                                     .toList(),
-                            list -> list))
-                    .collect(Collectors.toList());
+                            Function.identity()))
+                    .collect(Collectors.toCollection(ArrayList::new));
         }
         return unwrapped;
     }
@@ -82,7 +84,7 @@ public class TagOrCycleItemStackTransfer implements IItemTransfer {
 
     @Override
     public int getSlotLimit(int slot) {
-        return 64;
+        return Integer.MAX_VALUE;
     }
 
     @Override
