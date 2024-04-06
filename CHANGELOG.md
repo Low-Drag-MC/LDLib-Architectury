@@ -1,3 +1,4 @@
 # ChangeLog
 
-* fix server crash when opening an UI with the player inventory in it
+* clean up EMI plugin internals, remove non-api class usage
+* clean up REI plugin internals, remove non-api class usage

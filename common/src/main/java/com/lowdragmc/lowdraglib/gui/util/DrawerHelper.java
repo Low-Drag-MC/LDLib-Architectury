@@ -2,15 +2,13 @@ package com.lowdragmc.lowdraglib.gui.util;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
-import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
-import com.lowdragmc.lowdraglib.client.scene.WorldSceneRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.shader.management.ShaderProgram;
 import com.lowdragmc.lowdraglib.client.shader.uniform.UniformCache;
 import com.lowdragmc.lowdraglib.client.utils.RenderBufferUtils;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
-import com.lowdragmc.lowdraglib.utils.LdUtils;
+import com.lowdragmc.lowdraglib.utils.ColorUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Rect;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -21,13 +19,13 @@ import com.mojang.math.Vector4f;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -42,7 +40,6 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class DrawerHelper {
@@ -55,17 +52,17 @@ public class DrawerHelper {
     public static ShaderProgram ROUND_LINE;
 
     public static void init() {
-        ROUND = LdUtils.make(new ShaderProgram(), program
+        ROUND = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.ROUND_F).attach(Shaders.SCREEN_V));
-        PANEL_BG = LdUtils.make(new ShaderProgram(), program
+        PANEL_BG = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.PANEL_BG_F).attach(Shaders.SCREEN_V));
-        ROUND_BOX = LdUtils.make(new ShaderProgram(), program
+        ROUND_BOX = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.ROUND_BOX_F).attach(Shaders.SCREEN_V));
-        PROGRESS_ROUND_BOX = LdUtils.make(new ShaderProgram(), program
+        PROGRESS_ROUND_BOX = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.PROGRESS_ROUND_BOX_F).attach(Shaders.SCREEN_V));
-        FRAME_ROUND_BOX = LdUtils.make(new ShaderProgram(), program
+        FRAME_ROUND_BOX = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.FRAME_ROUND_BOX_F).attach(Shaders.SCREEN_V));
-        ROUND_LINE = LdUtils.make(new ShaderProgram(), program
+        ROUND_LINE = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.ROUND_LINE_F).attach(Shaders.SCREEN_V));
     }
 

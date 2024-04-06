@@ -11,12 +11,14 @@ import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
 
 public class TestREIPlugin {
     public static void registerCategories(CategoryRegistry registry) {
         registry.add(new TestREIRecipeCategory());
+        registry.addWorkstations(TestREIRecipeCategory.IDENTIFIER, EntryStacks.of(TestItem.ITEM));
     }
 
     public static void registerDisplays(DisplayRegistry registry) {

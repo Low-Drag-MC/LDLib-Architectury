@@ -14,7 +14,7 @@ import com.lowdragmc.lowdraglib.utils.interpolate.Interpolator;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import dev.emi.emi.api.stack.ItemEmiStack;
+import dev.emi.emi.api.stack.EmiStack;
 import lombok.Getter;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
@@ -38,6 +38,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+@SuppressWarnings({"unused", "UnusedReturnValue", "SameParameterValue"})
 public class SceneWidget extends WidgetGroup {
     @Environment(EnvType.CLIENT)
     protected WorldSceneRenderer renderer;
@@ -386,7 +387,7 @@ public class SceneWidget extends WidgetGroup {
                 return EntryStacks.of(hoverItem);
             }
             if (LDLib.isEmiLoaded()) {
-                return new ItemEmiStack(hoverItem);
+                return EmiStack.of(hoverItem);
             }
             return hoverItem;
         }

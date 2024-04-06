@@ -38,17 +38,16 @@ public class RecipeSlotWrapper extends RecipeSlot {
 
     public RecipeSlotWrapper(
             Widget widget,
-            RecipeSlot wrapperSlot,
+            RecipeSlot wrappedSlot,
             int xPos,
             int yPos
     ) {
-
-        super(((RecipeSlotAccessor) wrapperSlot).getIngredientManager(), wrapperSlot.getRole(), 0, 0, 0);
+        super(((RecipeSlotAccessor) wrappedSlot).getIngredientManager(), wrappedSlot.getRole(), 0, 0, 0);
         this.widget = widget;
-        this.wrapperSlot = wrapperSlot;
+        this.wrapperSlot = wrappedSlot;
         this.area = new ImmutableRect2i(xPos, yPos, widget.getSize().width, widget.getSize().height);
         ((RecipeSlotAccessor) this).setArea(this.area);
-        ((RecipeSlotAccessor) wrapperSlot).setArea(this.area);
+        ((RecipeSlotAccessor) wrappedSlot).setArea(this.area);
         if (widget instanceof IRecipeIngredientSlot slot) {
             slot.clearTooltipCallback();
         }
@@ -124,8 +123,8 @@ public class RecipeSlotWrapper extends RecipeSlot {
     @Override
     public void addTooltipCallback(IRecipeSlotTooltipCallback tooltipCallback) {
         wrapperSlot.addTooltipCallback(tooltipCallback);
-        if (widget instanceof IRecipeIngredientSlot) {
-            ((IRecipeIngredientSlot) widget).addTooltipCallback(tooltips -> {
+        if (widget instanceof IRecipeIngredientSlot ingredientSlot) {
+            ingredientSlot.addTooltipCallback(tooltips -> {
                 List<Component> additional = new ArrayList<>();
                 tooltipCallback.onTooltip(this, additional);
                 tooltips.addAll(additional);

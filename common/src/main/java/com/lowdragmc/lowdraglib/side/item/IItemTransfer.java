@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.side.item;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 
@@ -12,6 +13,52 @@ import javax.annotation.Nonnull;
  * @implNote IItemTransfer
  */
 public interface IItemTransfer {
+    IItemTransfer EMPTY = new IItemTransfer() {
+        @Override
+        public int getSlots() {
+            return 0;
+        }
+
+        @NotNull
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            return ItemStack.EMPTY;
+        }
+
+        @NotNull
+        @Override
+        public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate, boolean notifyChanges) {
+            return stack;
+        }
+
+        @NotNull
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return 0;
+        }
+
+        @Override
+        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+            return false;
+        }
+
+        @NotNull
+        @Override
+        public Object createSnapshot() {
+            return new Object();
+        }
+
+        @Override
+        public void restoreFromSnapshot(Object snapshot) {
+
+        }
+    };
+
     /**
      * Returns the number of slots available
      *
@@ -21,9 +68,9 @@ public interface IItemTransfer {
 
     /**
      * Returns the ItemStack in a given slot.
-     *
+     * <br>
      * The result's stack size may be greater than the itemstack's max size.
-     *
+     * <br>
      * If the result is empty, then the slot is empty.
      *
      * <p>

@@ -68,8 +68,8 @@ configurations {
 
 repositories {
     // mavens for Forge-exclusives
-    maven { url = "https://maven.terraformersmc.com/releases/" } // Mod Menu EMI
     maven { url = "https://maven.theillusivec4.top/" } // Curios
+    maven { url = "https://maven.terraformersmc.com/releases/" } // Mod Menu, EMI
     maven { // Create Forge and Registrate Forge
         url = "https://maven.tterrag.com/"
         content {
@@ -77,6 +77,7 @@ repositories {
             includeGroup("com.simibubi.create")
         }
     }
+    maven { url = "https://jitpack.io/" } // Mixin Extras, Fabric ASM
     maven {
         // saps.dev Maven (KubeJS and Rhino)
         url = "https://maven.saps.dev/minecraft"
