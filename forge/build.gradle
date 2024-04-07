@@ -104,7 +104,7 @@ dependencies {
 
     // EMI
     modCompileOnly("dev.emi:emi-forge:${emi_version}:api")
-    modCompileOnly("dev.emi:emi-forge:${emi_version}")
+    modImplementation("dev.emi:emi-forge:${emi_version}")
 
     // AE2
     modImplementation("appeng:appliedenergistics2-forge:${ae2_version}")

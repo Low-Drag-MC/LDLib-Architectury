@@ -568,6 +568,7 @@ public class SceneWidget extends WidgetGroup {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
+        drawOverlay(graphics, mouseX, mouseY, partialTicks);
         currentMouseX = mouseX;
         currentMouseY = mouseY;
     }

@@ -52,6 +52,10 @@ public class JEIPlugin implements IModPlugin {
         return new ArrayList<>(((RecipesGuiAccessor)recipesGui).getRecipeLayouts());
     }
 
+    public static boolean isJeiEnabled() {
+        return jeiRuntime != null && jeiRuntime.getIngredientListOverlay().isListDisplayed();
+    }
+
     @Override
     public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
         JEIPlugin.jeiRuntime = jeiRuntime;

@@ -87,6 +87,7 @@ public class ImageWidget extends Widget implements IConfigurableWidget {
         if (border > 0) {
             DrawerHelper.drawBorder(graphics, position.x, position.y, size.width, size.height, borderColor, border);
         }
+        drawOverlay(graphics, mouseX, mouseY, partialTicks);
     }
 }
 

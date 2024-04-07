@@ -1,18 +1,18 @@
 package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
-import com.lowdragmc.lowdraglib.gui.widget.TankWidget;
+import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
-import com.mojang.datafixers.util.Pair;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.SlotWidget;
+import dev.emi.emi.api.widget.TankWidget;
 import dev.emi.emi.api.widget.WidgetHolder;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
@@ -107,9 +107,37 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
                 var io = slot.getIngredientIO();
                 if (io == IngredientIO.BOTH || io == IngredientIO.INPUT || io == IngredientIO.OUTPUT || io == IngredientIO.CATALYST) {
                     //noinspection unchecked
-                    var slotWidget = new SlotWidget(EmiIngredient.of((List<? extends EmiIngredient>) (List<?>) slot.getXEIIngredients()),
-                            w.getPosition().x, w.getPosition().y)
-                            .customBackground(null, w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height)
+                    var ingredients = EmiIngredient.of((List<? extends EmiIngredient>) (List<?>) slot.getXEIIngredients());
+
+                    SlotWidget slotWidget = null;
+                    // Clear the LDLib slots & add EMI slots based on them.
+                    if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
+                        slotW.setHandlerSlot(IItemTransfer.EMPTY, 0);
+                        slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
+                    } else if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.TankWidget tankW) {
+                        tankW.setFluidTank(IFluidStorage.EMPTY);
+                        tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
+                        long capacity = Math.max(1, ingredients.getAmount());
+
+                        if (w.getParent() instanceof DraggableScrollableWidgetGroup draggable) {
+                            slotWidget = new ExtendedTankWidget(ingredients, w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height, capacity)
+                                    .setScissorBounds(draggable.getRect())
+                                    .setGroup(draggable);
+                        } else {
+                            slotWidget = new TankWidget(ingredients, w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height, capacity);
+                        }
+                    }
+                    if (slotWidget == null) {
+                        if (w.getParent() instanceof DraggableScrollableWidgetGroup draggable) {
+                            slotWidget = new ExtendedSlotWidget(ingredients, w.getPosition().x, w.getPosition().y)
+                                    .setScissorBounds(draggable.getRect())
+                                    .setGroup(draggable);
+                        } else {
+                            slotWidget = new SlotWidget(ingredients, w.getPosition().x, w.getPosition().y);
+                        }
+                    }
+
+                    slotWidget.customBackground(null, w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height)
                             .drawBack(false);
                     if (io == IngredientIO.CATALYST) {
                         slotWidget.catalyst(true);
@@ -120,20 +148,12 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
                         slotWidget.appendTooltip(component);
                     }
                     slots.add(slotWidget);
-
-                    // Clear the LDlib slots
-                    if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
-                        slotW.setHandlerSlot(IItemTransfer.EMPTY, 0);
-                        slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
-                    } else if (slot instanceof TankWidget tankW) {
-                        tankW.setFluidTank(IFluidStorage.EMPTY);
-                        tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
-                    }
                 }
             }
         }
         widgets.add(new ModularWrapperWidget(modular, slots));
         slots.forEach(widgets::add);
+        widgets.add(new ModularForegroundRenderWidget(modular));
     }
 
     public static ModularWrapper<?> TEMP_CACHE = null;

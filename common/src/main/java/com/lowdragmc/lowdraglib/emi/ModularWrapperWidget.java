@@ -4,6 +4,8 @@ import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
+import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -25,12 +27,13 @@ import java.util.stream.Collectors;
  */
 @Environment(EnvType.CLIENT)
 public class ModularWrapperWidget extends Widget implements ContainerEventHandler {
+    @Getter @Setter
     @Nullable
     private GuiEventListener focused;
+    @Getter @Setter
     private boolean isDragging;
     public final ModularWrapper<?> modular;
     public final List<Widget> slots;
-    private int lastX, lastY;
 
     public ModularWrapperWidget(ModularWrapper<?> modular, List<Widget> slots) {
         this.modular = modular;
@@ -44,8 +47,6 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
 
     @Override
     public void render(@Nonnull GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
-        this.lastX = pMouseX;
-        this.lastY = pMouseY;
         modular.draw(graphics, pMouseX, pMouseY, pPartialTick);
     }
 
@@ -73,7 +74,10 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
 
     @Override
     public boolean mouseClicked(int mouseX, int mouseY, int button) {
-        return modular.mouseClicked(mouseX + modular.getLeft(), mouseY + modular.getTop(), button);
+        if (modular.mouseClicked(mouseX + modular.getLeft(), mouseY + modular.getTop(), button)) {
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
@@ -96,6 +100,7 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
         return modular.mouseScrolled(pMouseX, pMouseY, pDelta);
     }
 
+    /*
     @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         modular.focused = false;
@@ -104,6 +109,7 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
         }
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
+    */
 
     @Override
     public boolean keyReleased(int pKeyCode, int pScanCode, int pModifiers) {
@@ -113,26 +119,5 @@ public class ModularWrapperWidget extends Widget implements ContainerEventHandle
     @Override
     public boolean charTyped(char pCodePoint, int pModifiers) {
         return modular.charTyped(pCodePoint, pModifiers);
-    }
-
-    @Override
-    public boolean isDragging() {
-        return this.isDragging;
-    }
-
-    @Override
-    public void setDragging(boolean isDragging) {
-        this.isDragging = isDragging;
-    }
-
-    @Override
-    @Nullable
-    public GuiEventListener getFocused() {
-        return this.focused;
-    }
-
-    @Override
-    public void setFocused(@Nullable GuiEventListener focused) {
-        this.focused = focused;
     }
 }

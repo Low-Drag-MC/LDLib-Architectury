@@ -155,6 +155,7 @@ public class TextBoxWidget extends Widget implements IConfigurableWidget {
             }
             graphics.pose().popPose();
         }
+        drawOverlay(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override

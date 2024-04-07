@@ -89,10 +89,6 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Setter
     public boolean drawHoverTips = true;
 
-    @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
-    @Setter
-    protected IGuiTexture overlay;
-
     @Setter
     protected Runnable changeListener;
     @Setter
@@ -223,9 +219,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 DrawerHelper.drawItemStack(graphics, itemStack, pos.x + 1, pos.y + 1, -1, null);
             }
         }
-        if (overlay != null) {
-            overlay.draw(graphics, mouseX, mouseY, pos.x, pos.y, 18, 18);
-        }
+        drawOverlay(graphics, mouseX, mouseY, partialTicks);
         if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             RenderSystem.colorMask(true, true, true, false);
             DrawerHelper.drawSolidRect(graphics,getPosition().x + 1, getPosition().y + 1, 16, 16, 0x80FFFFFF);
@@ -431,7 +425,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         } else if (LDLib.isEmiLoaded()) {
             return EMICallWrapper.getEmiIngredients(stream, getXEIChance());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private List<Object> getXEIIngredientsFromTagOrCycleTransfer(TagOrCycleItemStackTransfer transfer, int index) {
@@ -439,7 +433,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 .getStacks()
                 .get(index);
         var ref = new Object() {
-            List<Object> returnValue = null;
+            List<Object> returnValue = Collections.emptyList();
         };
         either.ifLeft(list -> {
             if (LDLib.isJeiLoaded()) {

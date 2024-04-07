@@ -22,7 +22,7 @@ import java.util.Optional;
 public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
     @Getter
     protected T widget;
-    @Setter
+    @Getter @Setter
     protected boolean shouldRenderTooltips = false;
 
     public ModularWrapper(T widget) {
