@@ -22,6 +22,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
 import javax.annotation.Nullable;
 
 import javax.annotation.Nonnull;
@@ -221,11 +223,12 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         return currentSize;
     }
 
-    public void setVisible(boolean visible) {
+    public WidgetGroup setVisible(boolean visible) {
         if (this.isVisible() == visible) {
-            return;
+            return this;
         }
         super.setVisible(visible);
+        return this;
     }
 
     @Override
@@ -462,6 +465,18 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     public void drawInBackground(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
         drawWidgetsBackground(poseStack, mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    public void drawOverlay(@NotNull PoseStack graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawOverlay(graphics, mouseX, mouseY, partialTicks);
+        for (Widget widget : widgets) {
+            if (widget.isVisible()) {
+                RenderSystem.setShaderColor(1, 1, 1, 1);
+                RenderSystem.enableBlend();
+                widget.drawOverlay(graphics, mouseX, mouseY, partialTicks);
+            }
+        }
     }
 
     @Override

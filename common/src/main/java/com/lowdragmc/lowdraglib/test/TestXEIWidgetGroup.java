@@ -11,6 +11,8 @@ import com.lowdragmc.lowdraglib.utils.TagOrCycleFluidTransfer;
 import com.lowdragmc.lowdraglib.utils.TagOrCycleItemStackTransfer;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -47,13 +49,26 @@ public class TestXEIWidgetGroup extends WidgetGroup {
         var outputFluid = new TankWidget(new FluidStorage(FluidStack.create(Fluids.LAVA, 1000)), 130, 40, 20, 20, false, false)
                 .setBackground(TankWidget.FLUID_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.OUTPUT)
-                .setXEIChance(0.01f);
+                .setXEIChance(0.01f)
+                .setOverlay((graphics, mouseX, mouseY, x, y, width, height) -> {
+                    graphics.pushPose();
+                    graphics.translate(0, 0, 400);
+                    graphics.scale(0.5f, 0.5f, 1);
+
+                    String s = String.format("%.2f", 0.01f) + "%";
+                    int color = 0xFFFF00;
+                    Font fontRenderer = Minecraft.getInstance().font;
+                    fontRenderer.drawShadow(graphics, s, (int) ((x + (width / 3f)) * 2 - fontRenderer.width(s) + 23), (int) ((y + (height / 3f) + 6) * 2 - height), color);
+
+                    graphics.popPose();
+                });
 
         List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> fluidList = List.of(Either.left(List.of(Pair.of(FluidTags.LAVA, 10000L))));
         var catalystFluid = new TankWidget(new TagOrCycleFluidTransfer(fluidList), 0, 110, 40, 20, 20, false, false)
                 .setBackground(TankWidget.FLUID_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.CATALYST)
                 .setXEIChance(0.01f);
+
         addWidget(input1);
         addWidget(input2);
         addWidget(output);

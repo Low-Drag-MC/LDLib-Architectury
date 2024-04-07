@@ -159,6 +159,7 @@ public class TextBoxWidget extends Widget implements IConfigurableWidget {
             }
             matrixStack.popPose();
         }
+        drawOverlay(matrixStack, mouseX, mouseY, partialTicks);
     }
 
     @Override

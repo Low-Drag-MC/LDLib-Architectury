@@ -96,9 +96,6 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Configurable(name = "ldlib.gui.editor.name.fillDirection")
     @Setter
     protected ProgressTexture.FillDirection fillDirection = ProgressTexture.FillDirection.ALWAYS_FULL;
-    @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
-    @Setter
-    protected IGuiTexture overlay;
     @Setter
     protected BiConsumer<TankWidget, List<Component>> onAddedTooltips;
     @Setter @Getter
@@ -152,6 +149,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     public TankWidget setFluidTank(IFluidStorage fluidTank) {
         this.fluidTank = fluidTank;
+        this.tank = 0;
         if (isClientSideWidget) {
             setClientSideWidget();
         }
@@ -191,9 +189,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return null;
 
             if (this.fluidTank instanceof CycleFluidTransfer cycleItemStackHandler) {
-                return getXEIIngredientsFromCycleTransfer(cycleItemStackHandler, tank);
+                return getXEIIngredientsFromCycleTransfer(cycleItemStackHandler, tank).get(0);
             } else if (this.fluidTank instanceof TagOrCycleFluidTransfer transfer) {
-                return getXEIIngredientsFromTagOrCycleTransfer(transfer, tank);
+                return getXEIIngredientsFromTagOrCycleTransfer(transfer, tank).get(0);
             }
 
             if (LDLib.isJeiLoaded()) {
@@ -212,6 +210,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Override
     public List<Object> getXEIIngredients() {
         if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return Collections.emptyList();
+
+        if (this.fluidTank instanceof CycleFluidTransfer cycleItemStackHandler) {
+            return getXEIIngredientsFromCycleTransfer(cycleItemStackHandler, tank);
+        } else if (this.fluidTank instanceof TagOrCycleFluidTransfer transfer) {
+            return getXEIIngredientsFromTagOrCycleTransfer(transfer, tank);
+        }
+
         if (LDLib.isJeiLoaded()) {
             return List.of(JEICallWrapper.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize()));
         }
@@ -233,7 +238,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         } else if (LDLib.isEmiLoaded()) {
             return EMICallWrapper.getEmiIngredients(stream, getXEIChance());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private List<Object> getXEIIngredientsFromTagOrCycleTransfer(TagOrCycleFluidTransfer transfer, int index) {
@@ -241,7 +246,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 .getStacks()
                 .get(index);
         var ref = new Object() {
-            List<Object> returnValue = null;
+            List<Object> returnValue = Collections.emptyList();
         };
         either.ifLeft(list -> {
             if (LDLib.isJeiLoaded()) {
@@ -336,9 +341,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             RenderSystem.enableBlend();
             RenderSystem.setShaderColor(1, 1, 1, 1);
         }
-        if (overlay != null) {
-            overlay.draw(matrixStack, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
-        }
+        drawOverlay(matrixStack, mouseX, mouseY, partialTicks);
         if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             RenderSystem.colorMask(true, true, true, false);
             DrawerHelper.drawSolidRect(matrixStack, getPosition().x + 1, getPosition().y + 1, getSize().width - 2, getSize().height - 2, 0x80FFFFFF);

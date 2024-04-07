@@ -147,6 +147,7 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(1,1,1,1);
+        drawOverlay(matrixStack, mouseX, mouseY, partialTicks);
     }
 
     @Override

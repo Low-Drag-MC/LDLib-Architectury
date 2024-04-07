@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIReiHandlers;
 import com.lowdragmc.lowdraglib.test.TestREIPlugin;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
@@ -16,6 +17,10 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
  * @implNote REIPlugin
  */
 public class REIPlugin implements REIClientPlugin {
+
+    public static boolean isReiEnabled() {
+        return REIRuntime.getInstance().isOverlayVisible();
+    }
 
     @Override
     public void registerScreens(ScreenRegistry registry) {
