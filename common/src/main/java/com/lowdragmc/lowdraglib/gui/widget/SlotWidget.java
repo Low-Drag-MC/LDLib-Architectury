@@ -27,6 +27,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
+import dev.emi.emi.registry.EmiTags;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -95,9 +96,11 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     protected BiConsumer<SlotWidget, List<Component>> onAddedTooltips;
     @Setter
     protected Function<ItemStack, ItemStack> itemHook;
-    @Setter @Getter
+    @Setter
+    @Getter
     protected IngredientIO ingredientIO = IngredientIO.RENDER_ONLY;
-    @Setter @Getter
+    @Setter
+    @Getter
     protected float XEIChance = 1f;
     @NotNull
     public List<Consumer<List<Component>>> tooltipCallbacks = new ArrayList<>();
@@ -200,10 +203,10 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         Position pos = getPosition();
-        if (slotReference != null)  {
+        if (slotReference != null) {
             ItemStack itemStack = getRealStack(slotReference.getItem());
             ModularUIGuiContainer modularUIGui = gui == null ? null : gui.getModularUIGui();
-            if (itemStack.isEmpty() && modularUIGui!= null && modularUIGui.getQuickCrafting() && modularUIGui.getQuickCraftSlots().contains(slotReference)) { // draw split
+            if (itemStack.isEmpty() && modularUIGui != null && modularUIGui.getQuickCrafting() && modularUIGui.getQuickCraftSlots().contains(slotReference)) { // draw split
                 int splitSize = modularUIGui.getQuickCraftSlots().size();
                 itemStack = gui.getModularUIContainer().getCarried();
                 if (!itemStack.isEmpty() && splitSize > 1 && AbstractContainerMenu.canItemQuickReplace(slotReference, itemStack, true)) {
@@ -222,7 +225,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         drawOverlay(graphics, mouseX, mouseY, partialTicks);
         if (drawHoverOverlay && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             RenderSystem.colorMask(true, true, true, false);
-            DrawerHelper.drawSolidRect(graphics,getPosition().x + 1, getPosition().y + 1, 16, 16, 0x80FFFFFF);
+            DrawerHelper.drawSolidRect(graphics, getPosition().x + 1, getPosition().y + 1, 16, 16, 0x80FFFFFF);
             RenderSystem.colorMask(true, true, true, true);
         }
     }
@@ -243,11 +246,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 modularUIGui.dragSplittingButton = button;
                 if (button == 0) {
                     modularUIGui.dragSplittingLimit = 0;
-                }
-                else if (button == 1) {
+                } else if (button == 1) {
                     modularUIGui.dragSplittingLimit = 1;
-                }
-                else if (Minecraft.getInstance().options.keyPickItem.matchesMouse(mouseKey.getValue())) {
+                } else if (Minecraft.getInstance().options.keyPickItem.matchesMouse(mouseKey.getValue())) {
                     modularUIGui.dragSplittingLimit = 2;
                 }
             }
@@ -283,8 +284,8 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (gui != null) {
             Position position = getPosition();
             if (slotReference != null) {
-                ((SlotAccessor)slotReference).setX(position.x + 1 - gui.getGuiLeft());
-                ((SlotAccessor)slotReference).setY(position.y + 1 - gui.getGuiTop());
+                ((SlotAccessor) slotReference).setX(position.x + 1 - gui.getGuiLeft());
+                ((SlotAccessor) slotReference).setY(position.y + 1 - gui.getGuiTop());
             }
         }
     }
@@ -525,8 +526,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
         @Override
         @Nonnull
-        public ItemStack getItem()
-        {
+        public ItemStack getItem() {
             return this.itemHandler.getStackInSlot(index);
         }
 
@@ -542,8 +542,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }
 
         @Override
-        public int getMaxStackSize()
-        {
+        public int getMaxStackSize() {
             return this.itemHandler.getSlotLimit(this.index);
         }
 
@@ -589,7 +588,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public void buildConfigurator(ConfiguratorGroup father) {
         var handler = new ItemStackTransfer();
         handler.setStackInSlot(0, Blocks.STONE.asItem().getDefaultInstance());
-        father.addConfigurators(new WrapperConfigurator("ldlib.gui.editor.group.preview", new SlotWidget(){
+        father.addConfigurators(new WrapperConfigurator("ldlib.gui.editor.group.preview", new SlotWidget() {
             @Override
             public void updateScreen() {
                 super.updateScreen();
@@ -609,11 +608,13 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         public static List<Object> getReiIngredients(Stream<ItemStack> stream) {
             return List.of(EntryIngredient.of(stream.map(EntryStacks::of).toList()));
         }
+
         public static List<Object> getReiIngredients(UnaryOperator<ItemStack> realStack, List<Pair<TagKey<Item>, Integer>> list) {
             return list.stream()
                     .map(pair -> EntryIngredients.ofTag(pair.getFirst(), holder -> EntryStacks.of(realStack.apply(new ItemStack(holder.value(), pair.getSecond())))))
                     .collect(Collectors.toList());
         }
+
         public static List<Object> getReiIngredients(ItemStack stack) {
             return List.of(EntryStacks.of(stack));
         }
@@ -624,9 +625,12 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return List.of(EmiIngredient.of(stream.map(EmiStack::of).toList()).setChance(xeiChance));
         }
         public static List<Object> getEmiIngredients(List<Pair<TagKey<Item>, Integer>> list, float xeiChance) {
-            return list.stream()
-                    .map(pair -> EmiIngredient.of(pair.getFirst(), pair.getSecond()).setChance(xeiChance))
-                    .collect(Collectors.toList());
+            if (list.size() == 1) {
+                var pair = list.get(0);
+                List<EmiStack> emiStacks = EmiIngredient.of(pair.getFirst(), pair.getSecond()).getEmiStacks();
+                return List.of(EmiTags.getIngredient(Item.class, emiStacks, pair.getSecond()));
+            }
+            return List.of(EmiIngredient.of(list.stream().map(pair -> EmiIngredient.of(pair.getFirst(), pair.getSecond()).setChance(xeiChance)).toList(), list.get(0).getSecond()));
         }
         public static List<Object> getEmiIngredients(ItemStack stack, float xeiChance) {
             return List.of(EmiStack.of(stack).setChance(xeiChance));
