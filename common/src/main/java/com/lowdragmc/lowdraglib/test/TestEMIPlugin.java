@@ -16,16 +16,17 @@ public class TestEMIPlugin {
         var category = new TestEmiRecipeCategory();
         registry.addCategory(category);
         registry.addRecipe(new TestEmiRecipe(category));
+        registry.addRecipeHandler(null, new TestEmiRecipeHandler());
         registry.addWorkstation(category, EmiStack.of(TestItem.ITEM));
     }
 
-    private static class TestEmiRecipeCategory extends EmiRecipeCategory {
+    protected static class TestEmiRecipeCategory extends EmiRecipeCategory {
         public TestEmiRecipeCategory() {
             super(LDLib.location("modular_ui"), EmiStack.of(Items.APPLE));
         }
     }
 
-    private static class TestEmiRecipe extends ModularEmiRecipe<WidgetGroup> {
+    protected static class TestEmiRecipe extends ModularEmiRecipe<WidgetGroup> {
         @Getter
         TestEmiRecipeCategory category;
         public TestEmiRecipe(TestEmiRecipeCategory category) {

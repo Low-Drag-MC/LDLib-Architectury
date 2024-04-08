@@ -591,7 +591,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }
         public static List<Object> getEmiIngredients(List<Pair<TagKey<Fluid>, Long>> list, float xeiChance) {
             return list.stream()
-                    .map(pair -> EmiIngredient.of(pair.getFirst(), pair.getSecond()).setChance(xeiChance))
+                    .map(pair -> EmiIngredient.of(pair.getFirst()).setAmount(pair.getSecond()).setChance(xeiChance))
                     .collect(Collectors.toList());
         }
     }
