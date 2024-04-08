@@ -2,12 +2,12 @@ package com.lowdragmc.lowdraglib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.lowdragmc.lowdraglib.emi.EMIPlugin;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
-import com.lowdragmc.lowdraglib.json.factory.FluidStackTypeAdapter;
 import com.lowdragmc.lowdraglib.json.IGuiTextureTypeAdapter;
 import com.lowdragmc.lowdraglib.json.ItemStackTypeAdapter;
+import com.lowdragmc.lowdraglib.json.factory.FluidStackTypeAdapter;
 import com.lowdragmc.lowdraglib.rei.REIPlugin;
+import dev.emi.emi.config.EmiConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -78,6 +78,6 @@ public class LDLib {
     }
 
     public static boolean isEmiLoaded() {
-        return isModLoaded(MODID_EMI) && EMIPlugin.isEmiEnabled();
+        return isModLoaded(MODID_EMI) && EmiConfig.enabled;
     }
 }

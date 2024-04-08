@@ -22,11 +22,12 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.lowdraglib.utils.TagOrCycleFluidTransfer;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
-import com.mojang.blaze3d.vertex.PoseStack;
+import dev.emi.emi.registry.EmiTags;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -54,7 +55,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -590,9 +590,12 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return List.of(EmiIngredient.of(stream.map(fluidStack -> EmiStack.of(fluidStack.getFluid(), fluidStack.getTag(), fluidStack.getAmount())).toList()).setChance(xeiChance));
         }
         public static List<Object> getEmiIngredients(List<Pair<TagKey<Fluid>, Long>> list, float xeiChance) {
-            return list.stream()
-                    .map(pair -> EmiIngredient.of(pair.getFirst(), pair.getSecond()).setChance(xeiChance))
-                    .collect(Collectors.toList());
+            if (list.size() == 1) {
+                var pair = list.get(0);
+                List<EmiStack> emiStacks = EmiIngredient.of(pair.getFirst(), pair.getSecond()).getEmiStacks();
+                return List.of(EmiTags.getIngredient(Fluid.class, emiStacks, pair.getSecond()));
+            }
+            return List.of(EmiIngredient.of(list.stream().map(pair -> EmiIngredient.of(pair.getFirst(), pair.getSecond()).setChance(xeiChance)).toList(), list.get(0).getSecond()));
         }
     }
 }

@@ -14,10 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.ContainerListener;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
@@ -27,14 +24,20 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ModularUIContainer extends AbstractContainerMenu implements WidgetUIAccess {
+    public static final MenuType<ModularUIContainer> MENUTYPE = new MenuType<>((i, inventory) -> new ModularUIContainer(i));
 
     private final ModularUI modularUI;
 
     public ModularUIContainer(ModularUI modularUI, int windowID) {
-        super(null, windowID);
+        super(MENUTYPE, windowID);
         this.modularUI = modularUI;
         this.modularUI.setModularUIContainer(this);
         modularUI.mainGroup.setUiAccess(this);
+    }
+
+    private ModularUIContainer(int windowID) {
+        super(null, windowID);
+        this.modularUI = null;
     }
 
     //WARNING! WIDGET CHANGES SHOULD BE *STRICTLY* SYNCHRONIZED BETWEEN SERVER AND CLIENT,
