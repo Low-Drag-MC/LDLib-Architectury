@@ -8,8 +8,6 @@ import dev.emi.emi.api.EmiEntrypoint;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.config.EmiConfig;
-import dev.emi.emi.screen.EmiScreen;
-import dev.emi.emi.screen.EmiScreenManager;
 
 /**
  * @author KilaBash
@@ -31,6 +29,6 @@ public class EMIPlugin implements EmiPlugin {
 
     // Oops, no API for Emi config. gotta use this, I guess.
     public static boolean isEmiEnabled() {
-        return !EmiScreenManager.isDisabled();
+        return EmiConfig.enabled;
     }
 }

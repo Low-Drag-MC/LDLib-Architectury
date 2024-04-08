@@ -73,8 +73,8 @@ public class TestXEIWidgetGroup extends WidgetGroup {
                     graphics.pose().popPose();
                 });
 
-        List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> fluidList = List.of(Either.left(List.of(Pair.of(FluidTags.LAVA, 10000L), Pair.of(FluidTags.WATER, 10000L))));
-        List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> fluidList2 = List.of(Either.left(List.of(Pair.of(FluidTags.LAVA, 10000L))));
+        List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> fluidList = List.of(Either.left(List.of(Pair.of(FluidTags.WATER, 100L), Pair.of(FluidTags.LAVA, 1000L))));
+        List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> fluidList2 = List.of(Either.left(List.of(Pair.of(FluidTags.WATER, 2333L))));
         var catalystFluid = new TankWidget(new TagOrCycleFluidTransfer(fluidList), 0, 110, 40, 20, 20, false, false)
                 .setBackground(TankWidget.FLUID_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.CATALYST)
