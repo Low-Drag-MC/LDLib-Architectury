@@ -28,7 +28,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
-import dev.emi.emi.registry.EmiTags;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -630,12 +629,9 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return List.of(EmiIngredient.of(stream.map(EmiStack::of).toList()).setChance(xeiChance));
         }
         public static List<Object> getEmiIngredients(List<Pair<TagKey<Item>, Integer>> list, float xeiChance) {
-            if (list.size() == 1) {
-                var pair = list.get(0);
-                List<EmiStack> emiStacks = EmiIngredient.of(pair.getFirst(), pair.getSecond()).getEmiStacks();
-                return List.of(EmiTags.getIngredient(Item.class, emiStacks, pair.getSecond()));
-            }
-            return List.of(EmiIngredient.of(list.stream().map(pair -> EmiIngredient.of(pair.getFirst(), pair.getSecond()).setChance(xeiChance)).toList(), list.get(0).getSecond()));
+            return list.stream()
+                    .map(pair -> EmiIngredient.of(pair.getFirst()).setAmount(pair.getSecond()).setChance(xeiChance))
+                    .collect(Collectors.toList());
         }
         public static List<Object> getEmiIngredients(ItemStack stack, float xeiChance) {
             return List.of(EmiStack.of(stack).setChance(xeiChance));
