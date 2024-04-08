@@ -560,7 +560,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
      */
     public static final class JEICallWrapper {
         public static Object getPlatformFluidTypeForJEI(FluidStack fluidStack, Position pos, Size size) {
-            return _getPlatformFluidTypeForJEI(JEIPlugin.jeiRuntime.getJeiHelpers().getPlatformFluidHelper(), fluidStack, pos, size);
+            return _getPlatformFluidTypeForJEI(JEIPlugin.jeiHelpers.getPlatformFluidHelper(), fluidStack, pos, size);
         }
 
         private static <T> Object _getPlatformFluidTypeForJEI(IPlatformFluidHelper<T> helper, FluidStack fluidStack, Position pos, Size size) {

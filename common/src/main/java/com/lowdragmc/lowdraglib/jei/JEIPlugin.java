@@ -9,10 +9,8 @@ import com.lowdragmc.lowdraglib.test.TestJEIPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.registration.IAdvancedRegistration;
-import mezz.jei.api.registration.IGuiHandlerRegistration;
-import mezz.jei.api.registration.IRecipeCategoryRegistration;
-import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.IJeiRuntime;
 import mezz.jei.common.input.ClickableIngredient;
 import mezz.jei.common.util.ImmutableRect2i;
@@ -35,6 +33,7 @@ import java.util.List;
 public class JEIPlugin implements IModPlugin {
     
     public static IJeiRuntime jeiRuntime;
+    public static IJeiHelpers jeiHelpers;
     private static final ModularUIJeiHandler modularUIGuiHandler = new ModularUIJeiHandler();
 
     public JEIPlugin() {
@@ -79,6 +78,7 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
+        JEIPlugin.jeiHelpers = registration.getJeiHelpers();
         if (Platform.isDevEnv()) {
             TestJEIPlugin.registerCategories(registration);
         }

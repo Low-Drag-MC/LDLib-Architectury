@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix issues in EMI plugin
+* fix tank widget crashing JEI in GTCEu
