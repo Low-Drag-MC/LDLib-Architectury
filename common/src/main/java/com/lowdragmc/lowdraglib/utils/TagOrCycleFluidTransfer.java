@@ -76,7 +76,7 @@ public class TagOrCycleFluidTransfer implements IFluidTransfer {
 
     @Override
     public long getTankCapacity(int tank) {
-        return Long.MAX_VALUE;
+        return getFluidInTank(tank).getAmount();
     }
 
     @Override
