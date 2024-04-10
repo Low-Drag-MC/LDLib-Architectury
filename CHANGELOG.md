@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix tank widget crashing JEI in GTCEu
+* fix tank widget having maxlong size in JEI
