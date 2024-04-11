@@ -66,7 +66,7 @@ public abstract class RecipesGuiMixin extends Screen implements IRecipesGui, IRe
     }
 
     @Inject(method = "mouseScrolled", at = @At(value = "HEAD"), cancellable = true)
-    private void ldlib$injectMouseScroll(double scrollX, double scrollY, double scrollDelta, CallbackInfoReturnable<Boolean> cir) {
+    private void ldlib$injectMouseScroll(double scrollX, double scrollY, double horizontal, double vertical, CallbackInfoReturnable<Boolean> cir) {
         var recipesGui = (RecipesGui) (Object) this;
         for (RecipeLayout<?> recipeLayout : JEIPlugin.getRecipeLayouts(recipesGui)) {
             if (recipeLayout instanceof RecipeLayoutWrapper<?> recipeLayoutWrapper) {

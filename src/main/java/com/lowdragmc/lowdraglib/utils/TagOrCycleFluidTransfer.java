@@ -1,13 +1,13 @@
 package com.lowdragmc.lowdraglib.utils;
 
-import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
-import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
+import com.lowdragmc.lowdraglib.side.fluid.IFluidHandlerModifiable;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import lombok.Getter;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -16,18 +16,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TagOrCycleFluidTransfer implements IFluidTransfer {
+public class TagOrCycleFluidTransfer implements IFluidHandlerModifiable {
     @Getter
-    private List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> stacks;
+    private List<Either<List<Pair<TagKey<Fluid>, Integer>>, List<FluidStack>>> stacks;
 
     private List<List<FluidStack>> unwrapped = null;
 
 
-    public TagOrCycleFluidTransfer(List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> stacks) {
+    public TagOrCycleFluidTransfer(List<Either<List<Pair<TagKey<Fluid>, Integer>>, List<FluidStack>>> stacks) {
         updateStacks(stacks);
     }
 
-    public void updateStacks(List<Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>>> stacks) {
+    public void updateStacks(List<Either<List<Pair<TagKey<Fluid>, Integer>>, List<FluidStack>>> stacks) {
         this.stacks = new ArrayList<>(stacks);
         this.unwrapped = null;
     }
@@ -44,7 +44,7 @@ public class TagOrCycleFluidTransfer implements IFluidTransfer {
                                         .stream()
                                         .flatMap(pair -> BuiltInRegistries.FLUID.getTag(pair.getFirst())
                                                 .map(holderSet -> holderSet.stream()
-                                                        .map(holder -> FluidStack.create(holder.value(), pair.getSecond())))
+                                                        .map(holder -> new FluidStack(holder.value(), pair.getSecond())))
                                                 .orElseGet(Stream::empty))
                                         .toList(),
                                 Function.identity());
@@ -63,7 +63,7 @@ public class TagOrCycleFluidTransfer implements IFluidTransfer {
     @Override
     public FluidStack getFluidInTank(int tank) {
         List<FluidStack> stackList = getUnwrapped().get(tank);
-        return stackList == null || stackList.isEmpty() ? FluidStack.empty() : stackList.get(Math.abs((int)(System.currentTimeMillis() / 1000) % stackList.size()));
+        return stackList == null || stackList.isEmpty() ? FluidStack.EMPTY : stackList.get(Math.abs((int)(System.currentTimeMillis() / 1000) % stackList.size()));
     }
 
     @Override
@@ -75,7 +75,7 @@ public class TagOrCycleFluidTransfer implements IFluidTransfer {
     }
 
     @Override
-    public long getTankCapacity(int tank) {
+    public int getTankCapacity(int tank) {
         return getFluidInTank(tank).getAmount();
     }
 
@@ -85,7 +85,7 @@ public class TagOrCycleFluidTransfer implements IFluidTransfer {
     }
 
     @Override
-    public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
+    public int fill(FluidStack resource, FluidAction action) {
         return 0;
     }
 
@@ -96,23 +96,17 @@ public class TagOrCycleFluidTransfer implements IFluidTransfer {
 
     @NotNull
     @Override
-    public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
-        return FluidStack.empty();
+    public FluidStack drain(FluidStack resource, FluidAction action) {
+        return FluidStack.EMPTY;
+    }
+
+    @Override
+    public @NotNull FluidStack drain(int maxDrain, FluidAction action) {
+        return FluidStack.EMPTY;
     }
 
     @Override
     public boolean supportsDrain(int tank) {
         return false;
-    }
-
-    @NotNull
-    @Override
-    public Object createSnapshot() {
-        return new Object();
-    }
-
-    @Override
-    public void restoreFromSnapshot(Object snapshot) {
-
     }
 }

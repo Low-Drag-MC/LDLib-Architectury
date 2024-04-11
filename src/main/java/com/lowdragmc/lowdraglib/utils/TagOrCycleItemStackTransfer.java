@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.utils;
 
-import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import lombok.Getter;
@@ -8,6 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TagOrCycleItemStackTransfer implements IItemTransfer {
+public class TagOrCycleItemStackTransfer implements IItemHandlerModifiable {
     @Getter
     private List<Either<List<Pair<TagKey<Item>, Integer>>, List<ItemStack>>> stacks;
 
@@ -76,13 +76,13 @@ public class TagOrCycleItemStackTransfer implements IItemTransfer {
 
     @NotNull
     @Override
-    public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate, boolean notifyChanges) {
+    public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
         return stack;
     }
 
     @NotNull
     @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate, boolean notifyChanges) {
+    public ItemStack extractItem(int slot, int amount, boolean simulate) {
         return ItemStack.EMPTY;
     }
 
@@ -94,16 +94,5 @@ public class TagOrCycleItemStackTransfer implements IItemTransfer {
     @Override
     public boolean isItemValid(int slot, @NotNull ItemStack stack) {
         return true;
-    }
-
-    @NotNull
-    @Override
-    public Object createSnapshot() {
-        return new Object();
-    }
-
-    @Override
-    public void restoreFromSnapshot(Object snapshot) {
-
     }
 }

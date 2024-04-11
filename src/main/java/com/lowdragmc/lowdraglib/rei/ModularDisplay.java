@@ -7,8 +7,6 @@ import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
-import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -18,6 +16,9 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.wrapper.EmptyHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,10 +128,10 @@ public class ModularDisplay<T extends Widget> implements Display {
 
                 // Clear the LDLib slots
                 if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
-                    slotW.setHandlerSlot(IItemTransfer.EMPTY, 0);
+                    slotW.setHandlerSlot((IItemHandlerModifiable) EmptyHandler.INSTANCE, 0);
                     slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                 } else if (slot instanceof TankWidget tankW) {
-                    tankW.setFluidTank(IFluidStorage.EMPTY);
+                    tankW.setFluidTank(EmptyFluidHandler.INSTANCE);
                     tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                 }
             }

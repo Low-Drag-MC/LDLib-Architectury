@@ -53,7 +53,7 @@ public abstract class RecipeScreenMixin {
         for (var widgetGroup : currentPage) {
             for (Widget widget : widgetGroup.widgets) {
                 if (widget instanceof ModularWrapperWidget wrapperWidget) {
-                    if (wrapperWidget.mouseScrolled(mouseX, mouseY, amount)) {
+                    if (wrapperWidget.mouseScrolled(mouseX, mouseY, horizontal, vertical)) {
                         cir.setReturnValue(true);
                     }
                 }

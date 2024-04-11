@@ -8,12 +8,12 @@ import dev.emi.emi.api.widget.TankWidget;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 @Accessors(chain = true)
 public class ExtendedTankWidget extends TankWidget {
     @Getter

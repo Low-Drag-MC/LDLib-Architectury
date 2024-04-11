@@ -6,8 +6,6 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
-import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
-import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
@@ -16,6 +14,10 @@ import dev.emi.emi.api.widget.TankWidget;
 import dev.emi.emi.api.widget.WidgetHolder;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.wrapper.EmptyHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,10 +114,10 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
                     SlotWidget slotWidget = null;
                     // Clear the LDLib slots & add EMI slots based on them.
                     if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
-                        slotW.setHandlerSlot(IItemTransfer.EMPTY, 0);
+                        slotW.setHandlerSlot((IItemHandlerModifiable) EmptyHandler.INSTANCE, 0);
                         slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                     } else if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.TankWidget tankW) {
-                        tankW.setFluidTank(IFluidStorage.EMPTY);
+                        tankW.setFluidTank(EmptyFluidHandler.INSTANCE);
                         tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                         long capacity = Math.max(1, ingredients.getAmount());
 

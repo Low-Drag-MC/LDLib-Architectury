@@ -48,11 +48,11 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
         super(fluidTank, x, y, width, height, false, false);
     }
 
-    public PhantomFluidWidget(IFluidTransfer fluidTank, int tank, int x, int y) {
+    public PhantomFluidWidget(IFluidHandler fluidTank, int tank, int x, int y) {
         super(fluidTank, tank, x, y, false, false);
     }
 
-    public PhantomFluidWidget(@Nullable IFluidTransfer fluidTank, int tank, int x, int y, int width, int height) {
+    public PhantomFluidWidget(@Nullable IFluidHandler fluidTank, int tank, int x, int y, int width, int height) {
         super(fluidTank, tank, x, y, width, height, false, false);
     }
 

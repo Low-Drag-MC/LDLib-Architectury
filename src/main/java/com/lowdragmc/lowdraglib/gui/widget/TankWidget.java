@@ -14,6 +14,7 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.TextFormattingUtil;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
+import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.side.fluid.*;
 import com.lowdragmc.lowdraglib.utils.CycleFluidTransfer;
 import com.lowdragmc.lowdraglib.utils.Position;
@@ -135,11 +136,11 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         this.drawHoverTips = true;
     }
 
-    public TankWidget(IFluidTransfer fluidTank, int tank, int x, int y, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
+    public TankWidget(IFluidHandler fluidTank, int tank, int x, int y, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
         this(fluidTank, tank, x, y, 18, 18, allowClickContainerFilling, allowClickContainerEmptying);
     }
 
-    public TankWidget(@Nullable IFluidTransfer fluidTank, int tank, int x, int y, int width, int height, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
+    public TankWidget(@Nullable IFluidHandler fluidTank, int tank, int x, int y, int width, int height, boolean allowClickContainerFilling, boolean allowClickContainerEmptying) {
         super(new Position(x, y), new Size(width, height));
         this.fluidTank = fluidTank;
         this.tank = tank;
@@ -158,7 +159,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return this;
     }
 
-    public TankWidget setFluidTank(IFluidTransfer fluidTank, int tank) {
+    public TankWidget setFluidTank(IFluidHandler fluidTank, int tank) {
         this.fluidTank = fluidTank;
         this.tank = tank;
         if (isClientSideWidget) {
@@ -244,7 +245,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     }
 
     private List<Object> getXEIIngredientsFromTagOrCycleTransfer(TagOrCycleFluidTransfer transfer, int index) {
-        Either<List<Pair<TagKey<Fluid>, Long>>, List<FluidStack>> either = transfer
+        Either<List<Pair<TagKey<Fluid>, Integer>>, List<FluidStack>> either = transfer
                 .getStacks()
                 .get(index);
         var ref = new Object() {
@@ -257,7 +258,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                                 .getTag(pair.getFirst())
                                 .stream()
                                 .flatMap(HolderSet.ListBacked::stream)
-                                .map(fluid -> JEICallWrapper.getPlatformFluidTypeForJEI(FluidStack.create(fluid.value(), pair.getSecond()), getPosition(), getSize())))
+                                .map(fluid -> JEICallWrapper.getPlatformFluidTypeForJEI(new FluidStack(fluid.value(), pair.getSecond()), getPosition(), getSize())))
                         .collect(Collectors.toList());
             } else if (LDLib.isReiLoaded()) {
                 ref.returnValue = REICallWrapper.getReiIngredients(list);
@@ -581,7 +582,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                     .map(EntryStacks::of)
                     .toList()));
         }
-        public static List<Object> getReiIngredients(List<Pair<TagKey<Fluid>, Long>> list) {
+        public static List<Object> getReiIngredients(List<Pair<TagKey<Fluid>, Integer>> list) {
             return list.stream()
                     .map(pair -> EntryIngredients.ofTag(pair.getFirst(), holder -> EntryStacks.of(dev.architectury.fluid.FluidStack.create(holder.value(), pair.getSecond()))))
                     .collect(Collectors.toList());
@@ -592,7 +593,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         public static List<Object> getEmiIngredients(Stream<FluidStack> stream, float xeiChance) {
             return List.of(EmiIngredient.of(stream.map(fluidStack -> EmiStack.of(fluidStack.getFluid(), fluidStack.getTag(), fluidStack.getAmount())).toList()).setChance(xeiChance));
         }
-        public static List<Object> getEmiIngredients(List<Pair<TagKey<Fluid>, Long>> list, float xeiChance) {
+        public static List<Object> getEmiIngredients(List<Pair<TagKey<Fluid>, Integer>> list, float xeiChance) {
             return list.stream()
                     .map(pair -> EmiIngredient.of(pair.getFirst()).setAmount(pair.getSecond()).setChance(xeiChance))
                     .collect(Collectors.toList());

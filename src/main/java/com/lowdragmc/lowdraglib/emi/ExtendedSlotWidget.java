@@ -2,20 +2,18 @@ package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.core.mixins.emi.SlotWidgetAccessor;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
-import com.lowdragmc.lowdraglib.rei.ExtendedEntryWidget;
 import com.lowdragmc.lowdraglib.utils.Rect;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.widget.SlotWidget;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.shedaniel.math.Point;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 @Accessors(chain = true)
 public class ExtendedSlotWidget extends SlotWidget {
     @Getter @Setter
