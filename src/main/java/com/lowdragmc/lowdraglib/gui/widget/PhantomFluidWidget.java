@@ -8,7 +8,7 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
-import dev.emi.emi.api.stack.FluidEmiStack;
+import dev.emi.emi.api.stack.EmiStack;
 import net.minecraft.core.NonNullList;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -48,6 +48,14 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
         super(fluidTank, x, y, width, height, false, false);
     }
 
+    public PhantomFluidWidget(IFluidTransfer fluidTank, int tank, int x, int y) {
+        super(fluidTank, tank, x, y, false, false);
+    }
+
+    public PhantomFluidWidget(@Nullable IFluidTransfer fluidTank, int tank, int x, int y, int width, int height) {
+        super(fluidTank, tank, x, y, width, height, false, false);
+    }
+
     public PhantomFluidWidget setIFluidStackUpdater(Consumer<FluidStack> fluidStackUpdater) {
         this.fluidStackUpdater = fluidStackUpdater;
         return this;
@@ -66,8 +74,8 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
     }
 
     public static FluidStack drainFrom(Object ingredient) {
-         if (ingredient instanceof Ingredient ingred) {
-            var items = ingred.getItems();
+         if (ingredient instanceof Ingredient ing) {
+            var items = ing.getItems();
             if (items.length > 0) {
                 ingredient = items[0];
             }
@@ -85,11 +93,11 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
     @OnlyIn(Dist.CLIENT)
     public List<Target> getPhantomTargets(Object ingredient) {
         if (LDLib.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
-            ingredient = new FluidStack(fluidStack.getFluid(), fluidTank.getTankCapacity(0), fluidStack.getTag());
+            ingredient = new FluidStack(fluidStack.getFluid(), fluidTank.getTankCapacity(tank), fluidStack.getTag());
         }
-        if (LDLib.isEmiLoaded() && ingredient instanceof FluidEmiStack fluidEmiStack) {
+        if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
             var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
-            ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, fluidTank.getTankCapacity(0), fluidEmiStack.getNbt());
+            ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, fluidTank.getTankCapacity(tank), fluidEmiStack.getNbt());
         }
         if (!(ingredient instanceof FluidStack) && drainFrom(ingredient) == null) {
             return Collections.emptyList();
@@ -108,14 +116,14 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                 if (fluidTank == null) return;
                 FluidStack ingredientStack;
                 if (LDLib.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
-                    ingredient = new FluidStack(fluidStack.getFluid(), fluidTank.getTankCapacity(0), fluidStack.getTag());
+                    ingredient = new FluidStack(fluidStack.getFluid(), fluidTank.getTankCapacity(tank), fluidStack.getTag());
                 }
-                if (LDLib.isEmiLoaded() && ingredient instanceof FluidEmiStack fluidEmiStack) {
+                if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
                     var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
-                    ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, fluidTank.getTankCapacity(0), fluidEmiStack.getNbt());
+                    ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, fluidTank.getTankCapacity(tank), fluidEmiStack.getNbt());
                 }
-                if (ingredient instanceof FluidStack)
-                    ingredientStack = (FluidStack) ingredient;
+                if (ingredient instanceof FluidStack fluidStack)
+                    ingredientStack = fluidStack;
                 else
                     ingredientStack = drainFrom(ingredient);
 
@@ -125,7 +133,7 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                 }
 
                 if (isClientSideWidget) {
-                    fluidTank.drain(fluidTank.getTankCapacity(0), IFluidHandler.FluidAction.EXECUTE);
+                    fluidTank.drain(fluidTank.getTankCapacity(tank), IFluidHandler.FluidAction.EXECUTE);
                     if (ingredientStack != null) {
                         fluidTank.fill(ingredientStack.copy(), IFluidHandler.FluidAction.EXECUTE);
                     }
@@ -145,7 +153,7 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
             FluidStack fluidStack;
             fluidStack = FluidStack.loadFluidStackFromNBT(buffer.readNbt());
             if (fluidTank == null) return;
-            fluidTank.drain(fluidTank.getTankCapacity(0), IFluidHandler.FluidAction.EXECUTE);
+            fluidTank.drain(fluidTank.getTankCapacity(tank), IFluidHandler.FluidAction.EXECUTE);
             if (fluidStack != null) {
                 fluidTank.fill(fluidStack.copy(), IFluidHandler.FluidAction.EXECUTE);
             }
@@ -177,14 +185,14 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
             var handler = FluidTransferHelper.getFluidTransfer(gui.entityPlayer, gui.getModularUIContainer());
             if (handler != null) {
                 FluidStack resultFluid = handler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE);
-                fluidTank.drain(fluidTank.getTankCapacity(0), IFluidHandler.FluidAction.EXECUTE);
+                fluidTank.drain(fluidTank.getTankCapacity(tank), IFluidHandler.FluidAction.EXECUTE);
                 fluidTank.fill(resultFluid.copy(), IFluidHandler.FluidAction.EXECUTE);
                 if (fluidStackUpdater != null) {
                     fluidStackUpdater.accept(resultFluid);
                 }
             }
         } else {
-            fluidTank.drain(fluidTank.getTankCapacity(0), IFluidHandler.FluidAction.EXECUTE);
+            fluidTank.drain(fluidTank.getTankCapacity(tank), IFluidHandler.FluidAction.EXECUTE);
             if (fluidStackUpdater != null) {
                 fluidStackUpdater.accept(null);
             }

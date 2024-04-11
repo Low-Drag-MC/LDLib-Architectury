@@ -4,8 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.json.factory.FluidStackTypeAdapter;
+import com.lowdragmc.lowdraglib.emi.EMIPlugin;
+import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.json.IGuiTextureTypeAdapter;
 import com.lowdragmc.lowdraglib.json.ItemStackTypeAdapter;
+import com.lowdragmc.lowdraglib.json.factory.FluidStackTypeAdapter;
+import com.lowdragmc.lowdraglib.rei.REIPlugin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -87,10 +91,10 @@ public class LDLib {
     }
 
     public static boolean isReiLoaded() {
-        return isModLoaded(MODID_REI);
+        return isModLoaded(MODID_REI) && REIPlugin.isReiEnabled();
     }
 
     public static boolean isEmiLoaded() {
-        return isModLoaded(MODID_EMI);
+        return isModLoaded(MODID_EMI) && EMIPlugin.isEmiEnabled();
     }
 }

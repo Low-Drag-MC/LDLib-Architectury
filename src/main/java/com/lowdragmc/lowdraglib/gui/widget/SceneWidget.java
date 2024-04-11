@@ -13,7 +13,7 @@ import com.lowdragmc.lowdraglib.utils.interpolate.Eases;
 import com.lowdragmc.lowdraglib.utils.interpolate.Interpolator;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import dev.emi.emi.api.stack.ItemEmiStack;
+import dev.emi.emi.api.stack.EmiStack;
 import lombok.Getter;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.neoforged.api.distmarker.Dist;
@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+@SuppressWarnings({"unused", "UnusedReturnValue", "SameParameterValue"})
 public class SceneWidget extends WidgetGroup {
     @OnlyIn(Dist.CLIENT)
     protected WorldSceneRenderer renderer;
@@ -439,7 +440,7 @@ public class SceneWidget extends WidgetGroup {
                 return EntryStacks.of(hoverItem);
             }
             if (LDLib.isEmiLoaded()) {
-                return new ItemEmiStack(hoverItem);
+                return EmiStack.of(hoverItem);
             }
             return hoverItem;
         }
@@ -566,6 +567,7 @@ public class SceneWidget extends WidgetGroup {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
+        drawOverlay(graphics, mouseX, mouseY, partialTicks);
         currentMouseX = mouseX;
         currentMouseY = mouseY;
     }

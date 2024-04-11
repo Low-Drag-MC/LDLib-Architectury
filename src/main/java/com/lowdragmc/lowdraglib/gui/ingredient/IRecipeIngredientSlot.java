@@ -4,12 +4,11 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import net.minecraft.network.chat.Component;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface IRecipeIngredientSlot extends IIngredientSlot{
+public interface IRecipeIngredientSlot extends IIngredientSlot {
 
     default Widget self() {
         return (Widget) this;
@@ -44,7 +43,7 @@ public interface IRecipeIngredientSlot extends IIngredientSlot{
 
     }
 
-    default void clearTooltipCallback(){
+    default void clearTooltipCallback() {
 
     }
 

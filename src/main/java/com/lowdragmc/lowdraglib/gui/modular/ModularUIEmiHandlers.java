@@ -25,13 +25,7 @@ public final class ModularUIEmiHandlers {
             if (targets.isEmpty()) continue;
             for (Target target : targets) {
                 var area = target.getArea();
-                var rect = new Bounds(
-                        area.getX(),
-                        area.getY(),
-                        area.getWidth(),
-                        area.getHeight()
-                );
-                if (rect.contains(x, y)) {
+                if (area.contains(x, y)) {
                     target.accept(emiStack);
                     return true;
                 }

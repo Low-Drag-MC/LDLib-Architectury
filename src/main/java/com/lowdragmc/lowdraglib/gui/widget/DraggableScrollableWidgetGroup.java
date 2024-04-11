@@ -8,15 +8,21 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import lombok.Getter;
+import lombok.Setter;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 @LDLRegister(name = "draggable_scrollable_group", group = "widget.group")
 public class DraggableScrollableWidgetGroup extends WidgetGroup {
@@ -32,6 +38,7 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     protected boolean draggable;
     @Configurable(name = "ldlib.gui.editor.name.scrollable")
     protected boolean scrollable = true;
+    @Getter @Setter
     @Configurable(name = "ldlib.gui.editor.name.use_scissor")
     protected boolean useScissor;
     protected int maxHeight;
@@ -51,10 +58,11 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     private boolean draggedOnXScrollBar;
     private boolean draggedOnYScrollBar;
     private double lastDeltaX, lastDeltaY;
+    @Getter
+    private final Set<BiConsumer<Integer, Integer>> moveCallbacks = new HashSet<>();
 
     public DraggableScrollableWidgetGroup() {
         this(0, 0,50, 50);
-
     }
 
     @Override
@@ -109,10 +117,6 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         this.yBarB = background;
         this.yBarF = bar;
         return this;
-    }
-
-    public void setUseScissor(boolean useScissor) {
-        this.useScissor = useScissor;
     }
 
     public int getScrollYOffset() {
@@ -258,8 +262,11 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         this.scrollXOffset = scrollXOffset;
         isComputingMax = true;
         for (Widget widget : widgets) {
-            Position newPos = widget.addSelfPosition( - offset, 0);
+            Position newPos = widget.addSelfPosition(-offset, 0);
             widget.setVisible(newPos.x < getSize().width - yBarWidth && newPos.x + widget.getSize().width > 0);
+        }
+        for (var callback : moveCallbacks) {
+            callback.accept(-offset, 0);
         }
         isComputingMax = false;
     }
@@ -271,8 +278,11 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         this.scrollYOffset = scrollYOffset;
         isComputingMax = true;
         for (Widget widget : widgets) {
-            Position newPos = widget.addSelfPosition(0, - offset);
+            Position newPos = widget.addSelfPosition(0, -offset);
             widget.setVisible(newPos.y < getSize().height - xBarHeight && newPos.y + widget.getSize().height > 0);
+        }
+        for (var callback : moveCallbacks) {
+            callback.accept(0, -offset);
         }
         isComputingMax = false;
     }
@@ -339,6 +349,21 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
                 int barHeight = (int) (height * 1.0f / getMaxHeight() * height);
                 yBarF.draw(graphics, mouseX, mouseY, x + width  - yBarWidth, y + scrollYOffset * height * 1.0f / getMaxHeight(), yBarWidth, barHeight);
             }
+        }
+    }
+
+    @Override
+    public void drawOverlay(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        int x = getPosition().x;
+        int y = getPosition().y;
+        int width = getSize().width;
+        int height = getSize().height;
+        if (useScissor) {
+            graphics.enableScissor(x, y, x + width, y + height);
+            super.drawOverlay(graphics, mouseX, mouseY, partialTicks);
+            graphics.disableScissor();
+        } else {
+            super.drawOverlay(graphics, mouseX, mouseY, partialTicks);
         }
     }
 

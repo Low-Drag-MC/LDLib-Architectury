@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix server crash when opening an UI with the player inventory in it
+* fix tank widget having maxlong size in JEI

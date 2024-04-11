@@ -22,9 +22,9 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -177,6 +177,23 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         }
     }
 
+    public <T extends Widget> List<T> getWidgetsByType(Class<T> clazz) {
+        List<T> list = new ArrayList<>();
+        getWidgetsByType(list, clazz);
+        return list;
+    }
+
+    private <T extends Widget> void getWidgetsByType(List<T> list, Class<T> clazz) {
+        for (Widget widget : widgets) {
+            if (clazz.isAssignableFrom(widget.getClass())) {
+                list.add((T) widget);
+            }
+            if (widget instanceof WidgetGroup group) {
+                group.getWidgetsByType(list, clazz);
+            }
+        }
+    }
+
     protected boolean recomputeSize() {
         if (isDynamicSized) {
             Size currentSize = getSize();
@@ -204,11 +221,12 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         return currentSize;
     }
 
-    public void setVisible(boolean visible) {
+    public WidgetGroup setVisible(boolean visible) {
         if (this.isVisible() == visible) {
-            return;
+            return this;
         }
         super.setVisible(visible);
+        return this;
     }
 
     @Override
@@ -396,7 +414,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     @OnlyIn(Dist.CLIENT)
-    protected void drawWidgetsForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    protected void drawWidgetsForeground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         DialogWidget dialogWidget = null;
         for (int i = widgets.size() - 1; i >= 0; i--) {
             if (widgets.get(i) instanceof DialogWidget dialog) {
@@ -420,13 +438,13 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawInForeground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
         drawWidgetsForeground(graphics, mouseX, mouseY, partialTicks);
     }
 
     @OnlyIn(Dist.CLIENT)
-    protected void drawWidgetsBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    protected void drawWidgetsBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         for (Widget widget : widgets) {
             if (widget.isVisible()) {
                 RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -442,9 +460,21 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    public void drawOverlay(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.drawOverlay(graphics, mouseX, mouseY, partialTicks);
+        for (Widget widget : widgets) {
+            if (widget.isVisible()) {
+                RenderSystem.setShaderColor(1, 1, 1, 1);
+                RenderSystem.enableBlend();
+                widget.drawOverlay(graphics, mouseX, mouseY, partialTicks);
+            }
+        }
     }
 
     @Override

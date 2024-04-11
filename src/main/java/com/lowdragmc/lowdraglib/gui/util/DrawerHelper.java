@@ -8,12 +8,13 @@ import com.lowdragmc.lowdraglib.client.shader.uniform.UniformCache;
 import com.lowdragmc.lowdraglib.client.utils.RenderBufferUtils;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.utils.ColorUtils;
-import com.lowdragmc.lowdraglib.utils.LdUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Rect;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -39,7 +40,6 @@ import org.lwjgl.opengl.GL11;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
 
 @OnlyIn(Dist.CLIENT)
 public class DrawerHelper {
@@ -52,17 +52,17 @@ public class DrawerHelper {
     public static ShaderProgram ROUND_LINE;
 
     public static void init() {
-        ROUND = LdUtils.make(new ShaderProgram(), program
+        ROUND = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.ROUND_F).attach(Shaders.SCREEN_V));
-        PANEL_BG = LdUtils.make(new ShaderProgram(), program
+        PANEL_BG = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.PANEL_BG_F).attach(Shaders.SCREEN_V));
-        ROUND_BOX = LdUtils.make(new ShaderProgram(), program
+        ROUND_BOX = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.ROUND_BOX_F).attach(Shaders.SCREEN_V));
-        PROGRESS_ROUND_BOX = LdUtils.make(new ShaderProgram(), program
+        PROGRESS_ROUND_BOX = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.PROGRESS_ROUND_BOX_F).attach(Shaders.SCREEN_V));
-        FRAME_ROUND_BOX = LdUtils.make(new ShaderProgram(), program
+        FRAME_ROUND_BOX = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.FRAME_ROUND_BOX_F).attach(Shaders.SCREEN_V));
-        ROUND_LINE = LdUtils.make(new ShaderProgram(), program
+        ROUND_LINE = Util.make(new ShaderProgram(), program
                 -> program.attach(Shaders.ROUND_LINE_F).attach(Shaders.SCREEN_V));
     }
 

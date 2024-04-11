@@ -149,6 +149,7 @@ public class SwitchWidget extends Widget implements IConfigurableWidget {
         if (isMouseOverElement(mouseX, mouseY) && hoverTexture != null) {
             hoverTexture.draw(graphics, mouseX, mouseY, position.x, position.y, size.width, size.height);
         }
+        drawOverlay(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override

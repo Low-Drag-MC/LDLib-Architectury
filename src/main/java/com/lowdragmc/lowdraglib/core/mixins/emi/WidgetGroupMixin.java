@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.core.mixins.emi;
 
-import com.lowdragmc.lowdraglib.emi.ModularSlotWidget;
 import com.lowdragmc.lowdraglib.emi.ModularWrapperWidget;
 import dev.emi.emi.api.widget.Widget;
 import dev.emi.emi.screen.WidgetGroup;
@@ -28,9 +27,6 @@ public abstract class WidgetGroupMixin {
     private <T extends Widget> void init(T widget, CallbackInfoReturnable<T> cir) {
         if (widget instanceof ModularWrapperWidget wrapperWidget) {
             wrapperWidget.modular.setEmiRecipeWidget(this.x, this.y);
-        }
-        if (widget instanceof ModularSlotWidget slotWidget) {
-            slotWidget.setLayout(x, y);
         }
     }
 }

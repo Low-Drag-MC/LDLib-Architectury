@@ -14,8 +14,10 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Rect;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.latvian.mods.rhino.util.RemapPrefixForJS;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -26,6 +28,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
@@ -45,7 +48,9 @@ import java.util.function.Supplier;
  * It's information is also synced to client
  */
 @SuppressWarnings("UnusedReturnValue")
+@RemapPrefixForJS("kjs$")
 @Configurable(name = "ldlib.gui.editor.group.basic_info", collapse = false)
+@Accessors(chain = true)
 public class Widget {
 
     protected ModularUI gui;
@@ -54,25 +59,37 @@ public class Widget {
     @Setter
     @Getter
     protected String id = "";
+    @Getter
     private Position parentPosition = Position.ORIGIN;
     @Configurable(name = "ldlib.gui.editor.name.pos", tips = "ldlib.gui.editor.tips.pos")
     private Position selfPosition;
+    @Getter
     private Position position;
     @Configurable(name = "ldlib.gui.editor.name.size")
+    @Getter
     private Size size;
+    @Getter @Setter
     private boolean isVisible;
+    @Getter @Setter
     private boolean isActive;
+    @Getter
     private boolean isFocus;
     protected boolean isClientSideWidget;
+    @Getter
     @Configurable(name = "ldlib.gui.editor.name.hover_tips", tips = "ldlib.gui.editor.tips.hover_tips")
     protected final List<Component> tooltipTexts = new ArrayList<>();
     @Configurable(name = "ldlib.gui.editor.name.background")
     protected IGuiTexture backgroundTexture;
     @Configurable(name = "ldlib.gui.editor.name.hover_texture")
     protected IGuiTexture hoverTexture;
+    @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
+    @Setter
+    protected IGuiTexture overlay;
+    @Getter
     protected WidgetGroup parent;
     @Getter
     protected Animation animation;
+    @Getter
     protected boolean initialized;
     protected boolean tryToDrag = false;
     protected Supplier<Object> draggingProvider;
@@ -121,7 +138,7 @@ public class Widget {
         return this;
     }
 
-    public Widget setKJSHoverTooltips(Component... tooltipText) {
+    public Widget kjs$setHoverTooltips(Component... tooltipText) {
         tooltipTexts.clear();
         Arrays.stream(tooltipText).filter(Objects::nonNull).forEach(tooltipTexts::add);
         return this;
@@ -245,20 +262,12 @@ public class Widget {
         setSize(getSize().width, height);
     }
 
-    public final Position getPosition() {
-        return position;
-    }
-
     public final int getPositionX() {
         return getPosition().x;
     }
 
     public final int getPositionY() {
         return getPosition().y;
-    }
-
-    public final Size getSize() {
-        return size;
     }
 
     public final int getSizeWidth() {
@@ -271,22 +280,6 @@ public class Widget {
 
     public final Rect getRect() {
         return Rect.of(position, size);
-    }
-
-    public boolean isVisible() {
-        return isVisible;
-    }
-
-    public void setVisible(boolean visible) {
-        isVisible = visible;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -325,18 +318,6 @@ public class Widget {
 
     public static boolean isMouseOver(int x, int y, int width, int height, double mouseX, double mouseY) {
         return mouseX >= x && mouseY >= y && x + width > mouseX && y + height > mouseY;
-    }
-
-    public Position getParentPosition() {
-        return parentPosition;
-    }
-
-    public WidgetGroup getParent() {
-        return parent;
-    }
-
-    public boolean isInitialized() {
-        return initialized;
     }
 
     /**
@@ -407,6 +388,13 @@ public class Widget {
     @OnlyIn(Dist.CLIENT)
     public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         drawBackgroundTexture(graphics, mouseX, mouseY);
+    }
+
+    public void drawOverlay(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        if (overlay != null) {
+            Position pos = getPosition();
+            overlay.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
+        }
     }
 
     /**
@@ -520,11 +508,6 @@ public class Widget {
                 }
             }
         }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public final boolean isFocus() {
-        return isFocus;
     }
     
     @OnlyIn(Dist.CLIENT)

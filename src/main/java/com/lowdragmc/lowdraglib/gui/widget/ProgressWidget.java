@@ -120,6 +120,7 @@ public class ProgressWidget extends Widget implements IConfigurableWidget {
         if (overlayTexture != null) {
             overlayTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
         }
+        drawOverlay(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override

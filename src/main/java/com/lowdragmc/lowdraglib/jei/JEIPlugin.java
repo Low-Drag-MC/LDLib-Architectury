@@ -9,10 +9,8 @@ import com.lowdragmc.lowdraglib.test.TestJEIPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.registration.IAdvancedRegistration;
-import mezz.jei.api.registration.IGuiHandlerRegistration;
-import mezz.jei.api.registration.IRecipeCategoryRegistration;
-import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.IJeiRuntime;
 import mezz.jei.common.input.ClickableIngredient;
 import mezz.jei.common.util.ImmutableRect2i;
@@ -36,6 +34,7 @@ import java.util.function.Supplier;
 public class JEIPlugin implements IModPlugin {
     
     public static IJeiRuntime jeiRuntime;
+    public static IJeiHelpers jeiHelpers;
     private static final ModularUIJeiHandler modularUIGuiHandler = new ModularUIJeiHandler();
 
     public JEIPlugin() {
@@ -43,16 +42,17 @@ public class JEIPlugin implements IModPlugin {
     }
 
     public static Object getItemIngredient(ItemStack itemStack, int x, int y, int width, int height) {
-        Supplier<Object> supplier = () -> {
-            return new ClickableIngredient<>(TypedIngredient.createUnvalidated(VanillaTypes.ITEM_STACK, itemStack),
-                    new ImmutableRect2i(x, y, width, height));
-        };
-        return supplier.get();
+        return new ClickableIngredient<>(TypedIngredient.createUnvalidated(VanillaTypes.ITEM_STACK, itemStack),
+                new ImmutableRect2i(x, y, width, height));
     }
 
     @Nonnull
     public static List<RecipeLayout<?>> getRecipeLayouts(RecipesGui recipesGui) {
         return new ArrayList<>(((RecipesGuiAccessor)recipesGui).getRecipeLayouts());
+    }
+
+    public static boolean isJeiEnabled() {
+        return jeiRuntime != null && jeiRuntime.getIngredientListOverlay().isListDisplayed();
     }
 
     @Override
@@ -79,6 +79,7 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
+        JEIPlugin.jeiHelpers = registration.getJeiHelpers();
         if (Platform.isDevEnv()) {
             TestJEIPlugin.registerCategories(registration);
         }

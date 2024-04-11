@@ -21,7 +21,6 @@
     "accessor.MouseHandlerAccessor",
     "accessor.VertexFormatAccessor",
     "emi.RecipeScreenMixin",
-    "emi.WidgetGroupAccessor",
     "emi.WidgetGroupMixin",
     "jei.RecipesGuiAccessor",
     "jei.RecipesGuiMixin",
@@ -38,6 +37,7 @@
     "accessor.ServerPlayerAccessor",
     "accessor.SlotAccessor",
     "emi.EmiRenderHelperMixin",
+    "emi.SlotWidgetAccessor",
     "jei.JeiRecipeLayoutMixin",
     "jei.RecipeLayoutAccessor",
     "jei.RecipeSlotsAccessor"
