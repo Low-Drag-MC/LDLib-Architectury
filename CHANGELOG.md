@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix tank widget having maxlong size in JEI
+* fix servers with REI crashing when opening some GUIs
