@@ -70,14 +70,17 @@ public class LDLib {
     }
 
     public static boolean isJeiLoaded() {
-        return !isEmiLoaded() && !isReiLoaded() && isModLoaded(MODID_JEI);
+        if (!isEmiLoaded() && !isReiLoaded()) {
+            return isModLoaded(MODID_JEI);
+        }
+        return false;
     }
 
     public static boolean isReiLoaded() {
-        return isModLoaded(MODID_REI) && REIPlugin.isReiEnabled();
+        return isModLoaded(MODID_REI) && (!Platform.isClient() || REIPlugin.isReiEnabled());
     }
 
     public static boolean isEmiLoaded() {
-        return isModLoaded(MODID_EMI) && EMIPlugin.isEmiEnabled();
+        return isModLoaded(MODID_EMI) && (!Platform.isClient() || EMIPlugin.isEmiEnabled());
     }
 }
