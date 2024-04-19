@@ -34,9 +34,6 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import mezz.jei.api.helpers.IPlatformFluidHelper;
-import mezz.jei.common.input.ClickableIngredient;
-import mezz.jei.common.util.ImmutableRect2i;
-import mezz.jei.library.ingredients.TypedIngredient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -564,9 +561,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }
 
         private static <T> Object _getPlatformFluidTypeForJEI(IPlatformFluidHelper<T> helper, FluidStack fluidStack, Position pos, Size size) {
-            T ingredient = helper.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
-            return new ClickableIngredient<>(TypedIngredient.createUnvalidated(helper.getFluidIngredientType(), ingredient),
-                    new ImmutableRect2i(pos.x, pos.y, size.width, size.height));
+            return helper.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
         }
     }
 

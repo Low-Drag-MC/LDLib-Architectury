@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix servers with REI crashing when opening some GUIs
+* fix JEI plugin not showing uses or crafts

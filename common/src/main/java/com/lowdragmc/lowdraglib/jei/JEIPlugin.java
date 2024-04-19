@@ -41,8 +41,7 @@ public class JEIPlugin implements IModPlugin {
     }
 
     public static Object getItemIngredient(ItemStack itemStack, int x, int y, int width, int height) {
-        return new ClickableIngredient<>(TypedIngredient.createUnvalidated(VanillaTypes.ITEM_STACK, itemStack),
-                new ImmutableRect2i(x, y, width, height));
+        return itemStack;
     }
 
     @Nonnull
