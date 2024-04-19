@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix servers with REI crashing when opening some GUIs
+* just bump version to keep up with 1.19
