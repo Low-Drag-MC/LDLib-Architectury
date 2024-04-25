@@ -50,10 +50,10 @@ public class FluidStackAccessor extends TypesAccessor<FluidStack> {
                 () -> supplier.get().getFluid(),
                 item -> {
                     var last = supplier.get();
-                    var tag = last.getTag();
+                    var tag = last.getComponents();
                     var count = last.getAmount();
                     var newStack = new FluidStack(item, Math.max(count, 1));
-                    newStack.setTag(tag);
+                    newStack.applyComponents(tag);
                     updateStack.accept(newStack);
                 }, Fluids.EMPTY, forceUpdate));
         var min = 1;
@@ -70,6 +70,7 @@ public class FluidStackAccessor extends TypesAccessor<FluidStack> {
                     updateStack.accept(copy);
                 }, 1, forceUpdate)
                 .setRange(min, max));
+        /*
         group.addConfigurators(new CompoundTagAccessor().create("ldlib.gui.editor.configurator.nbt",
                 () -> supplier.get().hasTag() ? supplier.get().getTag() : new CompoundTag(),
                 tag -> {
@@ -84,6 +85,7 @@ public class FluidStackAccessor extends TypesAccessor<FluidStack> {
                     }
                     updateStack.accept(newStack);
                 }, false, field));
+        */
         group.addConfigurators(new WrapperConfigurator("ldlib.gui.editor.group.preview", tank));
         return group;
     }

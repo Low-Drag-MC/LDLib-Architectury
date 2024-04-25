@@ -47,10 +47,10 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
                 () -> supplier.get().getItem(),
                 item -> {
                     var last = supplier.get();
-                    var tag = last.getTag();
+                    var components = last.getComponents();
                     var count = last.getCount();
                     var newStack = new ItemStack(item, Math.max(count, 1));
-                    newStack.setTag(tag);
+                    newStack.applyComponents(components);
                     updateStack.accept(newStack);
                 }, Items.AIR, forceUpdate));
         var min = 1;
@@ -63,8 +63,9 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
                 () -> supplier.get().getCount(),
                 count -> updateStack.accept(supplier.get().copyWithCount(count.intValue())), 1, forceUpdate)
                 .setRange(min, max));
+        /*
         group.addConfigurators(new CompoundTagAccessor().create("ldlib.gui.editor.configurator.nbt",
-                () -> supplier.get().hasTag() ? supplier.get().getTag() : new CompoundTag(),
+                () -> supplier.get().compo() ? supplier.get().getTag() : new CompoundTag(),
                 tag -> {
                     var last = supplier.get();
                     var item = last.getItem();
@@ -77,6 +78,7 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
                     }
                     updateStack.accept(newStack);
                 }, false, field));
+        */
         group.addConfigurators(new WrapperConfigurator("ldlib.gui.editor.group.preview", slot));
         return group;
     }
