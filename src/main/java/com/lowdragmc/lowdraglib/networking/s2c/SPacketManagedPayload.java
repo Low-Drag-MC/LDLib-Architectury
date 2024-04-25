@@ -2,12 +2,15 @@ package com.lowdragmc.lowdraglib.networking.s2c;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.networking.both.PacketIntLocation;
+import com.lowdragmc.lowdraglib.networking.c2s.CPacketUIClientAction;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.syncdata.accessor.IManagedAccessor;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import lombok.NoArgsConstructor;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -18,7 +21,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.BitSet;
@@ -31,7 +34,9 @@ import java.util.Objects;
  */
 @NoArgsConstructor
 public class SPacketManagedPayload extends PacketIntLocation {
-    public static ResourceLocation ID = LDLib.location("managed_payload");
+    public static final ResourceLocation ID = LDLib.location("managed_payload");
+    public static final Type<SPacketManagedPayload> TYPE = new Type<>(ID);
+    public static final StreamCodec<FriendlyByteBuf, SPacketManagedPayload> CODEC = StreamCodec.ofMember(SPacketManagedPayload::write, SPacketManagedPayload::decode);
 
     private CompoundTag extra;
     private BlockEntityType<?> blockEntityType;
@@ -146,19 +151,17 @@ public class SPacketManagedPayload extends PacketIntLocation {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void execute(SPacketManagedPayload packet, PlayPayloadContext context) {
-        context.workHandler().submitAsync(() -> {
-            var level = Minecraft.getInstance().level;
-            if (level != null) {
-                if (level.getBlockEntity(packet.pos) instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
-                    processPacket(autoSyncBlockEntity, packet);
-                }
+    public static void execute(SPacketManagedPayload packet, IPayloadContext context) {
+        var level = Minecraft.getInstance().level;
+        if (level != null) {
+            if (level.getBlockEntity(packet.pos) instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
+                processPacket(autoSyncBlockEntity, packet);
             }
-        });
+        }
     }
 
     @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

@@ -6,14 +6,17 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.NoArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @NoArgsConstructor
 public class CPacketUIClientAction implements CustomPacketPayload {
     public static final ResourceLocation ID = LDLib.location("ui_client_action");
+    public static final Type<CPacketUIClientAction> TYPE = new Type<>(ID);
+    public static final StreamCodec<FriendlyByteBuf, CPacketUIClientAction> CODEC = StreamCodec.ofMember(CPacketUIClientAction::write, CPacketUIClientAction::decode);
     public int windowId;
     public FriendlyByteBuf updateData;
 
@@ -22,17 +25,11 @@ public class CPacketUIClientAction implements CustomPacketPayload {
         this.updateData = updateData;
     }
 
-    @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeVarInt(updateData.readableBytes());
         buf.writeBytes(updateData);
 
         buf.writeVarInt(windowId);
-    }
-
-    @Override
-    public ResourceLocation id() {
-        return ID;
     }
 
     public static CPacketUIClientAction decode(FriendlyByteBuf buf) {
@@ -45,12 +42,15 @@ public class CPacketUIClientAction implements CustomPacketPayload {
         return new CPacketUIClientAction(windowId, updateData);
     }
 
-    public static void execute(CPacketUIClientAction packet, PlayPayloadContext context) {
-        context.workHandler().submitAsync(() -> {
-            AbstractContainerMenu openContainer = context.player().get().containerMenu;
-            if (openContainer instanceof ModularUIContainer) {
-                ((ModularUIContainer)openContainer).handleClientAction(packet);
-            }
-        });
+    public static void execute(CPacketUIClientAction packet, IPayloadContext context) {
+        AbstractContainerMenu openContainer = context.player().containerMenu;
+        if (openContainer instanceof ModularUIContainer) {
+            ((ModularUIContainer)openContainer).handleClientAction(packet);
+        }
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

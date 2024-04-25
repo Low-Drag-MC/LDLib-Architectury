@@ -5,16 +5,19 @@ import com.lowdragmc.lowdraglib.gui.factory.UIFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.NoArgsConstructor;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @NoArgsConstructor
 public class SPacketUIOpen implements CustomPacketPayload {
-    public static ResourceLocation ID = LDLib.location("ui_open");
+    public static final ResourceLocation ID = LDLib.location("ui_open");
+    public static final Type<SPacketUIOpen> TYPE = new Type<>(ID);
+    public static final StreamCodec<FriendlyByteBuf, SPacketUIOpen> CODEC = StreamCodec.ofMember(SPacketUIOpen::write, SPacketUIOpen::decode);
     private ResourceLocation uiFactoryId;
     private FriendlyByteBuf serializedHolder;
     private int windowId;
@@ -25,18 +28,12 @@ public class SPacketUIOpen implements CustomPacketPayload {
         this.windowId = windowId;
     }
 
-    @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeVarInt(serializedHolder.readableBytes());
         buf.writeBytes(serializedHolder);
 
         buf.writeResourceLocation(uiFactoryId);
         buf.writeVarInt(windowId);
-    }
-
-    @Override
-    public ResourceLocation id() {
-        return ID;
     }
 
     public static SPacketUIOpen decode(FriendlyByteBuf buf) {
@@ -51,13 +48,15 @@ public class SPacketUIOpen implements CustomPacketPayload {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void execute(SPacketUIOpen packet, PlayPayloadContext context) {
-        context.workHandler().submitAsync(() -> {
-            UIFactory<?> uiFactory = UIFactory.FACTORIES.get(packet.uiFactoryId);
-            if (uiFactory != null) {
-                uiFactory.initClientUI(packet.serializedHolder, packet.windowId);
-            }
-        });
+    public static void execute(SPacketUIOpen packet, IPayloadContext context) {
+        UIFactory<?> uiFactory = UIFactory.FACTORIES.get(packet.uiFactoryId);
+        if (uiFactory != null) {
+            uiFactory.initClientUI(packet.serializedHolder, packet.windowId);
+        }
     }
 
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 }

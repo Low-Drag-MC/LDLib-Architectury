@@ -16,7 +16,6 @@ public abstract class PacketIntLocation implements CustomPacketPayload {
         this.pos = pos;
     }
 
-    @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeBlockPos(pos);
     }

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib;
 
+import dev.latvian.mods.kubejs.KubeJSPaths;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.api.distmarker.Dist;
@@ -49,7 +50,7 @@ public class Platform {
     }
 
     public static Path getGamePath() {
-        return FMLPaths.GAMEDIR.get();
+        return FMLLoader.getGamePath();
     }
 
     @Nullable

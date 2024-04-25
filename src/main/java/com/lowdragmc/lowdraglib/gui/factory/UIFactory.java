@@ -1,16 +1,12 @@
 package com.lowdragmc.lowdraglib.gui.factory;
 
 import com.lowdragmc.lowdraglib.Platform;
-import com.lowdragmc.lowdraglib.core.mixins.accessor.ServerPlayerAccessor;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
-import com.lowdragmc.lowdraglib.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIOpen;
 import com.lowdragmc.lowdraglib.side.ForgeEventHooks;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -43,8 +39,8 @@ public abstract class UIFactory<T> {
         if (player.containerMenu != player.inventoryMenu) {
             player.closeContainer();
         }
-        ((ServerPlayerAccessor) player).callNextContainerCounter();
-        int currentWindowId = ((ServerPlayerAccessor) player).getContainerCounter();
+        player.nextContainerCounter();
+        int currentWindowId = player.containerCounter;
 
         FriendlyByteBuf serializedHolder = new FriendlyByteBuf(Unpooled.buffer());
         writeHolderToSyncData(serializedHolder, holder);
@@ -55,7 +51,7 @@ public abstract class UIFactory<T> {
 
         player.connection.send(new SPacketUIOpen(uiFactoryId, serializedHolder, currentWindowId));
 
-        ((ServerPlayerAccessor) player).callInitMenu(container);
+        player.initMenu(container);
         player.containerMenu = container;
 
         //and fire forge event only in the end
@@ -78,7 +74,6 @@ public abstract class UIFactory<T> {
         uiTemplate.mainGroup.readInitialData(serializedHolder);
         minecraft.setScreen(ModularUIGuiContainer);
         minecraft.player.containerMenu = ModularUIGuiContainer.getMenu();
-
     }
 
     protected abstract ModularUI createUITemplate(T holder, Player entityPlayer);

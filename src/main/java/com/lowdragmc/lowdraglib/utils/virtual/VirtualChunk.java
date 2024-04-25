@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.*;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -119,12 +120,6 @@ public class VirtualChunk extends LevelChunk {
 	@Nullable
 	@Override
 	public CompoundTag getBlockEntityNbt(BlockPos p_201579_1_) {
-		return null;
-	}
-
-	@Nullable
-	@Override
-	public CompoundTag getBlockEntityNbtForSaving(BlockPos p_223134_1_) {
 		return null;
 	}
 

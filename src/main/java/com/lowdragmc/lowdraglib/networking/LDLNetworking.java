@@ -7,12 +7,10 @@ import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIOpen;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
-import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 /**
  * Author: KilaBash
@@ -21,18 +19,16 @@ import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
  */
 public class LDLNetworking {
 
-    public static void registerPayloads(RegisterPayloadHandlerEvent event) {
-        IPayloadRegistrar registar = event.registrar(LDLib.MOD_ID);
+    public static void registerPayloads(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registar = event.registrar(LDLib.MOD_ID);
 
-        registar.play(SPacketUIOpen.ID, SPacketUIOpen::decode, builder -> builder.client(SPacketUIOpen::execute));
-        registar.play(SPacketUIWidgetUpdate.ID, SPacketUIWidgetUpdate::decode, builder -> builder.client(SPacketUIWidgetUpdate::execute));
-        registar.play(SPacketManagedPayload.ID, SPacketManagedPayload::decode, builder -> builder.client(SPacketManagedPayload::execute));
+        registar.playToClient(SPacketUIOpen.TYPE, SPacketUIOpen.CODEC, SPacketUIOpen::execute);
+        registar.playToClient(SPacketUIWidgetUpdate.TYPE, SPacketUIWidgetUpdate.CODEC, SPacketUIWidgetUpdate::execute);
+        registar.playToClient(SPacketManagedPayload.TYPE, SPacketManagedPayload.CODEC, SPacketManagedPayload::execute);
 
-        registar.play(CPacketUIClientAction.ID, CPacketUIClientAction::decode, builder -> builder.server(CPacketUIClientAction::execute));
+        registar.playToServer(CPacketUIClientAction.TYPE, CPacketUIClientAction.CODEC, CPacketUIClientAction::execute);
 
-        registar.play(PacketRPCMethodPayload.ID, PacketRPCMethodPayload::decode, builder -> builder
-                .client(PacketRPCMethodPayload::executeClient)
-                .server(PacketRPCMethodPayload::executeServer));
+        registar.playBidirectional(PacketRPCMethodPayload.TYPE, PacketRPCMethodPayload.CODEC, PacketRPCMethodPayload::execute);
     }
 
     public static void sendToTrackingChunk(ServerLevel level, ChunkPos pos, CustomPacketPayload packet) {

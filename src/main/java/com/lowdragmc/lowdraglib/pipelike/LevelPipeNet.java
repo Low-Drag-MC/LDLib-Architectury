@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.pipelike;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -135,7 +136,7 @@ public abstract class LevelPipeNet<NodeDataType, T extends PipeNet<NodeDataType>
     protected abstract T createNetInstance();
 
     @Override
-    public CompoundTag save(CompoundTag compound) {
+    public CompoundTag save(HolderLookup.Provider provider, CompoundTag compound) {
         ListTag allPipeNets = new ListTag();
         for (T pipeNet : pipeNets) {
             CompoundTag pNetTag = pipeNet.serializeNBT();

@@ -10,11 +10,14 @@ import lombok.NoArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.handling.ServerPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -25,7 +28,10 @@ import java.util.Objects;
  */
 @NoArgsConstructor
 public class PacketRPCMethodPayload extends PacketIntLocation implements CustomPacketPayload {
-    public static ResourceLocation ID = LDLib.location("rpc_method_payload");
+    public static final ResourceLocation ID = LDLib.location("rpc_method_payload");
+    public static final Type<PacketRPCMethodPayload> TYPE = new Type<>(ID);
+    public static final StreamCodec<FriendlyByteBuf, PacketRPCMethodPayload> CODEC = StreamCodec.ofMember(PacketRPCMethodPayload::write, PacketRPCMethodPayload::decode);
+
     private BlockEntityType<?> blockEntityType;
     private ITypedPayload<?>[] payloads;
 
@@ -109,38 +115,42 @@ public class PacketRPCMethodPayload extends PacketIntLocation implements CustomP
         return new PacketRPCMethodPayload(managedId, blockEntityType, pos, methodName, payloads);
     }
 
-    public static void executeClient(PacketRPCMethodPayload packet, PlayPayloadContext context) {
-        context.workHandler().submitAsync(() -> {
-            if (context.level().isEmpty()) {
-                return;
-            }
-            BlockEntity tile = context.level().get().getBlockEntity(packet.pos);
-            if (tile == null) {
-                return;
-            }
-            processPacket(tile, RPCSender.ofServer(), packet);
-        });
+    public static void execute(PacketRPCMethodPayload packet, IPayloadContext context) {
+        if (context.player() instanceof ServerPlayer) {
+            executeServer(packet, context);
+        } else {
+            executeClient(packet, context);
+        }
     }
 
-    public static void executeServer(PacketRPCMethodPayload packet, PlayPayloadContext context) {
-        context.workHandler().submitAsync(() -> {
-            var player = context.player().orElse(null);
-            if (player == null) {
-                LDLib.LOGGER.error("Received rpc payload packet from client with no player!");
-                return;
-            }
-            var level = player.level();
-            if (!level.isLoaded(packet.pos)) return;
-            BlockEntity tile = level.getBlockEntity(packet.pos);
-            if (tile == null) {
-                return;
-            }
-            processPacket(tile, RPCSender.ofClient(player), packet);
-        });
+    public static void executeClient(PacketRPCMethodPayload packet, IPayloadContext context) {
+        if (context.player().level() == null) {
+            return;
+        }
+        BlockEntity tile = context.player().level().getBlockEntity(packet.pos);
+        if (tile == null) {
+            return;
+        }
+        processPacket(tile, RPCSender.ofServer(), packet);
+    }
+
+    public static void executeServer(PacketRPCMethodPayload packet, IPayloadContext context) {
+        var player = context.player();
+        if (player == null) {
+            LDLib.LOGGER.error("Received rpc payload packet from client with no player!");
+            return;
+        }
+        var level = player.level();
+        if (!level.isLoaded(packet.pos)) return;
+        BlockEntity tile = level.getBlockEntity(packet.pos);
+        if (tile == null) {
+            return;
+        }
+        processPacket(tile, RPCSender.ofClient(player), packet);
     }
 
     @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

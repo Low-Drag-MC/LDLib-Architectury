@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib.json;
 
 import com.google.gson.*;
+import com.lowdragmc.lowdraglib.Platform;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +26,6 @@ public class ItemStackTypeAdapter implements JsonDeserializer<ItemStack>, JsonSe
 
     @Override
     public JsonElement serialize(ItemStack src, Type typeOfSrc, JsonSerializationContext context) {
-        return new JsonPrimitive(src.save(new CompoundTag()).toString());
+        return new JsonPrimitive(src.save(Platform.getFrozenRegistry(), new CompoundTag()).toString());
     }
 }
