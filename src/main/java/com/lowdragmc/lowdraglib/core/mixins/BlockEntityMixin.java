@@ -23,15 +23,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class BlockEntityMixin {
 
     @Inject(method = "getUpdateTag", at = @At(value = "RETURN"))
-    private void injectGetUpdateTag(CallbackInfoReturnable<CompoundTag> cir) {
+    private void injectGetUpdateTag(HolderLookup.Provider provider, CallbackInfoReturnable<CompoundTag> cir) {
         if (this instanceof IAutoSyncBlockEntity autoSyncBlockEntity) {
             var tag = cir.getReturnValue();
-            tag.put(autoSyncBlockEntity.getSyncTag(), SPacketManagedPayload.of(autoSyncBlockEntity, true).serializeNBT(autoSyncBlockEntity.getSelf().getLevel().registryAccess()));
+            tag.put(autoSyncBlockEntity.getSyncTag(), SPacketManagedPayload.of(autoSyncBlockEntity, true).serializeNBT(provider));
         }
     }
 
     @Inject(method = "saveAdditional", at = @At(value = "RETURN"))
-    private void injectSaveAdditional(CompoundTag pTag, CallbackInfo ci) {
+    private void injectSaveAdditional(CompoundTag pTag, HolderLookup.Provider provider, CallbackInfo ci) {
         if (this instanceof IAutoPersistBlockEntity autoPersistBlockEntity) {
             autoPersistBlockEntity.saveManagedPersistentData(pTag, false);
         }

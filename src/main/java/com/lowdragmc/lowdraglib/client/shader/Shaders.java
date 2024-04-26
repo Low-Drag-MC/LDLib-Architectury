@@ -105,16 +105,16 @@ public class Shaders {
 		try {
 			return List.of(
 					Pair.of(new ShaderInstance(resourceProvider,
-									new ResourceLocation(LDLib.MOD_ID, "particle").toString(), DefaultVertexFormat.PARTICLE),
+									new ResourceLocation(LDLib.MOD_ID, "particle"), DefaultVertexFormat.PARTICLE),
 							shaderInstance -> particleShader = shaderInstance),
 					Pair.of(new ShaderInstance(resourceProvider,
-									new ResourceLocation(LDLib.MOD_ID, "fast_blit").toString(), DefaultVertexFormat.POSITION),
+									new ResourceLocation(LDLib.MOD_ID, "fast_blit"), DefaultVertexFormat.POSITION),
 							shaderInstance -> blitShader = shaderInstance),
 					Pair.of(new ShaderInstance(resourceProvider,
-									new ResourceLocation(LDLib.MOD_ID, "hsb_block").toString(), HSB_VERTEX_FORMAT),
+									new ResourceLocation(LDLib.MOD_ID, "hsb_block"), HSB_VERTEX_FORMAT),
 							shaderInstance -> hsbShader = shaderInstance),
 					Pair.of(new ShaderInstance(resourceProvider,
-									new ResourceLocation(LDLib.MOD_ID, "compass_line").toString(), DefaultVertexFormat.POSITION_TEX_COLOR),
+									new ResourceLocation(LDLib.MOD_ID, "compass_line"), DefaultVertexFormat.POSITION_TEX_COLOR),
 							shaderInstance -> compassLineShader = shaderInstance)
 			);
 		} catch (IOException e) {
