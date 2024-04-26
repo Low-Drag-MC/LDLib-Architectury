@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.syncdata.accessor;
 import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.StringPayload;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -17,12 +18,12 @@ public class ResourceLocationAccessor extends CustomObjectAccessor<ResourceLocat
     }
 
     @Override
-    public ITypedPayload<?> serialize(AccessorOp op, ResourceLocation value) {
+    public ITypedPayload<?> serialize(AccessorOp op, ResourceLocation value, HolderLookup.Provider provider) {
         return StringPayload.of(value.toString());
     }
 
     @Override
-    public ResourceLocation deserialize(AccessorOp op, ITypedPayload<?> payload) {
+    public ResourceLocation deserialize(AccessorOp op, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof StringPayload stringPayload) {
             return new ResourceLocation(stringPayload.getPayload());
         }

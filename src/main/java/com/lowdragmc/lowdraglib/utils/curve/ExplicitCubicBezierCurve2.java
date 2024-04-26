@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib.utils.curve;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.utils.Interpolations;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.phys.Vec2;
@@ -21,8 +23,12 @@ public class ExplicitCubicBezierCurve2 extends Curve<Vec2> implements INBTSerial
         this.p1 = end;
     }
 
+    public ExplicitCubicBezierCurve2(HolderLookup.Provider provider, ListTag list) {
+        deserializeNBT(provider, list);
+    }
+
     public ExplicitCubicBezierCurve2(ListTag list) {
-        deserializeNBT(list);
+        deserializeNBT(Platform.getFrozenRegistry(), list);
     }
 
     @Override
@@ -40,7 +46,7 @@ public class ExplicitCubicBezierCurve2 extends Curve<Vec2> implements INBTSerial
     }
 
     @Override
-    public ListTag serializeNBT() {
+    public ListTag serializeNBT(HolderLookup.Provider provider) {
         var list = new ListTag();
         list.add(FloatTag.valueOf(p0.x));
         list.add(FloatTag.valueOf(p0.y));
@@ -57,7 +63,7 @@ public class ExplicitCubicBezierCurve2 extends Curve<Vec2> implements INBTSerial
     }
 
     @Override
-    public void deserializeNBT(ListTag list) {
+    public void deserializeNBT(HolderLookup.Provider provider, ListTag list) {
         p0 = new Vec2(list.getFloat(0), list.getFloat(1));
         c0 = new Vec2(list.getFloat(2), list.getFloat(3));
         c1 = new Vec2(list.getFloat(4), list.getFloat(5));

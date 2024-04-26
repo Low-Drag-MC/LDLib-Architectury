@@ -21,10 +21,14 @@ import java.util.concurrent.Executor;
 @Mixin(WorldLoader.class)
 public class WorldLoaderMixin {
 
-    @Inject(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$Frozen;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "load",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/LayeredRegistryAccess;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"),
+            locals = LocalCapture.CAPTURE_FAILHARD)
     private static <D, R> void ldlib$getRegistryAccess(WorldLoader.InitConfig initConfig, WorldLoader.WorldDataSupplier<D> loadContextSupplier, WorldLoader.ResultFactory<D, R> applierFactory, Executor prepareExecutor, Executor applyExecutor, CallbackInfoReturnable<CompletableFuture<R>> cir,
-                                                       Pair<WorldDataConfiguration, CloseableResourceManager> pair, CloseableResourceManager closeableResourceManager, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess2, RegistryAccess.Frozen frozen, RegistryAccess.Frozen frozen2, WorldDataConfiguration worldDataConfiguration, WorldLoader.DataLoadOutput<D> dataLoadOutput, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess3,
-                                                       RegistryAccess.Frozen frozen3) {
-        Platform.FROZEN_REGISTRY_ACCESS = frozen3;
+                                                       Pair<WorldDataConfiguration, CloseableResourceManager> pair, CloseableResourceManager closeableResourceManager, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess2, RegistryAccess.Frozen frozen, RegistryAccess.Frozen frozen2, WorldDataConfiguration worldDataConfiguration, WorldLoader.DataLoadOutput<D> dataLoadOutput,
+                                                       LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess3) {
+        Platform.FROZEN_REGISTRY_ACCESS = layeredRegistryAccess3.compositeAccess();
     }
 }

@@ -13,6 +13,7 @@ import com.lowdragmc.lowdraglib.syncdata.IAutoPersistedSerializable;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.Collections;
@@ -20,16 +21,16 @@ import java.util.Optional;
 
 public interface ISerializableRenderer extends IConfigurable, IRenderer, IAutoPersistedSerializable {
 
-    static CompoundTag serializeWrapper(ISerializableRenderer renderer) {
-        return renderer.serializeNBT();
+    static CompoundTag serializeWrapper(HolderLookup.Provider provider, ISerializableRenderer renderer) {
+        return renderer.serializeNBT(provider);
     }
 
-    static ISerializableRenderer deserializeWrapper(CompoundTag tag) {
+    static ISerializableRenderer deserializeWrapper(HolderLookup.Provider provider, CompoundTag tag) {
         var type = tag.getString("_type");
         var wrapper = AnnotationDetector.REGISTER_RENDERERS.get(type);
         if (wrapper != null) {
             var renderer = wrapper.creator().get();
-            renderer.deserializeNBT(tag);
+            renderer.deserializeNBT(provider, tag);
             renderer.initRenderer();
             return renderer;
         }

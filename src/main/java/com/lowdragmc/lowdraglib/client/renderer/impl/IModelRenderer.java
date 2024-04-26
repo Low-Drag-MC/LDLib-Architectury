@@ -41,6 +41,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.common.util.TriState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -114,12 +115,12 @@ public class IModelRenderer implements ISerializableRenderer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean useAO() {
+    public TriState useAO() {
         var model = getItemBakedModel();
         if (model != null) {
-            return model.useAmbientOcclusion();
+            return model.useAmbientOcclusion() ? TriState.DEFAULT : TriState.FALSE;
         }
-        return false;
+        return TriState.FALSE;
     }
 
     @Override

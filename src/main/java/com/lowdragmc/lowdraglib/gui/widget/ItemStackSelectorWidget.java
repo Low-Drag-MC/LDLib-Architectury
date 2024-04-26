@@ -32,7 +32,7 @@ public class ItemStackSelectorWidget extends WidgetGroup {
         itemField = (TextFieldWidget) new TextFieldWidget(22, 0, width - 46, 20, null, s -> {
             if (s != null && !s.isEmpty()) {
                 Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(s));
-                if (!ItemStack.isSameItemSameTags(item.getDefaultInstance(), this.item)) {
+                if (!ItemStack.isSameItemSameComponents(item.getDefaultInstance(), this.item)) {
                     this.item = item.getDefaultInstance();
                     onUpdate();
                 }
@@ -47,6 +47,7 @@ public class ItemStackSelectorWidget extends WidgetGroup {
                 }).setBackgroundTexture(new ColorBorderTexture(1, -1)));
         addWidget(itemField);
 
+        /*
         if (nbt) {
             addWidget(new ButtonWidget(width - 21, 0, 20, 20, null, cd -> {
                 if (item.isEmpty()) return;
@@ -68,6 +69,7 @@ public class ItemStackSelectorWidget extends WidgetGroup {
                     .setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("NBT", -1).setDropShadow(true))
                     .setHoverBorderTexture(1, -1).setHoverTooltips("ldlib.gui.tips.item_tag"));
         }
+         */
     }
 
     public ItemStack getItemStack() {

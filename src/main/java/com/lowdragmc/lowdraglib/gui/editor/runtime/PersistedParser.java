@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.syncdata.ManagedFieldUtils;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
 import com.lowdragmc.lowdraglib.utils.TagUtils;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
@@ -24,10 +25,10 @@ import java.util.Map;
  * @implNote PersistedParser
  */
 public class PersistedParser {
-    public static void serializeNBT(CompoundTag tag, Class<?> clazz, Object object) {
+    public static void serializeNBT(CompoundTag tag, Class<?> clazz, Object object, HolderLookup.Provider provider) {
         if (clazz == Object.class || clazz == null) return;
 
-        serializeNBT(tag,  clazz.getSuperclass(), object);
+        serializeNBT(tag, clazz.getSuperclass(), object, provider);
 
         for (Field field : clazz.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers())) {
@@ -60,16 +61,16 @@ public class PersistedParser {
                     var value = field.get(object);
                     if (value != null) {
                         if (value instanceof INBTSerializable<?> serializable) {
-                            nbt = serializable.serializeNBT();
+                            nbt = serializable.serializeNBT(provider);
                         } else {
                             nbt = new CompoundTag();
-                            serializeNBT((CompoundTag)nbt, ReflectionUtils.getRawType(field.getGenericType()), value);
+                            serializeNBT((CompoundTag)nbt, ReflectionUtils.getRawType(field.getGenericType()), value, provider);
                         }
                     }
                 } catch (IllegalAccessException ignored) {}
             } else {
                 var managedKey = ManagedFieldUtils.createKey(field);
-                nbt = managedKey.readPersistedField(managedKey.createRef(object));
+                nbt = managedKey.readPersistedField(managedKey.createRef(object), provider);
             }
             if (nbt != null) {
                 TagUtils.setTagExtended(tag, key, nbt);
@@ -78,7 +79,7 @@ public class PersistedParser {
         }
     }
 
-    public static void deserializeNBT(CompoundTag tag, Map<String, Method> setters, Class<?> clazz, Object object) {
+    public static void deserializeNBT(CompoundTag tag, Map<String, Method> setters, Class<?> clazz, Object object, HolderLookup.Provider provider) {
         if (clazz == Object.class || clazz == null) return;
 
         for (Method method : clazz.getMethods()) {
@@ -91,7 +92,7 @@ public class PersistedParser {
             }
         }
 
-        deserializeNBT(tag, setters, clazz.getSuperclass(), object);
+        deserializeNBT(tag, setters, clazz.getSuperclass(), object, provider);
 
         for (Field field : clazz.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers())) {
@@ -125,15 +126,15 @@ public class PersistedParser {
                         var value = field.get(object);
                         if (value != null) {
                             if (value instanceof INBTSerializable serializable) {
-                                serializable.deserializeNBT(nbt);
+                                serializable.deserializeNBT(provider, nbt);
                             } else if (nbt instanceof CompoundTag compoundTag) {
-                                deserializeNBT(compoundTag, new HashMap<>(), ReflectionUtils.getRawType(field.getGenericType()), value);
+                                deserializeNBT(compoundTag, new HashMap<>(), ReflectionUtils.getRawType(field.getGenericType()), value, provider);
                             }
                         }
                     } catch (IllegalAccessException ignored) {}
                 } else {
                     var managedKey = ManagedFieldUtils.createKey(field);
-                    managedKey.writePersistedField(managedKey.createRef(object), nbt);
+                    managedKey.writePersistedField(managedKey.createRef(object), nbt, provider);
                     Method setter = setters.get(field.getName());
 
                     if (setter != null) {

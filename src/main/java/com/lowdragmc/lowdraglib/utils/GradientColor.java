@@ -1,12 +1,14 @@
 package com.lowdragmc.lowdraglib.utils;
 
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +123,7 @@ public class GradientColor implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         var tag = new CompoundTag();
         tag.put("a", saveAsTag(aP));
         tag.put("r", saveAsTag(rP));
@@ -131,7 +133,7 @@ public class GradientColor implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         loadFromTag(aP, nbt.getList("a", Tag.TAG_FLOAT));
         loadFromTag(rP, nbt.getList("r", Tag.TAG_FLOAT));
         loadFromTag(gP, nbt.getList("g", Tag.TAG_FLOAT));

@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
 import com.lowdragmc.lowdraglib.utils.Size;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 /**
@@ -18,7 +19,7 @@ public class SizeAccessor extends CustomObjectAccessor<Size>{
     }
 
     @Override
-    public ITypedPayload<?> serialize(AccessorOp op, Size value) {
+    public ITypedPayload<?> serialize(AccessorOp op, Size value, HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.putInt("width", value.width);
         tag.putInt("height", value.height);
@@ -26,7 +27,7 @@ public class SizeAccessor extends CustomObjectAccessor<Size>{
     }
 
     @Override
-    public Size deserialize(AccessorOp op, ITypedPayload<?> payload) {
+    public Size deserialize(AccessorOp op, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof NbtTagPayload nbtTagPayload) {
             var tag = (CompoundTag)nbtTagPayload.getPayload();
             return new Size(tag.getInt("width"), tag.getInt("height"));

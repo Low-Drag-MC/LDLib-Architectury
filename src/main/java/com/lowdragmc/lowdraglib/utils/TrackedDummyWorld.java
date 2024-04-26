@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.utils;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.scene.ParticleManager;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.EntityAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -8,6 +9,8 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -121,7 +124,7 @@ public class TrackedDummyWorld extends DummyWorld {
     public BlockEntity getBlockEntity(@Nonnull BlockPos pos) {
         if (renderFilter != null && !renderFilter.test(pos))
             return null;
-        return proxyWorld != null ? proxyWorld.getBlockEntity(pos) : blockEntities.computeIfAbsent(pos, p -> renderedBlocks.getOrDefault(p, BlockInfo.EMPTY).getBlockEntity(this, p));
+        return proxyWorld != null ? proxyWorld.getBlockEntity(pos) : blockEntities.computeIfAbsent(pos, p -> renderedBlocks.getOrDefault(p, BlockInfo.EMPTY).getBlockEntity(p, Platform.getFrozenRegistry()));
     }
 
     @Override
@@ -145,29 +148,25 @@ public class TrackedDummyWorld extends DummyWorld {
     }
 
     public static ItemStack withUnsafeNBTDiscarded(ItemStack stack) {
-        if (stack.getTag() == null)
-            return stack;
         ItemStack copy = stack.copy();
-        stack.getTag()
-                .getAllKeys()
+        stack.getComponents()
+                .keySet()
                 .stream()
                 .filter(TrackedDummyWorld::isUnsafeItemNBTKey)
-                .forEach(copy::removeTagKey);
-        if (copy.getTag().isEmpty())
-            copy.setTag(null);
+                .forEach(copy::remove);
         return copy;
     }
 
-    public static boolean isUnsafeItemNBTKey(String name) {
-        if (name.equals(EnchantedBookItem.TAG_STORED_ENCHANTMENTS))
+    public static boolean isUnsafeItemNBTKey(DataComponentType<?> name) {
+        if (name == DataComponents.STORED_ENCHANTMENTS)
             return false;
-        if (name.equals("Enchantments"))
+        if (name == DataComponents.ENCHANTMENTS)
             return false;
-        if (name.contains("Potion"))
+        if (name == DataComponents.POTION_CONTENTS)
             return false;
-        if (name.contains("Damage"))
+        if (name == DataComponents.DAMAGE)
             return false;
-        if (name.equals("display"))
+        if (name == DataComponents.CUSTOM_NAME)
             return false;
         return true;
     }

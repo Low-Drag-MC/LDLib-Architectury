@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ui.ResourcePanel;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 
@@ -73,13 +74,13 @@ public abstract class Resource<T> {
     public abstract ResourceContainer<T, ? extends Widget> createContainer(ResourcePanel panel);
 
     @Nullable
-    public abstract Tag serialize(T value);
-    public abstract T deserialize(Tag nbt);
+    public abstract Tag serialize(T value, HolderLookup.Provider provider);
+    public abstract T deserialize(Tag nbt, HolderLookup.Provider provider);
 
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         data.forEach((key, value) -> {
-            var nbt = serialize(value);
+            var nbt = serialize(value, provider);
             if (nbt != null) {
                 tag.put(key, nbt);
             }
@@ -87,10 +88,10 @@ public abstract class Resource<T> {
         return tag;
     }
 
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(CompoundTag nbt, HolderLookup.Provider provider) {
         data.clear();
         for (String key : nbt.getAllKeys()) {
-            data.put(key, deserialize(nbt.get(key)));
+            data.put(key, deserialize(nbt.get(key), provider));
         }
     }
 

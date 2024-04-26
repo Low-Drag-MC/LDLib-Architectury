@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.gui.texture.UIResourceTexture;
 import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 /**
@@ -19,8 +20,8 @@ public class IGuiTextureAccessor extends CustomObjectAccessor<IGuiTexture>{
     }
 
     @Override
-    public ITypedPayload<?> serialize(AccessorOp op, IGuiTexture value) {
-        var tag = IGuiTexture.serializeWrapper(value);
+    public ITypedPayload<?> serialize(AccessorOp op, IGuiTexture value, HolderLookup.Provider provider) {
+        var tag = IGuiTexture.serializeWrapper(value, provider);
         if (tag == null) {
             tag = new CompoundTag();
             if (value instanceof UIResourceTexture uiResourceTexture) {
@@ -34,7 +35,7 @@ public class IGuiTextureAccessor extends CustomObjectAccessor<IGuiTexture>{
     }
 
     @Override
-    public IGuiTexture deserialize(AccessorOp op, ITypedPayload<?> payload) {
+    public IGuiTexture deserialize(AccessorOp op, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof NbtTagPayload nbtTagPayload) {
             var tag = (CompoundTag)nbtTagPayload.getPayload();
             var type = tag.getString("type");
@@ -50,7 +51,7 @@ public class IGuiTextureAccessor extends CustomObjectAccessor<IGuiTexture>{
                     return resource.getResourceOrDefault(key, IGuiTexture.MISSING_TEXTURE);
                 }
             }
-            return IGuiTexture.deserializeWrapper(tag);
+            return IGuiTexture.deserializeWrapper(tag, provider);
         }
         return null;
     }

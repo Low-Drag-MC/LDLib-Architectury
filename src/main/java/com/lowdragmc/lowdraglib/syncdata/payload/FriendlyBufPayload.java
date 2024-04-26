@@ -2,9 +2,11 @@ package com.lowdragmc.lowdraglib.syncdata.payload;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 import java.util.Arrays;
 
@@ -17,13 +19,13 @@ public class FriendlyBufPayload extends ObjectTypedPayload<FriendlyByteBuf> {
     }
 
     @Override
-    public void writePayload(FriendlyByteBuf buf) {
+    public void writePayload(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(buf.readableBytes());
         buf.writeBytes(buf);
     }
 
     @Override
-    public void readPayload(FriendlyByteBuf buf) {
+    public void readPayload(RegistryFriendlyByteBuf buf) {
         ByteBuf directSliceBuffer = buf.readBytes(buf.readVarInt());
         ByteBuf copiedDataBuffer = Unpooled.copiedBuffer(directSliceBuffer);
         directSliceBuffer.release();
@@ -31,12 +33,12 @@ public class FriendlyBufPayload extends ObjectTypedPayload<FriendlyByteBuf> {
     }
 
     @Override
-    public Tag serializeNBT() {
+    public Tag serializeNBT(HolderLookup.Provider provider) {
         return new ByteArrayTag(Arrays.copyOfRange(payload.array(), 0, payload.writerIndex()));
     }
 
     @Override
-    public void deserializeNBT(Tag buf) {
+    public void deserializeNBT(Tag buf, HolderLookup.Provider provider) {
         if (buf instanceof ByteArrayTag byteTags) {
             payload = new FriendlyByteBuf(Unpooled.copiedBuffer(byteTags.getAsByteArray()));
         }

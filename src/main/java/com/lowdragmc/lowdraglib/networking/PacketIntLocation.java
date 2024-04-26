@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.networking.IPacket;
 import lombok.NoArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 /**
  * a packet that contains a BlockPos
@@ -17,12 +18,12 @@ public abstract class PacketIntLocation implements IPacket {
     }
 
     @Override
-    public void encode(FriendlyByteBuf buf) {
+    public void encode(RegistryFriendlyByteBuf buf) {
         buf.writeBlockPos(pos);
     }
 
     @Override
-    public void decode(FriendlyByteBuf buf) {
+    public void decode(RegistryFriendlyByteBuf buf) {
         pos = buf.readBlockPos();
     }
 }

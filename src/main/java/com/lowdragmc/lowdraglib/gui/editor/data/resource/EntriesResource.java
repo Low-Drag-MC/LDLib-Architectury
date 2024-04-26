@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ui.ResourcePanel;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.EntriesResourceContainer;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import javax.annotation.Nullable;
@@ -49,12 +50,12 @@ public class EntriesResource extends Resource<String> {
 
     @Nullable
     @Override
-    public Tag serialize(String value) {
+    public Tag serialize(String value, HolderLookup.Provider provider) {
         return StringTag.valueOf(value);
     }
 
     @Override
-    public String deserialize(Tag nbt) {
+    public String deserialize(Tag nbt, HolderLookup.Provider provider) {
         return nbt instanceof StringTag stringTag ? stringTag.getAsString() : "missing value";
     }
 }

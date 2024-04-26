@@ -9,8 +9,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public class ItemHandlerHelper {
     public static boolean canItemStacksStack(ItemStack first, ItemStack second) {
-        if (!first.isEmpty() && ItemStack.isSameItem(first, second) && first.hasTag() == second.hasTag()) {
-            return !first.hasTag() || first.getTag().equals(second.getTag());
+        if (!first.isEmpty() && ItemStack.isSameItem(first, second)) {
+            return !first.getComponents().equals(second.getComponents());
         } else {
             return false;
         }

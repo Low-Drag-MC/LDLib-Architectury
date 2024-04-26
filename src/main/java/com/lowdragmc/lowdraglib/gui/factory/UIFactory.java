@@ -9,7 +9,7 @@ import com.lowdragmc.lowdraglib.side.ForgeEventHooks;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -42,7 +42,7 @@ public abstract class UIFactory<T> {
         player.nextContainerCounter();
         int currentWindowId = player.containerCounter;
 
-        FriendlyByteBuf serializedHolder = new FriendlyByteBuf(Unpooled.buffer());
+        RegistryFriendlyByteBuf serializedHolder = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.server.registryAccess());
         writeHolderToSyncData(serializedHolder, holder);
         ModularUIContainer container = new ModularUIContainer(uiTemplate, currentWindowId);
 
@@ -62,7 +62,7 @@ public abstract class UIFactory<T> {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public final void initClientUI(FriendlyByteBuf serializedHolder, int windowId) {
+    public final void initClientUI(RegistryFriendlyByteBuf serializedHolder, int windowId) {
         T holder = readHolderFromSyncData(serializedHolder);
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer entityPlayer = minecraft.player;
@@ -79,8 +79,8 @@ public abstract class UIFactory<T> {
     protected abstract ModularUI createUITemplate(T holder, Player entityPlayer);
 
     @OnlyIn(Dist.CLIENT)
-    protected abstract T readHolderFromSyncData(FriendlyByteBuf syncData);
+    protected abstract T readHolderFromSyncData(RegistryFriendlyByteBuf syncData);
 
-    protected abstract void writeHolderToSyncData(FriendlyByteBuf syncData, T holder);
+    protected abstract void writeHolderToSyncData(RegistryFriendlyByteBuf syncData, T holder);
 
 }

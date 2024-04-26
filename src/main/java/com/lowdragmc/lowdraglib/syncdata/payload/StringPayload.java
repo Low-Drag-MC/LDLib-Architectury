@@ -1,28 +1,29 @@
 package com.lowdragmc.lowdraglib.syncdata.payload;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public class StringPayload extends ObjectTypedPayload<String> {
 
     @Override
-    public void writePayload(FriendlyByteBuf buf) {
+    public void writePayload(RegistryFriendlyByteBuf buf) {
         buf.writeUtf(payload);
     }
 
     @Override
-    public void readPayload(FriendlyByteBuf buf) {
+    public void readPayload(RegistryFriendlyByteBuf buf) {
         payload = buf.readUtf();
     }
 
     @Override
-    public Tag serializeNBT() {
+    public Tag serializeNBT(HolderLookup.Provider provider) {
         return StringTag.valueOf(payload);
     }
 
     @Override
-    public void deserializeNBT(Tag tag) {
+    public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
         payload = tag.getAsString();
     }
 

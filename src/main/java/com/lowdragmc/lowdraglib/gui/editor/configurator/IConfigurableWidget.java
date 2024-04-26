@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.UIResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import net.minecraft.Util;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import javax.annotation.Nullable;
 
@@ -73,44 +74,44 @@ public interface IConfigurableWidget extends IConfigurable {
     }
 
     @SuppressWarnings("unchecked")
-    static CompoundTag serializeNBT(IConfigurableWidget widget, Resources resources, boolean isProject) {
+    static CompoundTag serializeNBT(IConfigurableWidget widget, Resources resources, boolean isProject, HolderLookup.Provider provider) {
         UIResourceTexture.setCurrentResource((Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject);
-        CompoundTag tag = widget.serializeInnerNBT();
+        CompoundTag tag = widget.serializeInnerNBT(provider);
         UIResourceTexture.clearCurrentResource();
         return tag;
     }
 
     @SuppressWarnings("unchecked")
-    static void deserializeNBT(IConfigurableWidget widget, CompoundTag tag, Resources resources, boolean isProject) {
+    static void deserializeNBT(IConfigurableWidget widget, CompoundTag tag, Resources resources, boolean isProject, HolderLookup.Provider provider) {
         UIResourceTexture.setCurrentResource((Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject);
-        widget.deserializeInnerNBT(tag);
+        widget.deserializeInnerNBT(provider, tag);
         UIResourceTexture.clearCurrentResource();
     }
 
-    default CompoundTag serializeInnerNBT() {
+    default CompoundTag serializeInnerNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        PersistedParser.serializeNBT(tag, getClass(), this);
+        PersistedParser.serializeNBT(tag, getClass(), this, provider);
         return tag;
     }
 
-    default void deserializeInnerNBT(CompoundTag nbt) {
-        PersistedParser.deserializeNBT(nbt, new HashMap<>(), getClass(), this);
+    default void deserializeInnerNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        PersistedParser.deserializeNBT(nbt, new HashMap<>(), getClass(), this, provider);
     }
 
-    default CompoundTag serializeWrapper() {
+    default CompoundTag serializeWrapper(HolderLookup.Provider provider) {
         var tag = new CompoundTag();
         tag.putString("type", name());
-        tag.put("data", serializeInnerNBT());
+        tag.put("data", serializeInnerNBT(provider));
         return tag;
     }
 
     @Nullable
-    static IConfigurableWidget deserializeWrapper(CompoundTag tag) {
+    static IConfigurableWidget deserializeWrapper(CompoundTag tag, HolderLookup.Provider provider) {
         String type = tag.getString("type");
         var wrapper = CACHE.apply(type);
         if (wrapper != null) {
             var child = wrapper.creator().get();
-            child.deserializeInnerNBT(tag.getCompound("data"));
+            child.deserializeInnerNBT(provider, tag.getCompound("data"));
             return child;
         }
         return null;

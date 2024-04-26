@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.data;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
@@ -7,6 +8,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ui.MainPanel;
 import com.lowdragmc.lowdraglib.gui.editor.ui.tool.WidgetToolBox;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 
@@ -34,7 +36,11 @@ public class UIProject implements IProject {
     }
 
     public UIProject(CompoundTag tag) {
-        deserializeNBT(tag);
+        deserializeNBT(tag, Platform.getFrozenRegistry());
+    }
+
+    public UIProject(CompoundTag tag, HolderLookup.Provider provider) {
+        deserializeNBT(tag, provider);
     }
 
     public UIProject newEmptyProject() {
@@ -42,17 +48,17 @@ public class UIProject implements IProject {
                 (WidgetGroup) new WidgetGroup(30, 30, 200, 200).setBackground(ResourceBorderTexture.BORDERED_BACKGROUND));
     }
 
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        tag.put("resources", resources.serializeNBT());
-        tag.put("root", IConfigurableWidget.serializeNBT(this.root, resources, true));
+        tag.put("resources", resources.serializeNBT(provider));
+        tag.put("root", IConfigurableWidget.serializeNBT(this.root, resources, true, provider));
         return tag;
     }
 
-    public void deserializeNBT(CompoundTag tag) {
+    public void deserializeNBT(CompoundTag tag, HolderLookup.Provider provider) {
         this.resources = loadResources(tag.getCompound("resources"));
         this.root = new WidgetGroup();
-        IConfigurableWidget.deserializeNBT(this.root, tag.getCompound("root"), resources, true);
+        IConfigurableWidget.deserializeNBT(this.root, tag.getCompound("root"), resources, true, provider);
     }
 
     @Override
@@ -63,7 +69,7 @@ public class UIProject implements IProject {
     @Override
     public void saveProject(Path file) {
         try {
-            NbtIo.write(serializeNBT(), file);
+            NbtIo.write(serializeNBT(Platform.getFrozenRegistry()), file);
         } catch (IOException ignored) {
             // TODO
         }

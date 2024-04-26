@@ -24,11 +24,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.extensions.IBakedModelExtension;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.client.model.data.ModelProperty;
 import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
+import net.neoforged.neoforge.common.util.TriState;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -117,14 +119,14 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
         }
 
         @Override
-        public boolean useAmbientOcclusion(BlockState state) {
+        public TriState useAmbientOcclusion(BlockState state, ModelData data, RenderType renderType) {
             if (state.getBlock() instanceof IBlockRendererProvider rendererProvider) {
                 IRenderer renderer = rendererProvider.getRenderer(state);
                 if (renderer != null) {
-                    return renderer.useAO(state);
+                    return renderer.useAO(state, data, renderType);
                 }
             }
-            return useAmbientOcclusion();
+            return BakedModel.super.useAmbientOcclusion(state, data, renderType);
         }
 
 

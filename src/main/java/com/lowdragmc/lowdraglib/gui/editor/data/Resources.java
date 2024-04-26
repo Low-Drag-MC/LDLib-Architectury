@@ -1,7 +1,9 @@
 package com.lowdragmc.lowdraglib.gui.editor.data;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.LinkedHashMap;
@@ -34,7 +36,7 @@ public class Resources {
 
     public static Resources fromNBT(CompoundTag tag) {
         var resource = new Resources();
-        resource.deserializeNBT(tag);
+        resource.deserializeNBT(tag, Platform.getFrozenRegistry());
         return resource;
     }
 
@@ -62,14 +64,14 @@ public class Resources {
         resources.values().forEach(Resource::unLoad);
     }
 
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        resources.forEach((key, resource) -> tag.put(key, resource.serializeNBT()));
+        resources.forEach((key, resource) -> tag.put(key, resource.serializeNBT(provider)));
         return tag;
     }
 
-    public void deserializeNBT(CompoundTag nbt) {
-        resources.forEach((k, v) -> v.deserializeNBT(nbt.getCompound(k)));
+    public void deserializeNBT(CompoundTag nbt, HolderLookup.Provider provider) {
+        resources.forEach((k, v) -> v.deserializeNBT(nbt.getCompound(k), provider));
     }
 
 

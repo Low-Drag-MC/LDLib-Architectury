@@ -2,7 +2,7 @@ package com.lowdragmc.lowdraglib.syncdata.payload;
 
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 import java.util.Objects;
 
@@ -35,8 +35,8 @@ public abstract class ObjectTypedPayload<T> implements ITypedPayload<T> {
 
 
     @Override
-    public void writePayload(FriendlyByteBuf buf) {
-        var nbt = serializeNBT();
+    public void writePayload(RegistryFriendlyByteBuf buf) {
+        var nbt = serializeNBT(buf.registryAccess());
         if (nbt instanceof CompoundTag) {
             buf.writeBoolean(true);
             buf.writeNbt((CompoundTag) nbt);
@@ -51,15 +51,15 @@ public abstract class ObjectTypedPayload<T> implements ITypedPayload<T> {
     }
 
     @Override
-    public void readPayload(FriendlyByteBuf buf) {
+    public void readPayload(RegistryFriendlyByteBuf buf) {
         if (buf.readBoolean()) {
             var nbt = buf.readNbt();
-            deserializeNBT(nbt);
+            deserializeNBT(nbt, buf.registryAccess());
         } else {
             var root = buf.readNbt();
             Objects.requireNonNull(root);
             var nbt = root.get("d");
-            deserializeNBT(nbt);
+            deserializeNBT(nbt, buf.registryAccess());
         }
     }
 

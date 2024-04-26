@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.NoArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -16,27 +17,27 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public class CPacketUIClientAction implements CustomPacketPayload {
     public static final ResourceLocation ID = LDLib.location("ui_client_action");
     public static final Type<CPacketUIClientAction> TYPE = new Type<>(ID);
-    public static final StreamCodec<FriendlyByteBuf, CPacketUIClientAction> CODEC = StreamCodec.ofMember(CPacketUIClientAction::write, CPacketUIClientAction::decode);
+    public static final StreamCodec<RegistryFriendlyByteBuf, CPacketUIClientAction> CODEC = StreamCodec.ofMember(CPacketUIClientAction::write, CPacketUIClientAction::decode);
     public int windowId;
-    public FriendlyByteBuf updateData;
+    public RegistryFriendlyByteBuf updateData;
 
-    public CPacketUIClientAction(int windowId, FriendlyByteBuf updateData) {
+    public CPacketUIClientAction(int windowId, RegistryFriendlyByteBuf updateData) {
         this.windowId = windowId;
         this.updateData = updateData;
     }
 
-    public void write(FriendlyByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(updateData.readableBytes());
         buf.writeBytes(updateData);
 
         buf.writeVarInt(windowId);
     }
 
-    public static CPacketUIClientAction decode(FriendlyByteBuf buf) {
+    public static CPacketUIClientAction decode(RegistryFriendlyByteBuf buf) {
         ByteBuf directSliceBuffer = buf.readBytes(buf.readVarInt());
         ByteBuf copiedDataBuffer = Unpooled.copiedBuffer(directSliceBuffer);
         directSliceBuffer.release();
-        FriendlyByteBuf updateData = new FriendlyByteBuf(copiedDataBuffer);
+        RegistryFriendlyByteBuf updateData = new RegistryFriendlyByteBuf(copiedDataBuffer, buf.registryAccess());
         
         int windowId = buf.readVarInt();
         return new CPacketUIClientAction(windowId, updateData);

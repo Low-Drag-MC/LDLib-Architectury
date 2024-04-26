@@ -9,6 +9,7 @@ import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
 import com.lowdragmc.lowdraglib.utils.TagUtils;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 
@@ -27,21 +28,21 @@ public class IManagedAccessor extends ReadonlyAccessor {
     }
 
     @Override
-    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj) {
+    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj, HolderLookup.Provider provider) {
         if(!(obj instanceof IManaged managed)) {
             throw new IllegalArgumentException("Field %s is not INBTSerializable".formatted(obj));
         }
 
         CompoundTag tag;
         if (op == AccessorOp.SYNCED || op == AccessorOp.FORCE_SYNCED) {
-            tag = readSyncedFields(managed, new CompoundTag(), op == AccessorOp.FORCE_SYNCED);
+            tag = readSyncedFields(managed, new CompoundTag(), op == AccessorOp.FORCE_SYNCED, provider);
         } else {
-            tag = readManagedFields(managed, new CompoundTag());
+            tag = readManagedFields(managed, new CompoundTag(), provider);
         }
         return new NbtTagPayload().setPayload(tag);
     }
 
-    public static CompoundTag readSyncedFields(IManaged managed, CompoundTag tag, boolean force) {
+    public static CompoundTag readSyncedFields(IManaged managed, CompoundTag tag, boolean force, HolderLookup.Provider provider) {
         BitSet changed = new BitSet();
         var syncedFields = managed.getSyncStorage().getSyncFields();
         var list = new ListTag();
@@ -51,10 +52,10 @@ public class IManagedAccessor extends ReadonlyAccessor {
                 changed.set(i);
                 var key = field.getKey();
 
-                var payload = key.readSyncedField(field, force);
+                var payload = key.readSyncedField(field, force, provider);
                 CompoundTag payloadTag = new CompoundTag();
                 payloadTag.putByte("t", payload.getType());
-                var data = payload.serializeNBT();
+                var data = payload.serializeNBT(provider);
                 if (data != null) {
                     payloadTag.put("d", data);
                 }
@@ -68,7 +69,7 @@ public class IManagedAccessor extends ReadonlyAccessor {
         return tag;
     }
 
-    public static CompoundTag readManagedFields(IManaged managed, CompoundTag tag) {
+    public static CompoundTag readManagedFields(IManaged managed, CompoundTag tag, HolderLookup.Provider provider) {
         var persistedFields = managed.getSyncStorage().getPersistedFields();
         for (var persistedField : persistedFields) {
             var fieldKey = persistedField.getKey();
@@ -78,7 +79,7 @@ public class IManagedAccessor extends ReadonlyAccessor {
                 key = fieldKey.getName();
             }
 
-            var nbt = fieldKey.readPersistedField(persistedField);
+            var nbt = fieldKey.readPersistedField(persistedField, provider);
 
             if (nbt != null) {
                 TagUtils.setTagExtended(tag, key, nbt);
@@ -88,11 +89,10 @@ public class IManagedAccessor extends ReadonlyAccessor {
     }
 
     @Override
-    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload) {
+    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if(!(obj instanceof IManaged managed)) {
             throw new IllegalArgumentException("Field %s is not INBTSerializable".formatted(obj));
         }
-
 
         if(!(payload instanceof NbtTagPayload nbtPayload && nbtPayload.getPayload() instanceof CompoundTag tag)) {
             throw new IllegalArgumentException("Payload %s is not NbtTagPayload".formatted(payload));
@@ -110,20 +110,20 @@ public class IManagedAccessor extends ReadonlyAccessor {
                 CompoundTag payloadTag = list.getCompound(i);
                 byte id = payloadTag.getByte("t");
                 var p = TypedPayloadRegistries.create(id);
-                p.deserializeNBT(payloadTag.get("d"));
+                p.deserializeNBT(payloadTag.get("d"), provider);
                 payloads[i] = p;
             }
 
-            writeSyncedFields(storage, syncedFields, changed, payloads);
+            writeSyncedFields(storage, syncedFields, changed, payloads, provider);
         } else if (op == AccessorOp.PERSISTED) {
             var refs = managed.getSyncStorage().getPersistedFields();
-            writePersistedFields(tag, refs);
+            writePersistedFields(tag, refs, provider);
         } else {
             throw new IllegalArgumentException("Payload %s does not match op %s".formatted(payload, op));
         }
     }
 
-    public static void writePersistedFields(CompoundTag tag, IRef[] refs) {
+    public static void writePersistedFields(CompoundTag tag, IRef[] refs, HolderLookup.Provider provider) {
         for (var ref : refs) {
             var fieldKey = ref.getKey();
             String key = fieldKey.getPersistentKey();
@@ -133,12 +133,12 @@ public class IManagedAccessor extends ReadonlyAccessor {
 
             var nbt = TagUtils.getTagExtended(tag, key);
             if (nbt != null) {
-                fieldKey.writePersistedField(ref, nbt);
+                fieldKey.writePersistedField(ref, nbt, provider);
             }
         }
     }
 
-    public static void writeSyncedFields(IManagedStorage storage, IRef[] syncedFields, BitSet changed, ITypedPayload<?>[] payloads) {
+    public static void writeSyncedFields(IManagedStorage storage, IRef[] syncedFields, BitSet changed, ITypedPayload<?>[] payloads, HolderLookup.Provider provider) {
         int j = 0;
         for (int i = 0; i < changed.length(); i++) {
             if (changed.get(i)) {
@@ -150,7 +150,7 @@ public class IManagedAccessor extends ReadonlyAccessor {
                 if (hasListener) {
                     oldValue = field.readRaw();
                 }
-                key.writeSyncedField(field, payloads[j]);
+                key.writeSyncedField(field, payloads[j], provider);
                 if(hasListener) {
                     storage.notifyFieldUpdate(key, field.readRaw(), oldValue);
                 }

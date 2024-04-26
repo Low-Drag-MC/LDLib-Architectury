@@ -21,7 +21,6 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.lowdraglib.utils.TagOrCycleFluidTransfer;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.emi.emi.api.stack.FluidEmiStack;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import dev.emi.emi.api.stack.EmiIngredient;
@@ -32,11 +31,12 @@ import lombok.experimental.Accessors;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.helpers.IPlatformFluidHelper;
 import mezz.jei.common.input.ClickableIngredient;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.ingredients.TypedIngredient;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -45,7 +45,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -201,10 +200,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 return JEICallWrapper.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
             }
             if (LDLib.isReiLoaded()) {
-                return EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag()));
+                return EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount()/*, lastFluidInTank.getComponents()*/));
             }
             if (LDLib.isEmiLoaded()) {
-                return EmiStack.of(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance);
+                return EmiStack.of(lastFluidInTank.getFluid(), /*lastFluidInTank.getComponents(), */lastFluidInTank.getAmount()).setChance(XEIChance);
             }
         }
         return null;
@@ -224,10 +223,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return List.of(JEICallWrapper.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize()));
         }
         if (LDLib.isReiLoaded()) {
-            return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getTag())));
+            return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount()/*, lastFluidInTank.getTag()*/)));
         }
         if (LDLib.isEmiLoaded()) {
-            return List.of(EmiStack.of(lastFluidInTank.getFluid(), lastFluidInTank.getTag(), lastFluidInTank.getAmount()).setChance(XEIChance));
+            return List.of(EmiStack.of(lastFluidInTank.getFluid(), /*lastFluidInTank.getTag(), */lastFluidInTank.getAmount()).setChance(XEIChance));
         }
         return List.of(FluidHelper.toRealFluidStack(lastFluidInTank));
     }
@@ -309,7 +308,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             if (capacity != lastTankCapacity) {
                 this.lastTankCapacity = capacity;
             }
-            if (!fluidStack.isFluidEqual(lastFluidInTank)) {
+            if (!FluidStack.isSameFluidSameComponents(fluidStack, lastFluidInTank)) {
                 this.lastFluidInTank = fluidStack.copy();
             } else if (fluidStack.getAmount() != lastFluidInTank.getAmount()) {
                 this.lastFluidInTank.setAmount(fluidStack.getAmount());
@@ -392,9 +391,9 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 this.lastTankCapacity = capacity;
                 writeUpdateInfo(0, buffer -> buffer.writeVarInt(lastTankCapacity));
             }
-            if (!fluidStack.isFluidEqual(lastFluidInTank)) {
+            if (!FluidStack.isSameFluidSameComponents(fluidStack, lastFluidInTank)) {
                 this.lastFluidInTank = fluidStack.copy();
-                CompoundTag fluidStackTag = fluidStack.writeToNBT(new CompoundTag());
+                Tag fluidStackTag = fluidStack.save(Platform.getFrozenRegistry());
                 writeUpdateInfo(2, buffer -> buffer.writeNbt(fluidStackTag));
             } else if (fluidStack.getAmount() != lastFluidInTank.getAmount()) {
                 this.lastFluidInTank.setAmount(fluidStack.getAmount());
@@ -410,19 +409,19 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     }
 
     @Override
-    public void writeInitialData(FriendlyByteBuf buffer) {
+    public void writeInitialData(RegistryFriendlyByteBuf buffer) {
         buffer.writeBoolean(fluidTank != null);
         if (fluidTank != null) {
             this.lastTankCapacity = fluidTank.getTankCapacity(tank);
             buffer.writeVarInt(lastTankCapacity);
             FluidStack fluidStack = fluidTank.getFluidInTank(tank);
             this.lastFluidInTank = fluidStack.copy();
-            buffer.writeNbt(fluidStack.writeToNBT(new CompoundTag()));
+            buffer.writeNbt(fluidStack.save(Platform.getFrozenRegistry()));
         }
     }
 
     @Override
-    public void readInitialData(FriendlyByteBuf buffer) {
+    public void readInitialData(RegistryFriendlyByteBuf buffer) {
         if (buffer.readBoolean()) {
             this.lastTankCapacity = buffer.readVarInt();
             readUpdateInfo(2, buffer);
@@ -431,13 +430,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
+    public void readUpdateInfo(int id, RegistryFriendlyByteBuf buffer) {
         if (id == 0) {
             this.lastTankCapacity = buffer.readVarInt();
         } else if (id == 1) {
             this.lastFluidInTank = null;
         } else if (id == 2) {
-            this.lastFluidInTank = FluidStack.loadFluidStackFromNBT(buffer.readNbt());
+            this.lastFluidInTank = FluidStack.parse(Platform.getFrozenRegistry(), buffer.readNbt()).orElse(FluidStack.EMPTY);
         } else if (id == 3 && lastFluidInTank != null) {
             this.lastFluidInTank.setAmount(buffer.readVarInt());
         } else if (id == 4) {
@@ -455,7 +454,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     }
 
     @Override
-    public void handleClientAction(int id, FriendlyByteBuf buffer) {
+    public void handleClientAction(int id, RegistryFriendlyByteBuf buffer) {
         super.handleClientAction(id, buffer);
         if (id == 1) {
             boolean isShiftKeyDown = buffer.readBoolean();
@@ -569,7 +568,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }
 
         private static <T> Object _getPlatformFluidTypeForJEI(IPlatformFluidHelper<T> helper, FluidStack fluidStack, Position pos, Size size) {
-            T ingredient = helper.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
+            T ingredient = helper.create(fluidStack.getFluid(), fluidStack.getAmount()/*, fluidStack.getComponents()*/);
             return new ClickableIngredient<>(TypedIngredient.createUnvalidated(helper.getFluidIngredientType(), ingredient),
                     new ImmutableRect2i(pos.x, pos.y, size.width, size.height));
         }
@@ -578,7 +577,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public static final class REICallWrapper {
         public static List<Object> getReiIngredients(Stream<FluidStack> stream) {
             return List.of(EntryIngredient.of(stream
-                    .map(fluidStack -> dev.architectury.fluid.FluidStack.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag()))
+                    .map(fluidStack -> dev.architectury.fluid.FluidStack.create(fluidStack.getFluid(), fluidStack.getAmount()/*, fluidStack.getTag()*/))
                     .map(EntryStacks::of)
                     .toList()));
         }
@@ -591,7 +590,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     public static final class EMICallWrapper {
         public static List<Object> getEmiIngredients(Stream<FluidStack> stream, float xeiChance) {
-            return List.of(EmiIngredient.of(stream.map(fluidStack -> EmiStack.of(fluidStack.getFluid(), fluidStack.getTag(), fluidStack.getAmount())).toList()).setChance(xeiChance));
+            return List.of(EmiIngredient.of(stream.map(fluidStack -> EmiStack.of(fluidStack.getFluid()/*, fluidStack.getTag()*/, fluidStack.getAmount())).toList()).setChance(xeiChance));
         }
         public static List<Object> getEmiIngredients(List<Pair<TagKey<Fluid>, Integer>> list, float xeiChance) {
             return list.stream()

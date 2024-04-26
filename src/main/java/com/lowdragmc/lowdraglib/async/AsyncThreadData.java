@@ -25,7 +25,7 @@ public class AsyncThreadData extends SavedData {
     private final ServerLevel serverLevel;
 
     public static AsyncThreadData getOrCreate(ServerLevel serverLevel) {
-        return serverLevel.getDataStorage().computeIfAbsent(new SavedData.Factory<>(() -> new AsyncThreadData(serverLevel), tag -> new AsyncThreadData(serverLevel, tag)), LDLib.MOD_ID);
+        return serverLevel.getDataStorage().computeIfAbsent(new SavedData.Factory<>(() -> new AsyncThreadData(serverLevel), (tag, provider) -> new AsyncThreadData(serverLevel, tag)), LDLib.MOD_ID);
     }
 
     private AsyncThreadData(ServerLevel serverLevel) {

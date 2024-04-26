@@ -13,6 +13,7 @@ import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.widget.HsbColorWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.utils.ColorUtils;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.Tag;
 import javax.annotation.Nullable;
@@ -96,12 +97,12 @@ public class ColorsResource extends Resource<Integer> {
 
     @Nullable
     @Override
-    public Tag serialize(Integer value) {
+    public Tag serialize(Integer value, HolderLookup.Provider provider) {
         return IntTag.valueOf(value);
     }
 
     @Override
-    public Integer deserialize(Tag nbt) {
+    public Integer deserialize(Tag nbt, HolderLookup.Provider provider) {
         return nbt instanceof IntTag intTag ? intTag.getAsInt() : -1;
     }
 }

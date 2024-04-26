@@ -45,7 +45,7 @@ public class FluidStackSelectorWidget extends WidgetGroup {
                     onUpdate();
                 }).setBackground(new ColorBorderTexture(1, -1)));
         addWidget(fluidField);
-
+        /*
         addWidget(new ButtonWidget(width - 21, 0, 20, 20, null, cd -> {
             if (fluid.isEmpty()) return;
             TextFieldWidget nbtField;
@@ -65,6 +65,7 @@ public class FluidStackSelectorWidget extends WidgetGroup {
         })
                 .setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("NBT", -1).setDropShadow(true))
                 .setHoverBorderTexture(1, -1).setHoverTooltips("ldlib.gui.tips.fluid_tag"));
+        */
     }
 
     public FluidStack getIFluidStack() {

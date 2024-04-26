@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.syncdata.managed.*;
 import com.lowdragmc.lowdraglib.syncdata.payload.ArrayPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.PrimitiveTypedPayload;
+import net.minecraft.core.HolderLookup;
 
 import java.lang.reflect.Array;
 
@@ -31,14 +32,14 @@ public class ArrayAccessor implements IAccessor, IArrayLikeAccessor {
     }
 
     @Override
-    public ITypedPayload<?> readField(AccessorOp op, IRef field) {
+    public ITypedPayload<?> readField(AccessorOp op, IRef field, HolderLookup.Provider provider) {
 
         if (field instanceof ManagedRef managedRef) {
             var managedField = managedRef.getField();
             if (!managedField.isPrimitive() && managedField.value() == null) {
                 return PrimitiveTypedPayload.ofNull();
             }
-            return readManagedField(op, managedField);
+            return readManagedField(op, managedField, provider);
         }
 
         var obj = field.readRaw();
@@ -46,21 +47,21 @@ public class ArrayAccessor implements IAccessor, IArrayLikeAccessor {
             throw new IllegalArgumentException("readonly field %s has a null reference".formatted(field));
         }
 
-        return readFromReadonlyField(op, obj);
+        return readFromReadonlyField(op, obj, provider);
     }
 
     @Override
-    public void writeField(AccessorOp op, IRef field, ITypedPayload<?> payload) {
+    public void writeField(AccessorOp op, IRef field, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (field instanceof ManagedRef syncedField) {
             var managedField = syncedField.getField();
-            writeManagedField(op, managedField, payload);
+            writeManagedField(op, managedField, payload, provider);
         }
         var obj = field.readRaw();
         if (obj == null) {
             throw new IllegalArgumentException("readonly field %s has a null reference".formatted(field));
         }
 
-        writeToReadonlyField(op, obj, payload);
+        writeToReadonlyField(op, obj, payload, provider);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class ArrayAccessor implements IAccessor, IArrayLikeAccessor {
     }
 
     @Override
-    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
+    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field, HolderLookup.Provider provider) {
         var value = field.value();
         if (value == null) {
             return PrimitiveTypedPayload.ofNull();
@@ -94,13 +95,13 @@ public class ArrayAccessor implements IAccessor, IArrayLikeAccessor {
         if (!childAccessor.isManaged()) {
             for (int i = 0; i < size; i++) {
                 var obj = Array.get(value, i);
-                var payload = childAccessor.readFromReadonlyField(op, obj);
+                var payload = childAccessor.readFromReadonlyField(op, obj, provider);
                 result[i] = payload;
             }
         } else {
             for (int i = 0; i < size; i++) {
                 var holder = ManagedArrayItem.of(value, i);
-                var payload = childAccessor.readManagedField(op, holder);
+                var payload = childAccessor.readManagedField(op, holder, provider);
                 result[i] = payload;
             }
 
@@ -109,7 +110,7 @@ public class ArrayAccessor implements IAccessor, IArrayLikeAccessor {
     }
 
     @Override
-    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
+    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof PrimitiveTypedPayload<?> primitive && primitive.isNull()) {
             field.set(null);
             return;
@@ -130,12 +131,12 @@ public class ArrayAccessor implements IAccessor, IArrayLikeAccessor {
             for (int i = 0; i < payloads.length; i++) {
                 var obj = Array.get(result, i);
                 var item = payloads[i];
-                childAccessor.writeToReadonlyField(op, obj, item);
+                childAccessor.writeToReadonlyField(op, obj, item, provider);
             }
         } else {
             for (int i = 0; i < payloads.length; i++) {
                 var holder = ManagedArrayItem.of(result, i);
-                childAccessor.writeManagedField(op, holder, payloads[i]);
+                childAccessor.writeManagedField(op, holder, payloads[i], provider);
             }
         }
 
@@ -146,15 +147,15 @@ public class ArrayAccessor implements IAccessor, IArrayLikeAccessor {
     }
 
     @Override
-    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj) {
+    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj, HolderLookup.Provider provider) {
         var holder = ManagedHolder.of(obj);
-        return readManagedField(op, holder);
+        return readManagedField(op, holder, provider);
     }
 
     @Override
-    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload) {
+    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         var holder = ManagedHolder.of(obj);
-        writeManagedField(op, holder, payload);
+        writeManagedField(op, holder, payload, provider);
     }
 
     @Override

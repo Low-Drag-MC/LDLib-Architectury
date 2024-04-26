@@ -34,6 +34,7 @@ package com.lowdragmc.lowdraglib.client.utils.glu;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nonnull;
@@ -280,7 +281,7 @@ public class Project extends Util {
 	 *
 	 */
 	public static void gluLookAt(
-			@Nonnull PoseStack poseStack,
+			@Nonnull Matrix4fStack poseStack,
 			float eyex,
 			float eyey,
 			float eyez,
@@ -327,7 +328,7 @@ public class Project extends Util {
 		matrix.rewind();
 
 		var matrix4f = new Matrix4f(matrix);
-		poseStack.mulPoseMatrix(matrix4f);
+		poseStack.mul(matrix4f);
 		poseStack.translate(-eyex, -eyey, -eyez);
 	}
 

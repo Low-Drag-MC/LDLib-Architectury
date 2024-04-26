@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.syncdata.managed.IManagedVar;
 import com.lowdragmc.lowdraglib.syncdata.payload.EnumValuePayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.PrimitiveTypedPayload;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.Map;
@@ -60,7 +61,7 @@ public class EnumAccessor extends ManagedAccessor {
 
 
     @Override
-    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
+    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field, HolderLookup.Provider provider) {
         if (!field.getType().isEnum()) {
             throw new IllegalArgumentException("Field is not an enum");
         }
@@ -76,7 +77,7 @@ public class EnumAccessor extends ManagedAccessor {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
+    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof PrimitiveTypedPayload<?> primitive && primitive.isNull()) {
             field.set(null);
             return;

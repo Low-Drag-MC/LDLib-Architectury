@@ -1,7 +1,7 @@
 package com.lowdragmc.lowdraglib.client.renderer.impl;
 
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.renderer.ISerializableRenderer;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.FacadeBlockWorld;
@@ -35,6 +35,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.FluidState;
+import net.neoforged.neoforge.common.util.TriState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -141,7 +142,7 @@ public class BlockStateRenderer implements ISerializableRenderer {
     @Nullable
     public BlockEntity getBlockEntity(BlockAndTintGetter world, BlockPos pos) {
         BlockInfo blockInfo = getBlockInfo();
-        BlockEntity tile = blockInfo.getBlockEntity(pos);
+        BlockEntity tile = blockInfo.getBlockEntity(pos, Platform.getFrozenRegistry());
         if (tile != null && world instanceof Level) {
             try {
                 var state = getState(world.getBlockState(pos));
@@ -210,12 +211,12 @@ public class BlockStateRenderer implements ISerializableRenderer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean useAO() {
+    public TriState useAO() {
         var state = getBlockInfo().getBlockState();
         if (state.getRenderShape() != RenderShape.INVISIBLE) {
-            return Minecraft.getInstance().getBlockRenderer().getBlockModel(state).useAmbientOcclusion();
+            return Minecraft.getInstance().getBlockRenderer().getBlockModel(state).useAmbientOcclusion() ? TriState.DEFAULT : TriState.FALSE;
         }
-        return false;
+        return TriState.DEFAULT;
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.*;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.ChatFormatting;
@@ -12,11 +14,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -106,16 +103,16 @@ public class ComponentPanelWidget extends Widget {
     }
 
     @Override
-    public void writeInitialData(FriendlyByteBuf buffer) {
+    public void writeInitialData(RegistryFriendlyByteBuf buffer) {
         super.writeInitialData(buffer);
         buffer.writeVarInt(lastText.size());
         for (Component textComponent : lastText) {
-            buffer.writeComponent(textComponent);
+            ComponentSerialization.STREAM_CODEC.encode(buffer, textComponent);
         }
     }
 
     @Override
-    public void readInitialData(FriendlyByteBuf buffer) {
+    public void readInitialData(RegistryFriendlyByteBuf buffer) {
         super.readInitialData(buffer);
         readUpdateInfo(1, buffer);
     }
@@ -158,7 +155,7 @@ public class ComponentPanelWidget extends Widget {
                 writeUpdateInfo(1, buffer -> {
                     buffer.writeVarInt(lastText.size());
                     for (Component textComponent : lastText) {
-                        buffer.writeComponent(textComponent);
+                        ComponentSerialization.STREAM_CODEC.encode(buffer, textComponent);
                     }
                 });
             }
@@ -166,12 +163,12 @@ public class ComponentPanelWidget extends Widget {
     }
 
     @Override
-    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
+    public void readUpdateInfo(int id, RegistryFriendlyByteBuf buffer) {
         if (id == 1) {
             this.lastText.clear();
             int count = buffer.readVarInt();
             for (int i = 0; i < count; i++) {
-                this.lastText.add(buffer.readComponent());
+                this.lastText.add(ComponentSerialization.STREAM_CODEC.decode(buffer));
             }
             formatDisplayText();
             updateComponentTextSize();
@@ -179,7 +176,7 @@ public class ComponentPanelWidget extends Widget {
     }
 
     @Override
-    public void handleClientAction(int id, FriendlyByteBuf buffer) {
+    public void handleClientAction(int id, RegistryFriendlyByteBuf buffer) {
         if (id == 1) {
             ClickData clickData = ClickData.readFromBuf(buffer);
             String componentData = buffer.readUtf();

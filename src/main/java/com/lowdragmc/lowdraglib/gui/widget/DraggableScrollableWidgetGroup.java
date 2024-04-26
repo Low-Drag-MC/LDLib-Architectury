@@ -10,6 +10,7 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.gui.GuiGraphics;
@@ -539,8 +540,8 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     }
 
     @Override
-    public CompoundTag serializeInnerNBT() {
-        CompoundTag tag = super.serializeInnerNBT();
+    public CompoundTag serializeInnerNBT(HolderLookup.Provider provider) {
+        CompoundTag tag = super.serializeInnerNBT(provider);
         tag.putInt("scrollXOffset", scrollXOffset);
         tag.putInt("scrollYOffset", scrollYOffset);
         tag.putInt("maxHeight", maxHeight);
@@ -549,8 +550,8 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
     }
 
     @Override
-    public void deserializeInnerNBT(CompoundTag nbt) {
-        super.deserializeInnerNBT(nbt);
+    public void deserializeInnerNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeInnerNBT(provider, nbt);
         this.scrollXOffset= nbt.getInt("scrollXOffset");
         this.scrollYOffset= nbt.getInt("scrollYOffset");
         this.maxHeight= nbt.getInt("maxHeight");

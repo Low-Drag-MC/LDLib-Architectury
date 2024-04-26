@@ -9,6 +9,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Setter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -101,7 +102,7 @@ public class SearchComponentWidget<T> extends WidgetGroup {
     }
 
     @Override
-    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
+    public void readUpdateInfo(int id, RegistryFriendlyByteBuf buffer) {
         if (id == -1) {
             popUp.clearAllWidgets();
             popUp.setSize(new Size(getSize().width, 0));

@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
@@ -10,11 +11,13 @@ import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
 import dev.emi.emi.api.stack.EmiStack;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
@@ -93,11 +96,11 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
     @OnlyIn(Dist.CLIENT)
     public List<Target> getPhantomTargets(Object ingredient) {
         if (LDLib.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
-            ingredient = new FluidStack(fluidStack.getFluid(), fluidTank.getTankCapacity(tank), fluidStack.getTag());
+            ingredient = new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluidStack.getFluid())).orElse(null), fluidTank.getTankCapacity(tank)/*, fluidStack.getTag()*/);
         }
         if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
             var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
-            ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, fluidTank.getTankCapacity(tank), fluidEmiStack.getNbt());
+            ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, fluidTank.getTankCapacity(tank)/*, fluidEmiStack.getNbt()*/);
         }
         if (!(ingredient instanceof FluidStack) && drainFrom(ingredient) == null) {
             return Collections.emptyList();
@@ -116,11 +119,11 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                 if (fluidTank == null) return;
                 FluidStack ingredientStack;
                 if (LDLib.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
-                    ingredient = new FluidStack(fluidStack.getFluid(), fluidTank.getTankCapacity(tank), fluidStack.getTag());
+                    ingredient = new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluidStack.getFluid())).orElse(null), fluidTank.getTankCapacity(tank)/*, fluidStack.getTag()*/);
                 }
                 if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
                     var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
-                    ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, fluidTank.getTankCapacity(tank), fluidEmiStack.getNbt());
+                    ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(BuiltInRegistries.FLUID.getHolder(BuiltInRegistries.FLUID.getKey(fluid)).orElse(null), fluidTank.getTankCapacity(tank)/*, fluidEmiStack.getNbt()*/);
                 }
                 if (ingredient instanceof FluidStack fluidStack)
                     ingredientStack = fluidStack;
@@ -128,7 +131,7 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                     ingredientStack = drainFrom(ingredient);
 
                 if (ingredientStack != null) {
-                    CompoundTag tagCompound = ingredientStack.writeToNBT(new CompoundTag());
+                    Tag tagCompound = ingredientStack.save(Platform.getFrozenRegistry());
                     writeClientAction(2, buffer -> buffer.writeNbt(tagCompound));
                 }
 
@@ -146,12 +149,12 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
     }
 
     @Override
-    public void handleClientAction(int id, FriendlyByteBuf buffer) {
+    public void handleClientAction(int id, RegistryFriendlyByteBuf buffer) {
         if (id == 1) {
             handlePhantomClick();
         } else if (id == 2) {
             FluidStack fluidStack;
-            fluidStack = FluidStack.loadFluidStackFromNBT(buffer.readNbt());
+            fluidStack = FluidStack.parseOptional(Platform.getFrozenRegistry(), buffer.readNbt());
             if (fluidTank == null) return;
             fluidTank.drain(fluidTank.getTankCapacity(tank), IFluidHandler.FluidAction.EXECUTE);
             if (fluidStack != null) {

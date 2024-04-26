@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.gui.editor.runtime.PersistedParser;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.core.HolderLookup;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.Util;
@@ -105,12 +106,12 @@ public interface IGuiTexture extends IConfigurable {
     }
 
     @Nullable
-    static CompoundTag serializeWrapper(IGuiTexture texture) {
+    static CompoundTag serializeWrapper(IGuiTexture texture, HolderLookup.Provider provider) {
         if (texture.isLDLRegister()) {
             CompoundTag tag = new CompoundTag();
             tag.putString("type", texture.name());
             CompoundTag data = new CompoundTag();
-            PersistedParser.serializeNBT(data, texture.getClass(), texture);
+            PersistedParser.serializeNBT(data, texture.getClass(), texture, provider);
             tag.put("data", data);
             return tag;
         }
@@ -118,12 +119,12 @@ public interface IGuiTexture extends IConfigurable {
     }
 
     @NotNull
-    static IGuiTexture deserializeWrapper(CompoundTag tag) {
+    static IGuiTexture deserializeWrapper(CompoundTag tag, HolderLookup.Provider provider) {
         var type = tag.getString("type");
         var data = tag.getCompound("data");
         var wrapper = CACHE.apply(type);
         IGuiTexture value = wrapper == null ? IGuiTexture.EMPTY : wrapper.creator().get();
-        PersistedParser.deserializeNBT(data, new HashMap<>(), value.getClass(), value);
+        PersistedParser.deserializeNBT(data, new HashMap<>(), value.getClass(), value, provider);
         return value;
     }
 

@@ -2,8 +2,10 @@ package com.lowdragmc.lowdraglib.syncdata.payload;
 
 import com.lowdragmc.lowdraglib.syncdata.SyncedFieldAccessors;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+
 import javax.annotation.Nullable;
 
 public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
@@ -282,20 +284,20 @@ public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
         }
 
         @Override
-        public void writePayload(FriendlyByteBuf buf) {
+        public void writePayload(RegistryFriendlyByteBuf buf) {
         }
 
         @Override
-        public void readPayload(FriendlyByteBuf buf) {
+        public void readPayload(RegistryFriendlyByteBuf buf) {
         }
 
         @Override
-        public Tag serializeNBT() {
+        public Tag serializeNBT(HolderLookup.Provider provider) {
             return null;
         }
 
         @Override
-        public void deserializeNBT(Tag tag) {
+        public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
         }
 
         @Override
@@ -308,22 +310,22 @@ public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
         private int value;
 
         @Override
-        public void writePayload(FriendlyByteBuf buf) {
+        public void writePayload(RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(value);
         }
 
         @Override
-        public void readPayload(FriendlyByteBuf buf) {
+        public void readPayload(RegistryFriendlyByteBuf buf) {
             value = buf.readVarInt();
         }
 
         @Override
-        public Tag serializeNBT() {
+        public Tag serializeNBT(HolderLookup.Provider provider) {
             return IntTag.valueOf(value);
         }
 
         @Override
-        public void deserializeNBT(Tag tag) {
+        public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
             value = ((IntTag) tag).getAsInt();
         }
 
@@ -337,22 +339,22 @@ public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
         private long value;
 
         @Override
-        public void writePayload(FriendlyByteBuf buf) {
+        public void writePayload(RegistryFriendlyByteBuf buf) {
             buf.writeVarLong(value);
         }
 
         @Override
-        public void readPayload(FriendlyByteBuf buf) {
+        public void readPayload(RegistryFriendlyByteBuf buf) {
             value = buf.readVarLong();
         }
 
         @Override
-        public Tag serializeNBT() {
+        public Tag serializeNBT(HolderLookup.Provider provider) {
             return LongTag.valueOf(value);
         }
 
         @Override
-        public void deserializeNBT(Tag tag) {
+        public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
             value = ((LongTag) tag).getAsLong();
         }
 
@@ -366,22 +368,22 @@ public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
         private boolean value;
 
         @Override
-        public void writePayload(FriendlyByteBuf buf) {
+        public void writePayload(RegistryFriendlyByteBuf buf) {
             buf.writeBoolean(value);
         }
 
         @Override
-        public void readPayload(FriendlyByteBuf buf) {
+        public void readPayload(RegistryFriendlyByteBuf buf) {
             value = buf.readBoolean();
         }
 
         @Override
-        public Tag serializeNBT() {
+        public Tag serializeNBT(HolderLookup.Provider provider) {
             return ByteTag.valueOf(value);
         }
 
         @Override
-        public void deserializeNBT(Tag tag) {
+        public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
             value = ((ByteTag) tag).getAsByte() != 0;
         }
 
@@ -395,22 +397,22 @@ public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
         private float value;
 
         @Override
-        public void writePayload(FriendlyByteBuf buf) {
+        public void writePayload(RegistryFriendlyByteBuf buf) {
             buf.writeFloat(value);
         }
 
         @Override
-        public void readPayload(FriendlyByteBuf buf) {
+        public void readPayload(RegistryFriendlyByteBuf buf) {
             value = buf.readFloat();
         }
 
         @Override
-        public Tag serializeNBT() {
+        public Tag serializeNBT(HolderLookup.Provider provider) {
             return FloatTag.valueOf(value);
         }
 
         @Override
-        public void deserializeNBT(Tag tag) {
+        public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
             value = ((FloatTag) tag).getAsFloat();
         }
 
@@ -424,22 +426,22 @@ public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
         private double value;
 
         @Override
-        public void writePayload(FriendlyByteBuf buf) {
+        public void writePayload(RegistryFriendlyByteBuf buf) {
             buf.writeDouble(value);
         }
 
         @Override
-        public void readPayload(FriendlyByteBuf buf) {
+        public void readPayload(RegistryFriendlyByteBuf buf) {
             value = buf.readDouble();
         }
 
         @Override
-        public Tag serializeNBT() {
+        public Tag serializeNBT(HolderLookup.Provider provider) {
             return DoubleTag.valueOf(value);
         }
 
         @Override
-        public void deserializeNBT(Tag tag) {
+        public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
             value = ((DoubleTag) tag).getAsDouble();
         }
 
@@ -453,22 +455,22 @@ public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
         private byte value;
 
         @Override
-        public void writePayload(FriendlyByteBuf buf) {
+        public void writePayload(RegistryFriendlyByteBuf buf) {
             buf.writeByte(value);
         }
 
         @Override
-        public void readPayload(FriendlyByteBuf buf) {
+        public void readPayload(RegistryFriendlyByteBuf buf) {
             value = buf.readByte();
         }
 
         @Override
-        public Tag serializeNBT() {
+        public Tag serializeNBT(HolderLookup.Provider provider) {
             return ByteTag.valueOf(value);
         }
 
         @Override
-        public void deserializeNBT(Tag tag) {
+        public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
             value = ((ByteTag) tag).getAsByte();
         }
 
@@ -482,22 +484,22 @@ public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
         private short value;
 
         @Override
-        public void writePayload(FriendlyByteBuf buf) {
+        public void writePayload(RegistryFriendlyByteBuf buf) {
             buf.writeShort(value);
         }
 
         @Override
-        public void readPayload(FriendlyByteBuf buf) {
+        public void readPayload(RegistryFriendlyByteBuf buf) {
             value = buf.readShort();
         }
 
         @Override
-        public Tag serializeNBT() {
+        public Tag serializeNBT(HolderLookup.Provider provider) {
             return ShortTag.valueOf(value);
         }
 
         @Override
-        public void deserializeNBT(Tag tag) {
+        public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
             value = ((ShortTag) tag).getAsShort();
         }
 
@@ -511,22 +513,22 @@ public abstract class PrimitiveTypedPayload<T> implements ITypedPayload<T> {
         private char value;
 
         @Override
-        public void writePayload(FriendlyByteBuf buf) {
+        public void writePayload(RegistryFriendlyByteBuf buf) {
             buf.writeChar(value);
         }
 
         @Override
-        public void readPayload(FriendlyByteBuf buf) {
+        public void readPayload(RegistryFriendlyByteBuf buf) {
             value = buf.readChar();
         }
 
         @Override
-        public Tag serializeNBT() {
+        public Tag serializeNBT(HolderLookup.Provider provider) {
             return IntTag.valueOf(value);
         }
 
         @Override
-        public void deserializeNBT(Tag tag) {
+        public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
             value = (char) ((IntTag) tag).getAsInt();
         }
 

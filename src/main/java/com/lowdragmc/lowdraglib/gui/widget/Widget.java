@@ -18,13 +18,13 @@ import dev.latvian.mods.rhino.util.RemapPrefixForJS;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -327,10 +327,10 @@ public class Widget {
         initialized = true;
     }
 
-    public void writeInitialData(FriendlyByteBuf buffer) {
+    public void writeInitialData(RegistryFriendlyByteBuf buffer) {
     }
 
-    public void readInitialData(FriendlyByteBuf buffer) {
+    public void readInitialData(RegistryFriendlyByteBuf buffer) {
         
     }
     
@@ -519,25 +519,25 @@ public class Widget {
      * Read data received from server's {@link #writeUpdateInfo}
      */
     @OnlyIn(Dist.CLIENT)
-    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
+    public void readUpdateInfo(int id, RegistryFriendlyByteBuf buffer) {
     }
 
-    public void handleClientAction(int id, FriendlyByteBuf buffer) {
+    public void handleClientAction(int id, RegistryFriendlyByteBuf buffer) {
     }
 
     /**
      * Writes data to be sent to client's {@link #readUpdateInfo}
      */
-    protected final void writeUpdateInfo(int id, Consumer<FriendlyByteBuf> FriendlyByteBufWriter) {
+    protected final void writeUpdateInfo(int id, Consumer<RegistryFriendlyByteBuf> buffer) {
         if (uiAccess != null && gui != null) {
-            uiAccess.writeUpdateInfo(this, id, FriendlyByteBufWriter);
+            uiAccess.writeUpdateInfo(this, id, buffer);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
-    protected final void writeClientAction(int id, Consumer<FriendlyByteBuf> FriendlyByteBufWriter) {
+    protected final void writeClientAction(int id, Consumer<RegistryFriendlyByteBuf> buffer) {
         if (uiAccess != null && !isClientSideWidget) {
-            uiAccess.writeClientAction(this, id, FriendlyByteBufWriter);
+            uiAccess.writeClientAction(this, id, buffer);
         }
     }
 

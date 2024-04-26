@@ -45,7 +45,7 @@ public class ServerCommands {
 											var world = context.getSource().getLevel();
 											var blockEntity = world.getBlockEntity(pos);
 											if (blockEntity != null) {
-												var tag = blockEntity.saveWithoutMetadata();
+												var tag = blockEntity.saveWithoutMetadata(context.getSource().registryAccess());
 												var value = NbtUtils.structureToSnbt(tag);
 												context.getSource().sendSuccess(() -> Component
 														.literal("[Copy to clipboard]")
@@ -130,7 +130,7 @@ public class ServerCommands {
 										e.getValue().toString()))
 								.collect(Collectors.toList()));
 						if (saveNbt && blockentity != null) {
-							var tag = blockentity.saveWithoutMetadata();
+							var tag = blockentity.saveWithoutMetadata(context.getSource().registryAccess());
 							nodes.add("<nbt>");
 							nodes.add(NbtUtils.toPrettyComponent(tag)
 									.getString());

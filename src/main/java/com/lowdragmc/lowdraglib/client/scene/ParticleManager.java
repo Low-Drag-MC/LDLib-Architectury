@@ -16,6 +16,7 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.world.level.Level;
+import org.joml.Matrix4fStack;
 
 import java.util.*;
 
@@ -87,9 +88,9 @@ public class ParticleManager {
         RenderSystem.enableDepthTest();
         RenderSystem.activeTexture(org.lwjgl.opengl.GL13.GL_TEXTURE2);
         RenderSystem.activeTexture(org.lwjgl.opengl.GL13.GL_TEXTURE0);
-        PoseStack posestack = RenderSystem.getModelViewStack();
-        posestack.pushPose();
-        posestack.mulPoseMatrix(pMatrixStack.last().pose());
+        Matrix4fStack posestack = RenderSystem.getModelViewStack();
+        posestack.pushMatrix();
+        posestack.mul(pMatrixStack.last().pose());
         RenderSystem.applyModelViewMatrix();
 
         for(ParticleRenderType particlerendertype : this.particles.keySet()) {
@@ -114,7 +115,7 @@ public class ParticleManager {
             }
         }
 
-        posestack.popPose();
+        posestack.popMatrix();
         RenderSystem.applyModelViewMatrix();
         RenderSystem.depthMask(true);
         RenderSystem.disableBlend();

@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.syncdata.managed.ManagedHolder;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.rpc.RPCSender;
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -57,7 +58,7 @@ public class RPCMethodMeta {
     }
 
 
-    public void invoke(Object instance, RPCSender sender, ITypedPayload<?>[] payloads) {
+    public void invoke(Object instance, RPCSender sender, ITypedPayload<?>[] payloads, HolderLookup.Provider provider) {
         if(argsAccessor.length != payloads.length) {
             throw new IllegalArgumentException("Invalid number of arguments, expected " + argsAccessor.length + " but got " + payloads.length);
         }
@@ -66,12 +67,12 @@ public class RPCMethodMeta {
             args = new Object[argsAccessor.length + 1];
             args[0] = sender;
             for (int i = 0; i < argsAccessor.length; i++) {
-                args[i + 1] = deserialize(payloads[i], argsType[i], argsAccessor[i]);
+                args[i + 1] = deserialize(payloads[i], argsType[i], argsAccessor[i], provider);
             }
         } else {
             args = new Object[argsAccessor.length];
             for (int i = 0; i < argsAccessor.length; i++) {
-                args[i] = deserialize(payloads[i], argsType[i], argsAccessor[i]);
+                args[i] = deserialize(payloads[i], argsType[i], argsAccessor[i], provider);
             }
         }
 
@@ -82,13 +83,13 @@ public class RPCMethodMeta {
         }
     }
 
-    public ITypedPayload<?>[] serializeArgs(Object[] args) {
+    public ITypedPayload<?>[] serializeArgs(Object[] args, HolderLookup.Provider provider) {
         if(argsAccessor.length != args.length) {
             throw new IllegalArgumentException("Invalid number of arguments, expected " + argsAccessor.length + " but got " + args.length);
         }
         var payloads = new ITypedPayload[argsAccessor.length];
         for (int i = 0; i < argsAccessor.length; i++) {
-            payloads[i] = serialize(args[i], argsAccessor[i]);
+            payloads[i] = serialize(args[i], argsAccessor[i], provider);
         }
         return payloads;
     }
@@ -105,14 +106,14 @@ public class RPCMethodMeta {
         throw new IllegalArgumentException("Accessor for type " + type + " is not a ManagedAccessor");
     }
 
-    private static Object deserialize(ITypedPayload<?> payload, Class<?> type, ManagedAccessor accessor) {
+    private static Object deserialize(ITypedPayload<?> payload, Class<?> type, ManagedAccessor accessor, HolderLookup.Provider provider) {
         var cache = ManagedHolder.ofType(type);
-        accessor.writeManagedField(AccessorOp.PERSISTED, cache, payload);
+        accessor.writeManagedField(AccessorOp.PERSISTED, cache, payload, provider);
         return cache.value();
     }
 
-    private static ITypedPayload<?> serialize(Object value, ManagedAccessor accessor) {
+    private static ITypedPayload<?> serialize(Object value, ManagedAccessor accessor, HolderLookup.Provider provider) {
         var cache = ManagedHolder.of(value);
-        return accessor.readManagedField(AccessorOp.PERSISTED, cache);
+        return accessor.readManagedField(AccessorOp.PERSISTED, cache, provider);
     }
 }

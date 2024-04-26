@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ui.UIEditor;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 
 public class UIEditorFactory extends UIFactory<UIEditorFactory> implements IUIHolder {
@@ -21,12 +22,12 @@ public class UIEditorFactory extends UIFactory<UIEditorFactory> implements IUIHo
 	}
 
 	@Override
-	protected UIEditorFactory readHolderFromSyncData(FriendlyByteBuf syncData) {
+	protected UIEditorFactory readHolderFromSyncData(RegistryFriendlyByteBuf syncData) {
 		return this;
 	}
 
 	@Override
-	protected void writeHolderToSyncData(FriendlyByteBuf syncData, UIEditorFactory holder) {
+	protected void writeHolderToSyncData(RegistryFriendlyByteBuf syncData, UIEditorFactory holder) {
 
 	}
 

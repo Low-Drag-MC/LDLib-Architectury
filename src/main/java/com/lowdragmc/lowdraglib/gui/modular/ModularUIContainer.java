@@ -1,16 +1,17 @@
 package com.lowdragmc.lowdraglib.gui.modular;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.AbstractContainerMenuAccessor;
 import com.lowdragmc.lowdraglib.gui.util.PerTickIntCounter;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
-import com.lowdragmc.lowdraglib.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib.networking.c2s.CPacketUIClientAction;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -146,7 +147,7 @@ public class ModularUIContainer extends AbstractContainerMenu implements WidgetU
             if (!slot.mayPlace(itemStack))
                 continue; //if itemstack cannot be placed into that slot, continue
             ItemStack stackInSlot = slot.getItem();
-            if (!ItemStack.isSameItem(itemStack, stackInSlot) || !ItemStack.isSameItemSameTags(itemStack, stackInSlot))
+            if (!ItemStack.isSameItem(itemStack, stackInSlot) || !ItemStack.isSameItemSameComponents(itemStack, stackInSlot))
                 continue; //if itemstacks don't match, continue
             int slotMaxStackSize = Math.min(stackInSlot.getMaxStackSize(), slot.getMaxStackSize(stackInSlot));
             int amountToInsert = Math.min(itemStack.getCount(), slotMaxStackSize - stackInSlot.getCount());
@@ -248,8 +249,8 @@ public class ModularUIContainer extends AbstractContainerMenu implements WidgetU
     }
 
     @Override
-    public void writeClientAction(Widget widget, int updateId, Consumer<FriendlyByteBuf> payloadWriter) {
-        FriendlyByteBuf packetBuffer = new FriendlyByteBuf(Unpooled.buffer());
+    public void writeClientAction(Widget widget, int updateId, Consumer<RegistryFriendlyByteBuf> payloadWriter) {
+        RegistryFriendlyByteBuf packetBuffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), Platform.getFrozenRegistry());
         packetBuffer.writeVarInt(updateId);
         payloadWriter.accept(packetBuffer);
         if (modularUI.entityPlayer instanceof AbstractClientPlayer) {
@@ -258,8 +259,8 @@ public class ModularUIContainer extends AbstractContainerMenu implements WidgetU
     }
 
     @Override
-    public void writeUpdateInfo(Widget widget, int updateId, Consumer<FriendlyByteBuf> payloadWriter) {
-        FriendlyByteBuf packetBuffer = new FriendlyByteBuf(Unpooled.buffer());
+    public void writeUpdateInfo(Widget widget, int updateId, Consumer<RegistryFriendlyByteBuf> payloadWriter) {
+        RegistryFriendlyByteBuf packetBuffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), this.modularUI.entityPlayer.registryAccess());
         packetBuffer.writeVarInt(updateId);
         payloadWriter.accept(packetBuffer);
         if (modularUI.entityPlayer instanceof ServerPlayer serverPlayer) {

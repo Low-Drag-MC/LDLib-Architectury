@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.resource;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
@@ -151,7 +152,7 @@ public class ResourceContainer<T, C extends Widget> extends WidgetGroup {
 
     protected void paste() {
         panel.getEditor().ifCopiedPresent(resource.name(), c -> {
-            var value = getResource().deserialize((Tag)c);
+            var value = getResource().deserialize((Tag)c, Platform.getFrozenRegistry());
             resource.addResource(genNewFileName(), value);
             reBuild();
         });
@@ -159,7 +160,7 @@ public class ResourceContainer<T, C extends Widget> extends WidgetGroup {
 
     protected void copy() {
         if (selected != null) {
-            panel.getEditor().setCopy(resource.name(), resource.serialize(resource.getResource(selected)));
+            panel.getEditor().setCopy(resource.name(), resource.serialize(resource.getResource(selected), Platform.getFrozenRegistry()));
         }
     }
 

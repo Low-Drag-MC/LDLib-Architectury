@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.syncdata.accessor;
 import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
@@ -18,18 +19,18 @@ public class ITagSerializableAccessor extends ReadonlyAccessor {
     }
 
     @Override
-    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj) {
+    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj, HolderLookup.Provider provider) {
         if(!(obj instanceof INBTSerializable<?> serializable)) {
             throw new IllegalArgumentException("Field %s is not INBTSerializable".formatted(obj));
         }
 
-        var nbt = serializable.serializeNBT();
+        var nbt = serializable.serializeNBT(provider);
 
         return new NbtTagPayload().setPayload(nbt);
     }
 
     @Override
-    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload) {
+    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if(!(obj instanceof INBTSerializable<?>)) {
             throw new IllegalArgumentException("Field %s is not INBTSerializable".formatted(obj));
         }
@@ -39,6 +40,6 @@ public class ITagSerializableAccessor extends ReadonlyAccessor {
         }
 
         //noinspection unchecked
-        ((INBTSerializable<Tag>) obj).deserializeNBT(nbtPayload.getPayload());
+        ((INBTSerializable<Tag>) obj).deserializeNBT(provider, nbtPayload.getPayload());
     }
 }

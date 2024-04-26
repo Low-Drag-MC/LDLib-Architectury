@@ -7,6 +7,8 @@ import com.lowdragmc.lowdraglib.client.scene.ParticleManager;
 import com.lowdragmc.lowdraglib.utils.virtual.WrappedClientWorld;
 import lombok.Getter;
 import net.minecraft.world.TickRateManager;
+import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -180,6 +182,11 @@ public class DummyWorld extends Level {
     }
 
     @Override
+    public PotionBrewing potionBrewing() {
+        return null;
+    }
+
+    @Override
     public FeatureFlagSet enabledFeatures() {
         return level.enabledFeatures();
     }
@@ -200,7 +207,7 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public int getFreeMapId() {
+    public MapId getFreeMapId() {
         return level.getFreeMapId();
     }
 
@@ -219,13 +226,14 @@ public class DummyWorld extends Level {
         return new TickRateManager();
     }
 
+    @org.jetbrains.annotations.Nullable
     @Override
-    public MapItemSavedData getMapData(String mapName) {
-        return null;
+    public MapItemSavedData getMapData(MapId p_324234_) {
+        return level.getMapData(p_324234_);
     }
 
     @Override
-    public void setMapData(String pMapId, MapItemSavedData pData) {
+    public void setMapData(MapId p_324009_, MapItemSavedData p_151534_) {
 
     }
 
@@ -287,12 +295,7 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public void gameEvent(GameEvent event, Vec3 position, GameEvent.Context context) {
-
-    }
-
-    @Override
-    public void gameEvent(@Nullable Entity pEntity, GameEvent pEvent, BlockPos pPos) {
+    public void gameEvent(Holder<GameEvent> p_316267_, Vec3 p_220405_, GameEvent.Context p_220406_) {
 
     }
 

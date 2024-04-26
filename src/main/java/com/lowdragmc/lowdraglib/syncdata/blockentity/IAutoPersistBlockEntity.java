@@ -21,7 +21,7 @@ public interface IAutoPersistBlockEntity extends IManagedBlockEntity {
             if (Strings.isNullOrEmpty(key)) {
                 key = fieldKey.getName();
             }
-            var nbt = fieldKey.readPersistedField(persistedField);
+            var nbt = fieldKey.readPersistedField(persistedField, getSelf().getLevel().registryAccess());
             if (nbt != null) {
                 TagUtils.setTagExtended(tag, key, nbt);
             }
@@ -32,7 +32,7 @@ public interface IAutoPersistBlockEntity extends IManagedBlockEntity {
 
     default void loadManagedPersistentData(CompoundTag tag) {
         var refs = getRootStorage().getPersistedFields();
-        IManagedAccessor.writePersistedFields(tag, refs);
+        IManagedAccessor.writePersistedFields(tag, refs, getSelf().getLevel().registryAccess());
         loadCustomPersistedData(tag);
     }
 

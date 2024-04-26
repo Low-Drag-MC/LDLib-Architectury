@@ -7,10 +7,10 @@ import com.lowdragmc.lowdraglib.gui.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.TexturesResourceContainer;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.TankWidget;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 
@@ -55,24 +55,24 @@ public class TexturesResource extends Resource<IGuiTexture> {
     }
 
     @Override
-    public Tag serialize(IGuiTexture value) {
-        return IGuiTexture.serializeWrapper(value);
+    public Tag serialize(IGuiTexture value, HolderLookup.Provider provider) {
+        return IGuiTexture.serializeWrapper(value, provider);
     }
 
     @Override
-    public IGuiTexture deserialize(Tag nbt) {
+    public IGuiTexture deserialize(Tag nbt, HolderLookup.Provider provider) {
         if (nbt instanceof CompoundTag tag) {
-            return IGuiTexture.deserializeWrapper(tag);
+            return IGuiTexture.deserializeWrapper(tag, provider);
         }
         return null;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(CompoundTag nbt, HolderLookup.Provider provider) {
         data.clear();
         data.put("empty", IGuiTexture.EMPTY);
         for (String key : nbt.getAllKeys()) {
-            data.put(key, deserialize(nbt.get(key)));
+            data.put(key, deserialize(nbt.get(key), provider));
         }
         for (IGuiTexture texture : data.values()) {
             texture.setUIResource(this);

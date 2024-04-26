@@ -12,11 +12,11 @@ import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.emi.emi.api.stack.EmiStack;
 import lombok.Setter;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
@@ -114,7 +114,7 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
             Item item = itemEmiStack.getKeyOfType(Item.class);
             ingredient = item == null ? null : new ItemStack(item, (int)itemEmiStack.getAmount());
             if (ingredient instanceof ItemStack itemStack) {
-                itemStack.setTag(itemEmiStack.getNbt());
+                //itemStack.setTag(itemEmiStack.getNbt());
             }
         }
         if (!(ingredient instanceof ItemStack)) {
@@ -134,7 +134,7 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
                     Item item = itemEmiStack.getKeyOfType(Item.class);
                     ingredient = item == null ? null : new ItemStack(item, (int)itemEmiStack.getAmount());
                     if (ingredient instanceof ItemStack itemStack) {
-                        itemStack.setTag(itemEmiStack.getNbt());
+                        //itemStack.setTag(itemEmiStack.getNbt());
                     }
                 }
                 if (slotReference != null && ingredient instanceof ItemStack stack) {
@@ -143,7 +143,7 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
                     ClickType clickType = shiftDown ? ClickType.QUICK_MOVE : ClickType.PICKUP;
                     slotClickPhantom(slotReference, 0, clickType, stack);
                     writeClientAction(1, buffer -> {
-                        buffer.writeItem(stack);
+                        ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, stack);
                         buffer.writeVarInt(0);
                         buffer.writeBoolean(shiftDown);
                     });
@@ -153,10 +153,9 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
     }
 
     @Override
-    public void handleClientAction(int id, FriendlyByteBuf buffer) {
+    public void handleClientAction(int id, RegistryFriendlyByteBuf buffer) {
         if (slotReference != null && id == 1) {
-            ItemStack stackHeld;
-            stackHeld = buffer.readItem();
+            ItemStack stackHeld = ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer);
             int mouseButton = buffer.readVarInt();
             boolean shiftKeyDown = buffer.readBoolean();
             ClickType clickType = shiftKeyDown ? ClickType.QUICK_MOVE : ClickType.PICKUP;

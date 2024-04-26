@@ -1,30 +1,32 @@
 package com.lowdragmc.lowdraglib.syncdata.payload;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public class BlockPosPayload extends ObjectTypedPayload<BlockPos> {
 
     @Override
-    public void writePayload(FriendlyByteBuf buf) {
+    public void writePayload(RegistryFriendlyByteBuf buf) {
         buf.writeBlockPos(payload);
     }
 
     @Override
-    public void readPayload(FriendlyByteBuf buf) {
+    public void readPayload(RegistryFriendlyByteBuf buf) {
         payload = buf.readBlockPos();
     }
 
     @Override
-    public Tag serializeNBT() {
+    public Tag serializeNBT(HolderLookup.Provider provider) {
         return NbtUtils.writeBlockPos(payload);
     }
 
     @Override
-    public void deserializeNBT(Tag tag) {
-        payload = NbtUtils.readBlockPos((CompoundTag) tag);
+    public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
+        IntArrayTag ints = (IntArrayTag) tag;
+        payload = ints.size() == 3 ? new BlockPos(ints.get(0).getAsInt(), ints.get(1).getAsInt(), ints.get(2).getAsInt()) : null;
     }
 }

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.data.resource;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.renderer.ISerializableRenderer;
 import com.lowdragmc.lowdraglib.client.renderer.impl.IModelRenderer;
@@ -7,6 +8,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ui.ResourcePanel;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.IRendererResourceContainer;
 import com.lowdragmc.lowdraglib.gui.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
@@ -36,27 +38,27 @@ public class IRendererResource extends Resource<IRenderer> {
 
     @Nullable
     @Override
-    public Tag serialize(IRenderer renderer) {
+    public Tag serialize(IRenderer renderer, HolderLookup.Provider provider) {
         if (renderer instanceof ISerializableRenderer serializableRenderer) {
-            return ISerializableRenderer.serializeWrapper(serializableRenderer);
+            return ISerializableRenderer.serializeWrapper(provider, serializableRenderer);
         }
         return null;
     }
 
     @Override
-    public IRenderer deserialize(Tag tag) {
+    public IRenderer deserialize(Tag tag, HolderLookup.Provider provider) {
         if (tag instanceof CompoundTag compoundTag) {
-            return ISerializableRenderer.deserializeWrapper(compoundTag);
+            return ISerializableRenderer.deserializeWrapper(provider, compoundTag);
         }
         return IRenderer.EMPTY;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(CompoundTag nbt, HolderLookup.Provider provider) {
         data.clear();
         data.put("empty", IRenderer.EMPTY);
         for (String key : nbt.getAllKeys()) {
-            data.put(key, deserialize(nbt.get(key)));
+            data.put(key, deserialize(nbt.get(key), provider));
         }
     }
 }

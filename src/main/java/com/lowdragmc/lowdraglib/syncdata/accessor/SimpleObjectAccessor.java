@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.syncdata.managed.IManagedVar;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.ObjectTypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.PrimitiveTypedPayload;
+import net.minecraft.core.HolderLookup;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -53,7 +54,7 @@ public abstract class SimpleObjectAccessor extends ManagedAccessor {
     public abstract ObjectTypedPayload<?> createEmpty();
 
     @Override
-    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
+    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field, HolderLookup.Provider provider) {
         var value = field.value();
         if (value != null) {
             //noinspection unchecked
@@ -63,7 +64,7 @@ public abstract class SimpleObjectAccessor extends ManagedAccessor {
     }
 
     @Override
-    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
+    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof ObjectTypedPayload<?> object) {
             //noinspection unchecked
             ((IManagedVar<Object>) field).set(object.getPayload());

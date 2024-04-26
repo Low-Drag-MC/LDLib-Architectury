@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.NoArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -17,18 +18,18 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public class SPacketUIOpen implements CustomPacketPayload {
     public static final ResourceLocation ID = LDLib.location("ui_open");
     public static final Type<SPacketUIOpen> TYPE = new Type<>(ID);
-    public static final StreamCodec<FriendlyByteBuf, SPacketUIOpen> CODEC = StreamCodec.ofMember(SPacketUIOpen::write, SPacketUIOpen::decode);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SPacketUIOpen> CODEC = StreamCodec.ofMember(SPacketUIOpen::write, SPacketUIOpen::decode);
     private ResourceLocation uiFactoryId;
-    private FriendlyByteBuf serializedHolder;
+    private RegistryFriendlyByteBuf serializedHolder;
     private int windowId;
 
-    public SPacketUIOpen(ResourceLocation uiFactoryId, FriendlyByteBuf serializedHolder, int windowId) {
+    public SPacketUIOpen(ResourceLocation uiFactoryId, RegistryFriendlyByteBuf serializedHolder, int windowId) {
         this.uiFactoryId = uiFactoryId;
         this.serializedHolder = serializedHolder;
         this.windowId = windowId;
     }
 
-    public void write(FriendlyByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(serializedHolder.readableBytes());
         buf.writeBytes(serializedHolder);
 
@@ -36,11 +37,11 @@ public class SPacketUIOpen implements CustomPacketPayload {
         buf.writeVarInt(windowId);
     }
 
-    public static SPacketUIOpen decode(FriendlyByteBuf buf) {
+    public static SPacketUIOpen decode(RegistryFriendlyByteBuf buf) {
         ByteBuf directSliceBuffer = buf.readBytes(buf.readVarInt());
         ByteBuf copiedDataBuffer = Unpooled.copiedBuffer(directSliceBuffer);
         directSliceBuffer.release();
-        FriendlyByteBuf serializedHolder = new FriendlyByteBuf(copiedDataBuffer);
+        RegistryFriendlyByteBuf serializedHolder = new RegistryFriendlyByteBuf(copiedDataBuffer, buf.registryAccess());
 
         ResourceLocation uiFactoryId = buf.readResourceLocation();
         int windowId = buf.readVarInt();

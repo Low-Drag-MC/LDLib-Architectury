@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.misc;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
@@ -118,12 +119,12 @@ public class ItemTransferList implements IItemHandlerModifiable, INBTSerializabl
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         var tag = new CompoundTag();
         var list = new ListTag();
         for (var transfer : transfers) {
             if (transfer instanceof INBTSerializable<?> serializable) {
-                list.add(serializable.serializeNBT());
+                list.add(serializable.serializeNBT(provider));
             } else {
                 LDLib.LOGGER.warn("[ItemTransferList] internal container doesn't support serialization");
             }
@@ -134,11 +135,11 @@ public class ItemTransferList implements IItemHandlerModifiable, INBTSerializabl
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         var list = nbt.getList("slots", nbt.getByte("type"));
         for (int i = 0; i < list.size(); i++) {
             if (transfers[i] instanceof INBTSerializable serializable) {
-                serializable.deserializeNBT(list.get(i));
+                serializable.deserializeNBT(provider, list.get(i));
             } else {
                 LDLib.LOGGER.warn("[ItemTransferList] internal container doesn't support serialization");
             }

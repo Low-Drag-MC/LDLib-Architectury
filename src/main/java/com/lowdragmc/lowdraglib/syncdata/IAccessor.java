@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.syncdata;
 import com.lowdragmc.lowdraglib.syncdata.managed.IManagedVar;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
+import net.minecraft.core.HolderLookup;
 
 import java.util.function.Predicate;
 
@@ -11,9 +12,9 @@ import java.util.function.Predicate;
  */
 public interface IAccessor extends Predicate<Class<?>> {
 
-    ITypedPayload<?> readField(AccessorOp op, IRef field);
+    ITypedPayload<?> readField(AccessorOp op, IRef field, HolderLookup.Provider provider);
 
-    void writeField(AccessorOp op, IRef field, ITypedPayload<?> payload);
+    void writeField(AccessorOp op, IRef field, ITypedPayload<?> payload, HolderLookup.Provider provider);
 
     default boolean hasPredicate() {
         return false;
@@ -34,19 +35,19 @@ public interface IAccessor extends Predicate<Class<?>> {
     byte getDefaultType();
 
 
-    default ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj) {
+    default ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj, HolderLookup.Provider provider) {
         throw new UnsupportedOperationException();
     }
 
-    default void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload) {
+    default void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         throw new UnsupportedOperationException();
     }
 
-    default ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
+    default ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field, HolderLookup.Provider provider) {
         throw new UnsupportedOperationException();
     }
 
-    default void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
+    default void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         throw new UnsupportedOperationException();
     }
 

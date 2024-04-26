@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -36,13 +37,13 @@ public class HeldItemUIFactory extends UIFactory<HeldItemUIFactory.HeldItemHolde
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected HeldItemHolder readHolderFromSyncData(FriendlyByteBuf syncData) {
+    protected HeldItemHolder readHolderFromSyncData(RegistryFriendlyByteBuf syncData) {
         Player player = Minecraft.getInstance().player;
         return player == null ? null :new HeldItemHolder(player, syncData.readEnum(InteractionHand.class));
     }
 
     @Override
-    protected void writeHolderToSyncData(FriendlyByteBuf syncData, HeldItemHolder holder) {
+    protected void writeHolderToSyncData(RegistryFriendlyByteBuf syncData, HeldItemHolder holder) {
         syncData.writeEnum(holder.hand);
     }
 
@@ -67,7 +68,7 @@ public class HeldItemUIFactory extends UIFactory<HeldItemUIFactory.HeldItemHolde
 
         @Override
         public boolean isInvalid() {
-            return !ItemStack.isSameItemSameTags(player.getItemInHand(hand), held);
+            return !ItemStack.isSameItemSameComponents(player.getItemInHand(hand), held);
         }
 
         @Override

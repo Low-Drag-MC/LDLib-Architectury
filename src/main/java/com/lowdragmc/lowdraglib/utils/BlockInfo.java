@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.utils;
 
 import lombok.Setter;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -79,18 +80,18 @@ public class BlockInfo {
         return hasBlockEntity;
     }
 
-    public BlockEntity getBlockEntity(BlockPos pos) {
+    public BlockEntity getBlockEntity(BlockPos pos, HolderLookup.Provider provider) {
         if (hasBlockEntity && blockState.getBlock() instanceof EntityBlock entityBlock) {
             if (lastEntity != null && lastEntity.getBlockPos().equals(pos)) {
                 return lastEntity;
             }
             lastEntity = entityBlock.newBlockEntity(pos, blockState);
             if (tag != null && lastEntity != null) {
-                var compoundTag2 = lastEntity.saveWithoutMetadata();
+                var compoundTag2 = lastEntity.saveWithoutMetadata(provider);
                 var compoundTag3 = compoundTag2.copy();
                 compoundTag2.merge(tag);
                 if (!compoundTag2.equals(compoundTag3)) {
-                    lastEntity.load(compoundTag2);
+                    lastEntity.loadWithComponents(compoundTag2, provider);
                 }
             }
             if (postCreate != null) {
@@ -101,8 +102,8 @@ public class BlockInfo {
         return null;
     }
 
-    public BlockEntity getBlockEntity(Level level, BlockPos pos) {
-        BlockEntity entity = getBlockEntity(pos);
+    public BlockEntity getBlockEntity(HolderLookup.Provider provider, Level level, BlockPos pos) {
+        BlockEntity entity = getBlockEntity(pos, provider);
         if (entity != null) {
             entity.setLevel(level);
         }
@@ -118,9 +119,9 @@ public class BlockInfo {
         return blockState.getBlock().getCloneItemStack(level, pos, blockState);
     }
 
-    public void apply(Level world, BlockPos pos) {
+    public void apply(HolderLookup.Provider provider, Level world, BlockPos pos) {
         world.setBlockAndUpdate(pos, blockState);
-        BlockEntity blockEntity = getBlockEntity(pos);
+        BlockEntity blockEntity = getBlockEntity(pos, provider);
         if (blockEntity != null) {
             world.setBlockEntity(blockEntity);
         }

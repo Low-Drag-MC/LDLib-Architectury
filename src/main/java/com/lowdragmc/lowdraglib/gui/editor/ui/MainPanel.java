@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidgetGroup;
@@ -13,13 +14,11 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -163,7 +162,7 @@ public class MainPanel extends WidgetGroup {
         List<CompoundTag> list = new ArrayList<>();
         if (!selectedUIs.isEmpty()) {
             for (UIWrapper selectedUI : selectedUIs) {
-                list.add(selectedUI.inner().serializeWrapper());
+                list.add(selectedUI.inner().serializeWrapper(Platform.getFrozenRegistry()));
             }
         }
         UIResourceTexture.clearCurrentResource();
@@ -179,7 +178,7 @@ public class MainPanel extends WidgetGroup {
                 }
                 List<CompoundTag> list = (List<CompoundTag>) c;
                 for (var tag : list) {
-                    var widget = IConfigurableWidget.deserializeWrapper(tag);
+                    var widget = IConfigurableWidget.deserializeWrapper(tag, Platform.getFrozenRegistry());
                     if (widget != null && hoverUI.inner() instanceof IConfigurableWidgetGroup group) {
                         widget.widget().addSelfPosition(5,5);
                         if (group.canWidgetAccepted(widget)) {

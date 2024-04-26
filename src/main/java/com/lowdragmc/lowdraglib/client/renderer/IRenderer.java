@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.RenderType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -20,6 +21,8 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.common.util.TriState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -139,15 +142,15 @@ public interface IRenderer {
      * Whether to apply AO for the model.
      */
     @OnlyIn(Dist.CLIENT)
-    default boolean useAO() {
-        return false;
+    default TriState useAO() {
+        return TriState.FALSE;
     }
 
     /**
      * Whether to apply AO for the model.
      */
     @OnlyIn(Dist.CLIENT)
-    default boolean useAO(BlockState state) {
+    default TriState useAO(BlockState state, ModelData modelData, RenderType renderType) {
         return useAO();
     }
 

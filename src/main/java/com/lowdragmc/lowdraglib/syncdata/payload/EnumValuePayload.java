@@ -1,9 +1,11 @@
 package com.lowdragmc.lowdraglib.syncdata.payload;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+
 import javax.annotation.Nullable;
 
 public class EnumValuePayload extends ObjectTypedPayload<EnumValuePayload.Payload> {
@@ -24,7 +26,7 @@ public class EnumValuePayload extends ObjectTypedPayload<EnumValuePayload.Payloa
     }
 
     @Override
-    public void writePayload(FriendlyByteBuf buf) {
+    public void writePayload(RegistryFriendlyByteBuf buf) {
         if (payload.ordinal == -1) {
             throw new IllegalStateException("Did not find ordinal for enum");
         }
@@ -32,12 +34,12 @@ public class EnumValuePayload extends ObjectTypedPayload<EnumValuePayload.Payloa
     }
 
     @Override
-    public void readPayload(FriendlyByteBuf buf) {
+    public void readPayload(RegistryFriendlyByteBuf buf) {
         payload.ordinal = buf.readVarInt();
     }
 
     @Override
-    public @Nullable Tag serializeNBT() {
+    public @Nullable Tag serializeNBT(HolderLookup.Provider provider) {
         if (payload.name == null) {
             throw new IllegalStateException("Did not find name for enum");
         }
@@ -45,7 +47,7 @@ public class EnumValuePayload extends ObjectTypedPayload<EnumValuePayload.Payloa
     }
 
     @Override
-    public void deserializeNBT(Tag tag) {
+    public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
         // supports old formats and transform it
         if (tag instanceof IntTag) {
             payload.ordinal = ((IntTag) tag).getAsInt();

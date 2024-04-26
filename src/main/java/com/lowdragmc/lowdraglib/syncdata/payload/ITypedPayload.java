@@ -1,7 +1,9 @@
 package com.lowdragmc.lowdraglib.syncdata.payload;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+
 import javax.annotation.Nullable;
 
 /**
@@ -11,14 +13,14 @@ public interface ITypedPayload<T> {
 
     byte getType();
 
-    void writePayload(FriendlyByteBuf buf);
+    void writePayload(RegistryFriendlyByteBuf buf);
 
-    void readPayload(FriendlyByteBuf buf);
+    void readPayload(RegistryFriendlyByteBuf buf);
 
     @Nullable
-    Tag serializeNBT();
+    Tag serializeNBT(HolderLookup.Provider provider);
 
-    void deserializeNBT(Tag tag);
+    void deserializeNBT(Tag tag, HolderLookup.Provider provider);
 
     T getPayload();
 

@@ -8,6 +8,7 @@ import com.lowdragmc.lowdraglib.syncdata.managed.ReadOnlyManagedRef;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.PrimitiveTypedPayload;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 public abstract class ReadonlyAccessor implements IAccessor {
@@ -24,9 +25,9 @@ public abstract class ReadonlyAccessor implements IAccessor {
         this.defaultType = defaultType;
     }
 
-    public abstract ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj);
+    public abstract ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj, HolderLookup.Provider provider);
 
-    public abstract void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload);
+    public abstract void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload, HolderLookup.Provider provider);
 
     @Override
     public boolean isManaged() {
@@ -34,7 +35,7 @@ public abstract class ReadonlyAccessor implements IAccessor {
     }
 
     @Override
-    public ITypedPayload<?> readField(AccessorOp op, IRef field) {
+    public ITypedPayload<?> readField(AccessorOp op, IRef field, HolderLookup.Provider provider) {
         var obj = field.readRaw();
         if (field instanceof ReadOnlyManagedRef managedRef) {
             if (obj == null) {
@@ -44,9 +45,9 @@ public abstract class ReadonlyAccessor implements IAccessor {
                 tag.put("uid", managedRef.getReadOnlyField().serializeUid(obj));
 
                 var payloadTag = new CompoundTag();
-                var payload = readFromReadonlyField(op, obj);
+                var payload = readFromReadonlyField(op, obj, provider);
                 payloadTag.putByte("t", payload.getType());
-                var data = payload.serializeNBT();
+                var data = payload.serializeNBT(provider);
                 if (data != null) {
                     payloadTag.put("d", data);
                 }
@@ -56,11 +57,11 @@ public abstract class ReadonlyAccessor implements IAccessor {
         } else if (obj == null) {
             throw new IllegalArgumentException("readonly field %s has a null reference".formatted(field.getKey()));
         }
-        return readFromReadonlyField(op, obj);
+        return readFromReadonlyField(op, obj, provider);
     }
 
     @Override
-    public void writeField(AccessorOp op, IRef field, ITypedPayload<?> payload) {
+    public void writeField(AccessorOp op, IRef field, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         var obj = field.readRaw();
         if (field instanceof ReadOnlyManagedRef managedRef) {
             var readOnlyField = managedRef.getReadOnlyField();
@@ -75,14 +76,14 @@ public abstract class ReadonlyAccessor implements IAccessor {
                 var payloadTag = tag.getCompound("payload");
                 byte id = payloadTag.getByte("t");
                 var p = TypedPayloadRegistries.create(id);
-                p.deserializeNBT(payloadTag.get("d"));
-                writeToReadonlyField(op, obj, p);
+                p.deserializeNBT(payloadTag.get("d"), provider);
+                writeToReadonlyField(op, obj, p, provider);
             }
             return;
         } else if (obj == null) {
             throw new IllegalArgumentException("readonly field %s has a null reference".formatted(field));
         }
-        writeToReadonlyField(op, obj, payload);
+        writeToReadonlyField(op, obj, payload, provider);
     }
 
 }

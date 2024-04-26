@@ -6,11 +6,10 @@ import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Registry;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
@@ -21,7 +20,7 @@ public class RecipeAccessor extends CustomObjectAccessor<RecipeHolder> {
     }
 
     @Override
-    public ITypedPayload<?> serialize(AccessorOp op, RecipeHolder value) {
+    public ITypedPayload<?> serialize(AccessorOp op, RecipeHolder value, HolderLookup.Provider provider) {
         var type = BuiltInRegistries.RECIPE_TYPE.getKey(value.value().getType());
         var id = value.id();
         CompoundTag tag = new CompoundTag();
@@ -31,7 +30,7 @@ public class RecipeAccessor extends CustomObjectAccessor<RecipeHolder> {
     }
 
     @Override
-    public RecipeHolder deserialize(AccessorOp op, ITypedPayload<?> payload) {
+    public RecipeHolder deserialize(AccessorOp op, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof NbtTagPayload nbtTagPayload && nbtTagPayload.getPayload() instanceof CompoundTag tag) {
             var type = BuiltInRegistries.RECIPE_TYPE.get(new ResourceLocation(tag.getString("type")));
             var id = new ResourceLocation(tag.getString("id"));

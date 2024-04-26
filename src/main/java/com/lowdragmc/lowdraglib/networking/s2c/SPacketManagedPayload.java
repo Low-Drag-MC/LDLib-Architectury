@@ -2,13 +2,14 @@ package com.lowdragmc.lowdraglib.networking.s2c;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.networking.both.PacketIntLocation;
-import com.lowdragmc.lowdraglib.networking.c2s.CPacketUIClientAction;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.syncdata.accessor.IManagedAccessor;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import lombok.NoArgsConstructor;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.api.distmarker.Dist;
@@ -18,7 +19,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -36,7 +36,7 @@ import java.util.Objects;
 public class SPacketManagedPayload extends PacketIntLocation {
     public static final ResourceLocation ID = LDLib.location("managed_payload");
     public static final Type<SPacketManagedPayload> TYPE = new Type<>(ID);
-    public static final StreamCodec<FriendlyByteBuf, SPacketManagedPayload> CODEC = StreamCodec.ofMember(SPacketManagedPayload::write, SPacketManagedPayload::decode);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SPacketManagedPayload> CODEC = StreamCodec.ofMember(SPacketManagedPayload::write, SPacketManagedPayload::decode);
 
     private CompoundTag extra;
     private BlockEntityType<?> blockEntityType;
@@ -52,7 +52,7 @@ public class SPacketManagedPayload extends PacketIntLocation {
         this.extra = extra;
     }
 
-    public SPacketManagedPayload(CompoundTag tag) {
+    public SPacketManagedPayload(CompoundTag tag, HolderLookup.Provider provider) {
         super(BlockPos.of(tag.getLong("p")));
         blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(new ResourceLocation(tag.getString("t")));
         changed = BitSet.valueOf(tag.getByteArray("c"));
@@ -62,14 +62,14 @@ public class SPacketManagedPayload extends PacketIntLocation {
             CompoundTag payloadTag = list.getCompound(i);
             byte id = payloadTag.getByte("t");
             var payload = TypedPayloadRegistries.create(id);
-            payload.deserializeNBT(payloadTag.get("d"));
+            payload.deserializeNBT(payloadTag.get("d"), provider);
             payloads[i] = payload;
         }
         extra = tag.getCompound("e");
     }
 
 
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.putLong("p", pos.asLong());
         tag.putString("t", Objects.requireNonNull(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType)).toString());
@@ -78,7 +78,7 @@ public class SPacketManagedPayload extends PacketIntLocation {
         for (ITypedPayload<?> payload : payloads) {
             CompoundTag payloadTag = new CompoundTag();
             payloadTag.putByte("t", payload.getType());
-            var data = payload.serializeNBT();
+            var data = payload.serializeNBT(provider);
             if (data != null) {
                 payloadTag.put("d", data);
             }
@@ -100,7 +100,7 @@ public class SPacketManagedPayload extends PacketIntLocation {
             if (force || field.isSyncDirty()) {
                 changed.set(i);
                 var key = field.getKey();
-                payloads.put(key, key.readSyncedField(field, force));
+                payloads.put(key, key.readSyncedField(field, force, tile.getSelf().getLevel().registryAccess()));
                 field.clearSyncDirty();
             }
         }
@@ -118,12 +118,12 @@ public class SPacketManagedPayload extends PacketIntLocation {
         var storage = blockEntity.getRootStorage();
         var syncedFields = storage.getSyncFields();
 
-        IManagedAccessor.writeSyncedFields(storage, syncedFields, packet.changed, packet.payloads);
+        IManagedAccessor.writeSyncedFields(storage, syncedFields, packet.changed, packet.payloads, blockEntity.getSelf().getLevel().registryAccess());
         blockEntity.readCustomSyncData(packet.extra);
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
+    public void write(RegistryFriendlyByteBuf buf) {
         super.write(buf);
         buf.writeResourceLocation(Objects.requireNonNull(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntityType)));
         buf.writeByteArray(changed.toByteArray());
@@ -134,7 +134,7 @@ public class SPacketManagedPayload extends PacketIntLocation {
         buf.writeNbt(extra);
     }
 
-    public static SPacketManagedPayload decode(FriendlyByteBuf buffer) {
+    public static SPacketManagedPayload decode(RegistryFriendlyByteBuf buffer) {
         BlockPos pos = buffer.readBlockPos();
 
         BlockEntityType<?> blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(buffer.readResourceLocation());

@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.syncdata.managed.ManagedHolder;
 import com.lowdragmc.lowdraglib.syncdata.payload.ArrayPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
+import net.minecraft.core.HolderLookup;
 
 import java.util.Collection;
 
@@ -36,7 +37,7 @@ public class CollectionAccessor extends ReadonlyAccessor implements IArrayLikeAc
     }
 
     @Override
-    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj) {
+    public ITypedPayload<?> readFromReadonlyField(AccessorOp op, Object obj, HolderLookup.Provider provider) {
         if (!(obj instanceof Collection<?> collection)) {
             throw new IllegalArgumentException("Field %s is not Collection".formatted(obj));
         }
@@ -53,7 +54,7 @@ public class CollectionAccessor extends ReadonlyAccessor implements IArrayLikeAc
         for (int i = 0; i < size; i++) {
             var element = iter.next();
             var holder = ManagedHolder.of(element);
-            var payload = childAccessor.readManagedField(op, holder);
+            var payload = childAccessor.readManagedField(op, holder, provider);
             result[i] = payload;
         }
 
@@ -61,7 +62,7 @@ public class CollectionAccessor extends ReadonlyAccessor implements IArrayLikeAc
     }
 
     @Override
-    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload) {
+    public void writeToReadonlyField(AccessorOp op, Object obj, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (!(obj instanceof Collection<?>)) {
             throw new IllegalArgumentException("Field %s is not Collection".formatted(obj));
         }
@@ -78,7 +79,7 @@ public class CollectionAccessor extends ReadonlyAccessor implements IArrayLikeAc
         collection.clear();
         for (ITypedPayload<?> element : array) {
             var holder = ManagedHolder.ofType(childType);
-            childAccessor.writeManagedField(op, holder, element);
+            childAccessor.writeManagedField(op, holder, element, provider);
             collection.add(holder.value());
         }
     }

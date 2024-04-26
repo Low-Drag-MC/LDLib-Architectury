@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
 import com.lowdragmc.lowdraglib.utils.Position;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 /**
@@ -18,7 +19,7 @@ public class PositionAccessor extends CustomObjectAccessor<Position>{
     }
 
     @Override
-    public ITypedPayload<?> serialize(AccessorOp op, Position value) {
+    public ITypedPayload<?> serialize(AccessorOp op, Position value, HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.putInt("x", value.x);
         tag.putInt("y", value.y);
@@ -26,7 +27,7 @@ public class PositionAccessor extends CustomObjectAccessor<Position>{
     }
 
     @Override
-    public Position deserialize(AccessorOp op, ITypedPayload<?> payload) {
+    public Position deserialize(AccessorOp op, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof NbtTagPayload nbtTagPayload) {
             var tag = (CompoundTag)nbtTagPayload.getPayload();
             return new Position(tag.getInt("x"), tag.getInt("y"));

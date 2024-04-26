@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.syncdata.payload.PrimitiveTypedPayload;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -138,27 +139,27 @@ public abstract class SyncableMap<K, V> implements Map<K, V>, IContentChangeAwar
         return map.entrySet();
     }
 
-    private static Tag readVal(ManagedAccessor accessor, Object val) {
-        return val == null ? PrimitiveTypedPayload.ofNull().serializeNBT() : accessor.readManagedField(AccessorOp.PERSISTED, ManagedHolder.of(val)).serializeNBT();
+    private static Tag readVal(ManagedAccessor accessor, Object val, HolderLookup.Provider provider) {
+        return val == null ? PrimitiveTypedPayload.ofNull().serializeNBT(provider) : accessor.readManagedField(AccessorOp.PERSISTED, ManagedHolder.of(val), provider).serializeNBT(provider);
     }
 
-    private static Object writeVal(ManagedAccessor accessor, Tag val, Class<?> type) {
+    private static Object writeVal(ManagedAccessor accessor, Tag val, Class<?> type, HolderLookup.Provider provider) {
         if (val == null) {
             return null;
         }
         var holder = ManagedHolder.ofType(type);
         var payload = TypedPayloadRegistries.create(accessor.getDefaultType());
-        payload.deserializeNBT(val);
-        accessor.writeManagedField(AccessorOp.PERSISTED, holder, payload);
+        payload.deserializeNBT(val, provider);
+        accessor.writeManagedField(AccessorOp.PERSISTED, holder, payload, provider);
         return holder.value();
     }
 
     @Override
-    public Tag serializeNBT() {
+    public Tag serializeNBT(HolderLookup.Provider provider) {
         if(stringKey) {
             var tag = new CompoundTag();
             for (var entry : map.entrySet()) {
-                var valueTag = readVal((ManagedAccessor) valueAccessor, entry.getValue());
+                var valueTag = readVal((ManagedAccessor) valueAccessor, entry.getValue(), provider);
                 tag.put((String) entry.getKey(), valueTag);
             }
             return tag;
@@ -166,8 +167,8 @@ public abstract class SyncableMap<K, V> implements Map<K, V>, IContentChangeAwar
         var list = new ListTag();
         map.forEach((k, v) -> {
             var tag = new CompoundTag();
-            var keyTag = readVal((ManagedAccessor) keyAccessor, k);
-            var valueTag = readVal((ManagedAccessor) valueAccessor, v);
+            var keyTag = readVal((ManagedAccessor) keyAccessor, k, provider);
+            var valueTag = readVal((ManagedAccessor) valueAccessor, v, provider);
             tag.put("k", keyTag);
             if (valueTag != null) {
                 tag.put("v", valueTag);
@@ -178,13 +179,13 @@ public abstract class SyncableMap<K, V> implements Map<K, V>, IContentChangeAwar
     }
 
     @Override
-    public void deserializeNBT(Tag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, Tag nbt) {
         map.clear();
 
         if(nbt instanceof CompoundTag tag) {
             for (var key : tag.getAllKeys()) {
                 var valueTag = tag.get(key);
-                var value = writeVal((ManagedAccessor) valueAccessor, valueTag, valueType);
+                var value = writeVal((ManagedAccessor) valueAccessor, valueTag, valueType, provider);
                 map.put((K) key, (V) value);
             }
             return;
@@ -194,8 +195,8 @@ public abstract class SyncableMap<K, V> implements Map<K, V>, IContentChangeAwar
             var compound = (CompoundTag) tag;
             var keyTag = compound.get("k");
             var valueTag = compound.get("v");
-            var key = writeVal((ManagedAccessor) keyAccessor, keyTag, keyType);
-            var value = writeVal((ManagedAccessor) valueAccessor, valueTag, valueType);
+            var key = writeVal((ManagedAccessor) keyAccessor, keyTag, keyType, provider);
+            var value = writeVal((ManagedAccessor) valueAccessor, valueTag, valueType, provider);
             map.put((K) key, (V) value);
         });
     }

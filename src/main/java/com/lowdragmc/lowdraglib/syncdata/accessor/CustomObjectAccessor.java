@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.managed.IManagedVar;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.PrimitiveTypedPayload;
+import net.minecraft.core.HolderLookup;
 
 import java.util.Objects;
 
@@ -36,30 +37,30 @@ public abstract class CustomObjectAccessor<T> extends ManagedAccessor {
         return operandTypes;
     }
 
-    public abstract ITypedPayload<?> serialize(AccessorOp op, T value);
-    public abstract T deserialize(AccessorOp op, ITypedPayload<?> payload);
+    public abstract ITypedPayload<?> serialize(AccessorOp op, T value, HolderLookup.Provider provider);
+    public abstract T deserialize(AccessorOp op, ITypedPayload<?> payload, HolderLookup.Provider provider);
 
     @Override
-    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field) {
+    public ITypedPayload<?> readManagedField(AccessorOp op, IManagedVar<?> field, HolderLookup.Provider provider) {
         var value = field.value();
         if (value != null) {
             if (!type.isAssignableFrom(value.getClass())) {
                 throw new IllegalArgumentException("Value %s is not assignable to type %s".formatted(value, type));
             }
             //noinspection unchecked
-            return serialize(op, (T) value);
+            return serialize(op, (T) value, provider);
         }
         return PrimitiveTypedPayload.ofNull();
     }
 
     @Override
-    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload) {
+    public void writeManagedField(AccessorOp op, IManagedVar<?> field, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof PrimitiveTypedPayload<?> primitive && primitive.isNull()) {
             field.set(null);
             return;
         }
 
-        var result = deserialize(op, payload);
+        var result = deserialize(op, payload, provider);
         Objects.requireNonNull(result, "Payload %s is not a valid payload for type %s".formatted(payload, type));
         ((IManagedVar<T>) field).set(result);
 

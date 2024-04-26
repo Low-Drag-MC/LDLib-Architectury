@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.syncdata.accessor.IArrayLikeAccessor;
 import com.lowdragmc.lowdraglib.syncdata.managed.*;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import lombok.Getter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
@@ -69,23 +70,23 @@ public class ManagedKey {
         return accessor;
     }
 
-    public ITypedPayload<?> readSyncedField(IRef field, boolean force) {
-        return getAccessor().readField(force ? AccessorOp.FORCE_SYNCED : AccessorOp.SYNCED, field);
+    public ITypedPayload<?> readSyncedField(IRef field, boolean force, HolderLookup.Provider provider) {
+        return getAccessor().readField(force ? AccessorOp.FORCE_SYNCED : AccessorOp.SYNCED, field, provider);
     }
 
-    public void writeSyncedField(IRef field, ITypedPayload<?> payload) {
-        getAccessor().writeField(AccessorOp.SYNCED, field, payload);
+    public void writeSyncedField(IRef field, ITypedPayload<?> payload, HolderLookup.Provider provider) {
+        getAccessor().writeField(AccessorOp.SYNCED, field, payload, provider);
     }
 
-    public Tag readPersistedField(IRef field) {
-        return getAccessor().readField(AccessorOp.PERSISTED, field).serializeNBT();
+    public Tag readPersistedField(IRef field, HolderLookup.Provider provider) {
+        return getAccessor().readField(AccessorOp.PERSISTED, field, provider).serializeNBT(provider);
     }
 
-    public void writePersistedField(IRef field, @NotNull Tag nbt) {
+    public void writePersistedField(IRef field, @NotNull Tag nbt, HolderLookup.Provider provider) {
         var payloadType = getAccessor().getDefaultType();
         var payload = TypedPayloadRegistries.create(payloadType);
-        payload.deserializeNBT(nbt);
-        getAccessor().writeField(AccessorOp.PERSISTED, field, payload);
+        payload.deserializeNBT(nbt, provider);
+        getAccessor().writeField(AccessorOp.PERSISTED, field, payload, provider);
     }
 
     public IRef createRef(Object instance) {

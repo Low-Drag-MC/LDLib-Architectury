@@ -1,12 +1,12 @@
 package com.lowdragmc.lowdraglib.networking;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public interface IPacket {
 
-    void encode(FriendlyByteBuf buf);
+    void encode(RegistryFriendlyByteBuf buf);
 
-    void decode(FriendlyByteBuf buf);
+    void decode(RegistryFriendlyByteBuf buf);
 
     default void execute(IHandlerContext handler) {
         

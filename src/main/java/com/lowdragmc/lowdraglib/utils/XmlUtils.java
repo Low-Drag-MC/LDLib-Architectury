@@ -1,11 +1,15 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.JsonOps;
 import lombok.val;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -170,6 +174,23 @@ public class XmlUtils {
         return new CompoundTag();
     }
 
+    public static DataComponentMap getComponents(Element element) {
+        NodeList nodeList = element.getChildNodes();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            String text = node.getTextContent().replaceAll("\\h*\\R+\\h*", " ");
+            if (!text.isEmpty() && text.charAt(0) == ' ') {
+                text = text.substring(1);
+            }
+            builder.append(text);
+        }
+        if (!builder.isEmpty()) {
+            return DataComponentMap.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(builder.toString())).result().orElse(DataComponentMap.EMPTY);
+        }
+        return DataComponentMap.EMPTY;
+    }
+
     public static ItemStack getItemStack(Element element) {
         var ingredient = getIngredient(element);
         if (ingredient.ingredient.getItems().length > 0) {
@@ -230,8 +251,8 @@ public class XmlUtils {
                 ItemStack itemStack = new ItemStack(item, count);
                 NodeList nodeList = element.getChildNodes();
                 for (int i = 0; i < nodeList.getLength(); i++) {
-                    if (nodeList.item(i) instanceof Element subElement && subElement.getNodeName().equals("nbt")) {
-                        itemStack.setTag(getCompoundTag(subElement));
+                    if (nodeList.item(i) instanceof Element subElement && subElement.getNodeName().equals("components")) {
+                        itemStack.applyComponents(getComponents(subElement));
                         break;
                     }
                 }
@@ -265,9 +286,7 @@ public class XmlUtils {
                     builder.append(text);
                 }
                 if (!builder.isEmpty()) {
-                    try {
-                        fluidStack.setTag(TagParser.parseTag(builder.toString()));
-                    } catch (CommandSyntaxException ignored) {}
+                    fluidStack.applyComponents(DataComponentMap.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(builder.toString())).result().orElse(DataComponentMap.EMPTY));
                 }
             }
         }

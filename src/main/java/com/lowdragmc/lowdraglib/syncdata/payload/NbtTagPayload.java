@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata.payload;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 
 public class NbtTagPayload extends ObjectTypedPayload<Tag> {
@@ -11,12 +12,12 @@ public class NbtTagPayload extends ObjectTypedPayload<Tag> {
     }
 
     @Override
-    public Tag serializeNBT() {
+    public Tag serializeNBT(HolderLookup.Provider provider) {
         return payload;
     }
 
     @Override
-    public void deserializeNBT(Tag tag) {
+    public void deserializeNBT(Tag tag, HolderLookup.Provider provider) {
         payload = tag;
     }
 }

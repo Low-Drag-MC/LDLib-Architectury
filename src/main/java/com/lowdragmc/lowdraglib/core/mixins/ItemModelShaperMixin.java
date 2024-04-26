@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.common.util.TriState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -41,7 +42,7 @@ public class ItemModelShaperMixin {
 
                     @Override
                     public boolean useAmbientOcclusion() {
-                        return r.useAO();
+                        return r.useAO() == TriState.DEFAULT || r.useAO() == TriState.TRUE;
                     }
 
                     @Override

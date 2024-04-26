@@ -13,6 +13,8 @@ import com.lowdragmc.lowdraglib.gui.texture.WidgetTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.gui.GuiGraphics;
@@ -20,7 +22,6 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +72,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     @Override
-    public void writeInitialData(FriendlyByteBuf buffer) {
+    public void writeInitialData(RegistryFriendlyByteBuf buffer) {
         for (Widget widget : widgets) {
             if (widget.isInitialized() && !widget.isClientSideWidget) {
                 widget.writeInitialData(buffer);
@@ -80,7 +81,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     @Override
-    public void readInitialData(FriendlyByteBuf buffer) {
+    public void readInitialData(RegistryFriendlyByteBuf buffer) {
         for (Widget widget : widgets) {
             if (widget.isInitialized() && !widget.isClientSideWidget) {
                 widget.readInitialData(buffer);
@@ -573,7 +574,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
+    public void readUpdateInfo(int id, RegistryFriendlyByteBuf buffer) {
         if (id == 1) {
             int widgetIndex = buffer.readVarInt();
             int widgetUpdateId = buffer.readVarInt();
@@ -603,7 +604,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     @Override
-    public void handleClientAction(int id, FriendlyByteBuf buffer) {
+    public void handleClientAction(int id, RegistryFriendlyByteBuf buffer) {
         if (id == 1) {
             int widgetIndex = buffer.readVarInt();
             int widgetUpdateId = buffer.readVarInt();
@@ -640,7 +641,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         }
 
         @Override
-        public void writeClientAction(Widget widget, int updateId, Consumer<FriendlyByteBuf> dataWriter) {
+        public void writeClientAction(Widget widget, int updateId, Consumer<RegistryFriendlyByteBuf> dataWriter) {
             WidgetGroup.this.writeClientAction(1, buffer -> {
                 buffer.writeVarInt(widgets.indexOf(widget));
                 buffer.writeVarInt(updateId);
@@ -649,7 +650,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         }
 
         @Override
-        public void writeUpdateInfo(Widget widget, int updateId, Consumer<FriendlyByteBuf> dataWriter) {
+        public void writeUpdateInfo(Widget widget, int updateId, Consumer<RegistryFriendlyByteBuf> dataWriter) {
             WidgetGroup.this.writeUpdateInfo(1, buffer -> {
                 buffer.writeVarInt(widgets.indexOf(widget));
                 buffer.writeVarInt(updateId);
@@ -715,12 +716,12 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     @Override
-    public CompoundTag serializeInnerNBT() {
-        CompoundTag tag = IConfigurableWidgetGroup.super.serializeInnerNBT();
+    public CompoundTag serializeInnerNBT(HolderLookup.Provider provider) {
+        CompoundTag tag = IConfigurableWidgetGroup.super.serializeInnerNBT(provider);
         var children = new ListTag();
         for (Widget widget : widgets) {
             if (widget instanceof IConfigurableWidget child && child.isLDLRegister()) {
-                children.add(child.serializeWrapper());
+                children.add(child.serializeWrapper(provider));
             }
         }
         tag.put("children", children);
@@ -728,13 +729,13 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     @Override
-    public void deserializeInnerNBT(CompoundTag nbt) {
+    public void deserializeInnerNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         clearAllWidgets();
-        IConfigurableWidgetGroup.super.deserializeInnerNBT(nbt);
+        IConfigurableWidgetGroup.super.deserializeInnerNBT(provider, nbt);
         var children = nbt.getList("children", Tag.TAG_COMPOUND);
         for (Tag tag : children) {
             if (tag instanceof CompoundTag ui) {
-                var child = IConfigurableWidget.deserializeWrapper(ui);
+                var child = IConfigurableWidget.deserializeWrapper(ui, provider);
                 if (child != null) {
                     addWidget(child.widget());
                 }

@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.menu;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
@@ -50,7 +51,7 @@ public class FileMenu extends MenuTab {
                                 r = new File(r.getParentFile(), r.getName() + ".resource");
                             }
                             try {
-                                NbtIo.write(resources.serializeNBT(), r.toPath());
+                                NbtIo.write(resources.serializeNBT(Platform.getFrozenRegistry()), r.toPath());
                             } catch (IOException ignored) {
                                 // TODO
                             }

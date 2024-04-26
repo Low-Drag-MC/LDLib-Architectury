@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.lowdragmc.lowdraglib.Platform;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -33,7 +34,7 @@ public class FluidStackTypeAdapter implements TypeAdapterFactory {
                 gson.toJson(JsonNull.INSTANCE, out);
                 return;
             }
-            gson.toJson(new JsonPrimitive(value.writeToNBT(new CompoundTag()).toString()), out);
+            gson.toJson(new JsonPrimitive(value.save(Platform.getFrozenRegistry()).toString()), out);
         }
 
         @Override
@@ -41,7 +42,7 @@ public class FluidStackTypeAdapter implements TypeAdapterFactory {
             final JsonElement jsonElement = gson.fromJson(in, JsonElement.class);
             if (!jsonElement.isJsonObject()) return null;
             try {
-                return FluidStack.loadFluidStackFromNBT(TagParser.parseTag(jsonElement.getAsString()));
+                return FluidStack.parse(Platform.getFrozenRegistry(), TagParser.parseTag(jsonElement.getAsString())).orElse(FluidStack.EMPTY);
             } catch (CommandSyntaxException e) {
                 return FluidStack.EMPTY;
             }

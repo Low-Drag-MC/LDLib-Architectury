@@ -9,6 +9,7 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.WrapperConfigurator;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.PersistedParser;
 import com.lowdragmc.lowdraglib.gui.texture.*;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -156,16 +157,16 @@ public class TabContainer extends WidgetGroup {
     }
 
     @Override
-    public CompoundTag serializeInnerNBT() {
+    public CompoundTag serializeInnerNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        PersistedParser.serializeNBT(tag, getClass(), this);
+        PersistedParser.serializeNBT(tag, getClass(), this, provider);
         var tabs = new ListTag();
         for (Map.Entry<TabButton, WidgetGroup> entry : this.tabs.entrySet()) {
             var button = entry.getKey();
             var group = entry.getValue();
             var tab = new CompoundTag();
-            tab.put("button", button.serializeInnerNBT());
-            tab.put("group", group.serializeWrapper());
+            tab.put("button", button.serializeInnerNBT(provider));
+            tab.put("group", group.serializeWrapper(provider));
             tabs.add(tab);
         }
         tag.put("tabs", tabs);
@@ -173,15 +174,15 @@ public class TabContainer extends WidgetGroup {
     }
 
     @Override
-    public void deserializeInnerNBT(CompoundTag nbt) {
+    public void deserializeInnerNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         clearAllWidgets();
-        PersistedParser.deserializeNBT(nbt, new HashMap<>(), getClass(), this);
+        PersistedParser.deserializeNBT(nbt, new HashMap<>(), getClass(), this, provider);
         var tabs = nbt.getList("tabs", Tag.TAG_COMPOUND);
         for (Tag tag : tabs) {
             if (tag instanceof CompoundTag tab) {
                 TabButton button = new TabButton();
-                button.deserializeInnerNBT(tab.getCompound("button"));
-                var widget = IConfigurableWidget.deserializeWrapper(tab.getCompound("group"));
+                button.deserializeInnerNBT(provider, tab.getCompound("button"));
+                var widget = IConfigurableWidget.deserializeWrapper(tab.getCompound("group"), provider);
                 if (widget != null && widget.widget() instanceof WidgetGroup group) {
                     addTab(button, group);
                 }

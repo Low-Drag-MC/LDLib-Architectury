@@ -77,8 +77,8 @@ public class ItemTransferHelper {
     }
 
     public static boolean canItemStacksStack(ItemStack first, ItemStack second) {
-        if (!first.isEmpty() && ItemStack.isSameItem(first, second) && first.hasTag() == second.hasTag()) {
-            return !first.hasTag() || first.getTag().equals(second.getTag());
+        if (!first.isEmpty() && ItemStack.isSameItem(first, second)) {
+            return first.getComponents().equals(second.getComponents());
         } else {
             return false;
         }
@@ -166,10 +166,7 @@ public class ItemTransferHelper {
         if (!a.isStackable())
             return false;
 
-        if (a.hasTag() != b.hasTag())
-            return false;
-
-        return (!a.hasTag() || a.getTag().equals(b.getTag()));
+        return (a.getComponents().equals(b.getComponents()));
     }
 
     public static void giveItemToPlayer(Player player, ItemStack stack) {

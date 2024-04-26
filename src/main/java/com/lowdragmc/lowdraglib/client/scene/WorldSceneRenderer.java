@@ -35,6 +35,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.jetbrains.annotations.Nullable;
@@ -345,9 +346,9 @@ public abstract class WorldSceneRenderer {
         }
 
         //setup modelview matrix
-        PoseStack posesStack = RenderSystem.getModelViewStack();
-        posesStack.pushPose();
-        posesStack.setIdentity();
+        Matrix4fStack posesStack = RenderSystem.getModelViewStack();
+        posesStack.pushMatrix();
+        posesStack.identity();
         Project.gluLookAt(posesStack, eyePos.x(), eyePos.y(), eyePos.z(), lookAt.x(), lookAt.y(), lookAt.z(), worldUp.x(), worldUp.y(), worldUp.z());
         RenderSystem.applyModelViewMatrix();
 
@@ -382,8 +383,8 @@ public abstract class WorldSceneRenderer {
         RenderSystem.restoreProjectionMatrix();
 
         //reset modelview matrix
-        PoseStack posesStack = RenderSystem.getModelViewStack();
-        posesStack.popPose();
+        Matrix4fStack posesStack = RenderSystem.getModelViewStack();
+        posesStack.popMatrix();
         RenderSystem.applyModelViewMatrix();
         
         RenderSystem.depthMask(false);

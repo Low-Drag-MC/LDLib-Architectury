@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.misc;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidHandlerModifiable;
 import lombok.Setter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
@@ -143,12 +144,12 @@ public class FluidTransferList implements IFluidHandlerModifiable, INBTSerializa
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         var tag = new CompoundTag();
         var list = new ListTag();
         for (IFluidHandler transfer : transfers) {
             if (transfer instanceof INBTSerializable<?> serializable) {
-                list.add(serializable.serializeNBT());
+                list.add(serializable.serializeNBT(provider));
             } else {
                 LDLib.LOGGER.warn("[FluidTransferList] internal tank doesn't support serialization");
             }
@@ -159,11 +160,11 @@ public class FluidTransferList implements IFluidHandlerModifiable, INBTSerializa
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         var list = nbt.getList("tanks", nbt.getByte("type"));
         for (int i = 0; i < list.size(); i++) {
             if (transfers[i] instanceof INBTSerializable serializable) {
-                serializable.deserializeNBT(list.get(i));
+                serializable.deserializeNBT(provider, list.get(i));
             } else {
                 LDLib.LOGGER.warn("[FluidTransferList] internal tank doesn't support serialization");
             }
