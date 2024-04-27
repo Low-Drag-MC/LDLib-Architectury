@@ -37,7 +37,7 @@ public class FaceQuad {
      * @param shade whether shade the face
      */
     public static BakedQuad bakeFace(AABB cube, Direction face, TextureAtlasSprite sprite, ModelState rotation, int tintIndex, int emissivity, boolean cull, boolean shade) {
-        return new FaceQuadBakery().bakeQuad(
+        return FaceQuadBakery.bakeQuad(
                 new Vector3f((float) cube.minX * 16f, (float) cube.minY * 16f, (float) cube.minZ * 16f),
                 new Vector3f((float) cube.maxX * 16f, (float) cube.maxY * 16f, (float) cube.maxZ * 16f),
                 new BlockElementFace(cull ? face : null, tintIndex, "", new BlockFaceUV(new float[]{0.0F, 0.0F, 16.0F, 16.0F}, 0)),
@@ -129,7 +129,7 @@ public class FaceQuad {
         }
 
         public BakedQuad bake() {
-            return new FaceQuadBakery().bakeQuad(
+            return FaceQuadBakery.bakeQuad(
                     from,
                     to,
                     new BlockElementFace(cull ? face : null, tintIndex, "", new BlockFaceUV(new float[]{uv0.u(), uv0.v(), uv1.u(), uv1.v()}, 0)),
