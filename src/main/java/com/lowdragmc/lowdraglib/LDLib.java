@@ -16,6 +16,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.ApiStatus;
@@ -43,7 +44,7 @@ public class LDLib {
             .create();
     private static File location;
 
-    public LDLib(IEventBus eventBus) {
+    public LDLib(IEventBus eventBus, ModContainer modContainer) {
         LDLib.init();
         if (FMLEnvironment.dist == Dist.CLIENT) {
             new ClientProxy(eventBus);
