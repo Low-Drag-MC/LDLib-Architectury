@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
 @NoArgsConstructor
 public class SPacketUIOpen implements CustomPacketPayload {
@@ -29,12 +30,14 @@ public class SPacketUIOpen implements CustomPacketPayload {
         this.windowId = windowId;
     }
 
-    public void write(RegistryFriendlyByteBuf buf) {
+    public void write(@NotNull RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(serializedHolder.readableBytes());
         buf.writeBytes(serializedHolder);
 
         buf.writeResourceLocation(uiFactoryId);
         buf.writeVarInt(windowId);
+
+        serializedHolder.resetReaderIndex();
     }
 
     public static SPacketUIOpen decode(RegistryFriendlyByteBuf buf) {
