@@ -1,13 +1,11 @@
 package com.lowdragmc.lowdraglib;
 
-import dev.latvian.mods.kubejs.KubeJSPaths;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -18,7 +16,7 @@ import java.nio.file.Path;
 public class Platform {
 
     @ApiStatus.Internal
-    public static RegistryAccess FROZEN_REGISTRY_ACCESS;
+    public static RegistryAccess FROZEN_REGISTRY_ACCESS = RegistryAccess.EMPTY;
 
 
     public static String platformName() {

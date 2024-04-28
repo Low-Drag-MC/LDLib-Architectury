@@ -31,7 +31,7 @@
     "FluidTankMixin",
     "PackConfigMixin",
     "ReloadableResourceManagerMixin",
-    "WorldLoaderMixin",
+    "ReloadableServerResourcesMixin",
     "accessor.AbstractContainerMenuAccessor",
     "accessor.EntityAccessor",
     "accessor.SlotAccessor",
