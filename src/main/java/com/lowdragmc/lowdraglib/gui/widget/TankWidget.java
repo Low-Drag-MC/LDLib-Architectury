@@ -435,7 +435,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         } else if (id == 1) {
             this.lastFluidInTank = null;
         } else if (id == 2) {
-            this.lastFluidInTank = FluidStack.STREAM_CODEC.decode(buffer);
+            this.lastFluidInTank = FluidStack.OPTIONAL_STREAM_CODEC.decode(buffer);
         } else if (id == 3 && lastFluidInTank != null) {
             this.lastFluidInTank.setAmount(buffer.readVarInt());
         } else if (id == 4) {
