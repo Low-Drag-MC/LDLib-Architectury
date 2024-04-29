@@ -35,6 +35,8 @@ public class SPacketUIWidgetUpdate implements CustomPacketPayload {
         buf.writeBytes(updateData);
 
         buf.writeVarInt(windowId);
+
+        updateData.resetReaderIndex();
     }
 
     public static SPacketUIWidgetUpdate decode(RegistryFriendlyByteBuf buf) {

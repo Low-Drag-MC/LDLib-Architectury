@@ -31,6 +31,8 @@ public class CPacketUIClientAction implements CustomPacketPayload {
         buf.writeBytes(updateData);
 
         buf.writeVarInt(windowId);
+
+        updateData.resetReaderIndex();
     }
 
     public static CPacketUIClientAction decode(RegistryFriendlyByteBuf buf) {
