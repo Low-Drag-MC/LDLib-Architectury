@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.syncdata.blockentity;
 
 import com.google.common.base.Strings;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.syncdata.accessor.IManagedAccessor;
 import com.lowdragmc.lowdraglib.utils.TagUtils;
 import net.minecraft.nbt.CompoundTag;
@@ -21,7 +22,7 @@ public interface IAutoPersistBlockEntity extends IManagedBlockEntity {
             if (Strings.isNullOrEmpty(key)) {
                 key = fieldKey.getName();
             }
-            var nbt = fieldKey.readPersistedField(persistedField, getSelf().getLevel().registryAccess());
+            var nbt = fieldKey.readPersistedField(persistedField, Platform.getFrozenRegistry());
             if (nbt != null) {
                 TagUtils.setTagExtended(tag, key, nbt);
             }
@@ -32,7 +33,7 @@ public interface IAutoPersistBlockEntity extends IManagedBlockEntity {
 
     default void loadManagedPersistentData(CompoundTag tag) {
         var refs = getRootStorage().getPersistedFields();
-        IManagedAccessor.writePersistedFields(tag, refs, getSelf().getLevel().registryAccess());
+        IManagedAccessor.writePersistedFields(tag, refs, Platform.getFrozenRegistry());
         loadCustomPersistedData(tag);
     }
 
