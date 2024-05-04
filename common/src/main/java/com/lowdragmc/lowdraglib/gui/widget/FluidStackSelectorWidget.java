@@ -7,7 +7,6 @@ import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +16,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class FluidStackSelectorWidget extends WidgetGroup {
-    private Consumer<FluidStack> onIFluidStackUpdate;
+    private Consumer<FluidStack> onFluidStackUpdate;
     private final IFluidStorage handler;
     private final TextFieldWidget fluidField;
     private FluidStack fluid = FluidStack.empty();
@@ -38,11 +37,10 @@ public class FluidStackSelectorWidget extends WidgetGroup {
             }
         }).setResourceLocationOnly().setHoverTooltips("ldlib.gui.tips.fluid_selector");
 
-        addWidget(new PhantomFluidWidget(handler = new FluidStorage(1000),1, 1)
-                .setIFluidStackUpdater(fluidStack -> {
-                    setIFluidStack(fluidStack);
-                    onUpdate();
-                }).setBackground(new ColorBorderTexture(1, -1)));
+        addWidget(new PhantomFluidWidget(handler = new FluidStorage(1000), 0, 1, 1, 18, 18, this::getFluidStack, fluidStack -> {
+            setFluidStack(fluidStack);
+            onUpdate();
+        }).setBackground(new ColorBorderTexture(1, -1)));
         addWidget(fluidField);
 
         addWidget(new ButtonWidget(width - 21, 0, 20, 20, null, cd -> {
@@ -66,11 +64,11 @@ public class FluidStackSelectorWidget extends WidgetGroup {
                 .setHoverBorderTexture(1, -1).setHoverTooltips("ldlib.gui.tips.fluid_tag"));
     }
 
-    public FluidStack getIFluidStack() {
+    public FluidStack getFluidStack() {
         return fluid;
     }
 
-    public FluidStackSelectorWidget setIFluidStack(FluidStack fluidStack) {
+    public FluidStackSelectorWidget setFluidStack(FluidStack fluidStack) {
         fluid = Objects.requireNonNullElse(fluidStack, FluidStack.empty()).copy();
         if (fluid != FluidStack.empty()) {
             fluid.setAmount(1000);
@@ -80,15 +78,15 @@ public class FluidStackSelectorWidget extends WidgetGroup {
         return this;
     }
 
-    public FluidStackSelectorWidget setOnIFluidStackUpdate(Consumer<FluidStack> onIFluidStackUpdate) {
-        this.onIFluidStackUpdate = onIFluidStackUpdate;
+    public FluidStackSelectorWidget setOnFluidStackUpdate(Consumer<FluidStack> onFluidStackUpdate) {
+        this.onFluidStackUpdate = onFluidStackUpdate;
         return this;
     }
 
     private void onUpdate() {
         handler.setFluid(fluid);
-        if (onIFluidStackUpdate != null) {
-            onIFluidStackUpdate.accept(fluid);
+        if (onFluidStackUpdate != null) {
+            onFluidStackUpdate.accept(fluid);
         }
     }
 }
