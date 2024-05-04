@@ -353,7 +353,6 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     @OnlyIn(Dist.CLIENT)
-
     public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (drawHoverTips && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
             List<Component> tooltips = new ArrayList<>();

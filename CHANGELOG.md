@@ -1,3 +1,3 @@
 # ChangeLog
 
-* just bump version to keep up with 1.19
+* remake how the phantom fluid widget works
