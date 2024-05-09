@@ -4,8 +4,10 @@ import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.world.item.Item;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +32,7 @@ public class ModularWrapperWidget extends Widget {
     @Override
     public void render(@Nonnull GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
         modular.draw(graphics, pMouseX, pMouseY, pPartialTick);
-        var tooltip = getTooltip(TooltipContext.ofMouse());
+        var tooltip = getTooltip(TooltipContext.ofMouse(Item.TooltipContext.of(Minecraft.getInstance().level)));
         if (tooltip != null) {
             tooltip.queue();
         }
