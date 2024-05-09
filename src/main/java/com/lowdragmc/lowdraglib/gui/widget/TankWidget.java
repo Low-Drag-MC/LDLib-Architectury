@@ -200,10 +200,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 return JEICallWrapper.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize());
             }
             if (LDLib.isReiLoaded()) {
-                return EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount()/*, lastFluidInTank.getComponents()*/));
+                return EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getComponentsPatch()));
             }
             if (LDLib.isEmiLoaded()) {
-                return EmiStack.of(lastFluidInTank.getFluid(), /*lastFluidInTank.getComponents(), */lastFluidInTank.getAmount()).setChance(XEIChance);
+                return EmiStack.of(lastFluidInTank.getFluid(), lastFluidInTank.getComponentsPatch(), lastFluidInTank.getAmount()).setChance(XEIChance);
             }
         }
         return null;
@@ -223,10 +223,10 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
             return List.of(JEICallWrapper.getPlatformFluidTypeForJEI(lastFluidInTank, getPosition(), getSize()));
         }
         if (LDLib.isReiLoaded()) {
-            return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount()/*, lastFluidInTank.getTag()*/)));
+            return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getComponentsPatch())));
         }
         if (LDLib.isEmiLoaded()) {
-            return List.of(EmiStack.of(lastFluidInTank.getFluid(), /*lastFluidInTank.getTag(), */lastFluidInTank.getAmount()).setChance(XEIChance));
+            return List.of(EmiStack.of(lastFluidInTank.getFluid(), lastFluidInTank.getComponentsPatch(), lastFluidInTank.getAmount()).setChance(XEIChance));
         }
         return List.of(FluidHelper.toRealFluidStack(lastFluidInTank));
     }
@@ -575,7 +575,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     public static final class REICallWrapper {
         public static List<Object> getReiIngredients(Stream<FluidStack> stream) {
             return List.of(EntryIngredient.of(stream
-                    .map(fluidStack -> dev.architectury.fluid.FluidStack.create(fluidStack.getFluid(), fluidStack.getAmount()/*, fluidStack.getTag()*/))
+                    .map(fluidStack -> dev.architectury.fluid.FluidStack.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getComponentsPatch()))
                     .map(EntryStacks::of)
                     .toList()));
         }
@@ -588,7 +588,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     public static final class EMICallWrapper {
         public static List<Object> getEmiIngredients(Stream<FluidStack> stream, float xeiChance) {
-            return List.of(EmiIngredient.of(stream.map(fluidStack -> EmiStack.of(fluidStack.getFluid()/*, fluidStack.getTag()*/, fluidStack.getAmount())).toList()).setChance(xeiChance));
+            return List.of(EmiIngredient.of(stream.map(fluidStack -> EmiStack.of(fluidStack.getFluid(), fluidStack.getComponentsPatch(), fluidStack.getAmount())).toList()).setChance(xeiChance));
         }
         public static List<Object> getEmiIngredients(List<Pair<TagKey<Fluid>, Integer>> list, float xeiChance) {
             return list.stream()

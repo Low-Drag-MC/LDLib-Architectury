@@ -97,11 +97,11 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
     @OnlyIn(Dist.CLIENT)
     public List<Target> getPhantomTargets(Object ingredient) {
         if (LDLib.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
-            ingredient = new FluidStack(fluidStack.getFluid(), (int) fluidStack.getAmount()/*, fluidStack.getTag()*/);
+            ingredient = new FluidStack(fluidStack.getFluid().builtInRegistryHolder(), (int) fluidStack.getAmount(), fluidStack.getPatch());
         }
         if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
             var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
-            ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, (int) fluidEmiStack.getAmount()/*, fluidEmiStack.getNbt()*/);
+            ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid.builtInRegistryHolder(), (int) fluidEmiStack.getAmount(), fluidEmiStack.getComponentChanges());
         }
         if (!(ingredient instanceof FluidStack) && drainFrom(ingredient) == null) {
             return Collections.emptyList();
@@ -119,11 +119,11 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
             public void accept(@Nonnull Object ingredient) {
                 FluidStack ingredientStack;
                 if (LDLib.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
-                    ingredient = new FluidStack(fluidStack.getFluid(), (int) fluidStack.getAmount()/*, fluidStack.getTag()*/);
+                    ingredient = new FluidStack(fluidStack.getFluid().builtInRegistryHolder(), (int) fluidStack.getAmount(), fluidStack.getPatch());
                 }
                 if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
                     var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
-                    ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, (int) fluidEmiStack.getAmount()/*, fluidEmiStack.getNbt()*/);
+                    ingredient = fluid == null ? FluidStack.EMPTY : new FluidStack(fluid.builtInRegistryHolder(), (int) fluidEmiStack.getAmount(), fluidEmiStack.getComponentChanges());
                 }
                 if (ingredient instanceof FluidStack fluidStack)
                     ingredientStack = fluidStack;

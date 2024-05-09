@@ -114,7 +114,7 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
             Item item = itemEmiStack.getKeyOfType(Item.class);
             ingredient = item == null ? null : new ItemStack(item, (int)itemEmiStack.getAmount());
             if (ingredient instanceof ItemStack itemStack) {
-                //itemStack.setTag(itemEmiStack.getNbt());
+                itemStack.applyComponents(itemEmiStack.getComponentChanges());
             }
         }
         if (!(ingredient instanceof ItemStack)) {
@@ -134,7 +134,7 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
                     Item item = itemEmiStack.getKeyOfType(Item.class);
                     ingredient = item == null ? null : new ItemStack(item, (int)itemEmiStack.getAmount());
                     if (ingredient instanceof ItemStack itemStack) {
-                        //itemStack.setTag(itemEmiStack.getNbt());
+                        itemStack.applyComponents(itemEmiStack.getComponentChanges());
                     }
                 }
                 if (slotReference != null && ingredient instanceof ItemStack stack) {
