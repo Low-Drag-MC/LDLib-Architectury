@@ -106,6 +106,10 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
         List<dev.emi.emi.api.widget.Widget> slots = new ArrayList<>();
         for (Widget w : getFlatWidgetCollection(widget)) {
             if (w instanceof IRecipeIngredientSlot slot) {
+                if (w.getParent() instanceof DraggableScrollableWidgetGroup draggable && draggable.isUseScissor()) {
+                    // don't add the EMI widget at all if we have a draggable group, let the draggable widget handle it instead.
+                    continue;
+                }
                 var io = slot.getIngredientIO();
                 if (io == IngredientIO.BOTH || io == IngredientIO.INPUT || io == IngredientIO.OUTPUT || io == IngredientIO.CATALYST) {
                     //noinspection unchecked
@@ -120,23 +124,10 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
                         tankW.setFluidTank(EmptyFluidHandler.INSTANCE);
                         tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                         long capacity = Math.max(1, ingredients.getAmount());
-
-                        if (w.getParent() instanceof DraggableScrollableWidgetGroup draggable) {
-                            slotWidget = new ExtendedTankWidget(ingredients, w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height, capacity)
-                                    .setScissorBounds(draggable.getRect())
-                                    .setGroup(draggable);
-                        } else {
-                            slotWidget = new TankWidget(ingredients, w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height, capacity);
-                        }
+                        slotWidget = new TankWidget(ingredients, w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height, capacity);
                     }
                     if (slotWidget == null) {
-                        if (w.getParent() instanceof DraggableScrollableWidgetGroup draggable) {
-                            slotWidget = new ExtendedSlotWidget(ingredients, w.getPosition().x, w.getPosition().y)
-                                    .setScissorBounds(draggable.getRect())
-                                    .setGroup(draggable);
-                        } else {
-                            slotWidget = new SlotWidget(ingredients, w.getPosition().x, w.getPosition().y);
-                        }
+                        slotWidget = new SlotWidget(ingredients, w.getPosition().x, w.getPosition().y);
                     }
 
                     slotWidget.customBackground(null, w.getPosition().x, w.getPosition().y, w.getSize().width, w.getSize().height)

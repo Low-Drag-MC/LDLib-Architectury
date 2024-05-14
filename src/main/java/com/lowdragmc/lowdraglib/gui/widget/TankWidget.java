@@ -277,6 +277,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return ref.returnValue;
     }
 
+    @Override
+    public List<Component> getTooltipTexts() {
+        List<Component> tooltips = getToolTips(new ArrayList<>());
+        tooltips.addAll(tooltipTexts);
+        return tooltips;
+    }
+
     private List<Component> getToolTips(List<Component> list) {
         if (this.onAddedTooltips != null) {
             this.onAddedTooltips.accept(this, list);
@@ -372,8 +379,8 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 }
             }
             if (gui != null) {
-                tooltips.addAll(tooltipTexts);
-                gui.getModularUIGui().setHoverTooltip(getToolTips(tooltips), ItemStack.EMPTY, null, null);
+                tooltips.addAll(getTooltipTexts());
+                gui.getModularUIGui().setHoverTooltip(tooltips, ItemStack.EMPTY, null, null);
             }
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1f);
         } else {

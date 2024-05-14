@@ -8,9 +8,11 @@ import com.lowdragmc.lowdraglib.utils.TagOrCycleFluidTransfer;
 import com.lowdragmc.lowdraglib.utils.TagOrCycleItemStackTransfer;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -65,6 +67,9 @@ public class TestXEIWidgetGroup extends WidgetGroup {
                 .setBackground(TankWidget.FLUID_SLOT_TEXTURE)
                 .setIngredientIO(IngredientIO.OUTPUT)
                 .setXEIChance(0.01f)
+                .setOnAddedTooltips((widget, tooltips) -> {
+                    tooltips.add(Component.literal("test tooltip").withStyle(ChatFormatting.GREEN));
+                })
                 .setOverlay((graphics, mouseX, mouseY, x, y, width, height) -> {
                     graphics.pose().pushPose();
                     graphics.pose().translate(0, 0, 400);
