@@ -99,15 +99,12 @@ public class ModularDisplay<T extends Widget> implements Display {
         List<me.shedaniel.rei.api.client.gui.widgets.Widget> slots = new ArrayList<>();
         for (Widget w : getFlatWidgetCollection(widget)) {
             if (w instanceof IRecipeIngredientSlot slot) {
-                EntryWidget entryWidget;
                 if (w.getParent() instanceof DraggableScrollableWidgetGroup draggable && draggable.isUseScissor()) {
-                    entryWidget = new ExtendedEntryWidget(new Rectangle(slot.self().getPosition().x, slot.self().getPosition().y, slot.self().getSize().width, slot.self().getSize().height))
-                            .setScissorBounds(draggable.getRect())
-                            .setGroup(draggable);
-                } else {
-                    entryWidget = new EntryWidget(new Rectangle(slot.self().getPosition().x, slot.self().getPosition().y, slot.self().getSize().width, slot.self().getSize().height));
+                    // don't add the REI widget at all if we have a draggable group, let the draggable widget handle it instead.
+                    continue;
                 }
-                entryWidget.noBackground();
+                EntryWidget entryWidget = new EntryWidget(new Rectangle(slot.self().getPosition().x, slot.self().getPosition().y, slot.self().getSize().width, slot.self().getSize().height))
+                        .noBackground();
 
                 if (slot.getIngredientIO() == IngredientIO.INPUT) {
                     entryWidget.markIsInput();

@@ -1,3 +1,3 @@
 # ChangeLog
 
-* remake how the phantom fluid widget works
+* fix REI/EMI extra tooltips from slots not working at all

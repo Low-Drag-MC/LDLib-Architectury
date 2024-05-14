@@ -338,6 +338,13 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         return this;
     }
 
+    @Override
+    public List<Component> getTooltipTexts() {
+        List<Component> tooltips = getToolTips(new ArrayList<>());
+        tooltips.addAll(tooltipTexts);
+        return tooltips;
+    }
+
     private List<Component> getToolTips(List<Component> list) {
         if (this.onAddedTooltips != null) {
             this.onAddedTooltips.accept(this, list);

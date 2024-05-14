@@ -100,7 +100,7 @@ dependencies {
     // REI
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-forge:${rei_version}")
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-forge:${rei_version}")
-    modImplementation("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
 
     // EMI
     modCompileOnly("dev.emi:emi-forge:${emi_version}:api")
