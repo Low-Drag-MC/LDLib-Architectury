@@ -1,3 +1,3 @@
 # ChangeLog
 
-* continuing from .h because dev forgot REI
+* turns out that not all REI tooltips are actually tooltips.

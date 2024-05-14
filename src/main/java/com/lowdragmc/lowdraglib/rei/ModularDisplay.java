@@ -133,7 +133,7 @@ public class ModularDisplay<T extends Widget> implements Display {
                     tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                 }
                 entryWidget.tooltipProcessor(tooltips -> {
-                    if (tooltips.entries().stream().noneMatch(tooltip -> w.getTooltipTexts().contains(tooltip.getAsText()))) {
+                    if (tooltips.entries().stream().noneMatch(tooltip -> !tooltip.isText() || w.getTooltipTexts().contains(tooltip.getAsText()))) {
                         tooltips.addAll(w.getTooltipTexts().toArray(Component[]::new));
                     }
                     return tooltips;
