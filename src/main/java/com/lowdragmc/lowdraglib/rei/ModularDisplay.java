@@ -14,6 +14,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
@@ -131,6 +132,12 @@ public class ModularDisplay<T extends Widget> implements Display {
                     tankW.setFluidTank(EmptyFluidHandler.INSTANCE);
                     tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                 }
+                entryWidget.tooltipProcessor(tooltips -> {
+                    if (tooltips.entries().stream().noneMatch(tooltip -> w.getTooltipTexts().contains(tooltip.getAsText()))) {
+                        tooltips.addAll(w.getTooltipTexts().toArray(Component[]::new));
+                    }
+                    return tooltips;
+                });
             }
         }
         list.add(new ModularWrapperWidget(modular));
