@@ -36,6 +36,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -149,7 +150,12 @@ public class IModelRenderer implements ISerializableRenderer {
     @Environment(EnvType.CLIENT)
     @Nullable
     protected BakedModel getBlockBakedModel(BlockPos pos, BlockAndTintGetter blockAccess) {
-        return getRotatedModel(Direction.NORTH);
+        Direction facing = Direction.NORTH;
+        BlockState state = blockAccess.getBlockState(pos);
+        if (state.hasProperty(BlockStateProperties.FACING)) {
+            facing = state.getValue(BlockStateProperties.FACING);
+        }
+        return getRotatedModel(facing);
     }
 
     @Environment(EnvType.CLIENT)

@@ -2,7 +2,7 @@ package com.lowdragmc.lowdraglib.utils;
 
 import com.google.common.base.Suppliers;
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.client.ClientProxy;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.scene.ParticleManager;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.ParticleEngineAccessor;
 import com.lowdragmc.lowdraglib.utils.virtual.WrappedClientWorld;
@@ -12,21 +12,22 @@ import net.fabricmc.api.Environment;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -44,11 +45,13 @@ import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.LevelTickAccess;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -65,17 +68,20 @@ import java.util.function.Supplier;
 public class DummyWorld extends Level {
 
     protected DummyChunkSource chunkProvider = new DummyChunkSource(this);
-    protected Level level;
+    private final BiomeManager biomeManager;
+    protected WeakReference<Level> level;
     protected final LevelLightEngine lighter;
     private final BlockPos.MutableBlockPos scratch = new BlockPos.MutableBlockPos();
     @Getter
     private Supplier<ClientLevel> asClientWorld = Suppliers.memoize(() -> WrappedClientWorld.of(this));
 
+
     public DummyWorld(Level level) {
         super((WritableLevelData) level.getLevelData(), level.dimension(), level.registryAccess(), level.dimensionTypeRegistration(), level::getProfiler,
                 true, false, 0, 0);
-        this.level = level;
+        this.level = new WeakReference<>(level);
         this.lighter = new LevelLightEngine(chunkProvider, true, false);
+        this.biomeManager = new BiomeManager(this, 0);
     }
 
     @Override
@@ -161,52 +167,88 @@ public class DummyWorld extends Level {
 
     @Override
     public Holder<Biome> getUncachedNoiseBiome(int pX, int pY, int pZ) {
-        return level.getUncachedNoiseBiome(pX, pY, pZ);
+        Level level = this.level.get();
+        if (level != null) {
+            return level.getUncachedNoiseBiome(pX, pY, pZ);
+        }
+        return this.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS);
     }
 
     @Override
     public Holder<Biome> getNoiseBiome(int pX, int pY, int pZ) {
-        return level.getNoiseBiome(pX, pY, pZ);
+        Level level = this.level.get();
+        if (level != null) {
+            return level.getNoiseBiome(pX, pY, pZ);
+        }
+        return this.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS);
     }
 
     @Override
     public BiomeManager getBiomeManager() {
-        return level.getBiomeManager();
+        return this.biomeManager;
     }
 
     @Override
     public RegistryAccess registryAccess() {
-        return level.registryAccess();
+        Level level = this.level.get();
+        if (level != null) {
+            return level.registryAccess();
+        }
+        return Platform.getFrozenRegistry();
     }
 
     @Override
     public FeatureFlagSet enabledFeatures() {
-        return level.enabledFeatures();
+        Level level = this.level.get();
+        if (level != null) {
+            return level.enabledFeatures();
+        }
+        return FeatureFlags.REGISTRY.allFlags();
     }
 
     @Override
     public LevelTickAccess<Block> getBlockTicks() {
-        return level.getBlockTicks();
+        Level level = this.level.get();
+        if (level != null) {
+            return level.getBlockTicks();
+        }
+        return BlackholeTickAccess.emptyLevelList();
     }
 
     @Override
     public LevelTickAccess<Fluid> getFluidTicks() {
-        return level.getFluidTicks();
+        Level level = this.level.get();
+        if (level != null) {
+            return level.getFluidTicks();
+        }
+        return BlackholeTickAccess.emptyLevelList();
     }
 
     @Override
     public RecipeManager getRecipeManager() {
-        return level.getRecipeManager();
+        Level level = this.level.get();
+        if (level != null) {
+            level.getRecipeManager();
+        }
+        return Platform.isClient() ? Minecraft.getInstance().getConnection().getRecipeManager() : Platform.getMinecraftServer().getRecipeManager();
     }
 
     @Override
     public int getFreeMapId() {
-        return level.getFreeMapId();
+        Level level = this.level.get();
+        if (level != null) {
+            return level.getFreeMapId();
+        }
+        return 0;
     }
 
     @Override
     public Scoreboard getScoreboard() {
-        return level.getScoreboard();
+        Level level = this.level.get();
+        if (level != null) {
+            return level.getScoreboard();
+        }
+        return new Scoreboard();
     }
 
     @Override
@@ -302,17 +344,17 @@ public class DummyWorld extends Level {
     }
 
     @Override
-    public void playSeededSound(@org.jetbrains.annotations.Nullable Player player, double x, double y, double z, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch, long seed) {
+    public void playSeededSound(@Nullable Player player, double x, double y, double z, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch, long seed) {
 
     }
 
     @Override
-    public void playSeededSound(@javax.annotation.Nullable Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch, long seed) {
+    public void playSeededSound(@Nullable Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch, long seed) {
 
     }
 
     @Override
-    public void playSeededSound(@org.jetbrains.annotations.Nullable Player player, Entity entity, Holder<SoundEvent> sound, SoundSource category, float volume, float pitch, long seed) {
+    public void playSeededSound(@Nullable Player player, Entity entity, Holder<SoundEvent> sound, SoundSource category, float volume, float pitch, long seed) {
 
     }
 
