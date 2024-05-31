@@ -1,11 +1,11 @@
 package com.lowdragmc.lowdraglib;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.ApiStatus;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
@@ -57,8 +57,15 @@ public class Platform {
         throw new AssertionError();
     }
 
-    @Nullable
+    @Nullable("client not connected/server not loaded yet")
     public static RegistryAccess getFrozenRegistry() {
-        return FROZEN_REGISTRY_ACCESS;
+        if (FROZEN_REGISTRY_ACCESS != null) {
+            return FROZEN_REGISTRY_ACCESS;
+        } else if (LDLib.isRemote()) {
+            if (Minecraft.getInstance().getConnection() != null) {
+                return Minecraft.getInstance().getConnection().registryAccess();
+            }
+        }
+        return null;
     }
 }
