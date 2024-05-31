@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.api.distmarker.Dist;
@@ -8,8 +9,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.ApiStatus;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
@@ -51,9 +51,16 @@ public class Platform {
         return FMLLoader.getGamePath();
     }
 
-    @Nullable
+    @Nullable("client not connected/server not loaded yet")
     public static RegistryAccess getFrozenRegistry() {
-        return FROZEN_REGISTRY_ACCESS;
+        if (FROZEN_REGISTRY_ACCESS != null) {
+            return FROZEN_REGISTRY_ACCESS;
+        } else if (LDLib.isRemote()) {
+            if (Minecraft.getInstance().getConnection() != null) {
+                return Minecraft.getInstance().getConnection().registryAccess();
+            }
+        }
+        return null;
     }
 
 }

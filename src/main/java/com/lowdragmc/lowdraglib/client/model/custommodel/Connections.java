@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.client.model.custommodel;
 
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -14,7 +15,22 @@ import javax.annotation.Nullable;
  * @implNote Connections
  */
 public class Connections {
-    byte connections = 0;
+
+    /** Some hardcoded offset values for the different corner indeces */
+    protected static int[] submapOffsets = { 4, 5, 1, 0 };
+
+    // Mapping the different corner indeces to their respective dirs
+    protected static final Connection[][] submapMap = new Connection[][] {
+            { Connection.DOWN, Connection.LEFT, Connection.DOWN_LEFT },
+            { Connection.DOWN, Connection.RIGHT, Connection.DOWN_RIGHT },
+            { Connection.UP, Connection.RIGHT, Connection.UP_RIGHT },
+            { Connection.UP, Connection.LEFT, Connection.UP_LEFT }
+    };
+
+    @Getter
+    private int[] submapIndices = new int[] { 18, 19, 17, 16 };
+
+    private byte connections = 0;
 
     private Connections(Connection... connections) {
         for (Connection connection : connections) {
@@ -65,6 +81,58 @@ public class Connections {
                 }
             }
         }
+        // Map connections to submap indeces
+        for (int i = 0; i < 4; i++) {
+            connections.fillSubmaps(i);
+        }
         return connections;
+    }
+
+    /**
+     * @param dirs
+     *            The directions to check connection in.
+     * @return True if the cached connectionMap holds a connection in <i><b>all</b></i> the given {@link Connection directions}.
+     */
+    @SuppressWarnings("null")
+    public boolean connectedAnd(Connection... dirs) {
+        for (Connection dir : dirs) {
+            if (!contains(dir)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param dirs
+     *            The directions to check connection in.
+     * @return True if the cached connectionMap holds a connection in <i><b>one of</b></i> the given {@link Connection directions}.
+     */
+    @SuppressWarnings("null")
+    public boolean connectedOr(Connection... dirs) {
+        for (Connection dir : dirs) {
+            if (contains(dir)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @SuppressWarnings("null")
+    protected void fillSubmaps(int idx) {
+        Connection[] dirs = submapMap[idx];
+        if (connectedOr(dirs[0], dirs[1])) {
+            if (connectedAnd(dirs)) {
+                // If all dirs are connected, we use the fully connected face,
+                // the base offset value.
+                submapIndices[idx] = submapOffsets[idx];
+            } else {
+                // This is a bit magic-y, but basically the array is ordered so
+                // the first dir requires an offset of 2, and the second dir
+                // requires an offset of 8, plus the initial offset for the
+                // corner.
+                submapIndices[idx] = submapOffsets[idx] + (contains(dirs[0]) ? 2 : 0) + (contains(dirs[1]) ? 8 : 0);
+            }
+        }
     }
 }

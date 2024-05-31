@@ -51,7 +51,7 @@ public enum Connection {
         return pos.offset(getOffset(normal));
     }
 
-    public Connection getOppisite() {
+    public Connection getOpposite() {
         return switch (this) {
             case UP -> DOWN;
             case DOWN -> UP;
