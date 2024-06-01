@@ -7,28 +7,24 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import org.joml.Vector3f;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
-import dev.latvian.mods.kubejs.fluid.FluidStackJS;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.kubejs.util.ClassFilter;
-import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 
 /**
  * @author KilaBash
  * @date 2023/3/26
  * @implNote GregTechKubeJSPlugin
  */
-public class LDLibKubeJSPlugin extends KubeJSPlugin {
+public class LDLibKubeJSPlugin implements KubeJSPlugin {
 
     @Override
     public void registerClasses(ScriptType type, ClassFilter filter) {
-        super.registerClasses(type, filter);
         filter.allow("com.lowdragmc.lowdraglib");
     }
 
     @Override
     public void registerBindings(BindingsEvent event) {
-        super.registerBindings(event);
         // texture
         event.add("ResourceTexture", ResourceTexture.class);
         event.add("FillDirection", ProgressTexture.FillDirection.class);
@@ -68,11 +64,6 @@ public class LDLibKubeJSPlugin extends KubeJSPlugin {
         event.add("Vector3f", Vector3f.class);
         event.add("GuiSize", Size.class);
         event.add("GuiPos", Position.class);
-    }
-
-    @Override
-    public void registerTypeWrappers(ScriptType type, TypeWrappers typeWrappers) {
-        super.registerTypeWrappers(type, typeWrappers);
     }
 
 }

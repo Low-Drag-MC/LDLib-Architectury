@@ -19,7 +19,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.wrapper.EmptyHandler;
+import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,7 +126,7 @@ public class ModularDisplay<T extends Widget> implements Display {
 
                 // Clear the LDLib slots
                 if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
-                    slotW.setHandlerSlot((IItemHandlerModifiable) EmptyHandler.INSTANCE, 0);
+                    slotW.setHandlerSlot((IItemHandlerModifiable) EmptyItemHandler.INSTANCE, 0);
                     slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                 } else if (slot instanceof TankWidget tankW) {
                     tankW.setFluidTank(EmptyFluidHandler.INSTANCE);

@@ -7,6 +7,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +33,7 @@ public class Platform {
     }
 
     public static boolean isDatagen() {
-        return FMLLoader.getLaunchHandler().isData();
+        return DatagenModLoader.isRunningDataGen();
     }
 
     public static boolean isModLoaded(String modId) {

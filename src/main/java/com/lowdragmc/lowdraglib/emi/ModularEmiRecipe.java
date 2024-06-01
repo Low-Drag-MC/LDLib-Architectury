@@ -15,9 +15,8 @@ import dev.emi.emi.api.widget.WidgetHolder;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.wrapper.EmptyHandler;
+import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +117,7 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
                     SlotWidget slotWidget = null;
                     // Clear the LDLib slots & add EMI slots based on them.
                     if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
-                        slotW.setHandlerSlot((IItemHandlerModifiable) EmptyHandler.INSTANCE, 0);
+                        slotW.setHandlerSlot((IItemHandlerModifiable) EmptyItemHandler.INSTANCE, 0);
                         slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                     } else if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.TankWidget tankW) {
                         tankW.setFluidTank(EmptyFluidHandler.INSTANCE);
