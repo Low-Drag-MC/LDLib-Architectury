@@ -78,7 +78,7 @@ public class CustomBakedModel implements BakedModel {
             var section = LDLMetadataSection.getMetadata(bakedQuad.getSprite());
             TextureAtlasSprite connection = section.connection == null ? null : ModelFactory.getBlockSprite(section.connection);
             if (connection == null) {
-                result.add(bakedQuad);
+                result.add(makeQuad(bakedQuad, section, offset).rebake());
                 continue;
             }
 
