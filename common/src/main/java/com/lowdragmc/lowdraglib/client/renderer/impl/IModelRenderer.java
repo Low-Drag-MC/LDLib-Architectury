@@ -150,12 +150,7 @@ public class IModelRenderer implements ISerializableRenderer {
     @Environment(EnvType.CLIENT)
     @Nullable
     protected BakedModel getBlockBakedModel(BlockPos pos, BlockAndTintGetter blockAccess) {
-        Direction facing = Direction.NORTH;
-        BlockState state = blockAccess.getBlockState(pos);
-        if (state.hasProperty(BlockStateProperties.FACING)) {
-            facing = state.getValue(BlockStateProperties.FACING);
-        }
-        return getRotatedModel(facing);
+        return getRotatedModel(Direction.NORTH);
     }
 
     @Environment(EnvType.CLIENT)
