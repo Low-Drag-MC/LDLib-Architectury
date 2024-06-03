@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix the quad offset not being applied to non-ctm'd layers of models
+* revert IModelRenderer automatically getting rotation of block, caused a crash
