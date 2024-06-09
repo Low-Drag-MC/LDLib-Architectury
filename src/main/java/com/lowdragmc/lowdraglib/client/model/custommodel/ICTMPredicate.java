@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 public interface ICTMPredicate {
     ICTMPredicate DEFAULT = (level, state, pos, sourceState, sourcePos, side) -> {
         var stateAppearance = state.getAppearance(level, pos, side, sourceState, sourcePos);
-        var sourceStateAppearance = sourceState.getAppearance(level, pos, side, state, pos);
+        var sourceStateAppearance = sourceState.getAppearance(level, sourcePos, side, state, pos);
         return stateAppearance == sourceStateAppearance;
     };
 
