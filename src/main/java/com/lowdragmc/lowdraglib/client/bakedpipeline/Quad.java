@@ -374,7 +374,7 @@ public class Quad {
 
     @SuppressWarnings("null")
     public BakedQuad rebake() {
-        var builder = new FixedQuadBakingVertexConsumer();
+        var builder = new QuadBakingVertexConsumer();
         builder.setDirection(this.builder.quadOrientation);
         builder.setTintIndex(this.builder.quadTint);
         builder.setShade(this.builder.applyDiffuseLighting);
