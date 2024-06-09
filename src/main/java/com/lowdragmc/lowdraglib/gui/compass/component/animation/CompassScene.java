@@ -155,7 +155,7 @@ public class CompassScene extends WidgetGroup implements ISceneBlockRenderHook, 
     }
 
     private void renderBeforeWorld(SceneWidget sceneWidget) {
-        var graphics = new GuiGraphics(Minecraft.getInstance(), MultiBufferSource.immediate(new ByteBufferBuilder(1536)));
+        var graphics = new GuiGraphics(Minecraft.getInstance(), MultiBufferSource.immediate(new ByteBufferBuilder(RenderType.TRANSIENT_BUFFER_SIZE)));
         graphics.pose().pushPose();
         RenderUtils.moveToFace(graphics.pose(), (minX + maxX) / 2f, minY, (minZ + maxZ) / 2f, Direction.DOWN);
         RenderUtils.rotateToFace(graphics.pose(), Direction.UP, null);
