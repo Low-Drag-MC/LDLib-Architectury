@@ -25,7 +25,7 @@ public class ResourceLocationAccessor extends CustomObjectAccessor<ResourceLocat
     @Override
     public ResourceLocation deserialize(AccessorOp op, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof StringPayload stringPayload) {
-            return new ResourceLocation(stringPayload.getPayload());
+            return ResourceLocation.parse(stringPayload.getPayload());
         }
         return null;
     }

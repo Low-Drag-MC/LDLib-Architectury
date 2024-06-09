@@ -26,14 +26,14 @@ public class ResourceLocationAccessor extends TypesAccessor<ResourceLocation> {
     @Override
     public ResourceLocation defaultValue(Field field, Class<?> type) {
         if (field.isAnnotationPresent(DefaultValue.class)) {
-            return new ResourceLocation(field.getAnnotation(DefaultValue.class).stringValue()[0]);
+            return ResourceLocation.parse(field.getAnnotation(DefaultValue.class).stringValue()[0]);
         }
-        return new ResourceLocation(LDLib.MOD_ID, "default");
+        return ResourceLocation.fromNamespaceAndPath(LDLib.MOD_ID, "default");
     }
 
     @Override
     public Configurator create(String name, Supplier<ResourceLocation> supplier, Consumer<ResourceLocation> consumer, boolean forceUpdate, Field field) {
-        var configurator = new StringConfigurator(name, () -> supplier.get().toString(), s -> consumer.accept(new ResourceLocation(s)), defaultValue(field, String.class).toString(), forceUpdate);
+        var configurator = new StringConfigurator(name, () -> supplier.get().toString(), s -> consumer.accept(ResourceLocation.parse(s)), defaultValue(field, String.class).toString(), forceUpdate);
         configurator.setResourceLocation(true);
         return configurator;
     }

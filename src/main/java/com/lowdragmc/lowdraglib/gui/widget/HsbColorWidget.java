@@ -21,6 +21,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
+import org.lwjgl.system.MemoryUtil;
 
 import javax.annotation.Nonnull;
 import java.util.function.IntConsumer;
@@ -141,7 +142,7 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 		int height = getSize().height;
 
 		if (showRGB) {
-			BufferBuilder builder = Tesselator.getInstance().getBuilder();
+			BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, Shaders.HSB_VERTEX_FORMAT);
 			drawHsbContext(pose, builder, x, y, width - barWidth - gap, height - barWidth - gap);
 		}
 
@@ -196,12 +197,11 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 	@OnlyIn(Dist.CLIENT)
 	private void drawHsbContext(Matrix4f pose, BufferBuilder builder, int x, int y, int width, int height) {
 		RenderSystem.setShader(Shaders::getHsbShader);
-		builder.begin(VertexFormat.Mode.QUADS, Shaders.HSB_VERTEX_FORMAT);
 
 		renderMain(pose, builder, x, y, width, height);
 		renderColorSlide(pose, builder, x, y, width, height);
 
-		BufferUploader.drawWithShader(builder.end());
+		BufferUploader.drawWithShader(builder.buildOrThrow());
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -227,9 +227,8 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 					_b = b;
 				}
 			}
-			builder.vertex(pose, x, y, 0.0f);
-			putColor(builder, _h, _s, _b).nextElement();
-			builder.endVertex();
+			builder.addVertex(pose, x, y, 0.0f);
+			putColor(builder, _h, _s, _b);
 		}
 
 		{
@@ -251,9 +250,8 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 					_b = b;
 				}
 			}
-			builder.vertex(pose, x, y + height, 0.0f);
-			putColor(builder, _h, _s, _b).nextElement();
-			builder.endVertex();
+			builder.addVertex(pose, x, y + height, 0.0f);
+			putColor(builder, _h, _s, _b);
 		}
 
 		{
@@ -275,9 +273,8 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 					_b = b;
 				}
 			}
-			builder.vertex(pose, x + width, y + height, 0.0f);
-			putColor(builder, _h, _s, _b).nextElement();
-			builder.endVertex();
+			builder.addVertex(pose, x + width, y + height, 0.0f);
+			putColor(builder, _h, _s, _b);
 		}
 
 		{
@@ -300,9 +297,8 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 				}
 			}
 
-			builder.vertex(pose, x + width, y, 0.0f);
-			putColor(builder, _h, _s, _b).nextElement();
-			builder.endVertex();
+			builder.addVertex(pose, x + width, y, 0.0f);
+			putColor(builder, _h, _s, _b);
 		}
 	}
 
@@ -331,13 +327,11 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 					_b = 0f;
 				}
 			}
-			builder.vertex(pose, barX, y + height, 0.0f);
-			putColor(builder, _h, _s, _b).nextElement();
-			builder.endVertex();
+			builder.addVertex(pose, barX, y + height, 0.0f);
+			putColor(builder, _h, _s, _b);
 
-			builder.vertex(pose, barX + barWidth, y + height, 0.0f);
-			putColor(builder, _h, _s, _b).nextElement();
-			builder.endVertex();
+			builder.addVertex(pose, barX + barWidth, y + height, 0.0f);
+			putColor(builder, _h, _s, _b);
 		}
 
 		{
@@ -359,13 +353,11 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 					_b = 1f;
 				}
 			}
-			builder.vertex(pose, barX + barWidth, y, 0.0f);
-			putColor(builder, _h, _s, _b).nextElement();
-			builder.endVertex();
+			builder.addVertex(pose, barX + barWidth, y, 0.0f);
+			putColor(builder, _h, _s, _b);
 
-			builder.vertex(pose, barX, y, 0.0f);
-			putColor(builder, _h, _s, _b).nextElement();
-			builder.endVertex();
+			builder.addVertex(pose, barX, y, 0.0f);
+			putColor(builder, _h, _s, _b);
 		}
 
 
@@ -400,10 +392,7 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 
 	@OnlyIn(Dist.CLIENT)
 	private BufferBuilder putColor(BufferBuilder builder, float h, float s, float b, float a) {
-		builder.putFloat(0, h);
-		builder.putFloat(4, s);
-		builder.putFloat(8, b);
-		builder.putFloat(12, a);
+		builder.setColor(ColorUtils.HSBtoRGB(h, s, b, a));
 		return builder;
 	}
 
@@ -459,7 +448,7 @@ public class HsbColorWidget extends Widget implements IConfigurableWidget {
 	}
 
 	private void refreshRGB() {
-		argb = ColorUtils.HSBtoRGB(h / 360f, s, b);
+		argb = ColorUtils.HSBtoRGB(h / 360f, s, b, 1f);
 		argb = ColorUtils.color(alpha, ColorUtils.red(argb), ColorUtils.green(argb), ColorUtils.blue(argb));
 		if (onChanged != null) {
 			onChanged.accept(argb);

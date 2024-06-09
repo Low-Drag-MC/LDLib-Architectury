@@ -52,7 +52,7 @@ public class ShaderTexture extends TransformTexture {
 
     public ShaderTexture() {
         this(false);
-        this.location = new ResourceLocation("ldlib:fbm");
+        this.location = ResourceLocation.fromNamespaceAndPath(LDLib.MOD_ID, "fbm");
         if (LDLib.isRemote() && ShaderManager.allowedShader()) {
             Shader shader = Shaders.load(Shader.ShaderType.FRAGMENT, location);
             if (shader == null) return;
@@ -190,7 +190,7 @@ public class ShaderTexture extends TransformTexture {
                     Minecraft mc = Minecraft.getInstance();
                     float time;
                     if (mc.player != null) {
-                        time = (mc.player.tickCount + mc.getFrameTime()) / 20;
+                        time = (mc.player.tickCount + mc.getTimer().getGameTimeDeltaTicks()) / 20;
                     } else {
                         time = System.currentTimeMillis() / 1000f;
                     }
@@ -213,14 +213,13 @@ public class ShaderTexture extends TransformTexture {
 
             RenderSystem.enableBlend();
             Tesselator tessellator = Tesselator.getInstance();
-            BufferBuilder buffer = tessellator.getBuilder();
             var mat = graphics.pose().last().pose();
-            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            buffer.vertex(mat, x, y + height, 0).uv(0, 0).color(color).endVertex();
-            buffer.vertex(mat, x + width, y + height, 0).uv(1, 0).color(color).endVertex();
-            buffer.vertex(mat, x + width, y, 0).uv(1, 1).color(color).endVertex();
-            buffer.vertex(mat, x, y, 0).uv(0, 1).color(color).endVertex();
-            BufferUploader.draw(buffer.end());
+            BufferBuilder buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            buffer.addVertex(mat, x, y + height, 0).setUv(0, 0).setColor(color);
+            buffer.addVertex(mat, x + width, y + height, 0).setUv(1, 0).setColor(color);
+            buffer.addVertex(mat, x + width, y, 0).setUv(1, 1).setColor(color);
+            buffer.addVertex(mat, x, y, 0).setUv(0, 1).setColor(color);
+            BufferUploader.draw(buffer.buildOrThrow());
 
             program.release();
         } else {

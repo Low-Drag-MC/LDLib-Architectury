@@ -1,7 +1,5 @@
 package com.lowdragmc.lowdraglib.client.scene;
 
-import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.shader.management.ShaderManager;
 import com.lowdragmc.lowdraglib.client.utils.glu.Project;
 import com.lowdragmc.lowdraglib.utils.*;
@@ -17,12 +15,10 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -358,7 +354,7 @@ public abstract class WorldSceneRenderer {
         RenderSystem.enableCull();
 
         if (camera != null) {
-            camera.setup(world, cameraEntity, false, false, mc.getFrameTime());
+            camera.setup(world, cameraEntity, false, false, mc.getTimer().getGameTimeDeltaPartialTick(false));
         }
         ShaderManager.getInstance().setViewPort(positionedRect);
 
@@ -401,7 +397,7 @@ public abstract class WorldSceneRenderer {
 
         Minecraft mc = Minecraft.getInstance();
 
-        float particleTicks = mc.getFrameTime();
+        float particleTicks = mc.getTimer().getGameTimeDeltaPartialTick(false);
         if (useCache) {
             renderCacheBuffer(mc, particleTicks);
         } else {
@@ -434,12 +430,11 @@ public abstract class WorldSceneRenderer {
                             setDefaultRenderLayerState(layer);
                         }
 
-                        BufferBuilder buffer = Tesselator.getInstance().getBuilder();
-                        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+                        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
 
                         renderBlocks(poseStack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), renderedBlocks, hook, particleTicks);
 
-                        Tesselator.getInstance().end();
+                        BufferUploader.drawWithShader(buffer.buildOrThrow());
                         layer.clearRenderState();
                     }
                 });
@@ -492,12 +487,11 @@ public abstract class WorldSceneRenderer {
                         if (Thread.interrupted())
                             return;
                         RenderType layer = layers.get(i);
-                        BufferBuilder buffer = new BufferBuilder(layer.bufferSize());
-                        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+                        BufferBuilder buffer = new BufferBuilder(new ByteBufferBuilder(layer.bufferSize()), VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
                         renderedBlocksMap.forEach((renderedBlocks, hook) -> {
                             renderBlocks(matrixstack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), renderedBlocks, hook, 0);
                         });
-                        var builder = buffer.end();
+                        var builder = buffer.buildOrThrow();
 
                         var vertexBuffer = vertexBuffers[i];
                         Runnable toUpload = () -> {
@@ -645,7 +639,7 @@ public abstract class WorldSceneRenderer {
                 wrapperBuffer.addOffset((pos.getX() - (pos.getX() & 15)), (pos.getY() - (pos.getY() & 15)), (pos.getZ() - (pos.getZ() & 15)));
                 blockrendererdispatcher.renderLiquid(pos, world, wrapperBuffer, state, fluidState);
             }
-            wrapperBuffer.clerOffset();
+            wrapperBuffer.clearOffset();
             wrapperBuffer.clearColor();
             if (maxProgress > 0) {
                 progress++;
@@ -858,27 +852,27 @@ public abstract class WorldSceneRenderer {
     public static class VertexConsumerWrapper implements VertexConsumer {
         final VertexConsumer builder;
         @Setter
-        double offsetX, offsetY, offsetZ;
+        float offsetX, offsetY, offsetZ;
         float r = 1, g = 1, b = 1, a = 1;
 
         public VertexConsumerWrapper(VertexConsumer builder) {
             this.builder = builder;
         }
 
-        public void addOffset(double offsetX, double offsetY, double offsetZ) {
+        public void addOffset(float offsetX, float offsetY, float offsetZ) {
             this.offsetX += offsetX;
             this.offsetY += offsetY;
             this.offsetZ += offsetZ;
         }
 
-        public void setColor(float r, float g, float b, float a) {
+        public void setColorMultiplier(float r, float g, float b, float a) {
             this.r = r;
             this.g = g;
             this.b = b;
             this.a = a;
         }
 
-        public void clerOffset() {
+        public void clearOffset() {
             this.offsetX = 0;
             this.offsetY = 0;
             this.offsetZ = 0;
@@ -892,48 +886,33 @@ public abstract class WorldSceneRenderer {
         }
 
         @Override
-        public VertexConsumer vertex(double x, double y, double z) {
-            return builder.vertex(x + offsetX, y + offsetY, z + offsetZ);
+        public VertexConsumer addVertex(float x, float y, float z) {
+            return builder.addVertex(x + offsetX, y + offsetY, z + offsetZ);
         }
 
         @Override
-        public VertexConsumer color(int red, int green, int blue, int alpha) {
-            return builder.color((int)(red * r), (int)(green * g), (int)(blue * b), (int)(alpha * a));
+        public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+            return builder.setColor((int)(red * r), (int)(green * g), (int)(blue * b), (int)(alpha * a));
         }
 
         @Override
-        public VertexConsumer uv(float u, float v) {
-            return builder.uv(u, v);
+        public VertexConsumer setUv(float u, float v) {
+            return builder.setUv(u, v);
         }
 
         @Override
-        public VertexConsumer overlayCoords(int u, int v) {
-            return builder.overlayCoords(u, v);
+        public VertexConsumer setUv1(int u, int v) {
+            return builder.setUv1(u, u);
         }
 
         @Override
-        public VertexConsumer uv2(int u, int v) {
-            return builder.uv2(u, v);
+        public VertexConsumer setUv2(int u, int v) {
+            return builder.setUv2(u, u);
         }
 
         @Override
-        public VertexConsumer normal(float x, float y, float z) {
-            return builder.normal(x, y, z);
-        }
-
-        @Override
-        public void endVertex() {
-            builder.endVertex();
-        }
-
-        @Override
-        public void defaultColor(int defaultR, int defaultG, int defaultB, int defaultA) {
-            builder.defaultColor(defaultR, defaultG, defaultB, defaultA);
-        }
-
-        @Override
-        public void unsetDefaultColor() {
-            builder.unsetDefaultColor();
+        public VertexConsumer setNormal(float x, float y, float z) {
+            return builder.setNormal(x, y, z);
         }
     }
 }

@@ -62,7 +62,7 @@ public class IModelRenderer implements ISerializableRenderer {
     protected Map<Direction, BakedModel> blockModels;
 
     protected IModelRenderer() {
-        modelLocation = new ResourceLocation("block/furnace");
+        modelLocation = ResourceLocation.withDefaultNamespace("block/furnace");
     }
 
     public IModelRenderer(ResourceLocation modelLocation) {
@@ -144,8 +144,7 @@ public class IModelRenderer implements ISerializableRenderer {
             itemModel = model.bake(
                     ModelFactory.getModelBaker(),
                     this::materialMapping,
-                    BlockModelRotation.X0_Y0,
-                    modelLocation);
+                    BlockModelRotation.X0_Y0);
         }
         return itemModel;
     }
@@ -167,8 +166,7 @@ public class IModelRenderer implements ISerializableRenderer {
         return blockModels.computeIfAbsent(frontFacing, facing -> getModel().bake(
                 ModelFactory.getModelBaker(),
                 this::materialMapping,
-                ModelFactory.getRotation(facing),
-                modelLocation));
+                ModelFactory.getRotation(facing)));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -258,6 +256,6 @@ public class IModelRenderer implements ISerializableRenderer {
 
     private static ResourceLocation getModelFromFile(File path, File r){
         var id = path.getPath().replace('\\', '/').split("assets/")[1].split("/")[0];
-        return new ResourceLocation(id, r.getPath().replace(path.getPath(), "").replace(".json", "").replace('\\', '/'));
+        return ResourceLocation.fromNamespaceAndPath(id, r.getPath().replace(path.getPath(), "").replace(".json", "").replace('\\', '/'));
     }
 }

@@ -13,10 +13,7 @@ import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -70,7 +67,7 @@ public class AnimationTexture extends TransformTexture {
     }
 
     public AnimationTexture(String imageLocation) {
-        this.imageLocation = new ResourceLocation(imageLocation);
+        this.imageLocation = ResourceLocation.parse(imageLocation);
     }
 
     public AnimationTexture(ResourceLocation imageLocation) {
@@ -136,16 +133,15 @@ public class AnimationTexture extends TransformTexture {
         float imageV = Y * cell;
 
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, imageLocation);
         var matrix4f = graphics.pose().last().pose();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
-        bufferbuilder.vertex(matrix4f, x, y + height, 0).uv(imageU, imageV + cell).color(color).endVertex();
-        bufferbuilder.vertex(matrix4f, x + width, y + height, 0).uv(imageU + cell, imageV + cell).color(color).endVertex();
-        bufferbuilder.vertex(matrix4f, x + width, y, 0).uv(imageU + cell, imageV).color(color).endVertex();
-        bufferbuilder.vertex(matrix4f, x, y, 0).uv(imageU, imageV).color(color).endVertex();
-        tessellator.end();
+        BufferBuilder bufferbuilder = tessellator.begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
+        bufferbuilder.addVertex(matrix4f, x, y + height, 0).setUv(imageU, imageV + cell).setColor(color);
+        bufferbuilder.addVertex(matrix4f, x + width, y + height, 0).setUv(imageU + cell, imageV + cell).setColor(color);
+        bufferbuilder.addVertex(matrix4f, x + width, y, 0).setUv(imageU + cell, imageV).setColor(color);
+        bufferbuilder.addVertex(matrix4f, x, y, 0).setUv(imageU, imageV).setColor(color);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
     }
 
     @Override
@@ -176,7 +172,7 @@ public class AnimationTexture extends TransformTexture {
 
     private ResourceLocation getTextureFromFile(File path, File r){
         var id = path.getPath().replace('\\', '/').split("assets/")[1].split("/")[0];
-        return new ResourceLocation(id, r.getPath().replace(path.getPath(), "textures").replace('\\', '/'));
+        return ResourceLocation.fromNamespaceAndPath(id, r.getPath().replace(path.getPath(), "textures").replace('\\', '/'));
     }
 
     @OnlyIn(Dist.CLIENT)

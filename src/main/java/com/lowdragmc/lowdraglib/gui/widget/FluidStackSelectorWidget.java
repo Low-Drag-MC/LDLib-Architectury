@@ -27,7 +27,7 @@ public class FluidStackSelectorWidget extends WidgetGroup {
         setClientSideWidget();
         fluidField = (TextFieldWidget) new TextFieldWidget(22, 0, width - 46, 20, null, s -> {
             if (s != null && !s.isEmpty()) {
-                Fluid fluid = BuiltInRegistries.FLUID.get(new ResourceLocation(s));
+                Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(s));
                 if (fluid == null) {
                     fluid = FluidStack.EMPTY.getFluid();
                 }

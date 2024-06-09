@@ -18,6 +18,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,11 +28,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.IFluidBlock;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.fluids.capability.wrappers.BlockWrapper;
 import net.neoforged.neoforge.fluids.capability.wrappers.BucketPickupHandlerWrapper;
-import net.neoforged.neoforge.fluids.capability.wrappers.FluidBlockWrapper;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
@@ -439,7 +439,7 @@ public class FluidTransferHelper {
     @Nonnull
     public static FluidStack tryFluidTransfer(IFluidHandler fluidDestination, IFluidHandler fluidSource, FluidStack resource, boolean doTransfer) {
         FluidStack drainable = fluidSource.drain(resource, IFluidHandler.FluidAction.SIMULATE);
-        if (!drainable.isEmpty() && resource.isFluidEqual(drainable)) {
+        if (!drainable.isEmpty() && FluidStack.isSameFluidSameComponents(resource, drainable)) {
             return tryFluidTransfer_Internal(fluidDestination, fluidSource, drainable, doTransfer);
         }
         return FluidStack.EMPTY;
@@ -504,9 +504,7 @@ public class FluidTransferHelper {
         BlockState state = level.getBlockState(pos);
         Block block = state.getBlock();
         IFluidHandler targetFluidHandler;
-        if (block instanceof IFluidBlock fluidBlock) {
-            targetFluidHandler = new FluidBlockWrapper(fluidBlock, level, pos);
-        } else if (block instanceof BucketPickup) {
+        if (block instanceof BucketPickup) {
             targetFluidHandler = new BucketPickupHandlerWrapper(playerIn, (BucketPickup) block, level, pos);
         } else {
             var fluidHandler = getFluidTransfer(level, pos, side);

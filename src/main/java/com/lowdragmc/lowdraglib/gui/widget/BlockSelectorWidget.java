@@ -33,7 +33,7 @@ public class BlockSelectorWidget extends WidgetGroup {
         properties = new HashMap<>();
         blockField = (TextFieldWidget) new TextFieldWidget(22, 0, width - (isState ?  46 : 26), 20, null, s -> {
             if (s != null && !s.isEmpty()) {
-                Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(s));
+                Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(s));
                 if (this.block != block) {
                     this.block = block;
                     onUpdate();

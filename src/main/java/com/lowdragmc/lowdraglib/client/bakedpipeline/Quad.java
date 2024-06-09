@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.client.bakedpipeline;
 
-import com.lowdragmc.lowdraglib.core.mixins.accessor.VertexFormatAccessor;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import it.unimi.dsi.fastutil.Pair;
@@ -13,13 +12,14 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec2;
+import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
-import static com.lowdragmc.lowdraglib.client.bakedpipeline.IQuadTransformer.*;
+import static net.neoforged.neoforge.client.model.IQuadTransformer.*;
 
 /**
  * @author KilaBash
@@ -374,8 +374,7 @@ public class Quad {
 
     @SuppressWarnings("null")
     public BakedQuad rebake() {
-        var quad = new BakedQuad[1];
-        var builder = new QuadBakingVertexConsumer(q -> quad[0] = q);
+        var builder = new FixedQuadBakingVertexConsumer();
         builder.setDirection(this.builder.quadOrientation);
         builder.setTintIndex(this.builder.quadTint);
         builder.setShade(this.builder.applyDiffuseLighting);
@@ -385,22 +384,19 @@ public class Quad {
         for (int v = 0; v < 4; v++) {
             for (int i = 0; i < format.getElements().size(); i++) {
                 VertexFormatElement ele = format.getElements().get(i);
-                switch (ele.getUsage()) {
+                switch (ele.usage()) {
                     case POSITION:
                         Vector3f p = vertPos[v];
-                        builder.vertex(p.x(), p.y(), p.z());
+                        builder.addVertex(p.x(), p.y(), p.z());
                         break;
-                /*case COLOR:
-                    builder.put(i, 35, 162, 204); Pretty things
-                    break;*/
                     case UV:
-                        if (ele.getIndex() == 2) {
+                        if (ele.index() == 2) {
                             //Stuff for fullbright
-                            builder.uv2(blocklight * 0x10, skylight * 0x10);
+                            builder.setUv2(blocklight * 0x10, skylight * 0x10);
                             break;
-                        } else if (ele.getIndex() == 0) {
+                        } else if (ele.index() == 0) {
                             Vec2 uv = vertUv[v];
-                            builder.uv(uv.x, uv.y);
+                            builder.setUv(uv.x, uv.y);
                             break;
                         }
                         // fallthrough
@@ -408,10 +404,8 @@ public class Quad {
                         builder.misc(ele, this.builder.packedByElement.get(ele)[v]);
                 }
             }
-            builder.endVertex();
         }
-
-        return quad[0];
+        return builder.bakeQuad();
     }
 
     public Quad transformUVs(TextureAtlasSprite sprite) {
@@ -444,7 +438,7 @@ public class Quad {
         private final Map<VertexFormatElement, Integer> ELEMENT_OFFSETS = Util.make(new IdentityHashMap<>(), map -> {
             int i = 0;
             for (var element : DefaultVertexFormat.BLOCK.getElements())
-                map.put(element, ((VertexFormatAccessor)DefaultVertexFormat.BLOCK).getOffsets().getInt(i++) / 4); // Int offset
+                map.put(element, DefaultVertexFormat.BLOCK.getOffsetsByElement()[i++] / 4); // Int offset
         });
 
         @Getter
@@ -504,7 +498,7 @@ public class Quad {
             }
             for (var e : ELEMENT_OFFSETS.entrySet()) {
                 var offset = e.getValue();
-                int[][] data = new int[4][e.getKey().getByteSize() / 4];
+                int[][] data = new int[4][e.getKey().byteSize() / 4];
                 for (int v = 0; v < 4; v++) {
                     for (int i = 0; i < data[v].length; i++) {
                         data[v][i] = vertices[v * STRIDE + offset + i];

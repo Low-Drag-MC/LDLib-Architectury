@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.utils;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
@@ -31,6 +30,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.fluids.FluidStack;
+import org.joml.Vector3f;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -201,12 +201,12 @@ public class XmlUtils {
         return ItemStack.EMPTY;
     }
 
-    public static Vec3 getAsVec3(Element element, String name, Vec3 defaultValue) {
+    public static Vector3f getAsVector3f(Element element, String name, Vector3f defaultValue) {
         if (element.hasAttribute(name)) {
             String pos = getAsString(element, name, "0 0 0");
             try {
                 var s = pos.split(" ");
-                return new Vec3(Float.parseFloat(s[0]), Float.parseFloat(s[1]), Float.parseFloat(s[2]));
+                return new Vector3f(Float.parseFloat(s[0]), Float.parseFloat(s[1]), Float.parseFloat(s[2]));
             } catch (Exception ignored) {}
         }
         return defaultValue;
@@ -227,7 +227,7 @@ public class XmlUtils {
         int id = getAsInt(element, "id", LDLib.RANDOM.nextInt());
         EntityType<?> entityType = null;
         if (element.hasAttribute("type")) {
-            entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(element.getAttribute("type")));
+            entityType = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(element.getAttribute("type")));
         }
         CompoundTag tag = null;
         NodeList nodeList = element.getChildNodes();
@@ -246,7 +246,7 @@ public class XmlUtils {
         int count = getAsInt(element, "count", 1);
         var ingredient = new SizedIngredient(Ingredient.EMPTY, 0);
         if (element.hasAttribute("item")) {
-            Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(element.getAttribute("item")));
+            Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(element.getAttribute("item")));
             if (item != Items.AIR) {
                 ItemStack itemStack = new ItemStack(item, count);
                 NodeList nodeList = element.getChildNodes();
@@ -259,11 +259,11 @@ public class XmlUtils {
                 ingredient = new SizedIngredient(Ingredient.of(itemStack), count);
             }
         } else if (Platform.isForge() && element.hasAttribute("forge-tag")){
-            ingredient = new SizedIngredient(Ingredient.of(TagKey.create(Registries.ITEM, new ResourceLocation(element.getAttribute("forge-tag")))), count);
+            ingredient = new SizedIngredient(Ingredient.of(TagKey.create(Registries.ITEM, ResourceLocation.parse(element.getAttribute("forge-tag")))), count);
         } else if (!Platform.isForge() && element.hasAttribute("fabric-tag")) {
-            ingredient = new SizedIngredient(Ingredient.of(TagKey.create(Registries.ITEM, new ResourceLocation(element.getAttribute("fabric-tag")))), count);
+            ingredient = new SizedIngredient(Ingredient.of(TagKey.create(Registries.ITEM, ResourceLocation.parse(element.getAttribute("fabric-tag")))), count);
         } else if (element.hasAttribute("tag")) {
-            ingredient = new SizedIngredient(Ingredient.of(TagKey.create(Registries.ITEM, new ResourceLocation(element.getAttribute("tag")))), count);
+            ingredient = new SizedIngredient(Ingredient.of(TagKey.create(Registries.ITEM, ResourceLocation.parse(element.getAttribute("tag")))), count);
         }
         return ingredient;
     }
@@ -272,7 +272,7 @@ public class XmlUtils {
         int amount = getAsInt(element, "amount", 1) * FluidHelper.getBucket() / 1000;
         FluidStack fluidStack = FluidStack.EMPTY;
         if (element.hasAttribute("fluid")) {
-            var fluid = BuiltInRegistries.FLUID.get(new ResourceLocation(element.getAttribute("fluid")));
+            var fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(element.getAttribute("fluid")));
             if (fluid != Fluids.EMPTY) {
                 fluidStack = new FluidStack(fluid, amount);
                 NodeList nodeList = element.getChildNodes();
@@ -296,7 +296,7 @@ public class XmlUtils {
     public static BlockInfo getBlockInfo(Element element) {
         BlockInfo blockInfo = BlockInfo.EMPTY;
         if (element.hasAttribute("block")) {
-            Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(element.getAttribute("block")));
+            Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(element.getAttribute("block")));
             if (block != Blocks.AIR) {
                 var blockState = block.defaultBlockState();
                 val nodeList = element.getChildNodes();
@@ -412,7 +412,7 @@ public class XmlUtils {
                             newStyle = newStyle.withBold(getAsBoolean(nodeElement, "bold", true));
                         }
                         if (nodeElement.hasAttribute("font")) {
-                            newStyle = newStyle.withFont(new ResourceLocation(nodeElement.getAttribute("font")));
+                            newStyle = newStyle.withFont(ResourceLocation.parse(nodeElement.getAttribute("font")));
                         }
                         if (nodeElement.hasAttribute("italic")) {
                             newStyle = newStyle.withItalic(getAsBoolean(nodeElement, "italic", true));

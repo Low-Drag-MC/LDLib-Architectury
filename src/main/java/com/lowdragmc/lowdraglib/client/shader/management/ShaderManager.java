@@ -85,7 +85,7 @@ public class ShaderManager {
 			Minecraft mc = Minecraft.getInstance();
 			float time;
 			if (mc.player != null) {
-				time = (mc.player.tickCount + mc.getFrameTime()) / 20;
+				time = (mc.player.tickCount + mc.getTimer().getGameTimeDeltaTicks()) / 20;
 			} else {
 				time = System.currentTimeMillis() / 1000f;
 			}
@@ -97,14 +97,12 @@ public class ShaderManager {
 		});
 
 		Tesselator tessellator = Tesselator.getInstance();
-		BufferBuilder buffer = tessellator.getBuilder();
-		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-		buffer.vertex(-1, 1, 0).endVertex();
-		buffer.vertex(-1, -1, 0).endVertex();
-		buffer.vertex(1, -1, 0).endVertex();
-		buffer.vertex(1, 1, 0).endVertex();
-		buffer.end();
-		BufferUploader.draw(buffer.end());
+		BufferBuilder buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+		buffer.addVertex(-1, 1, 0);
+		buffer.addVertex(-1, -1, 0);
+		buffer.addVertex(1, -1, 0);
+		buffer.addVertex(1, 1, 0);
+		BufferUploader.draw(buffer.buildOrThrow());
 
 		program.release();
 

@@ -32,8 +32,8 @@ public class RecipeAccessor extends CustomObjectAccessor<RecipeHolder> {
     @Override
     public RecipeHolder deserialize(AccessorOp op, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof NbtTagPayload nbtTagPayload && nbtTagPayload.getPayload() instanceof CompoundTag tag) {
-            var type = BuiltInRegistries.RECIPE_TYPE.get(new ResourceLocation(tag.getString("type")));
-            var id = new ResourceLocation(tag.getString("id"));
+            var type = BuiltInRegistries.RECIPE_TYPE.get(ResourceLocation.parse(tag.getString("type")));
+            var id = ResourceLocation.parse(tag.getString("id"));
             if (type != null) {
                 RecipeManager recipeManager;
                 if (LDLib.isRemote()) {

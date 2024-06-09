@@ -48,9 +48,9 @@ public class BlockStateTypeAdapterFactory implements TypeAdapterFactory {
         public BlockState read(final JsonReader in) {
             final JsonElement jsonElement = gson.fromJson(in, JsonElement.class);
             if (jsonElement.isJsonNull()) return null;
-            final var id = new ResourceLocation(jsonElement.getAsJsonObject().get("id").getAsString());
+            final var id = ResourceLocation.parse(jsonElement.getAsJsonObject().get("id").getAsString());
             final var block = BuiltInRegistries.BLOCK.get(id);
-            if (block == Blocks.AIR && !id.equals(new ResourceLocation("air"))) return null;
+            if (block == Blocks.AIR && !id.equals(ResourceLocation.withDefaultNamespace("air"))) return null;
             if (jsonElement.getAsJsonObject().has("meta")) {
                 final int meta = jsonElement.getAsJsonObject().get("meta").getAsInt();
                 return block.getStateDefinition().getPossibleStates().size() > meta ? block.getStateDefinition().getPossibleStates().get(meta) : block.defaultBlockState();

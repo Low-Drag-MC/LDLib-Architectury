@@ -99,17 +99,16 @@ public class FBOWorldSceneRenderer extends WorldSceneRenderer {
 
         // render rect with FBO texture
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuilder();
+        BufferBuilder bufferbuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, fbo.getColorTextureId());
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
         var pose = poseStack.last().pose();
-        bufferbuilder.vertex(pose, x + width, y + height, 0).uv(1, 0).endVertex();
-        bufferbuilder.vertex(pose, x + width, y, 0).uv(1, 1).endVertex();
-        bufferbuilder.vertex(pose, x, y, 0).uv(0, 1).endVertex();
-        bufferbuilder.vertex(pose, x, y + height, 0).uv(0, 0).endVertex();
-        tessellator.end();
+        bufferbuilder.addVertex(pose, x + width, y + height, 0).setUv(1, 0);
+        bufferbuilder.addVertex(pose, x + width, y, 0).setUv(1, 1);
+        bufferbuilder.addVertex(pose, x, y, 0).setUv(0, 1);
+        bufferbuilder.addVertex(pose, x, y + height, 0).setUv(0, 0);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
 
 //        RenderSystem.bindTexture(lastID);
     }

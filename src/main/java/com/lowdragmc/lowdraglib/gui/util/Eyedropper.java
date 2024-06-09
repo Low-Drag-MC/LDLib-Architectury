@@ -111,7 +111,7 @@ package com.lowdragmc.lowdraglib.gui.util;
 //
 //    public static int pack(float[] color) {
 //        Asserts.check(color.length == 3, "raw color array's length must be 3");
-//        return FastColor.ARGB32.color(255, (int) (color[0] * 255), (int) (color[1] * 255), (int) (color[2] * 255));
+//        return FastColor.ARGB32.setColor(255, (int) (color[0] * 255), (int) (color[1] * 255), (int) (color[2] * 255));
 //    }
 //
 //    private static Component makeColorPreview(float[] color) {

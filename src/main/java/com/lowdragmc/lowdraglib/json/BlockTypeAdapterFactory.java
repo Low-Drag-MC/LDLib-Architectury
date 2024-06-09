@@ -42,7 +42,7 @@ public class BlockTypeAdapterFactory implements TypeAdapterFactory {
         public Block read(final JsonReader in) {
             final JsonElement jsonElement = gson.fromJson(in, JsonElement.class);
             if (jsonElement.isJsonNull()) return null;
-            return BuiltInRegistries.BLOCK.get(new ResourceLocation(jsonElement.getAsJsonObject().get("id").getAsString()));
+            return BuiltInRegistries.BLOCK.get(ResourceLocation.parse(jsonElement.getAsJsonObject().get("id").getAsString()));
         }
 
     }

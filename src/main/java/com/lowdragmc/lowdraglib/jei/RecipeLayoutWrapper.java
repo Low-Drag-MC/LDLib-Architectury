@@ -152,7 +152,7 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             // defensive push/pop to protect against recipe categories changing the last pose
             graphics.pose().pushPose();
             {
-                wrapper.draw(graphics, recipeMouseX, recipeMouseY, Minecraft.getInstance().getDeltaFrameTime());
+                wrapper.draw(graphics, recipeMouseX, recipeMouseY, Minecraft.getInstance().getTimer().getGameTimeDeltaTicks());
                 //drawExtras and drawInfo often render text which messes with the color, this clears it
                 RenderSystem.setShaderColor(1, 1, 1, 1);
             }
@@ -214,7 +214,7 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
         private final IModIdHelper modIdHelper;
 
         private RegisterNameTooltipCallback(String uid, IModIdHelper modIdHelper) {
-            this.uid = new ResourceLocation(uid);
+            this.uid = ResourceLocation.parse(uid);
             this.modIdHelper = modIdHelper;
         }
 

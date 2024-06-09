@@ -121,7 +121,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
             try (var reader = new InputStreamReader(resource.open(), StandardCharsets.UTF_8)) {
                 var path = key.getPath().replace("compass/sections/", "");
                 path = path.substring(0, path.length() - 5);
-                var section = new CompassSection(new ResourceLocation(key.getNamespace(), path), JsonParser.parseReader(reader).getAsJsonObject());
+                var section = new CompassSection(ResourceLocation.fromNamespaceAndPath(key.getNamespace(), path), JsonParser.parseReader(reader).getAsJsonObject());
                 sections.computeIfAbsent(key.getNamespace(), k -> new HashMap<>()).put(section.sectionName, section);
             } catch (Exception e) {
                 LDLib.LOGGER.error("loading compass section {} failed", entry.getKey(), e);
@@ -134,7 +134,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
             try (var reader = new InputStreamReader(resource.open(), StandardCharsets.UTF_8)) {
                 var path = key.getPath().replace("compass/nodes/", "");
                 path = path.substring(0, path.length() - 5);
-                var node = new CompassNode(new ResourceLocation(key.getNamespace(), path), JsonParser.parseReader(reader).getAsJsonObject());
+                var node = new CompassNode(ResourceLocation.fromNamespaceAndPath(key.getNamespace(), path), JsonParser.parseReader(reader).getAsJsonObject());
                 nodes.computeIfAbsent(key.getNamespace(), k -> new HashMap<>()).put(node.nodeName, node);
             } catch (Exception e) {
                 LDLib.LOGGER.error("loading compass node {} failed", entry.getKey(), e);
@@ -146,7 +146,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
             val iterator = entry.getValue().entrySet().iterator();
             while (iterator.hasNext()) {
                 val node = iterator.next().getValue();
-                var sectionName = new ResourceLocation(JsonUtils.getStringOr("section", node.getConfig(), "default"));
+                var sectionName = ResourceLocation.parse(JsonUtils.getStringOr("section", node.getConfig(), "default"));
                 var section = sections.getOrDefault(entry.getKey(), Collections.emptyMap()).get(sectionName);
                 if (section != null) {
                     node.setSection(section);
@@ -165,8 +165,8 @@ public final class CompassManager implements ResourceManagerReloadListener {
     }
 
     public static void onComponentClick(String link, ClickData cd) {
-        if (ResourceLocation.isValidResourceLocation(link)) {
-            CompassManager.INSTANCE.openCompass(new ResourceLocation(link));
+        if (ResourceLocation.isValidPath(link)) {
+            CompassManager.INSTANCE.openCompass(ResourceLocation.parse(link));
         }
     }
 

@@ -219,11 +219,10 @@ public class GradientColorWidget extends WidgetGroup {
         }
         // render grid
         var width = size.width - 6;
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         var matrix = graphics.pose().last().pose();
         int p = 0;
         for (int x = 0; x < width; x += 3) {
@@ -233,22 +232,21 @@ public class GradientColorWidget extends WidgetGroup {
                 float maxX = pos.x + 3 + x + 3;
                 float minY = pos.y + 13 + y;
                 float maxY = pos.y + 13 + y + 3;
-                bufferBuilder.vertex(matrix, minX, maxY, 0.0f).color(isWhite ? -1 : ColorPattern.GRAY.color).endVertex();
-                bufferBuilder.vertex(matrix, maxX, maxY, 0.0f).color(isWhite ? -1 : ColorPattern.GRAY.color).endVertex();
-                bufferBuilder.vertex(matrix, maxX, minY, 0.0f).color(isWhite ? -1 : ColorPattern.GRAY.color).endVertex();
-                bufferBuilder.vertex(matrix, minX, minY, 0.0f).color(isWhite ? -1 : ColorPattern.GRAY.color).endVertex();
+                bufferBuilder.addVertex(matrix, minX, maxY, 0.0f).setColor(isWhite ? -1 : ColorPattern.GRAY.color);
+                bufferBuilder.addVertex(matrix, maxX, maxY, 0.0f).setColor(isWhite ? -1 : ColorPattern.GRAY.color);
+                bufferBuilder.addVertex(matrix, maxX, minY, 0.0f).setColor(isWhite ? -1 : ColorPattern.GRAY.color);
+                bufferBuilder.addVertex(matrix, minX, minY, 0.0f).setColor(isWhite ? -1 : ColorPattern.GRAY.color);
             }
         }
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 
         // render color bar
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         Matrix4f mat = graphics.pose().last().pose();
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         var y = pos.y + 13;
         var yh = 15 + y;
@@ -266,13 +264,13 @@ public class GradientColorWidget extends WidgetGroup {
             float endGreen   = (float)(endColor   >>  8 & 255) / 255.0F;
             float endBlue    = (float)(endColor         & 255) / 255.0F;
 
-            buffer.vertex(mat,xw, y, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
-            buffer.vertex(mat,x, y, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-            buffer.vertex(mat,x, yh, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-            buffer.vertex(mat,xw, yh, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
+            buffer.addVertex(mat,xw, y, 0).setColor(endRed, endGreen, endBlue, endAlpha);
+            buffer.addVertex(mat,x, y, 0).setColor(startRed, startGreen, startBlue, startAlpha);
+            buffer.addVertex(mat,x, yh, 0).setColor(startRed, startGreen, startBlue, startAlpha);
+            buffer.addVertex(mat,xw, yh, 0).setColor(endRed, endGreen, endBlue, endAlpha);
         }
 
-        tesselator.end();
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
 
         // render children
         drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);

@@ -16,10 +16,7 @@ import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.Pair;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -218,13 +215,13 @@ public class CompassSectionWidget extends WidgetGroup {
             case CURSOR -> {
                 menu.crossLine().leaf(Icons.ADD, "ldlib.gui.compass.add_node", () -> {
                     var newId = 0;
-                    while (section.nodes.containsKey(new ResourceLocation("%s:%s/new_node_%d".formatted(section.sectionName.getNamespace(), section.sectionName.getPath(), newId)))) {
+                    while (section.nodes.containsKey(ResourceLocation.parse("%s:%s/new_node_%d".formatted(section.sectionName.getNamespace(), section.sectionName.getPath(), newId)))) {
                         newId++;
                     }
-                    var id = new ResourceLocation("%s:%s/new_node_%d".formatted(section.sectionName.getNamespace(), section.sectionName.getPath(), newId));
+                    var id = ResourceLocation.parse("%s:%s/new_node_%d".formatted(section.sectionName.getNamespace(), section.sectionName.getPath(), newId));
                     DialogWidget.showStringEditorDialog(compassView, "ldlib.gui.editor.tips.add_node", id.toString(),
-                            s -> ResourceLocation.isValidResourceLocation(s) && !section.nodes.containsKey(new ResourceLocation(s)), s -> {
-                                if (s == null || !ResourceLocation.isValidResourceLocation(s) || section.nodes.containsKey(new ResourceLocation(s))) return;
+                            s -> ResourceLocation.isValidPath(s) && !section.nodes.containsKey(ResourceLocation.parse(s)), s -> {
+                                if (s == null || !ResourceLocation.isValidPath(s) || section.nodes.containsKey(ResourceLocation.parse(s))) return;
                                 int newMouseX = (int) ((mouseX - this.getPosition().x) / scale + xOffset);
                                 int newMouseY = (int) ((mouseY - this.getPosition().y) / scale + yOffset);
                                 var config = LDLib.GSON.fromJson("""
@@ -243,7 +240,7 @@ public class CompassSectionWidget extends WidgetGroup {
                                           ]
                                         }
                                         """.formatted(section.sectionName.toString(), newMouseX, newMouseY, s), JsonObject.class);
-                                var node = new CompassNode(new ResourceLocation(s), config);
+                                var node = new CompassNode(ResourceLocation.parse(s), config);
                                 node.setSection(section);
                                 section.nodes.put(node.getNodeName(), node);
                             });
@@ -262,9 +259,9 @@ public class CompassSectionWidget extends WidgetGroup {
                 }).leaf("ldlib.gui.editor.menu.rename", () -> {
                     if (selectedNode != null) {
                         DialogWidget.showStringEditorDialog(compassView, "ldlib.gui.editor.tips.rename", selectedNode.getNodeName().toString(),
-                                ResourceLocation::isValidResourceLocation, s -> {
-                                    if (s == null || !ResourceLocation.isValidResourceLocation(s)) return;
-                                    selectedNode.setNodeName(new ResourceLocation(s));
+                                ResourceLocation::isValidPath, s -> {
+                                    if (s == null || !ResourceLocation.isValidPath(s)) return;
+                                    selectedNode.setNodeName(ResourceLocation.parse(s));
                                 });
                     }
                 }).branch("ldlib.gui.editor.group.size", m -> m
@@ -285,8 +282,8 @@ public class CompassSectionWidget extends WidgetGroup {
                                     selectedNode.config.add("items", items);
                                 }
                             }))
-                            .leaf("ldlib.gui.compass.attach_items.tag", () -> DialogWidget.showStringEditorDialog(compassView, "ldlib.gui.compass.attach_items.tag", "minecraft:planks", ResourceLocation::isValidResourceLocation, s -> {
-                                if (s == null || !ResourceLocation.isValidResourceLocation(s)) return;
+                            .leaf("ldlib.gui.compass.attach_items.tag", () -> DialogWidget.showStringEditorDialog(compassView, "ldlib.gui.compass.attach_items.tag", "minecraft:planks", ResourceLocation::isValidPath, s -> {
+                                if (s == null || !ResourceLocation.isValidPath(s)) return;
                                 var items = GsonHelper.getAsJsonArray(selectedNode.config, "items", new JsonArray());
                                 items.add("#"+s);
                                 selectedNode.config.add("items", items);
@@ -296,13 +293,13 @@ public class CompassSectionWidget extends WidgetGroup {
                         m.crossLine();
                         for (var element : items) {
                             var data = element.getAsString();
-                            if (ResourceLocation.isValidResourceLocation(data)) {
-                                Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(data));
+                            if (ResourceLocation.isValidPath(data)) {
+                                Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(data));
                                 if (item != Items.AIR) {
                                     m.leaf(new ItemStackTexture(item), LocalizationUtils.format("ldlib.gui.editor.tips.remove_item") + ": " + LocalizationUtils.format(item.getDescriptionId()), () -> items.remove(element));
                                 }
-                            } else if (data.startsWith("#") && ResourceLocation.isValidResourceLocation(data.substring(1))) {
-                                var tag = TagKey.create(Registries.ITEM, new ResourceLocation(data.substring(1)));
+                            } else if (data.startsWith("#") && ResourceLocation.isValidPath(data.substring(1))) {
+                                var tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(data.substring(1)));
                                 var tagCollection = BuiltInRegistries.ITEM.getTag(tag);
                                 tagCollection.ifPresent(named -> {
                                     var itemList = new ArrayList<Item>();
@@ -321,7 +318,7 @@ public class CompassSectionWidget extends WidgetGroup {
                         var pageLocation = selectedNode.getPage();
                         var resourceManager = Minecraft.getInstance().getResourceManager();
                         var path = "compass/pages/en_us/%s.xml".formatted(pageLocation.getPath());
-                        var option = resourceManager.getResource(new ResourceLocation(pageLocation.getNamespace(), path));
+                        var option = resourceManager.getResource(ResourceLocation.fromNamespaceAndPath(pageLocation.getNamespace(), path));
                         var resource = option.orElseGet(() -> resourceManager.getResource(LDLib.location("compass/pages/en_us/missing.xml")).orElseThrow());
                         String content;
                         try (var inputStream = resource.open()) {
@@ -375,8 +372,8 @@ public class CompassSectionWidget extends WidgetGroup {
     protected void createTextureMenu(TreeBuilder.Menu menu, String title, IGuiTexture initial, IGuiTexture defaultTexture, Consumer<IGuiTexture> consumer) {
         menu.branch(initial, title, m -> m
                 .leaf(defaultTexture == initial ? defaultTexture : IGuiTexture.EMPTY, "ldlib.gui.compass.default", () -> consumer.accept(defaultTexture))
-                .leaf((defaultTexture != initial && initial instanceof ResourceTexture) ? initial : IGuiTexture.EMPTY, "ldlib.gui.editor.register.texture.resource_texture", () -> DialogWidget.showStringEditorDialog(compassView, title, "ldlib:textures/gui/icon.png", ResourceLocation::isValidResourceLocation, s -> {
-                    if (s != null && ResourceLocation.isValidResourceLocation(s)) {
+                .leaf((defaultTexture != initial && initial instanceof ResourceTexture) ? initial : IGuiTexture.EMPTY, "ldlib.gui.editor.register.texture.resource_texture", () -> DialogWidget.showStringEditorDialog(compassView, title, "ldlib:textures/gui/icon.png", ResourceLocation::isValidPath, s -> {
+                    if (s != null && ResourceLocation.isValidPath(s)) {
                         consumer.accept(new ResourceTexture(s));
                     }
                 }))
@@ -385,9 +382,9 @@ public class CompassSectionWidget extends WidgetGroup {
                         consumer.accept(new ItemStackTexture(item));
                     }
                 }))
-                .leaf((defaultTexture != initial && initial instanceof ShaderTexture) ? initial : IGuiTexture.EMPTY, "ldlib.gui.editor.register.texture.shader_texture", () -> DialogWidget.showStringEditorDialog(compassView, title, "ldlib:compass_node", ResourceLocation::isValidResourceLocation, s -> {
-                    if (s != null && ResourceLocation.isValidResourceLocation(s)) {
-                        consumer.accept(ShaderTexture.createShader(new ResourceLocation(s)));
+                .leaf((defaultTexture != initial && initial instanceof ShaderTexture) ? initial : IGuiTexture.EMPTY, "ldlib.gui.editor.register.texture.shader_texture", () -> DialogWidget.showStringEditorDialog(compassView, title, "ldlib:compass_node", ResourceLocation::isValidPath, s -> {
+                    if (s != null && ResourceLocation.isValidPath(s)) {
+                        consumer.accept(ShaderTexture.createShader(ResourceLocation.parse(s)));
                     }
                 })));
     }
@@ -627,12 +624,11 @@ public class CompassSectionWidget extends WidgetGroup {
             float time = Math.abs((System.currentTimeMillis() + (node.hashCode() % 24000) + (childNode.hashCode() % 24000)) % 2400000) / 500f;
 
             Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder bufferbuilder = tesselator.getBuilder();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
             RenderSystem.setShader(Shaders::getCompassLineShader);
-            bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_TEX_COLOR);
+            BufferBuilder bufferbuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_TEX_COLOR);
             RenderSystem.getShader().safeGetUniform("iTime").set(time + (childNode.hashCode() % 4000) / 1000f);
             if (editMode && mode == Mode.LINK && selectedLink != null && (selectedLink.left() == node && selectedLink.right() == childNode ||
                     selectedLink.left() == childNode && selectedLink.right() == node)) {
@@ -640,7 +636,7 @@ public class CompassSectionWidget extends WidgetGroup {
             } else {
                 RenderBufferUtils.drawColorTexLines(graphics.pose(), bufferbuilder, List.of(from, to), 0xff57d39e, 0xff4444AA, 16);
             }
-            tesselator.end();
+            BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
             RenderSystem.defaultBlendFunc();
         }
     }

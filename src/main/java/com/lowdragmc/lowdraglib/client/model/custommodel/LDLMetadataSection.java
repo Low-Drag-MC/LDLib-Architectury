@@ -76,10 +76,10 @@ public class LDLMetadataSection {
 
     public static ResourceLocation spriteToAbsolute(ResourceLocation sprite) {
         if (!sprite.getPath().startsWith("textures/")) {
-            sprite = new ResourceLocation(sprite.getNamespace(), "textures/" + sprite.getPath());
+            sprite = ResourceLocation.fromNamespaceAndPath(sprite.getNamespace(), "textures/" + sprite.getPath());
         }
         if (!sprite.getPath().endsWith(".png")) {
-            sprite = new ResourceLocation(sprite.getNamespace(), sprite.getPath() + ".png");
+            sprite = ResourceLocation.fromNamespaceAndPath(sprite.getNamespace(), sprite.getPath() + ".png");
         }
         return sprite;
     }
@@ -109,7 +109,7 @@ public class LDLMetadataSection {
                 if (obj.has("connection")) {
                     JsonElement element = obj.get("connection");
                     if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
-                        connection = new ResourceLocation(element.getAsString());
+                        connection = ResourceLocation.parse(element.getAsString());
                     }
                 }
             }

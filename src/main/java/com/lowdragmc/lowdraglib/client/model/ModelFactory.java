@@ -1,8 +1,11 @@
 package com.lowdragmc.lowdraglib.client.model;
 
 import com.google.gson.JsonParseException;
+import com.lowdragmc.lowdraglib.core.mixins.accessor.ModelBakeryAccessor;
 import com.mojang.datafixers.util.Either;
 import com.mojang.math.Transformation;
+import lombok.Getter;
+import lombok.Setter;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -37,8 +40,11 @@ import java.util.function.Function;
 public class ModelFactory {
     public static final ItemModelGenerator ITEM_MODEL_GENERATOR = new ItemModelGenerator();
 
+    @Setter
+    private static ModelBakery modelBakery;
+
     public static ModelBakery getModelBakery() {
-        return Minecraft.getInstance().getModelManager().getModelBakery();
+        return modelBakery != null ? modelBakery : Minecraft.getInstance().getModelManager().getModelBakery();
     }
 
     public static UnbakedModel getLDLibModel(UnbakedModel vanilla) {
@@ -57,10 +63,10 @@ public class ModelFactory {
                 UnbakedModel unbakedmodel = this.getModel(location);
                 if (unbakedmodel instanceof BlockModel blockmodel) {
                     if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
-                        return ITEM_MODEL_GENERATOR.generateBlockModel(Material::sprite, blockmodel).bake(this, blockmodel, Material::sprite, state, location, false);
+                        return ITEM_MODEL_GENERATOR.generateBlockModel(Material::sprite, blockmodel).bake(this, blockmodel, Material::sprite, state, false);
                     }
                 }
-                return unbakedmodel.bake(this, Material::sprite, state, location);
+                return unbakedmodel.bake(this, Material::sprite, state);
             }
 
             @Override
@@ -76,7 +82,7 @@ public class ModelFactory {
     }
 
     public static UnbakedModel getUnBakedModel(ResourceLocation modelLocation) {
-        return getModelBakery().getModel(modelLocation);
+        return ((ModelBakeryAccessor)getModelBakery()).invokeGetModel(modelLocation);
     }
 
     public static Quaternionf getQuaternion(Direction facing) {

@@ -27,7 +27,7 @@ public class FluidStackAccessor extends TypesAccessor<FluidStack> {
     public FluidStack defaultValue(Field field, Class<?> type) {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
-            return new FluidStack(BuiltInRegistries.FLUID.get(new ResourceLocation(annotation.stringValue()[0])), (int) annotation.numberValue()[0]);
+            return new FluidStack(BuiltInRegistries.FLUID.get(ResourceLocation.parse(annotation.stringValue()[0])), (int) annotation.numberValue()[0]);
 
         }
         return FluidStack.EMPTY;

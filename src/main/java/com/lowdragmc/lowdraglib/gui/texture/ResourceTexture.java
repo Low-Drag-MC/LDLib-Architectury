@@ -14,10 +14,7 @@ import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import lombok.NoArgsConstructor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -36,7 +33,7 @@ import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR;
 public class ResourceTexture extends TransformTexture {
 
     @Configurable(name = "ldlib.gui.editor.name.resource")
-    public ResourceLocation imageLocation = new ResourceLocation("ldlib:textures/gui/icon.png");
+    public ResourceLocation imageLocation = ResourceLocation.fromNamespaceAndPath(LDLib.MOD_ID, "textures/gui/icon.png");
 
     @Configurable
     @NumberRange(range = {-Float.MAX_VALUE, Float.MAX_VALUE}, wheel = 0.02)
@@ -66,7 +63,7 @@ public class ResourceTexture extends TransformTexture {
     }
 
     public ResourceTexture(String imageLocation) {
-        this(new ResourceLocation(imageLocation), 0, 0, 1, 1);
+        this(ResourceLocation.parse(imageLocation), 0, 0, 1, 1);
     }
 
     public ResourceTexture getSubTexture(float offsetX, float offsetY, float width, float height) {
@@ -116,16 +113,15 @@ public class ResourceTexture extends TransformTexture {
         float imageWidth = this.imageWidth * drawnWidth;
         float imageHeight = this.imageHeight * drawnHeight;
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuilder();
+        BufferBuilder bufferbuilder = tessellator.begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, imageLocation);
         var matrix4f = graphics.pose().last().pose();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, POSITION_TEX_COLOR);
-        bufferbuilder.vertex(matrix4f, x, y + height, 0).uv(imageU, imageV + imageHeight).color(color).endVertex();
-        bufferbuilder.vertex(matrix4f, x + width, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight).color(color).endVertex();
-        bufferbuilder.vertex(matrix4f, x + width, y, 0).uv(imageU + imageWidth, imageV).color(color).endVertex();
-        bufferbuilder.vertex(matrix4f, x, y, 0).uv(imageU, imageV).color(color).endVertex();
-        tessellator.end();
+        bufferbuilder.addVertex(matrix4f, x, y + height, 0).setUv(imageU, imageV + imageHeight).setColor(color);
+        bufferbuilder.addVertex(matrix4f, x + width, y + height, 0).setUv(imageU + imageWidth, imageV + imageHeight).setColor(color);
+        bufferbuilder.addVertex(matrix4f, x + width, y, 0).setUv(imageU + imageWidth, imageV).setColor(color);
+        bufferbuilder.addVertex(matrix4f, x, y, 0).setUv(imageU, imageV).setColor(color);
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
     }
 
     @Override
@@ -154,7 +150,7 @@ public class ResourceTexture extends TransformTexture {
 
     private ResourceLocation getTextureFromFile(File path, File r){
         var id = path.getPath().replace('\\', '/').split("assets/")[1].split("/")[0];
-        return new ResourceLocation(id, r.getPath().replace(path.getPath(), "textures").replace('\\', '/'));
+        return ResourceLocation.fromNamespaceAndPath(id, r.getPath().replace(path.getPath(), "textures").replace('\\', '/'));
     }
 
     @OnlyIn(Dist.CLIENT)

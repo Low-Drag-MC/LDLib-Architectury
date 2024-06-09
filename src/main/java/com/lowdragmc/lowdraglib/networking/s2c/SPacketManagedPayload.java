@@ -54,7 +54,7 @@ public class SPacketManagedPayload extends PacketIntLocation {
 
     public SPacketManagedPayload(CompoundTag tag, HolderLookup.Provider provider) {
         super(BlockPos.of(tag.getLong("p")));
-        blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(new ResourceLocation(tag.getString("t")));
+        blockEntityType = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(ResourceLocation.parse(tag.getString("t")));
         changed = BitSet.valueOf(tag.getByteArray("c"));
         ListTag list = tag.getList("l", 10);
         payloads = new ITypedPayload<?>[list.size()];

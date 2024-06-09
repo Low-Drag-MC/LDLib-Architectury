@@ -23,7 +23,7 @@ public class IRendererResource extends Resource<IRenderer> {
 
     @Override
     public void buildDefault() {
-        data.put("furnace", new IModelRenderer(new ResourceLocation("block/furnace")));
+        data.put("furnace", new IModelRenderer(ResourceLocation.parse("block/furnace")));
     }
 
     @Override

@@ -74,7 +74,7 @@ public class JEIPlugin implements IModPlugin {
     @Override
     @Nonnull
     public ResourceLocation getPluginUid() {
-        return new ResourceLocation(LDLib.MOD_ID, "jei_plugin");
+        return ResourceLocation.fromNamespaceAndPath(LDLib.MOD_ID, "jei_plugin");
     }
 
     @Override

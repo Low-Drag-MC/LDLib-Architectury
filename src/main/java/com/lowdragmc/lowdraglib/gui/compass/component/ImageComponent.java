@@ -53,7 +53,7 @@ public class ImageComponent extends TextBoxComponent {
                 }).toArray(ItemStack[]::new);
                 yield new ItemStackTexture(items);
             }
-            case "shader" -> ShaderTexture.createShader(new ResourceLocation(url));
+            case "shader" -> ShaderTexture.createShader(ResourceLocation.parse(url));
             default -> IGuiTexture.EMPTY;
         };
 

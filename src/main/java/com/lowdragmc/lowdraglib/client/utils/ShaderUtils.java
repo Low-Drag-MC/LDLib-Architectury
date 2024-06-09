@@ -39,13 +39,12 @@ public class ShaderUtils {
         RenderSystem.defaultBlendFunc();
 
         Tesselator tesselator = RenderSystem.renderThreadTesselator();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        bufferbuilder.vertex(-1, 1, 0).endVertex();
-        bufferbuilder.vertex(-1, -1, 0).endVertex();
-        bufferbuilder.vertex(1, -1, 0).endVertex();
-        bufferbuilder.vertex(1, 1, 0).endVertex();
-        BufferUploader.draw(bufferbuilder.end());
+        BufferBuilder bufferbuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        bufferbuilder.addVertex(-1, 1, 0);
+        bufferbuilder.addVertex(-1, -1, 0);
+        bufferbuilder.addVertex(1, -1, 0);
+        bufferbuilder.addVertex(1, 1, 0);
+        BufferUploader.draw(bufferbuilder.buildOrThrow());
         Shaders.getBlitShader().clear();
 
         GlStateManager._depthMask(true);

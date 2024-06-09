@@ -52,7 +52,7 @@ public class LDLRendererModel implements IUnbakedGeometry<LDLRendererModel> {
     private LDLRendererModel() {}
 
     @Override
-    public BakedModel bake(IGeometryBakingContext iGeometryBakingContext, ModelBaker arg, Function<Material, TextureAtlasSprite> function, ModelState arg2, ItemOverrides arg3, ResourceLocation arg4) {
+    public BakedModel bake(IGeometryBakingContext iGeometryBakingContext, ModelBaker arg, Function<Material, TextureAtlasSprite> function, ModelState arg2, ItemOverrides arg3) {
         return new RendererBakedModel();
     }
 

@@ -58,7 +58,7 @@ public class WidgetTexture extends TransformTexture{
             float scaleH = height * 1f / widget.getSize().height;
             scale = Math.min(scaleW, scaleH);
         }
-        float particleTick = Minecraft.getInstance().getFrameTime();
+        float particleTick = Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
         graphics.pose().pushPose();
 
         graphics.pose().translate(x + width / 2f, y + height / 2f, 0);

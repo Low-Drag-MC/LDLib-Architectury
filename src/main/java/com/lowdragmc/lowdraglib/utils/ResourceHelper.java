@@ -27,12 +27,12 @@ public class ResourceHelper {
     }
 
     public static boolean isTextureExist(@Nonnull ResourceLocation location) {
-        var textureLocation = new ResourceLocation(location.getNamespace(), "textures/%s.png".formatted(location.getPath()));
+        var textureLocation = ResourceLocation.fromNamespaceAndPath(location.getNamespace(), "textures/%s.png".formatted(location.getPath()));
         return isResourceExist(textureLocation) || isResourceExistRaw(textureLocation);
     }
 
     public static boolean isModelExist(@Nonnull ResourceLocation location) {
-        var modelLocation = new ResourceLocation(location.getNamespace(), "models/%s.json".formatted(location.getPath()));
+        var modelLocation = ResourceLocation.fromNamespaceAndPath(location.getNamespace(), "models/%s.json".formatted(location.getPath()));
         return isResourceExist(modelLocation) || isResourceExistRaw(modelLocation);
     }
 

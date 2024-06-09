@@ -105,7 +105,7 @@ public class CompassNode {
         if (config.has("pre_nodes")) {
             JsonArray pre = config.get("pre_nodes").getAsJsonArray();
             for (JsonElement element : pre) {
-                var nodeName = new ResourceLocation(element.getAsString());
+                var nodeName = ResourceLocation.parse(element.getAsString());
                 CompassNode node = CompassManager.INSTANCE.getNodeByName(nodeName);
                 if (node != null) {
                     preNodes.add(node);
@@ -121,7 +121,7 @@ public class CompassNode {
     }
 
     public ResourceLocation getPage() {
-        return new ResourceLocation(GsonHelper.getAsString(config, "page", "ldlib:missing"));
+        return ResourceLocation.parse(GsonHelper.getAsString(config, "page", "ldlib:missing"));
     }
 
     public List<Item> getItems() {
@@ -130,13 +130,13 @@ public class CompassNode {
             JsonArray items = GsonHelper.getAsJsonArray(config, "items", new JsonArray());
             for (JsonElement element : items) {
                 var data = element.getAsString();
-                if (ResourceLocation.isValidResourceLocation(data)) {
-                    Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(data));
+                if (ResourceLocation.isValidPath(data)) {
+                    Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(data));
                     if (item != Items.AIR) {
                         this.items.add(item);
                     }
-                } else if (data.startsWith("#") && ResourceLocation.isValidResourceLocation(data.substring(1))) {
-                    var tag = TagKey.create(Registries.ITEM, new ResourceLocation(data.substring(1)));
+                } else if (data.startsWith("#") && ResourceLocation.isValidPath(data.substring(1))) {
+                    var tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(data.substring(1)));
                     var tagCollection = BuiltInRegistries.ITEM.getTag(tag);
                     tagCollection.ifPresent(named -> named.forEach(holder -> this.items.add(holder.value())));
                 }

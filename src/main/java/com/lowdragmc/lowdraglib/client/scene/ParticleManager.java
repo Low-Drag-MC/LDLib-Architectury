@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.neoforged.api.distmarker.Dist;
@@ -100,18 +101,13 @@ public class ParticleManager {
                 RenderSystem.setShader(GameRenderer::getParticleShader);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 Tesselator tesselator = Tesselator.getInstance();
-                BufferBuilder bufferbuilder = tesselator.getBuilder();
-                particlerendertype.begin(bufferbuilder, this.textureManager);
+                BufferBuilder bufferBuilder = particlerendertype.begin(tesselator, this.textureManager);
 
                 for(var particle : iterable) {
-                    try {
-                        particle.render(bufferbuilder, pActiveRenderInfo, pPartialTicks);
-                    } catch (Throwable throwable) {
-                        throw throwable;
-                    }
+                    particle.render(bufferBuilder, pActiveRenderInfo, pPartialTicks);
                 }
 
-                particlerendertype.end(tesselator);
+                BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
             }
         }
 

@@ -64,7 +64,7 @@ public class VirtualChunk extends LevelChunk {
 	}
 
 	@Override
-	public ChunkStatus getStatus() {
+	public ChunkStatus getPersistedStatus() {
 		return ChunkStatus.LIGHT;
 	}
 

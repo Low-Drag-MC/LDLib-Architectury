@@ -75,16 +75,15 @@ public class DrawerHelper {
         uMax = uMax - maskRight / 16f * (uMax - uMin);
         vMax = vMax - maskTop / 16f * (vMax - vMin);
 
-        BufferBuilder buffer = Tesselator.getInstance().getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         var mat = graphics.pose().last().pose();
-        buffer.vertex(mat, xCoord, yCoord + 16, zLevel).uv(uMin, vMax).color(fluidColor).endVertex();
-        buffer.vertex(mat, xCoord + 16 - maskRight, yCoord + 16, zLevel).uv(uMax, vMax).color(fluidColor).endVertex();
-        buffer.vertex(mat, xCoord + 16 - maskRight, yCoord + maskTop, zLevel).uv(uMax, vMin).color(fluidColor).endVertex();
-        buffer.vertex(mat, xCoord, yCoord + maskTop, zLevel).uv(uMin, vMin).color(fluidColor).endVertex();
+        buffer.addVertex(mat, xCoord, yCoord + 16, zLevel).setUv(uMin, vMax).setColor(fluidColor);
+        buffer.addVertex(mat, xCoord + 16 - maskRight, yCoord + 16, zLevel).setUv(uMax, vMax).setColor(fluidColor);
+        buffer.addVertex(mat, xCoord + 16 - maskRight, yCoord + maskTop, zLevel).setUv(uMax, vMin).setColor(fluidColor);
+        buffer.addVertex(mat, xCoord, yCoord + maskTop, zLevel).setUv(uMin, vMin).setColor(fluidColor);
 
-        BufferUploader.drawWithShader(buffer.end());
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     public static void drawFluidForGui(@Nonnull GuiGraphics graphics, FluidStack contents, long tankCapacity, int startX, int startY, int widthT, int heightT) {
@@ -93,7 +92,7 @@ public class DrawerHelper {
         if (fluidStillSprite == null) {
             fluidStillSprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(MissingTextureAtlasSprite.getLocation());
             if (Platform.isDevEnv()) {
-                LDLib.LOGGER.error("Missing fluid texture for fluid: " + contents.getDisplayName().getString());
+                LDLib.LOGGER.error("Missing fluid texture for fluid: " + contents.getHoverName().getString());
             }
         }
         int fluidColor = FluidHelper.getColor(contents) | 0xff000000;
@@ -219,20 +218,19 @@ public class DrawerHelper {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        buffer.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
         x += width;
         y += height;
         Matrix4f mat = graphics.pose().last().pose();
-        buffer.vertex(mat, x, y, 0).color(0, 0, 0, startAlpha).endVertex();
-        buffer.vertex(mat, x, y + distance, 0).color(0, 0, 0, 0).endVertex();
-        buffer.vertex(mat, x + distance, y + distance, 0).color(0, 0, 0, 0).endVertex();
+        buffer.addVertex(mat, x, y, 0).setColor(0, 0, 0, startAlpha);
+        buffer.addVertex(mat, x, y + distance, 0).setColor(0, 0, 0, 0);
+        buffer.addVertex(mat, x + distance, y + distance, 0).setColor(0, 0, 0, 0);
 
-        buffer.vertex(mat, x, y, 0).color(0, 0, 0, startAlpha).endVertex();
-        buffer.vertex(mat, x + distance, y + distance, 0).color(0, 0, 0, 0).endVertex();
-        buffer.vertex(mat, x + distance, y, 0).color(0, 0, 0, 0).endVertex();
-        tesselator.end();
+        buffer.addVertex(mat, x, y, 0).setColor(0, 0, 0, startAlpha);
+        buffer.addVertex(mat, x + distance, y + distance, 0).setColor(0, 0, 0, 0);
+        buffer.addVertex(mat, x + distance, y, 0).setColor(0, 0, 0, 0);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     public static void drawGradientRect(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int startColor, int endColor) {
@@ -252,49 +250,46 @@ public class DrawerHelper {
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         Matrix4f mat = graphics.pose().last().pose();
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         if (horizontal) {
-            buffer.vertex(mat,x + width, y, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
-            buffer.vertex(mat,x, y, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-            buffer.vertex(mat,x, y + height, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-            buffer.vertex(mat,x + width, y + height, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
-            tesselator.end();
+            buffer.addVertex(mat,x + width, y, 0).setColor(endRed, endGreen, endBlue, endAlpha);
+            buffer.addVertex(mat,x, y, 0).setColor(startRed, startGreen, startBlue, startAlpha);
+            buffer.addVertex(mat,x, y + height, 0).setColor(startRed, startGreen, startBlue, startAlpha);
+            buffer.addVertex(mat,x + width, y + height, 0).setColor(endRed, endGreen, endBlue, endAlpha);
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
         } else {
-            buffer.vertex(mat,x + width, y, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-            buffer.vertex(mat,x, y, 0).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-            buffer.vertex(mat,x, y + height, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
-            buffer.vertex(mat,x + width, y + height, 0).color(endRed, endGreen, endBlue, endAlpha).endVertex();
-            tesselator.end();
+            buffer.addVertex(mat,x + width, y, 0).setColor(startRed, startGreen, startBlue, startAlpha);
+            buffer.addVertex(mat,x, y, 0).setColor(startRed, startGreen, startBlue, startAlpha);
+            buffer.addVertex(mat,x, y + height, 0).setColor(endRed, endGreen, endBlue, endAlpha);
+            buffer.addVertex(mat,x + width, y + height, 0).setColor(endRed, endGreen, endBlue, endAlpha);
+            BufferUploader.drawWithShader(buffer.buildOrThrow());
         }
     }
 
     public static void drawLines(@Nonnull GuiGraphics graphics, List<Vec2> points, int startColor, int endColor, float width) {
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferbuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
         RenderBufferUtils.drawColorLines(graphics.pose(), bufferbuilder, points, startColor, endColor, width);
 
-        tesselator.end();
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
         RenderSystem.defaultBlendFunc();
     }
 
     public static void drawTextureRect(@Nonnull GuiGraphics graphics, float x, float y, float width, float height) {
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.getBuilder();
         Matrix4f mat = graphics.pose().last().pose();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(mat, x, y + height, 0).uv(0, 0).endVertex();
-        buffer.vertex(mat, x + width, y + height, 0).uv(1, 0).endVertex();
-        buffer.vertex(mat, x + width, y, 0).uv(1, 1).endVertex();
-        buffer.vertex(mat, x, y, 0).uv(0, 1).endVertex();
-        tesselator.end();
+        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        buffer.addVertex(mat, x, y + height, 0).setUv(0, 0);
+        buffer.addVertex(mat, x + width, y + height, 0).setUv(1, 0);
+        buffer.addVertex(mat, x + width, y, 0).setUv(1, 1);
+        buffer.addVertex(mat, x, y, 0).setUv(0, 1);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     public static void updateScreenVshUniform(@Nonnull GuiGraphics graphics, UniformCache uniform) {
@@ -402,14 +397,12 @@ public class DrawerHelper {
     }
 
     private static void uploadScreenPosVertex() {
-        var builder = Tesselator.getInstance().getBuilder();
-
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        builder.vertex(-1.0, 1.0, 0.0).endVertex();
-        builder.vertex(-1.0, -1.0, 0.0).endVertex();
-        builder.vertex(1.0, -1.0, 0.0).endVertex();
-        builder.vertex(1.0, 1.0, 0.0).endVertex();
-        BufferUploader.draw(builder.end());
+        var builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        builder.addVertex(-1, 1, 0);
+        builder.addVertex(-1, -1, 0);
+        builder.addVertex(1, -1, 0);
+        builder.addVertex(1, 1, 0);
+        BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 
     public static void drawTooltip(GuiGraphics graphics, int mouseX, int mouseY, List<Component> tooltipTexts, ItemStack tooltipStack, @Nullable TooltipComponent tooltipComponent, Font tooltipFont) {

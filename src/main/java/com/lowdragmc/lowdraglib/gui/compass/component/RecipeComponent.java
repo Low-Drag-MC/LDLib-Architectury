@@ -58,7 +58,7 @@ public class RecipeComponent extends AbstractComponent {
     public ILayoutComponent fromXml(Element element) {
         super.fromXml(element);
         if (element.hasAttribute("id")) {
-            var recipeID = new ResourceLocation(element.getAttribute("id"));
+            var recipeID = ResourceLocation.parse(element.getAttribute("id"));
             for (RecipeHolder<?> recipe : Minecraft.getInstance().getConnection().getRecipeManager().getRecipes()) {
                 if (recipe.id().equals(recipeID)) {
                     this.recipe = recipe;

@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -297,10 +298,9 @@ public class TextFieldWidget extends Widget implements IConfigurableWidget {
             try {
                 s = s.toLowerCase();
                 s = s.replace(' ', '_');
-                if (ResourceLocation.isValidResourceLocation(s)) {
-                    return s;
-                }
-            } catch (NumberFormatException ignored) { }
+                ResourceLocation.parse(s);
+                return s;
+            } catch (NumberFormatException | ResourceLocationException ignored) { }
             return this.currentString;
         });
         hover = Component.translatable("ldlib.gui.text_field.resourcelocation");

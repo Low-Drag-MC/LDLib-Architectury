@@ -18,6 +18,7 @@ import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.*;
 import com.lowdragmc.lowdraglib.utils.interpolate.Eases;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import lombok.Getter;
@@ -72,8 +73,8 @@ public class CompassScene extends WidgetGroup implements ISceneBlockRenderHook, 
     private final Map<BlockPos, Tuple<BlockAnima, Integer>> addedBlocks = new HashMap<>();
     private final Map<BlockPos, Tuple<BlockAnima, Integer>> removedBlocks = new HashMap<>();
     private final Map<BlockPosFace, Integer> highlightBlocks = new HashMap<>();
-    private final Map<Vec3, MutableTriple<Tuple<XmlUtils.SizedIngredient, List<Component>>, Vec2, Integer>> tooltipBlocks = new HashMap<>();
-    private final Map<Vec3, Vec2> tooltipPos = new HashMap<>();
+    private final Map<Vector3f, MutableTriple<Tuple<XmlUtils.SizedIngredient, List<Component>>, Vec2, Integer>> tooltipBlocks = new HashMap<>();
+    private final Map<Vector3f, Vec2> tooltipPos = new HashMap<>();
     private int currentFrame = -1;
     private int frameTick = 0;
     private boolean isPause;
@@ -136,7 +137,7 @@ public class CompassScene extends WidgetGroup implements ISceneBlockRenderHook, 
                     if (frameIndex < currentFrame) return 1;
                     if (frameTick > 0 && frameIndex == currentFrame) {
                         var duration = frame.getDuration();
-                        return (frameTick + (isPause ? 0 : Minecraft.getInstance().getDeltaFrameTime())) / Math.max(duration, 1);
+                        return (frameTick + (isPause ? 0 : Minecraft.getInstance().getTimer().getGameTimeDeltaTicks())) / Math.max(duration, 1);
                     }
                     return 0;
                 }, progressWidth * i + 1 + 1, height - 6 + 1, progressWidth - 4, 4, new ProgressTexture(IGuiTexture.EMPTY, ColorPattern.WHITE.rectTexture())));
@@ -154,7 +155,7 @@ public class CompassScene extends WidgetGroup implements ISceneBlockRenderHook, 
     }
 
     private void renderBeforeWorld(SceneWidget sceneWidget) {
-        var graphics = new GuiGraphics(Minecraft.getInstance(), MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()));
+        var graphics = new GuiGraphics(Minecraft.getInstance(), MultiBufferSource.immediate(new ByteBufferBuilder(1536)));
         graphics.pose().pushPose();
         RenderUtils.moveToFace(graphics.pose(), (minX + maxX) / 2f, minY, (minZ + maxZ) / 2f, Direction.DOWN);
         RenderUtils.rotateToFace(graphics.pose(), Direction.UP, null);
@@ -166,7 +167,7 @@ public class CompassScene extends WidgetGroup implements ISceneBlockRenderHook, 
 
     private void renderAfterWorld(SceneWidget sceneWidget) {
         PoseStack matrixStack = new PoseStack();
-        var tick = Math.abs((Minecraft.getInstance().getDeltaFrameTime() + gui.getTickCount() % 40) - 20) / 20;
+        var tick = Math.abs((Minecraft.getInstance().getTimer().getGameTimeDeltaTicks() + gui.getTickCount() % 40) - 20) / 20;
         for (Map.Entry<BlockPosFace, Integer> entry : highlightBlocks.entrySet()) {
             if (entry.getValue() <= 0) continue;
             if (entry.getKey().facing() == null) {
@@ -364,7 +365,7 @@ public class CompassScene extends WidgetGroup implements ISceneBlockRenderHook, 
         if (removedBlocks.containsKey(pos)) {
             var tuple = removedBlocks.get(pos);
             var anima = tuple.getA();
-            var tick = 1 - ((tuple.getB() - partialTicks) / anima.duration());
+            float tick = 1 - ((tuple.getB() - partialTicks) / anima.duration());
             if (tick > 0) {
                 wrapperBuffer.addOffset(tick * anima.offset().x, tick * anima.offset().y, tick * anima.offset().z);
             }
@@ -407,7 +408,7 @@ public class CompassScene extends WidgetGroup implements ISceneBlockRenderHook, 
         highlightBlocks.put(key, duration);
     }
 
-    public void addEntity(EntityInfo entityInfo, @Nullable Vec3 pos, boolean update) {
+    public void addEntity(EntityInfo entityInfo, @Nullable Vector3f pos, boolean update) {
         Entity entity = null;
         if (update) {
             entity = world.entities.get(entityInfo.getId());
@@ -437,7 +438,7 @@ public class CompassScene extends WidgetGroup implements ISceneBlockRenderHook, 
     }
 
 
-    public void addTooltip(Vec3 pos, Tuple<XmlUtils.SizedIngredient, List<Component>> tuple, Vec2 middle, Integer time) {
+    public void addTooltip(Vector3f pos, Tuple<XmlUtils.SizedIngredient, List<Component>> tuple, Vec2 middle, Integer time) {
         tooltipBlocks.put(pos, MutableTriple.of(tuple, middle, time));
     }
 

@@ -13,6 +13,7 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.MutableTriple;
+import org.joml.Vector3f;
 import org.w3c.dom.Element;
 
 import java.util.*;
@@ -27,10 +28,10 @@ public class SceneAction extends Action {
     private final List<BlockAnima> removedBlocks = new ArrayList<>();
     private final Map<BlockPos, BlockInfo> modifiedTags = new HashMap<>();
     private final Map<BlockPosFace, Integer> highlightedBlocks = new HashMap<>();
-    private final List<Tuple<EntityInfo, Vec3>> addedEntities = new ArrayList<>();
-    private final List<Tuple<EntityInfo, Vec3>> modifiedEntities = new ArrayList<>();
+    private final List<Tuple<EntityInfo, Vector3f>> addedEntities = new ArrayList<>();
+    private final List<Tuple<EntityInfo, Vector3f>> modifiedEntities = new ArrayList<>();
     private final List<Tuple<EntityInfo, Boolean>> removedEntities = new ArrayList<>();
-    private final Map<Vec3, MutableTriple<Tuple<XmlUtils.SizedIngredient, List<Component>>, Vec2, Integer>> tooltipBlocks = new HashMap<>();
+    private final Map<Vector3f, MutableTriple<Tuple<XmlUtils.SizedIngredient, List<Component>>, Vec2, Integer>> tooltipBlocks = new HashMap<>();
     private Float rotation;
     //runtime
     private int duration = -1;
@@ -46,17 +47,17 @@ public class SceneAction extends Action {
             if (node instanceof Element data) {
                 val nodeName = data.getNodeName();
                 val blockPos = XmlUtils.getAsBlockPos(data, "pos", BlockPos.ZERO);
-                val pos = XmlUtils.getAsVec3(data, "pos", Vec3.ZERO);
+                val pos = XmlUtils.getAsVector3f(data, "pos", new Vector3f());
                 switch (nodeName) {
-                    case "add" -> addedBlocks.add(new Tuple<>(new BlockAnima(blockPos, XmlUtils.getAsVec3(data, "offset", new Vec3(0, 0.7, 0)), XmlUtils.getAsInt(data, "duration", 15)), XmlUtils.getBlockInfo(data)));
-                    case "remove" -> removedBlocks.add(new BlockAnima(blockPos, XmlUtils.getAsVec3(data, "offset", new Vec3(0, 0.7, 0)), XmlUtils.getAsInt(data, "duration", 15)));
+                    case "add" -> addedBlocks.add(new Tuple<>(new BlockAnima(blockPos, XmlUtils.getAsVector3f(data, "offset", new Vector3f(0, 0.7f, 0)), XmlUtils.getAsInt(data, "duration", 15)), XmlUtils.getBlockInfo(data)));
+                    case "remove" -> removedBlocks.add(new BlockAnima(blockPos, XmlUtils.getAsVector3f(data, "offset", new Vector3f(0, 0.7f, 0)), XmlUtils.getAsInt(data, "duration", 15)));
                     case "modify" -> modifiedTags.put(blockPos, XmlUtils.getBlockInfo(data));
                     case "add-entity" -> addedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), pos));
-                    case "modify-entity" -> modifiedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), XmlUtils.getAsVec3(data, "pos", null)));
+                    case "modify-entity" -> modifiedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), XmlUtils.getAsVector3f(data, "pos", null)));
                     case "remove-entity" -> removedEntities.add(new Tuple<>(XmlUtils.getEntityInfo(data), XmlUtils.getAsBoolean(data, "force", false)));
                     case "rotation" -> rotation = XmlUtils.getAsFloat(data, "degree", 0f);
                     case "highlight" -> highlightedBlocks.put(new BlockPosFace(blockPos, XmlUtils.getAsEnum(data, "face", Direction.class, null)), XmlUtils.getAsInt(data, "duration", 40));
-                    case "tooltip" -> tooltipBlocks.put(XmlUtils.getAsVec3(data, "pos", new Vec3(0, 0, 0)), MutableTriple.of(new Tuple<>(XmlUtils.getIngredient(data), new ArrayList<>(XmlUtils.getComponents(data, Style.EMPTY))), XmlUtils.getAsVec2(data, "screen-offset", new Vec2(0.3f, 0.3f)), XmlUtils.getAsInt(data, "duration", 40)));
+                    case "tooltip" -> tooltipBlocks.put(XmlUtils.getAsVector3f(data, "pos", new Vector3f(0, 0, 0)), MutableTriple.of(new Tuple<>(XmlUtils.getIngredient(data), new ArrayList<>(XmlUtils.getComponents(data, Style.EMPTY))), XmlUtils.getAsVec2(data, "screen-offset", new Vec2(0.3f, 0.3f)), XmlUtils.getAsInt(data, "duration", 40)));
                 }
             }
         }
@@ -67,12 +68,12 @@ public class SceneAction extends Action {
         return this;
     }
 
-    public SceneAction addedBlock(BlockPos pos, BlockInfo blockInfo, Vec3 offset, int duration) {
+    public SceneAction addedBlock(BlockPos pos, BlockInfo blockInfo, Vector3f offset, int duration) {
         addedBlocks.add(new Tuple<>(new BlockAnima(pos, offset, duration), blockInfo));
         return this;
     }
 
-    public SceneAction removedBlock(BlockPos pos, Vec3 offset, int duration) {
+    public SceneAction removedBlock(BlockPos pos, Vector3f offset, int duration) {
         removedBlocks.add(new BlockAnima(pos, offset, duration));
         return this;
     }
@@ -87,12 +88,12 @@ public class SceneAction extends Action {
         return this;
     }
 
-    public SceneAction addedEntity(EntityInfo entityInfo, Vec3 pos) {
+    public SceneAction addedEntity(EntityInfo entityInfo, Vector3f pos) {
         addedEntities.add(new Tuple<>(entityInfo, pos));
         return this;
     }
 
-    public SceneAction modifiedEntity(EntityInfo entityInfo, Vec3 pos) {
+    public SceneAction modifiedEntity(EntityInfo entityInfo, Vector3f pos) {
         modifiedEntities.add(new Tuple<>(entityInfo, pos));
         return this;
     }
@@ -102,7 +103,7 @@ public class SceneAction extends Action {
         return this;
     }
 
-    public SceneAction tooltip(Vec3 pos, Tuple<XmlUtils.SizedIngredient, List<Component>> tooltip, Vec2 screenOffset, int duration) {
+    public SceneAction tooltip(Vector3f pos, Tuple<XmlUtils.SizedIngredient, List<Component>> tooltip, Vec2 screenOffset, int duration) {
         tooltipBlocks.put(pos, MutableTriple.of(tooltip, screenOffset, duration));
         return this;
     }

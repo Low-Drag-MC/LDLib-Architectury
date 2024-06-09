@@ -104,7 +104,7 @@ public class ColorUtils {
         return color((int)(alpha * 255), (int)(red * 255), (int)(green * 255), (int)(blue * 255));
     }
 
-    public static int HSBtoRGB(float hue, float saturation, float brightness) {
+    public static int HSBtoRGB(float hue, float saturation, float brightness, float alpha) {
         int r = 0, g = 0, b = 0;
         if (saturation == 0) {
             r = g = b = (int) (brightness * 255.0f + 0.5f);
@@ -147,7 +147,7 @@ public class ColorUtils {
                 }
             }
         }
-        return 0xff000000 | (r << 16) | (g << 8) | (b);
+        return ((int) (alpha * 255)) << 24 | (r << 16) | (g << 8) | (b);
     }
 
     /**

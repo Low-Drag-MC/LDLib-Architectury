@@ -41,8 +41,8 @@ public class InformationAction extends Action {
 
         guiTexture = switch (type) {
             case "resource" -> new ResourceTexture(url).getSubTexture(u0, v0, u1, v1);
-            case "item" -> new ItemStackTexture(BuiltInRegistries.ITEM.get(new ResourceLocation(url)));
-            case "shader" -> ShaderTexture.createShader(new ResourceLocation(url));
+            case "item" -> new ItemStackTexture(BuiltInRegistries.ITEM.get(ResourceLocation.parse(url)));
+            case "shader" -> ShaderTexture.createShader(ResourceLocation.parse(url));
             default -> IGuiTexture.EMPTY;
         };
 

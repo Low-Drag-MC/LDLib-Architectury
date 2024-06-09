@@ -7,14 +7,13 @@ import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.BlockElementRotation;
 import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.BlockMath;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.model.ExtraFaceData;
+import net.neoforged.neoforge.client.model.QuadTransformers;
 import org.joml.*;
 
 import java.lang.Math;
@@ -40,9 +39,9 @@ public class FaceQuadBakery {
         boolean shade,
         int emissivity
     ) {
-        BlockFaceUV blockfaceuv = face.uv;
+        BlockFaceUV blockfaceuv = face.uv();
         if (transform.isUvLocked()) {
-            blockfaceuv = recomputeUVs(face.uv, facing, transform.getRotation());
+            blockfaceuv = recomputeUVs(face.uv(), facing, transform.getRotation());
         }
 
         float[] afloat = new float[blockfaceuv.uvs.length];
@@ -62,19 +61,19 @@ public class FaceQuadBakery {
         }
 
         ClientHooks.fillNormal(aint, direction);
-        ExtraFaceData data = face.getFaceData();
-        BakedQuad quad = new BakedQuad(aint, face.tintIndex, direction, sprite, shade, data.ambientOcclusion());
+        ExtraFaceData data = face.faceData();
+        BakedQuad quad = new BakedQuad(aint, face.tintIndex(), direction, sprite, shade, data.ambientOcclusion());
         if (!ExtraFaceData.DEFAULT.equals(data)) {
-            net.neoforged.neoforge.client.model.QuadTransformers.applyingLightmap(data.blockLight(), data.skyLight()).processInPlace(quad);
-            net.neoforged.neoforge.client.model.QuadTransformers.applyingColor(data.color()).processInPlace(quad);
+            QuadTransformers.applyingLightmap(data.blockLight(), data.skyLight()).processInPlace(quad);
+            QuadTransformers.applyingColor(data.color()).processInPlace(quad);
         }
-        com.lowdragmc.lowdraglib.client.bakedpipeline.QuadTransformers.settingEmissivity(emissivity).processInPlace(quad);
+        LDLibQuadTransformers.settingEmissivity(emissivity).processInPlace(quad);
 
         return quad;
     }
 
     public static BlockFaceUV recomputeUVs(BlockFaceUV uv, Direction facing, Transformation modelRotation) {
-        Matrix4f matrix4f = BlockMath.getUVLockTransform(modelRotation, facing, () -> "Unable to resolve UVLock for model").getMatrix();
+        Matrix4f matrix4f = BlockMath.getUVLockTransform(modelRotation, facing).getMatrix();
         float f = uv.getU(uv.getReverseIndex(0));
         float f1 = uv.getV(uv.getReverseIndex(0));
         Vector4f vector4f = matrix4f.transform(new Vector4f(f / 16.0F, f1 / 16.0F, 0.0F, 1.0F));

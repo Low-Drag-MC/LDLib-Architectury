@@ -31,7 +31,7 @@ public class ItemStackSelectorWidget extends WidgetGroup {
         setClientSideWidget();
         itemField = (TextFieldWidget) new TextFieldWidget(22, 0, width - 46, 20, null, s -> {
             if (s != null && !s.isEmpty()) {
-                Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(s));
+                Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(s));
                 if (!ItemStack.isSameItemSameComponents(item.getDefaultInstance(), this.item)) {
                     this.item = item.getDefaultInstance();
                     onUpdate();

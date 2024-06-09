@@ -3,15 +3,16 @@ package com.lowdragmc.lowdraglib.client.bakedpipeline;
 import com.google.common.base.Preconditions;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.LightTexture;
+import net.neoforged.neoforge.client.model.IQuadTransformer;
 
 import java.util.Arrays;
 
 /**
  * @author KilaBash
  * @date 2023/2/20
- * @implNote QuadTransformers
+ * @implNote LDLibQuadTransformers
  */
-public class QuadTransformers {
+public class LDLibQuadTransformers {
 
     // do nothing
     private static final IQuadTransformer EMPTY = (quad) -> {
@@ -46,6 +47,6 @@ public class QuadTransformers {
         return EMISSIVE_TRANSFORMERS[15];
     }
 
-    private QuadTransformers() {
+    private LDLibQuadTransformers() {
     }
 }

@@ -177,11 +177,10 @@ public class RenderUtils {
         poseStack.scale(scale, scale, scale);
 
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
+        BufferBuilder buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         RenderUtils.renderCubeFace(poseStack, buffer, -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, r, g, b, 1);
-        tessellator.end();
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
 
         poseStack.popPose();
 
@@ -191,35 +190,35 @@ public class RenderUtils {
 
     public static void renderCubeFace(PoseStack poseStack, BufferBuilder buffer, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float r, float g, float b, float a) {
         Matrix4f mat = poseStack.last().pose();
-        buffer.vertex(mat, minX, minY, minZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, minX, minY, maxZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, minX, maxY, maxZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, minX, maxY, minZ).color(r, g, b, a).endVertex();
+        buffer.addVertex(mat, minX, minY, minZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, minX, minY, maxZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, minX, maxY, maxZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, minX, maxY, minZ).setColor(r, g, b, a);
 
-        buffer.vertex(mat, maxX, minY, minZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, maxY, minZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, maxY, maxZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, minY, maxZ).color(r, g, b, a).endVertex();
+        buffer.addVertex(mat, maxX, minY, minZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, maxY, minZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, maxY, maxZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, minY, maxZ).setColor(r, g, b, a);
 
-        buffer.vertex(mat, minX, minY, minZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, minY, minZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, minY, maxZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, minX, minY, maxZ).color(r, g, b, a).endVertex();
+        buffer.addVertex(mat, minX, minY, minZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, minY, minZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, minY, maxZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, minX, minY, maxZ).setColor(r, g, b, a);
 
-        buffer.vertex(mat, minX, maxY, minZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, minX, maxY, maxZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, maxY, maxZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, maxY, minZ).color(r, g, b, a).endVertex();
+        buffer.addVertex(mat, minX, maxY, minZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, minX, maxY, maxZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, maxY, maxZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, maxY, minZ).setColor(r, g, b, a);
 
-        buffer.vertex(mat, minX, minY, minZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, minX, maxY, minZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, maxY, minZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, minY, minZ).color(r, g, b, a).endVertex();
+        buffer.addVertex(mat, minX, minY, minZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, minX, maxY, minZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, maxY, minZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, minY, minZ).setColor(r, g, b, a);
 
-        buffer.vertex(mat, minX, minY, maxZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, minY, maxZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, maxX, maxY, maxZ).color(r, g, b, a).endVertex();
-        buffer.vertex(mat, minX, maxY, maxZ).color(r, g, b, a).endVertex();
+        buffer.addVertex(mat, minX, minY, maxZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, minY, maxZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, maxX, maxY, maxZ).setColor(r, g, b, a);
+        buffer.addVertex(mat, minX, maxY, maxZ).setColor(r, g, b, a);
     }
 
     public static void moveToFace(PoseStack poseStack, double x, double y, double z, Direction face) {

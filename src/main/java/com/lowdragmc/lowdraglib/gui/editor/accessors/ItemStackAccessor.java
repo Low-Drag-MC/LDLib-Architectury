@@ -28,7 +28,7 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
     public ItemStack defaultValue(Field field, Class<?> type) {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
-            return new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation(annotation.stringValue()[0])).asItem(), (int) annotation.numberValue()[0]);
+            return new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(annotation.stringValue()[0])).asItem(), (int) annotation.numberValue()[0]);
         }
         return ItemStack.EMPTY;
     }

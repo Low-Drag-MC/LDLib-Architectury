@@ -25,7 +25,7 @@ public class ItemAccessor extends TypesAccessor<Item> {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
             if (annotation.stringValue().length > 0) {
-                return BuiltInRegistries.ITEM.get(new ResourceLocation(annotation.stringValue()[0])).asItem();
+                return BuiltInRegistries.ITEM.get(ResourceLocation.parse(annotation.stringValue()[0])).asItem();
             }
         }
         return Items.AIR;

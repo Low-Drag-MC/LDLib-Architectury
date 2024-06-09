@@ -26,7 +26,7 @@ public class FluidAccessor extends TypesAccessor<Fluid> {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
             if (annotation.stringValue().length > 0) {
-                return BuiltInRegistries.FLUID.get(new ResourceLocation(annotation.stringValue()[0]));
+                return BuiltInRegistries.FLUID.get(ResourceLocation.parse(annotation.stringValue()[0]));
             }
         }
         return Fluids.EMPTY;
