@@ -8,9 +8,8 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.networking.c2s.CPacketUIClientAction;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
+import lombok.Getter;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -19,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.Comparator;
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 public class ModularUIContainer extends AbstractContainerMenu implements WidgetUIAccess {
     public static final MenuType<ModularUIContainer> MENUTYPE = new MenuType<>((i, inventory) -> new ModularUIContainer(i), FeatureFlags.DEFAULT_FLAGS);
 
+    @Getter
     private final ModularUI modularUI;
 
     public ModularUIContainer(ModularUI modularUI, int windowID) {
@@ -73,10 +74,6 @@ public class ModularUIContainer extends AbstractContainerMenu implements WidgetU
         this.slots.set(slotHandle.index, emptySlotPlaceholder);
         ((AbstractContainerMenuAccessor)this).getLastSlots().set(slotHandle.index, ItemStack.EMPTY);
         ((AbstractContainerMenuAccessor)this).getRemoteSlots().set(slotHandle.index, ItemStack.EMPTY);
-    }
-
-    public ModularUI getModularUI() {
-        return modularUI;
     }
 
     @Override
@@ -254,7 +251,7 @@ public class ModularUIContainer extends AbstractContainerMenu implements WidgetU
         packetBuffer.writeVarInt(updateId);
         payloadWriter.accept(packetBuffer);
         if (modularUI.entityPlayer instanceof AbstractClientPlayer) {
-            Minecraft.getInstance().getConnection().send(new CPacketUIClientAction(containerId, packetBuffer));
+            PacketDistributor.sendToServer(new CPacketUIClientAction(containerId, packetBuffer));
         }
     }
 
@@ -264,7 +261,7 @@ public class ModularUIContainer extends AbstractContainerMenu implements WidgetU
         packetBuffer.writeVarInt(updateId);
         payloadWriter.accept(packetBuffer);
         if (modularUI.entityPlayer instanceof ServerPlayer serverPlayer) {
-            serverPlayer.connection.send(new SPacketUIWidgetUpdate(containerId, packetBuffer));
+            PacketDistributor.sendToPlayer(serverPlayer, new SPacketUIWidgetUpdate(containerId, packetBuffer));
         }
     }
 

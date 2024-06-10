@@ -32,7 +32,8 @@ public class CPacketUIClientAction implements CustomPacketPayload {
 
         buf.writeVarInt(windowId);
 
-        updateData.resetReaderIndex();
+        // have to do this because the packet is written twice sometimes for some reason by the packet splitter??
+        updateData.readerIndex(0);
     }
 
     public static CPacketUIClientAction decode(RegistryFriendlyByteBuf buf) {

@@ -23,7 +23,7 @@ public class FriendlyBufPayload extends ObjectTypedPayload<FriendlyByteBuf> {
         buf.writeVarInt(buf.readableBytes());
         buf.writeBytes(buf);
 
-        buf.resetReaderIndex();
+        buf.readerIndex(0);
     }
 
     @Override

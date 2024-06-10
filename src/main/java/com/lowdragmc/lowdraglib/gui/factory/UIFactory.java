@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +50,7 @@ public abstract class UIFactory<T> {
         //accumulate all initial updates of widgets in open packet
         uiTemplate.mainGroup.writeInitialData(serializedHolder);
 
-        player.connection.send(new SPacketUIOpen(uiFactoryId, serializedHolder, currentWindowId));
+        PacketDistributor.sendToPlayer(player, new SPacketUIOpen(uiFactoryId, serializedHolder, currentWindowId));
 
         player.initMenu(container);
         player.containerMenu = container;
@@ -70,10 +71,10 @@ public abstract class UIFactory<T> {
         ModularUI uiTemplate = createUITemplate(holder, entityPlayer);
         if (uiTemplate == null) return;
         uiTemplate.initWidgets();
-        ModularUIGuiContainer ModularUIGuiContainer = new ModularUIGuiContainer(uiTemplate, windowId);
+        ModularUIGuiContainer container = new ModularUIGuiContainer(uiTemplate, windowId);
         uiTemplate.mainGroup.readInitialData(serializedHolder);
-        minecraft.setScreen(ModularUIGuiContainer);
-        minecraft.player.containerMenu = ModularUIGuiContainer.getMenu();
+        minecraft.setScreen(container);
+        minecraft.player.containerMenu = container.getMenu();
     }
 
     protected abstract ModularUI createUITemplate(T holder, Player entityPlayer);

@@ -434,7 +434,10 @@ public abstract class WorldSceneRenderer {
 
                         renderBlocks(poseStack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), renderedBlocks, hook, particleTicks);
 
-                        BufferUploader.drawWithShader(buffer.buildOrThrow());
+                        MeshData data = buffer.build();
+                        if (data != null) {
+                            BufferUploader.drawWithShader(data);
+                        }
                         layer.clearRenderState();
                     }
                 });
@@ -656,7 +659,6 @@ public abstract class WorldSceneRenderer {
         ModelData modelData = blockRenderDispatcher.getBlockModel(state).getModelData(level, pos, state, te == null ? ModelData.EMPTY : te.getModelData());
         blockRenderDispatcher.renderBatched(state, pos, level, poseStack, consumer, false, random, modelData, renderType);
     }
-
 
     private void renderTESR(Collection<BlockPos> poses, PoseStack poseStack, MultiBufferSource.BufferSource buffers, @Nullable ISceneBlockRenderHook hook, float partialTicks) {
         for (BlockPos pos : poses) {

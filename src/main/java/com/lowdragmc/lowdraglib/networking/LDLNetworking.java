@@ -6,9 +6,6 @@ import com.lowdragmc.lowdraglib.networking.c2s.CPacketUIClientAction;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIOpen;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketUIWidgetUpdate;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -29,11 +26,6 @@ public class LDLNetworking {
         registar.playToServer(CPacketUIClientAction.TYPE, CPacketUIClientAction.CODEC, CPacketUIClientAction::execute);
 
         registar.playBidirectional(PacketRPCMethodPayload.TYPE, PacketRPCMethodPayload.CODEC, PacketRPCMethodPayload::execute);
-    }
-
-    public static void sendToTrackingChunk(ServerLevel level, ChunkPos pos, CustomPacketPayload packet) {
-        level.getChunkSource().chunkMap.getPlayers(pos, false).forEach(p -> p.connection.send(packet));
-
     }
 
 }

@@ -3,13 +3,11 @@ package com.lowdragmc.lowdraglib.syncdata.blockentity;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.async.AsyncThreadData;
 import com.lowdragmc.lowdraglib.async.IAsyncLogic;
-import com.lowdragmc.lowdraglib.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-
-import java.util.Objects;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * @author KilaBash
@@ -44,7 +42,7 @@ public interface IAsyncAutoSyncBlockEntity extends IAutoSyncBlockEntity, IAsyncL
             if (getRootStorage().hasDirtySyncFields()) {
                 Platform.getMinecraftServer().execute(() -> {
                     var packet = SPacketManagedPayload.of(this, false);
-                    LDLNetworking.sendToTrackingChunk((ServerLevel) getSelf().getLevel(), new ChunkPos(this.getCurrentPos()), packet);
+                    PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) getSelf().getLevel(), new ChunkPos(this.getCurrentPos()), packet);
                 });
             }
         }

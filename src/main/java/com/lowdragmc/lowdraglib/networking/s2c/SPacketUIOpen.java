@@ -37,7 +37,7 @@ public class SPacketUIOpen implements CustomPacketPayload {
         buf.writeResourceLocation(uiFactoryId);
         buf.writeVarInt(windowId);
 
-        serializedHolder.resetReaderIndex();
+        serializedHolder.readerIndex(0);
     }
 
     public static SPacketUIOpen decode(RegistryFriendlyByteBuf buf) {

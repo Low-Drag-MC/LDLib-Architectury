@@ -129,6 +129,7 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
                     this.lastTextValue = latest;
                     writeUpdateInfo(-2, buffer -> ComponentSerialization.STREAM_CODEC.encode(buffer, this.component));
                 }
+                return;
             }
             String latest = textSupplier.get();
             if (!latest.equals(lastTextValue)) {
@@ -144,7 +145,7 @@ public class LabelWidget extends Widget implements IConfigurableWidget {
         if (id == -1) {
             this.lastTextValue = buffer.readUtf();
             updateSize();
-        } else if(id == -2) {
+        } else if (id == -2) {
             this.component = ComponentSerialization.STREAM_CODEC.decode(buffer);
             this.lastTextValue = component.getString();
             updateSize();
