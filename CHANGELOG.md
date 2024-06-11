@@ -1,3 +1,3 @@
 # ChangeLog
 
-* revert IModelRenderer automatically getting rotation of block, caused a crash
+* fix extremely rare packet crash that popped up

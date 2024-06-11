@@ -20,8 +20,8 @@ public class FriendlyBufPayload extends ObjectTypedPayload<FriendlyByteBuf> {
 
     @Override
     public void writePayload(RegistryFriendlyByteBuf buf) {
-        buf.writeVarInt(buf.readableBytes());
-        buf.writeBytes(buf);
+        buf.writeVarInt(payload.readableBytes());
+        buf.writeBytes(payload);
 
         buf.readerIndex(0);
     }
