@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -11,8 +12,9 @@ import java.nio.file.Path;
 
 public class Platform {
 
+    private static final RegistryAccess BLANK = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     @ApiStatus.Internal
-    public static RegistryAccess FROZEN_REGISTRY_ACCESS;
+    public static RegistryAccess FROZEN_REGISTRY_ACCESS = BLANK;
 
     @ExpectPlatform
     public static String platformName() {
@@ -57,7 +59,6 @@ public class Platform {
         throw new AssertionError();
     }
 
-    @Nullable("client not connected/server not loaded yet")
     public static RegistryAccess getFrozenRegistry() {
         if (FROZEN_REGISTRY_ACCESS != null) {
             return FROZEN_REGISTRY_ACCESS;
@@ -66,7 +67,7 @@ public class Platform {
                 return Minecraft.getInstance().getConnection().registryAccess();
             }
         }
-        return null;
+        return BLANK;
     }
 
 }

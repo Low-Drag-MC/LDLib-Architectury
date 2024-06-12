@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix extremely rare packet crash that popped up
+* fix crash that happened when no datapack registries were loaded yet but regular ones needed to be accessed
