@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModList;
@@ -10,14 +11,14 @@ import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
 public class Platform {
 
+    private static final RegistryAccess BLANK = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     @ApiStatus.Internal
-    public static RegistryAccess FROZEN_REGISTRY_ACCESS = RegistryAccess.EMPTY;
+    public static RegistryAccess FROZEN_REGISTRY_ACCESS = BLANK;
 
 
     public static String platformName() {
@@ -52,7 +53,6 @@ public class Platform {
         return FMLLoader.getGamePath();
     }
 
-    @Nullable("client not connected/server not loaded yet")
     public static RegistryAccess getFrozenRegistry() {
         if (FROZEN_REGISTRY_ACCESS != null) {
             return FROZEN_REGISTRY_ACCESS;
@@ -61,7 +61,7 @@ public class Platform {
                 return Minecraft.getInstance().getConnection().registryAccess();
             }
         }
-        return null;
+        return BLANK;
     }
 
 }
