@@ -185,8 +185,8 @@ public class IModelRenderer implements ISerializableRenderer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void onAdditionalModel(Consumer<ResourceLocation> registry) {
-        registry.accept(modelLocation);
+    public void onAdditionalModel(Consumer<ModelResourceLocation> registry) {
+        registry.accept(ModelResourceLocation.standalone(modelLocation));
     }
 
     @Override

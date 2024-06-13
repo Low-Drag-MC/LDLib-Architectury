@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
@@ -68,7 +69,7 @@ public interface IRenderer {
      * Register additional model here.
      */
     @OnlyIn(Dist.CLIENT)
-    default void onAdditionalModel(Consumer<ResourceLocation> registry) {
+    default void onAdditionalModel(Consumer<ModelResourceLocation> registry) {
 
     }
 
@@ -175,7 +176,7 @@ public interface IRenderer {
      */
     @OnlyIn(Dist.CLIENT)
     default float reBakeCustomQuadsOffset() {
-        return 0.002f;
+        return 0;
     }
 
     /**

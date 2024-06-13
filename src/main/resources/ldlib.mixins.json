@@ -31,7 +31,6 @@
         "BlockEntityMixin",
         "FluidTankMixin",
         "PackConfigMixin",
-        "QuadBakingVertexConsumerMixin",
         "ReloadableResourceManagerMixin",
         "ReloadableServerResourcesMixin",
         "accessor.AbstractContainerMenuAccessor",

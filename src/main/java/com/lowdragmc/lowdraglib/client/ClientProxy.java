@@ -87,7 +87,7 @@ public class ClientProxy extends CommonProxy {
 //    }
 
     @SubscribeEvent
-    public void registerTextures(ModelEvent.RegisterAdditional event) {
+    public void registerModels(ModelEvent.RegisterAdditional event) {
         for (IRenderer renderer : IRenderer.EVENT_REGISTERS) {
             renderer.onAdditionalModel(event::register);
         }

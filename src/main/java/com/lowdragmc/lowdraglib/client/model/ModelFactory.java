@@ -40,11 +40,8 @@ import java.util.function.Function;
 public class ModelFactory {
     public static final ItemModelGenerator ITEM_MODEL_GENERATOR = new ItemModelGenerator();
 
-    @Setter
-    private static ModelBakery modelBakery;
-
     public static ModelBakery getModelBakery() {
-        return modelBakery != null ? modelBakery : Minecraft.getInstance().getModelManager().getModelBakery();
+        return Minecraft.getInstance().getModelManager().getModelBakery();
     }
 
     public static UnbakedModel getLDLibModel(UnbakedModel vanilla) {
