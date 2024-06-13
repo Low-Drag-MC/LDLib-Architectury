@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       publishMaven:
-        description: 'whether publish to the maven'
+        description: 'whether to publish to the maven'
         required: true
         type: boolean
         default: true
       publishCurseForgeAndModrinth:
-        description: 'whether publish to the curseforge and modrinth'
+        description: 'whether to publish to curseforge and modrinth'
         required: true
         type: boolean
         default: true
@@ -52,13 +52,11 @@ jobs:
         name: Get Version
         id: var
         run: |
-          MESSAGE=$(ls fabric/build/libs/* | grep sources.jar -v | grep shadow.jar -v | awk -F 'ldlib-fabric-|.jar' '{print $2}')
-          echo fabric_version=$MESSAGE >> $GITHUB_OUTPUT
           MESSAGE=$(ls forge/build/libs/* | grep sources.jar -v | grep shadow.jar -v | awk -F 'ldlib-forge-|.jar' '{print $2}')
-          echo forge_version=$MESSAGE >> $GITHUB_OUTPUT
+          echo version=$MESSAGE >> $GITHUB_OUTPUT
 
       - if: ${{ inputs.publishCurseForgeAndModrinth }}
-        name: mc-publish-fabric
+        name: mc-publish
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           # Only include this section if you wish to publish
@@ -72,50 +70,16 @@ jobs:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
           files: |
-            fabric/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
-            fabric/build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
+            build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
+            build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
 
-          name: LDLib ${{ steps.var.outputs.fabric_version }}-fabric
-          version: mc${{ steps.var.outputs.fabric_version }}-fabric
+          name: LDLib ${{ steps.var.outputs.version }}-neoforge
+          version: mc${{ steps.var.outputs.version }}-neoforge
           version-type: release
           changelog-file: CHANGELOG.*
 
           loaders: |
-            fabric
-          game-versions: |
-            ${{ github.ref_name }}
-          game-version-filter: none
-          java: |
-            21
-          retry-attempts: 2
-          retry-delay: 10000
-          fail-mode: fail
-
-      - if: ${{ inputs.publishCurseForgeAndModrinth }}
-        name: mc-publish-forge
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          # Only include this section if you wish to publish
-          # your assets on Modrinth.
-          modrinth-id: B1CBVXHX
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-
-          # Only include this section if you wish to publish
-          # your assets on CurseForge.
-          curseforge-id: 626676
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-
-          files: |
-            forge/build/libs/!(*-@(dev|sources|javadoc|dev-shadow)).jar
-            forge/build/libs/*-@(dev|sources|javadoc|dev-shadow).jar
-
-          name: LDLib ${{ steps.var.outputs.forge_version }}-forge
-          version: mc${{ steps.var.outputs.forge_version }}-forge
-          version-type: release
-          changelog-file: CHANGELOG.*
-
-          loaders: |
-            forge
+            neoforge
           game-versions: |
             ${{ github.ref_name }}
           game-version-filter: none
