@@ -10,17 +10,17 @@ public class FluidStackPayload extends ObjectTypedPayload<FluidStack> {
 
     @Override
     public void writePayload(RegistryFriendlyByteBuf buf) {
-        FluidStack.STREAM_CODEC.encode(buf, payload);
+        FluidStack.OPTIONAL_STREAM_CODEC.encode(buf, payload);
     }
 
     @Override
     public void readPayload(RegistryFriendlyByteBuf buf) {
-        payload = FluidStack.STREAM_CODEC.decode(buf);
+        payload = FluidStack.OPTIONAL_STREAM_CODEC.decode(buf);
     }
 
     @Override
     public Tag serializeNBT(HolderLookup.Provider provider) {
-        return payload.save(provider, new CompoundTag());
+        return payload.saveOptional(provider);
     }
 
     @Override
