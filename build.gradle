@@ -7,7 +7,7 @@ plugins {
 }
 
 version = mod_version
-group = "com.lowdragmc.ldlib"
+group = maven_group
 
 repositories {
     mavenLocal()
@@ -187,6 +187,7 @@ tasks.withType(ProcessResources).configureEach {
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
+            artifactId = archivesBaseName
             from components.java
         }
     }
