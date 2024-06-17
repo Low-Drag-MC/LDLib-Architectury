@@ -1,3 +1,3 @@
 # ChangeLog
 
-* Fixed fluidstack payloads sometimes crashing because empty fluidstack was invalid, which it shouldn't be.
+* fix TrackedDummyWorld leaking client level instances of ~300mb

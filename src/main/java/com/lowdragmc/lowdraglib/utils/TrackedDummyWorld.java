@@ -1,22 +1,21 @@
 package com.lowdragmc.lowdraglib.utils;
 
 import com.lowdragmc.lowdraglib.LDLib;
-import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.scene.ParticleManager;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.EntityAccessor;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
@@ -33,6 +32,7 @@ import org.joml.Vector3f;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,37 +48,33 @@ import java.util.function.Predicate;
 @MethodsReturnNonnullByDefault
 public class TrackedDummyWorld extends DummyWorld {
 
+    @Setter
     private Predicate<BlockPos> renderFilter;
-    public final Level proxyWorld;
+    public final WeakReference<Level> proxyWorld;
+    @Getter
     public final Map<BlockPos, BlockInfo> renderedBlocks = new HashMap<>();
     public final Map<BlockPos, BlockEntity> blockEntities = new HashMap<>();
-    public final Map<Integer, Entity> entities =new Int2ObjectArrayMap<>();
+    public final Map<Integer, Entity> entities = new Int2ObjectArrayMap<>();
 
+    @Getter
     public final Vector3f minPos = new Vector3f(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+    @Getter
     public final Vector3f maxPos = new Vector3f(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 
-    public void setRenderFilter(Predicate<BlockPos> renderFilter) {
-        this.renderFilter = renderFilter;
-    }
-
-    public TrackedDummyWorld(){
+    public TrackedDummyWorld() {
         super(Minecraft.getInstance().level);
-        proxyWorld = null;
+        proxyWorld = new WeakReference<>(null);
     }
 
-    public TrackedDummyWorld(Level world){
+    public TrackedDummyWorld(Level world) {
         super(world);
-        proxyWorld = world;
+        proxyWorld = new WeakReference<>(world);
     }
 
     public void clear() {
         renderedBlocks.clear();
         blockEntities.clear();
         entities.clear();
-    }
-
-    public Map<BlockPos, BlockInfo> getRenderedBlocks() {
-        return renderedBlocks;
     }
 
     public void addBlocks(Map<BlockPos, BlockInfo> renderedBlocks) {
@@ -124,14 +120,16 @@ public class TrackedDummyWorld extends DummyWorld {
     public BlockEntity getBlockEntity(@Nonnull BlockPos pos) {
         if (renderFilter != null && !renderFilter.test(pos))
             return null;
-        return proxyWorld != null ? proxyWorld.getBlockEntity(pos) : blockEntities.computeIfAbsent(pos, p -> renderedBlocks.getOrDefault(p, BlockInfo.EMPTY).getBlockEntity(p, Platform.getFrozenRegistry()));
+        Level proxy = proxyWorld.get();
+        return proxy != null ? proxy.getBlockEntity(pos) : blockEntities.computeIfAbsent(pos, p -> renderedBlocks.getOrDefault(p, BlockInfo.EMPTY).getBlockEntity(p, this.registryAccess()));
     }
 
     @Override
     public BlockState getBlockState(@Nonnull BlockPos pos) {
         if (renderFilter != null && !renderFilter.test(pos))
-            return Blocks.AIR.defaultBlockState(); //return air if not rendering this com.lowdragmc.lowdraglib.test.block
-        return proxyWorld != null ? proxyWorld.getBlockState(pos) : renderedBlocks.getOrDefault(pos, BlockInfo.EMPTY).getBlockState();
+            return Blocks.AIR.defaultBlockState(); //return air if not rendering this
+        Level proxy = proxyWorld.get();
+        return proxy != null ? proxy.getBlockState(pos) : renderedBlocks.getOrDefault(pos, BlockInfo.EMPTY).getBlockState();
     }
 
     @Override
@@ -189,39 +187,35 @@ public class TrackedDummyWorld extends DummyWorld {
         return new Vector3f(maxPos.x - minPos.x + 1, maxPos.y - minPos.y + 1, maxPos.z - minPos.z + 1);
     }
 
-    public Vector3f getMinPos() {
-        return minPos;
-    }
-
-    public Vector3f getMaxPos() {
-        return maxPos;
-    }
-
     @Override
     public ChunkSource getChunkSource() {
-        return proxyWorld == null ? super.getChunkSource() : proxyWorld.getChunkSource();
+        Level proxy = proxyWorld.get();
+        return proxy == null ? super.getChunkSource() : proxy.getChunkSource();
     }
 
     @Override
     public FluidState getFluidState(BlockPos pPos) {
-        return proxyWorld == null ? super.getFluidState(pPos) : proxyWorld.getFluidState(pPos);
+        Level proxy = proxyWorld.get();
+        return proxy == null ? super.getFluidState(pPos) : proxy.getFluidState(pPos);
     }
 
     @Override
     public int getBlockTint(@Nonnull BlockPos blockPos, @Nonnull ColorResolver colorResolver) {
-        return  proxyWorld == null ? super.getBlockTint(blockPos, colorResolver) : proxyWorld.getBlockTint(blockPos, colorResolver);
+        Level proxy = proxyWorld.get();
+        return proxy == null ? super.getBlockTint(blockPos, colorResolver) : proxy.getBlockTint(blockPos, colorResolver);
     }
 
     @Nonnull
     @Override
     public Holder<Biome> getBiome(@Nonnull BlockPos pos) {
-        return proxyWorld == null ? super.getBiome(pos) : proxyWorld.getBiome(pos);
+        Level proxy = proxyWorld.get();
+        return proxy == null ? super.getBiome(pos) : proxy.getBiome(pos);
     }
 
     @Override
     public void setParticleManager(ParticleManager particleManager) {
         super.setParticleManager(particleManager);
-        if (proxyWorld instanceof DummyWorld dummyWorld) {
+        if (proxyWorld.get() instanceof DummyWorld dummyWorld) {
             dummyWorld.setParticleManager(particleManager);
         }
     }
@@ -230,7 +224,7 @@ public class TrackedDummyWorld extends DummyWorld {
     @Override
     public ParticleManager getParticleManager() {
         ParticleManager particleManager = super.getParticleManager();
-        if (particleManager == null && proxyWorld instanceof DummyWorld dummyWorld) {
+        if (particleManager == null && proxyWorld.get() instanceof DummyWorld dummyWorld) {
             return dummyWorld.getParticleManager();
         }
         return particleManager;
@@ -267,10 +261,10 @@ public class TrackedDummyWorld extends DummyWorld {
         }
     }
 
-    public List<Entity> geAllEntities() {
+    public List<Entity> getAllEntities() {
         var entities = new ArrayList<>(this.entities.values());
-        if (proxyWorld instanceof TrackedDummyWorld trackedDummyWorld)
-            entities.addAll(trackedDummyWorld.geAllEntities());
+        if (proxyWorld.get() instanceof TrackedDummyWorld trackedDummyWorld)
+            entities.addAll(trackedDummyWorld.getAllEntities());
         return entities;
     }
 }

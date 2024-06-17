@@ -684,7 +684,7 @@ public abstract class WorldSceneRenderer {
     }
 
     private void renderEntities(TrackedDummyWorld level, PoseStack poseStack, MultiBufferSource buffer, @Nullable ISceneEntityRenderHook hook, float partialTicks) {
-        for (Entity entity : level.geAllEntities()) {
+        for (Entity entity : level.getAllEntities()) {
             poseStack.pushPose();
             if (entity.tickCount == 0) {
                 entity.xOld = entity.getX();
