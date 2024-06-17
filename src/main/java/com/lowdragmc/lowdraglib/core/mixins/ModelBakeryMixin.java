@@ -1,14 +1,18 @@
 package com.lowdragmc.lowdraglib.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
+import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,6 +27,24 @@ import java.util.Collection;
 public abstract class ModelBakeryMixin {
 
     @Shadow abstract UnbakedModel getModel(ResourceLocation modelPath);
+
+    @WrapOperation(method = "getModel",
+              at = @At(value = "INVOKE",
+                       target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V"))
+    protected void injectStateToModelLocation(Logger instance, String s, Object[] objects, Operation<Void> original) {
+        ResourceLocation id = objects[0] instanceof ResourceLocation rl ? rl : null;
+        if (id != null) {
+            if (id.getPath().startsWith("block/")) {
+                id = id.withPath(id.getPath().substring("block/".length()));
+            } else if (id.getPath().startsWith("item/")) {
+                id = id.withPath(id.getPath().substring("item/".length()));
+            }
+            if (BuiltInRegistries.ITEM.get(id) instanceof IItemRendererProvider) {
+                return;
+            }
+        }
+        original.call(instance, s, objects);
+    }
 
     @ModifyExpressionValue(method = "registerModelAndLoadDependencies",
                            at = @At(value = "INVOKE",
