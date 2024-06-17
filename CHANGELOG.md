@@ -1,3 +1,4 @@
 # ChangeLog
 
-* fix TrackedDummyWorld leaking client level instances of ~300mb
+* updated dependencies
+* fixed error spam on model load

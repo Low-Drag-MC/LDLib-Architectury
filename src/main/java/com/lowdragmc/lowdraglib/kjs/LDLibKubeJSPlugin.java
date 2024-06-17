@@ -5,9 +5,9 @@ import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import dev.latvian.mods.kubejs.script.BindingRegistry;
 import org.joml.Vector3f;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
-import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.kubejs.util.ClassFilter;
 
@@ -24,7 +24,7 @@ public class LDLibKubeJSPlugin implements KubeJSPlugin {
     }
 
     @Override
-    public void registerBindings(BindingsEvent event) {
+    public void registerBindings(BindingRegistry event) {
         // texture
         event.add("ResourceTexture", ResourceTexture.class);
         event.add("FillDirection", ProgressTexture.FillDirection.class);
