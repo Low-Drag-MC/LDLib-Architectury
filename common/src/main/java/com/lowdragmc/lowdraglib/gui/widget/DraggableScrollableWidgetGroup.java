@@ -535,6 +535,11 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
             }
             selectedWidget = widget;
             ((ISelected) selectedWidget).onSelected();
+        } else if (widget == null) {
+            if (selectedWidget != null) {
+                ((ISelected) selectedWidget).onUnSelected();
+            }
+            selectedWidget = null;
         }
     }
 

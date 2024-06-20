@@ -24,7 +24,10 @@ public class IRendererAccessor extends CustomObjectAccessor<IRenderer> {
     @Override
     public IRenderer deserialize(AccessorOp op, ITypedPayload<?> payload) {
         if (payload instanceof NbtTagPayload nbtTagPayload && nbtTagPayload.getPayload() instanceof CompoundTag tag) {
-            return ISerializableRenderer.deserializeWrapper(tag);
+            var renderer = ISerializableRenderer.deserializeWrapper(tag);
+            if (renderer != null) {
+                return renderer;
+            }
         }
         return IRenderer.EMPTY;
     }

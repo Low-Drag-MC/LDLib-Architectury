@@ -55,7 +55,7 @@ public class ItemConfigurator extends ValueConfigurator<Item> implements SearchC
         searchComponent.setCapacity(5);
         var textFieldWidget = searchComponent.textFieldWidget;
         textFieldWidget.setClientSideWidget();
-        textFieldWidget.setCurrentString(value == null ? defaultValue : value);
+        textFieldWidget.setCurrentString(value == null ? BuiltInRegistries.ITEM.getKey(defaultValue) : BuiltInRegistries.ITEM.getKey(value));
         textFieldWidget.setBordered(false);
     }
 

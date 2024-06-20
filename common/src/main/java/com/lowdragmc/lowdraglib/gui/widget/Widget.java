@@ -80,6 +80,8 @@ public class Widget {
     protected final List<Component> tooltipTexts = new ArrayList<>();
     @Configurable(name = "ldlib.gui.editor.name.background")
     protected IGuiTexture backgroundTexture;
+    @Configurable(name = "ldlib.gui.editor.name.draw_background_when_hover")
+    protected boolean drawBackgroundWhenHover = true;
     @Configurable(name = "ldlib.gui.editor.name.hover_texture")
     protected IGuiTexture hoverTexture;
     @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
@@ -121,19 +123,34 @@ public class Widget {
 
     public Widget setHoverTooltips(String... tooltipText) {
         tooltipTexts.clear();
-        Arrays.stream(tooltipText).filter(Objects::nonNull).filter(s->!s.isEmpty()).map(
-                Component::translatable).forEach(tooltipTexts::add);
+        appendHoverTooltips(tooltipText);
         return this;
     }
 
     public Widget setHoverTooltips(Component... tooltipText) {
         tooltipTexts.clear();
-        Arrays.stream(tooltipText).filter(Objects::nonNull).forEach(tooltipTexts::add);
+        appendHoverTooltips(tooltipText);
         return this;
     }
 
     public Widget setHoverTooltips(List<Component> tooltipText) {
         tooltipTexts.clear();
+        appendHoverTooltips(tooltipText);
+        return this;
+    }
+
+    public Widget appendHoverTooltips(String... tooltipText) {
+        Arrays.stream(tooltipText).filter(Objects::nonNull).filter(s->!s.isEmpty()).map(
+                Component::translatable).forEach(tooltipTexts::add);
+        return this;
+    }
+
+    public Widget appendHoverTooltips(Component... tooltipText) {
+        Arrays.stream(tooltipText).filter(Objects::nonNull).forEach(tooltipTexts::add);
+        return this;
+    }
+
+    public Widget appendHoverTooltips(List<Component> tooltipText) {
         tooltipTexts.addAll(tooltipText);
         return this;
     }
@@ -146,6 +163,11 @@ public class Widget {
 
     public Widget setBackground(IGuiTexture... backgroundTexture) {
         this.backgroundTexture = backgroundTexture.length > 1 ? new GuiTextureGroup(backgroundTexture) : backgroundTexture[0];
+        return this;
+    }
+
+    public Widget setDrawBackgroundWhenHover(boolean drawBackgroundWhenHover) {
+        this.drawBackgroundWhenHover = drawBackgroundWhenHover;
         return this;
     }
 
@@ -370,12 +392,13 @@ public class Widget {
 
     @Environment(EnvType.CLIENT)
     protected void drawBackgroundTexture(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
-        if (backgroundTexture != null) {
+        var isHovered = isMouseOverElement(mouseX, mouseY);
+        if (backgroundTexture != null && (!isHovered || drawBackgroundWhenHover)) {
             Position pos = getPosition();
             Size size = getSize();
             backgroundTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
         }
-        if (hoverTexture != null && isMouseOverElement(mouseX, mouseY)) {
+        if (hoverTexture != null && isHovered) {
             Position pos = getPosition();
             Size size = getSize();
             hoverTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);

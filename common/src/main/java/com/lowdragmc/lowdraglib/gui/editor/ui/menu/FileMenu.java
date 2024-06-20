@@ -92,7 +92,7 @@ public class FileMenu extends MenuTab {
         var project = editor.getCurrentProject();
         if (project != null) {
             String suffix = "." + project.getSuffix();
-            DialogWidget.showFileDialog(editor, "ldlib.gui.editor.tips.save_project", editor.getWorkSpace(), false,
+            DialogWidget.showFileDialog(editor, "ldlib.gui.editor.tips.save_project", project.getProjectWorkSpace(editor), false,
                     DialogWidget.suffixFilter(suffix), file -> {
                         if (file != null && !file.isDirectory()) {
                             if (!file.getName().endsWith(suffix)) {

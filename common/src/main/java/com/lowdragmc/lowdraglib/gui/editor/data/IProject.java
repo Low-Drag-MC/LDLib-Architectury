@@ -31,6 +31,13 @@ public interface IProject extends ILDLRegister {
     IProject newEmptyProject();
 
     /**
+     * Get project work space
+     */
+    default File getProjectWorkSpace(Editor editor) {
+        return new File(editor.getWorkSpace(), "projects/" + name());
+    }
+
+    /**
      * Suffix name of this project
      */
     default String getSuffix() {

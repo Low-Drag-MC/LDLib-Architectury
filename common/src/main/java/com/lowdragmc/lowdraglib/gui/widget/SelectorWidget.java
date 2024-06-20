@@ -10,7 +10,6 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -59,12 +58,13 @@ public class SelectorWidget extends WidgetGroup {
 
     public SelectorWidget(int x, int y, int width, int height, List<String> candidates, int fontColor) {
         super(new Position(x, y), new Size(width, height));
-        this.button = new ButtonWidget(0,0, width, height, textTexture = new TextTexture("", fontColor).setWidth(width).setType(TextTexture.TextType.ROLL), d -> {
+        this.button = new ButtonWidget(0,0, width, height, IGuiTexture.EMPTY, d -> {
             if (d.isRemote) setShow(!isShow);
         });
         this.candidates = candidates;
         this.selectables = new ArrayList<>();
         this.addWidget(button);
+        this.addWidget(new ImageWidget(0, 1, width, height - 1, textTexture = new TextTexture("", fontColor).setWidth(width).setType(TextTexture.TextType.ROLL)));
         this.addWidget(popUp = new DraggableScrollableWidgetGroup(0, height, width, 15));
         popUp.setBackground(popUpTexture);
         popUp.setVisible(false);

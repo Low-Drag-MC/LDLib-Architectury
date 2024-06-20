@@ -65,6 +65,9 @@ public class PlayerInventoryWidget extends WidgetGroup {
                     if (Editor.INSTANCE != null) {
                         slotWidget.setCanPutItems(false);
                         slotWidget.setCanTakeItems(false);
+                    } else {
+                        slotWidget.setCanPutItems(true);
+                        slotWidget.setCanTakeItems(true);
                     }
                 }
             }

@@ -7,7 +7,6 @@ import com.lowdragmc.lowdraglib.networking.PacketIntLocation;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
 import com.lowdragmc.lowdraglib.syncdata.accessor.IManagedAccessor;
 import com.lowdragmc.lowdraglib.syncdata.blockentity.IAutoSyncBlockEntity;
-import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import lombok.NoArgsConstructor;
 import net.fabricmc.api.EnvType;
@@ -22,10 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.BitSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * a packet that contains payload for managed fields
@@ -87,21 +83,21 @@ public class SPacketManagedPayload extends PacketIntLocation implements IPacket 
     public static SPacketManagedPayload of(IAutoSyncBlockEntity tile, boolean force) {
         BitSet changed = new BitSet();
 
-        Map<ManagedKey, ITypedPayload<?>> payloads = new LinkedHashMap<>();
+        List<ITypedPayload<?>> payloads = new ArrayList<>();
         var syncedFields = tile.getRootStorage().getSyncFields();
         for (int i = 0; i < syncedFields.length; i++) {
             var field = syncedFields[i];
             if (force || field.isSyncDirty()) {
                 changed.set(i);
                 var key = field.getKey();
-                payloads.put(key, key.readSyncedField(field, force));
+                payloads.add(key.readSyncedField(field, force));
                 field.clearSyncDirty();
             }
         }
         var extra = new CompoundTag();
         tile.writeCustomSyncData(extra);
 
-        return new SPacketManagedPayload(tile.getBlockEntityType(), tile.getCurrentPos(), changed, payloads.values().toArray(new ITypedPayload<?>[0]), extra);
+        return new SPacketManagedPayload(tile.getBlockEntityType(), tile.getCurrentPos(), changed, payloads.toArray(new ITypedPayload<?>[0]), extra);
     }
 
     public void processPacket(@NotNull IAutoSyncBlockEntity blockEntity) {

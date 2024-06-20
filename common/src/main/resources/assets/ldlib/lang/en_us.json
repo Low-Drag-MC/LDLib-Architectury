@@ -96,6 +96,7 @@
   "ldlib.gui.editor.name.pos": "position",
   "ldlib.gui.editor.name.hover_tips": "hover tips",
   "ldlib.gui.editor.name.background": "background",
+  "ldlib.gui.editor.name.draw_background_when_hover": "draw background when hover",
   "ldlib.gui.editor.name.hover_texture": "hover texture",
   "ldlib.gui.editor.name.border": "border",
   "ldlib.gui.editor.name.border_color": "border color",

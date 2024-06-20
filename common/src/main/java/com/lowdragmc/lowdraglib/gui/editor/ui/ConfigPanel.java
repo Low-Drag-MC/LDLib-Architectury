@@ -62,8 +62,9 @@ public class ConfigPanel extends WidgetGroup {
         super(editor.getSize().getWidth() - WIDTH, 0, WIDTH, editor.getSize().height);
         setClientSideWidget();
         this.editor = editor;
+        setBackground(ColorPattern.BLACK.rectTexture());
         addWidget(new ImageWidget(0, 10, WIDTH, 10, new TextTexture("ldlib.gui.editor.configurator").setWidth(202)));
-        addWidget(tabBackground = new ImageWidget(-20, 30, 20, 2 * 20, ColorPattern.T_BLACK.rectTexture().setLeftRadius(8)));
+        addWidget(tabBackground = new ImageWidget(-20, 30, 20, 2 * 20, ColorPattern.BLACK.rectTexture().setLeftRadius(8)));
         addWidget(tabContainer = new TabContainer(0, 0, WIDTH, editor.getSize().height));
         reloadTabs(tabs);
     }
