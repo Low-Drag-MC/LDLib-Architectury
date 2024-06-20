@@ -53,16 +53,18 @@ import static net.minecraft.world.level.block.RenderShape.INVISIBLE;
 /**
  * @author KilaBash
  * @date 2022/05/25
- * @implNote  render a scene, through VBO compilation scene, greatly optimize rendering performance.
+ * @implNote render a scene, through VBO compilation scene, greatly optimize rendering performance.
  */
 @SuppressWarnings("ALL")
 @OnlyIn(Dist.CLIENT)
 public abstract class WorldSceneRenderer {
+
     protected static final FloatBuffer MODELVIEW_MATRIX_BUFFER = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
     protected static final FloatBuffer PROJECTION_MATRIX_BUFFER = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
     protected static final IntBuffer VIEWPORT_BUFFER = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder()).asIntBuffer();
     protected static final FloatBuffer PIXEL_DEPTH_BUFFER = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asFloatBuffer();
     protected static final FloatBuffer OBJECT_POS_BUFFER = ByteBuffer.allocateDirect(3 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+
     enum CacheState {
         UNUSED,
         NEED,
@@ -226,7 +228,7 @@ public abstract class WorldSceneRenderer {
         y = pos.y();
         width = size.x() - x;
         height = size.y() - y;
-        PositionedRect positionedRect = getPositionedRect((int)x, (int)y, (int)width, (int)height);
+        PositionedRect positionedRect = getPositionedRect((int) x, (int) y, (int) width, (int) height);
         PositionedRect mouse = getPositionedRect(mouseX, mouseY, 0, 0);
         mouseX = mouse.position.x;
         mouseY = mouse.position.y;
@@ -285,7 +287,7 @@ public abstract class WorldSceneRenderer {
 
     public void setCameraLookAt(Vector3f lookAt, double radius, double rotationPitch, double rotationYaw) {
         Vector3f vecX = new Vector3f((float) Math.cos(rotationPitch), (float) 0, (float) Math.sin(rotationPitch));
-        Vector3f vecY = new Vector3f(0, (float) (Math.tan(rotationYaw) * vecX.length()),0);
+        Vector3f vecY = new Vector3f(0, (float) (Math.tan(rotationYaw) * vecX.length()), 0);
         Vector3f pos = new Vector3f(vecX).add(vecY).normalize().mul((float) radius);
         setCameraLookAt(pos.add(lookAt.x(), lookAt.y(), lookAt.z()), lookAt, worldUp);
     }
@@ -382,7 +384,7 @@ public abstract class WorldSceneRenderer {
         Matrix4fStack posesStack = RenderSystem.getModelViewStack();
         posesStack.popMatrix();
         RenderSystem.applyModelViewMatrix();
-        
+
         RenderSystem.depthMask(false);
         RenderSystem.disableDepthTest();
         RenderSystem.enableBlend();
@@ -402,7 +404,7 @@ public abstract class WorldSceneRenderer {
             renderCacheBuffer(mc, particleTicks);
         } else {
             BlockRenderDispatcher blockrendererdispatcher = mc.getBlockRenderer();
-            try { // render com.lowdragmc.lowdraglib.test.block in each layer
+            try { // render the blocks in each layer
                 renderedBlocksMap.forEach((renderedBlocks, hook) -> {
                     for (RenderType layer : RenderType.chunkBufferLayers()) {
                         layer.setupRenderState();
@@ -480,10 +482,10 @@ public abstract class WorldSceneRenderer {
         if (cacheState.get() == CacheState.NEED) {
             progress = 0;
             maxProgress = renderedBlocksMap.keySet().stream().map(Collection::size).reduce(0, Integer::sum) * (layers.size() + 1);
-            thread = new Thread(()->{
+            thread = new Thread(() -> {
                 cacheState.set(CacheState.COMPILING);
                 BlockRenderDispatcher blockrendererdispatcher = mc.getBlockRenderer();
-                try { // render com.lowdragmc.lowdraglib.test.block in each layer
+                try { // render the blocks in each layer
                     ModelBlockRenderer.enableCaching();
                     PoseStack matrixstack = new PoseStack();
                     for (int i = 0; i < layers.size(); i++) {
@@ -494,20 +496,22 @@ public abstract class WorldSceneRenderer {
                         renderedBlocksMap.forEach((renderedBlocks, hook) -> {
                             renderBlocks(matrixstack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), renderedBlocks, hook, 0);
                         });
-                        var builder = buffer.buildOrThrow();
+                        MeshData data = buffer.build();
+                        if (data == null) {
+                            continue;
+                        }
 
                         var vertexBuffer = vertexBuffers[i];
                         Runnable toUpload = () -> {
                             if (!vertexBuffer.isInvalid()) {
                                 vertexBuffer.bind();
-                                vertexBuffer.upload(builder);
+                                vertexBuffer.upload(data);
                                 VertexBuffer.unbind();
                             }
                         };
                         CompletableFuture.runAsync(toUpload, runnable -> {
                             RenderSystem.recordRenderCall(runnable::run);
                         });
-
                     }
                     ModelBlockRenderer.clearCache();
                 } finally {
@@ -556,7 +560,7 @@ public abstract class WorldSceneRenderer {
 
                 ShaderInstance shaderInstance = RenderSystem.getShader();
 
-                for(int j = 0; j < 12; ++j) {
+                for (int j = 0; j < 12; ++j) {
                     int k = RenderSystem.getShaderTexture(j);
                     shaderInstance.setSampler("Sampler" + j, k);
                 }
@@ -838,7 +842,7 @@ public abstract class WorldSceneRenderer {
      * @param depth should pass Depth Test
      * @return x, y, z
      */
-    protected Vector3f blockPos2ScreenPos(BlockPos pos, boolean depth, int x, int y, int width, int height){
+    protected Vector3f blockPos2ScreenPos(BlockPos pos, boolean depth, int x, int y, int width, int height) {
         // render a frame
         RenderSystem.enableDepthTest();
         setupCamera(getPositionedRect(x, y, width, height));
@@ -852,6 +856,7 @@ public abstract class WorldSceneRenderer {
     }
 
     public static class VertexConsumerWrapper implements VertexConsumer {
+
         final VertexConsumer builder;
         @Setter
         float offsetX, offsetY, offsetZ;
@@ -894,7 +899,7 @@ public abstract class WorldSceneRenderer {
 
         @Override
         public VertexConsumer setColor(int red, int green, int blue, int alpha) {
-            return builder.setColor((int)(red * r), (int)(green * g), (int)(blue * b), (int)(alpha * a));
+            return builder.setColor((int) (red * r), (int) (green * g), (int) (blue * b), (int) (alpha * a));
         }
 
         @Override

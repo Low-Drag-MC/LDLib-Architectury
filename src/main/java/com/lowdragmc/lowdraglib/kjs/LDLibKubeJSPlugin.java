@@ -5,11 +5,10 @@ import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import dev.latvian.mods.kubejs.plugin.ClassFilter;
+import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
 import dev.latvian.mods.kubejs.script.BindingRegistry;
 import org.joml.Vector3f;
-import dev.latvian.mods.kubejs.KubeJSPlugin;
-import dev.latvian.mods.kubejs.script.ScriptType;
-import dev.latvian.mods.kubejs.util.ClassFilter;
 
 /**
  * @author KilaBash
@@ -19,7 +18,7 @@ import dev.latvian.mods.kubejs.util.ClassFilter;
 public class LDLibKubeJSPlugin implements KubeJSPlugin {
 
     @Override
-    public void registerClasses(ScriptType type, ClassFilter filter) {
+    public void registerClasses(ClassFilter filter) {
         filter.allow("com.lowdragmc.lowdraglib");
     }
 

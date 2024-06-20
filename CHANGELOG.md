@@ -1,4 +1,4 @@
 # ChangeLog
 
-* updated dependencies
-* fixed error spam on model load
+* fix WorldSceneRenderer crashing if it rendered a chunk layer with no blocks
+* updated KubeJS
