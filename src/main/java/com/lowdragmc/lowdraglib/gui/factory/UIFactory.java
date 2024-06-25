@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.factory;
 
 import com.lowdragmc.lowdraglib.Platform;
+import com.lowdragmc.lowdraglib.core.mixins.accessor.ServerPlayerAccessor;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
@@ -40,8 +41,8 @@ public abstract class UIFactory<T> {
         if (player.containerMenu != player.inventoryMenu) {
             player.closeContainer();
         }
-        player.nextContainerCounter();
-        int currentWindowId = player.containerCounter;
+        ((ServerPlayerAccessor)player).callNextContainerCounter();
+        int currentWindowId = ((ServerPlayerAccessor)player).getContainerCounter();
 
         RegistryFriendlyByteBuf serializedHolder = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.server.registryAccess());
         writeHolderToSyncData(serializedHolder, holder);
@@ -52,7 +53,7 @@ public abstract class UIFactory<T> {
 
         PacketDistributor.sendToPlayer(player, new SPacketUIOpen(uiFactoryId, serializedHolder, currentWindowId));
 
-        player.initMenu(container);
+        ((ServerPlayerAccessor)player).callInitMenu(container);
         player.containerMenu = container;
 
         //and fire forge event only in the end

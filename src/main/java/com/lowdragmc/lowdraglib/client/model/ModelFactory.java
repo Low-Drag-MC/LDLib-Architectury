@@ -56,6 +56,11 @@ public class ModelFactory {
             }
 
             @Override
+            public UnbakedModel getTopLevelModel(ModelResourceLocation modelResourceLocation) {
+                return ModelFactory.getTopLevelModel(modelResourceLocation);
+            }
+
+            @Override
             public @Nullable BakedModel bake(ResourceLocation location, ModelState state, Function<Material, TextureAtlasSprite> sprites) {
                 UnbakedModel unbakedmodel = this.getModel(location);
                 if (unbakedmodel instanceof BlockModel blockmodel) {
@@ -64,6 +69,16 @@ public class ModelFactory {
                     }
                 }
                 return unbakedmodel.bake(this, Material::sprite, state);
+            }
+
+            @Override
+            public @Nullable BakedModel bakeUncached(UnbakedModel unbakedModel, ModelState modelState, Function<Material, TextureAtlasSprite> function) {
+                if (unbakedModel instanceof BlockModel blockmodel) {
+                    if (blockmodel.getRootModel() == ModelBakery.GENERATION_MARKER) {
+                        return ITEM_MODEL_GENERATOR.generateBlockModel(Material::sprite, blockmodel).bake(this, blockmodel, Material::sprite, modelState, false);
+                    }
+                }
+                return unbakedModel.bake(this, Material::sprite, modelState);
             }
 
             @Override
@@ -80,6 +95,10 @@ public class ModelFactory {
 
     public static UnbakedModel getUnBakedModel(ResourceLocation modelLocation) {
         return ((ModelBakeryAccessor)getModelBakery()).invokeGetModel(modelLocation);
+    }
+
+    public static UnbakedModel getTopLevelModel(ModelResourceLocation modelLocation) {
+        return ((ModelBakeryAccessor)getModelBakery()).getTopLevelModels().get(modelLocation);
     }
 
     public static Quaternionf getQuaternion(Direction facing) {

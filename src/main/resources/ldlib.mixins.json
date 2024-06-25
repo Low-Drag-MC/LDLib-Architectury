@@ -35,6 +35,7 @@
         "ReloadableServerResourcesMixin",
         "accessor.AbstractContainerMenuAccessor",
         "accessor.EntityAccessor",
+        "accessor.ServerPlayerAccessor",
         "accessor.SlotAccessor",
         "emi.EmiRenderHelperMixin",
         "emi.SlotWidgetAccessor",
