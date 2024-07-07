@@ -37,6 +37,9 @@ public class ClientProxy extends CommonProxy {
 
     public ClientProxy(IEventBus eventBus) {
         super(eventBus);
+
+        // This needs to happen outside CommonProxy because the event bus can only register classes that have @SubscribeEvent methods
+        eventBus.register(this);
     }
 
 

@@ -43,8 +43,7 @@ public class CommonProxy {
             ITEMS.register("test", () -> TestItem.ITEM);
         }
 
-        // used for forge events (ClientProxy + CommonProxy)
-        eventBus.register(this);
+        // used for forge events (ClientProxy is registered separately, because CommonProxy doesn't have any @SubscribeEvent methods)
         eventBus.addListener(FMLLoadCompleteEvent.class, CommonProxy::loadComplete);
         eventBus.addListener(LDLNetworking::registerPayloads);
         // register server commands
