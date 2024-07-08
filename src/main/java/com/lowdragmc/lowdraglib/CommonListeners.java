@@ -33,7 +33,7 @@ public class CommonListeners {
 
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
-        Platform.FROZEN_REGISTRY_ACCESS = RegistryAccess.EMPTY;
+        Platform.FROZEN_REGISTRY_ACCESS = null;
     }
 
 }

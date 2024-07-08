@@ -18,7 +18,7 @@ public class Platform {
 
     private static final RegistryAccess BLANK = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     @ApiStatus.Internal
-    public static RegistryAccess FROZEN_REGISTRY_ACCESS = BLANK;
+    public static RegistryAccess FROZEN_REGISTRY_ACCESS = null;
 
 
     public static String platformName() {

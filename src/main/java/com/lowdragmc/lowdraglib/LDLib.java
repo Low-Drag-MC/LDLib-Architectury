@@ -78,7 +78,7 @@ public class LDLib {
 
     public static boolean isRemote() {
         if (isClient()) {
-            return Minecraft.getInstance().isSameThread();
+            return !Minecraft.getInstance().isSameThread();
         }
         return false;
     }
