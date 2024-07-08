@@ -1,4 +1,3 @@
 # ChangeLog
 
-* fix server loading issue
-* fix jei compatibility
+* part 2 (actually fixes the issue)

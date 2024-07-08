@@ -56,7 +56,7 @@ public class Platform {
     public static RegistryAccess getFrozenRegistry() {
         if (FROZEN_REGISTRY_ACCESS != null) {
             return FROZEN_REGISTRY_ACCESS;
-        } else if (LDLib.isRemote()) {
+        } else if (!LDLib.isRemote()) {
             if (Minecraft.getInstance() != null && Minecraft.getInstance().getConnection() != null) {
                 return Minecraft.getInstance().getConnection().registryAccess();
             }
