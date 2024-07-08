@@ -51,7 +51,6 @@ public class SPacketUIOpen implements CustomPacketPayload {
         return new SPacketUIOpen(uiFactoryId, serializedHolder, windowId);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void execute(SPacketUIOpen packet, IPayloadContext context) {
         UIFactory<?> uiFactory = UIFactory.FACTORIES.get(packet.uiFactoryId);
         if (uiFactory != null) {

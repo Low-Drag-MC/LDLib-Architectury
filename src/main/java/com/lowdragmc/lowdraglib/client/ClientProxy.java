@@ -37,6 +37,7 @@ public class ClientProxy extends CommonProxy {
 
     public ClientProxy(IEventBus eventBus) {
         super(eventBus);
+        eventBus.register(this);
     }
 
 

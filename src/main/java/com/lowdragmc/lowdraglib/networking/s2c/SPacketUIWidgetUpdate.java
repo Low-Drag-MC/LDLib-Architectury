@@ -49,7 +49,6 @@ public class SPacketUIWidgetUpdate implements CustomPacketPayload {
         return new SPacketUIWidgetUpdate(windowId, updateData);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void execute(SPacketUIWidgetUpdate packet, IPayloadContext context) {
         Screen currentScreen = Minecraft.getInstance().screen;
         if (currentScreen instanceof ModularUIGuiContainer) {

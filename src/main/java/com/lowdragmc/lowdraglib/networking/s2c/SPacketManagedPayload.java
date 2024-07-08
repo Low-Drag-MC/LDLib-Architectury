@@ -150,7 +150,6 @@ public class SPacketManagedPayload extends PacketIntLocation {
         return new SPacketManagedPayload(blockEntityType, pos, changed, payloads, extra);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void execute(SPacketManagedPayload packet, IPayloadContext context) {
         var level = Minecraft.getInstance().level;
         if (level != null) {

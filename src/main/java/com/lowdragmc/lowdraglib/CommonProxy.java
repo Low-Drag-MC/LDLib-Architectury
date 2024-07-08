@@ -44,7 +44,7 @@ public class CommonProxy {
         }
 
         // used for forge events (ClientProxy + CommonProxy)
-        eventBus.register(this);
+        // eventBus.register(this); //TODO: uncomment if @SubscribeEvent is used in this class
         eventBus.addListener(FMLLoadCompleteEvent.class, CommonProxy::loadComplete);
         eventBus.addListener(LDLNetworking::registerPayloads);
         // register server commands
