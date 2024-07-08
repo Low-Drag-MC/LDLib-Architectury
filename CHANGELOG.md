@@ -1,3 +1,4 @@
 # ChangeLog
 
-* updated NeoForge
+* fix server loading issue
+* fix jei compatibility

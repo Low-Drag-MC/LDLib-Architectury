@@ -57,7 +57,7 @@ public class Platform {
         if (FROZEN_REGISTRY_ACCESS != null) {
             return FROZEN_REGISTRY_ACCESS;
         } else if (LDLib.isRemote()) {
-            if (Minecraft.getInstance().getConnection() != null) {
+            if (Minecraft.getInstance() != null && Minecraft.getInstance().getConnection() != null) {
                 return Minecraft.getInstance().getConnection().registryAccess();
             }
         }
