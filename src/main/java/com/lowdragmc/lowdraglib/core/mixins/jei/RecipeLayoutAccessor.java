@@ -1,8 +1,7 @@
 package com.lowdragmc.lowdraglib.core.mixins.jei;
 
-import mezz.jei.api.helpers.IModIdHelper;
-import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.common.gui.elements.DrawableNineSliceTexture;
+import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.recipes.RecipeLayout;
 import mezz.jei.library.gui.recipes.ShapelessIcon;
 import org.apache.logging.log4j.Logger;
@@ -19,20 +18,12 @@ public interface RecipeLayoutAccessor {
     int getIngredientCycleOffset();
 
     @Accessor
-    IIngredientManager getIngredientManager();
-
-    @Accessor
-    IModIdHelper getModIdHelper();
-
-    @Accessor
     DrawableNineSliceTexture getRecipeBorder();
 
     @Accessor
     ShapelessIcon getShapelessIcon();
 
     @Accessor
-    int getPosX();
-    @Accessor
-    int getPosY();
+    ImmutableRect2i getArea();
 
 }

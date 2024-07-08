@@ -15,6 +15,7 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryDecorator;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IIngredientVisibility;
+import mezz.jei.common.Internal;
 import mezz.jei.common.gui.textures.Textures;
 import mezz.jei.library.gui.ingredients.RecipeSlot;
 import mezz.jei.library.gui.ingredients.RecipeSlotsView;
@@ -54,13 +55,9 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             IRecipeCategory<T> recipeCategory,
             Collection<IRecipeCategoryDecorator<T>> decorators,
             T recipe,
-            IFocusGroup focuses,
-            IIngredientManager ingredientManager,
-            IIngredientVisibility ingredientVisibility,
-            IModIdHelper modIdHelper,
-            Textures textures) {
-        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(recipeCategory, decorators, recipe, ingredientManager, modIdHelper, textures);
-        if (wrapper.setRecipeLayout(recipeCategory, recipe, focuses, ingredientVisibility)) {
+            IFocusGroup focuses) {
+        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(recipeCategory, decorators, recipe);
+        if (wrapper.setRecipeLayout(recipeCategory, recipe, focuses)) {
             return wrapper;
         }
         return null;
@@ -87,14 +84,13 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
     private boolean setRecipeLayout(
             IRecipeCategory<R> recipeCategory,
             R recipe,
-            IFocusGroup focuses,
-            IIngredientVisibility ingredientVisibility
+            IFocusGroup focuses
     ) {
-        RecipeLayoutBuilder builder = new RecipeLayoutBuilder(accessor.getIngredientManager(), accessor.getIngredientCycleOffset());
+        RecipeLayoutBuilder builder = new RecipeLayoutBuilder(Internal.getJeiRuntime().getIngredientManager(), accessor.getIngredientCycleOffset());
         try {
             recipeCategory.setRecipe(builder, recipe, focuses);
             if (builder.isUsed()) {
-                builder.setRecipeLayout(this, focuses, ingredientVisibility);
+                builder.setRecipeLayout(this, focuses);
                 return true;
             }
         } catch (RuntimeException | LinkageError e) {
@@ -111,12 +107,9 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
     public RecipeLayoutWrapper(
             IRecipeCategory<R> recipeCategory,
             Collection<IRecipeCategoryDecorator<R>> decorators,
-            R recipe,
-            IIngredientManager ingredientManager,
-            IModIdHelper modIdHelper,
-            Textures textures
+            R recipe
     ) {
-        super(recipeCategory, decorators, recipe, ingredientManager, modIdHelper, textures);
+        super(recipeCategory, decorators, recipe);
         this.wrapper = (ModularWrapper<?>) recipe;
     }
 
@@ -134,8 +127,8 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        int posX = accessor.getPosX();
-        int posY = accessor.getPosY();
+        int posX = accessor.getArea().getX();
+        int posY = accessor.getArea().getY();
         final int recipeMouseX = mouseX - posX;
         final int recipeMouseY = mouseY - posY;
 
@@ -204,7 +197,7 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
         if (outputSlots.isEmpty()) return;
 
         for (RecipeSlot outputSlot : outputSlots) {
-            outputSlot.addTooltipCallback(new RegisterNameTooltipCallback(uid, accessor.getModIdHelper()));
+            outputSlot.addTooltipCallback(new RegisterNameTooltipCallback(uid, Internal.getJeiRuntime().getJeiHelpers().getModIdHelper()));
         }
     }
 

@@ -11,7 +11,6 @@ import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.runtime.IClickableIngredient;
-import mezz.jei.api.runtime.IIngredientVisibility;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.ingredients.RecipeSlot;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -41,7 +40,7 @@ public class RecipeSlotWrapper extends RecipeSlot {
             int xPos,
             int yPos
     ) {
-        super(((RecipeSlotAccessor) wrappedSlot).getIngredientManager(), wrappedSlot.getRole(), 0, 0, 0);
+        super(wrappedSlot.getRole(), 0, 0, 0);
         this.widget = widget;
         this.wrapperSlot = wrappedSlot;
         this.area = new ImmutableRect2i(xPos, yPos, widget.getSize().width, widget.getSize().height);
@@ -110,8 +109,8 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     @Override
-    public void set(List<Optional<ITypedIngredient<?>>> ingredients, Set<Integer> focusMatches, IIngredientVisibility ingredientVisibility) {
-        wrapperSlot.set(ingredients, focusMatches, ingredientVisibility);
+    public void set(List<Optional<ITypedIngredient<?>>> ingredients, Set<Integer> focusMatches) {
+        wrapperSlot.set(ingredients, focusMatches);
     }
 
     @Override

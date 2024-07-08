@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
+import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeGuiLayoutsAccessor;
 import com.lowdragmc.lowdraglib.core.mixins.jei.RecipesGuiAccessor;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIJeiHandler;
@@ -9,11 +10,13 @@ import com.lowdragmc.lowdraglib.test.TestJEIPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.IRecipeLayoutDrawable;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.IJeiRuntime;
 import mezz.jei.common.input.ClickableIngredient;
 import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.gui.recipes.RecipeLayoutWithButtons;
 import mezz.jei.gui.recipes.RecipesGui;
 import mezz.jei.library.gui.recipes.RecipeLayout;
 import mezz.jei.library.ingredients.TypedIngredient;
@@ -24,6 +27,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author KilaBash
@@ -47,8 +51,11 @@ public class JEIPlugin implements IModPlugin {
     }
 
     @Nonnull
-    public static List<RecipeLayout<?>> getRecipeLayouts(RecipesGui recipesGui) {
-        return new ArrayList<>(((RecipesGuiAccessor)recipesGui).getRecipeLayouts());
+    public static List<IRecipeLayoutDrawable<?>> getRecipeLayouts(RecipesGui recipesGui) {
+        return ((RecipeGuiLayoutsAccessor)((RecipesGuiAccessor)recipesGui).getLayouts()).getRecipeLayoutsWithButtons()
+                .stream()
+                .map(RecipeLayoutWithButtons::getRecipeLayout)
+                .collect(Collectors.toList());
     }
 
     public static boolean isJeiEnabled() {
