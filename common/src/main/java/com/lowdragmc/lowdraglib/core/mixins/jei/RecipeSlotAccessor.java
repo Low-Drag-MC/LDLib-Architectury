@@ -10,7 +10,4 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface RecipeSlotAccessor {
     @Accessor("rect")
     void setArea(ImmutableRect2i rect);
-
-    @Accessor
-    IIngredientManager getIngredientManager();
 }

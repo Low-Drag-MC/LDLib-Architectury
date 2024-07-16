@@ -41,7 +41,7 @@ public class RecipeSlotWrapper extends RecipeSlot {
             int xPos,
             int yPos
     ) {
-        super(((RecipeSlotAccessor) wrappedSlot).getIngredientManager(), wrappedSlot.getRole(), 0, 0, 0);
+        super(wrappedSlot.getRole(), 0, 0, 0);
         this.widget = widget;
         this.wrapperSlot = wrappedSlot;
         this.area = new ImmutableRect2i(xPos, yPos, widget.getSize().width, widget.getSize().height);
@@ -95,7 +95,7 @@ public class RecipeSlotWrapper extends RecipeSlot {
         int height = this.area.getHeight();
 
         RenderSystem.disableDepthTest();
-        guiGraphics.fill(x, y, x + width, y + height , color);
+        guiGraphics.fill(x, y, x + width, y + height, color);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
@@ -110,8 +110,8 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     @Override
-    public void set(List<Optional<ITypedIngredient<?>>> ingredients, Set<Integer> focusMatches, IIngredientVisibility ingredientVisibility) {
-        wrapperSlot.set(ingredients, focusMatches, ingredientVisibility);
+    public void set(List<Optional<ITypedIngredient<?>>> ingredients, Set<Integer> focusMatches) {
+        wrapperSlot.set(ingredients, focusMatches);
     }
 
     @Override
