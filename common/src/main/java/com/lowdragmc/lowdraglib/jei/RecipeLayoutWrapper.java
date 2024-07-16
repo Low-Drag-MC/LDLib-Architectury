@@ -76,8 +76,8 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
         List<RecipeSlot> recipeSlots = new ArrayList<>();
         List<Widget> allWidgets = recipe.modularUI.getFlatWidgetCollection();
         for (var slot : this.getRecipeSlots().getSlots()) {
-            if (slot instanceof RecipeSlotWrapper wrapper) {
-                recipeSlots.add(wrapper);
+            if (slot instanceof RecipeSlotWrapper slotWrapper) {
+                recipeSlots.add(slotWrapper);
                 continue;
             }
             var rect = slot.getRect();
@@ -135,7 +135,6 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
     @Override
     public void drawRecipe(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         IRecipeCategory<R> recipeCategory = getRecipeCategory();
-        IDrawable background = recipeCategory.getBackground();
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         accessor.getRecipeBackground().draw(graphics, getRectWithBorder());

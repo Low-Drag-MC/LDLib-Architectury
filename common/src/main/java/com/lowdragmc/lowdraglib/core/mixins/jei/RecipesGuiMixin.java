@@ -8,7 +8,6 @@ import mezz.jei.api.runtime.IRecipesGui;
 import mezz.jei.gui.input.IRecipeFocusSource;
 import mezz.jei.gui.recipes.IRecipeLogicStateListener;
 import mezz.jei.gui.recipes.RecipesGui;
-import mezz.jei.library.gui.recipes.RecipeLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;

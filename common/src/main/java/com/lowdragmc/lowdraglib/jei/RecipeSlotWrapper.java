@@ -11,7 +11,6 @@ import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.runtime.IClickableIngredient;
-import mezz.jei.api.runtime.IIngredientVisibility;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.ingredients.RecipeSlot;
 import net.minecraft.MethodsReturnNonnullByDefault;

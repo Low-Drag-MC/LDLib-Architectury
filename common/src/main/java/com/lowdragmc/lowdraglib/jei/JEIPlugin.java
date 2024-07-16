@@ -19,15 +19,12 @@ import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.gui.recipes.RecipeGuiLayouts;
 import mezz.jei.gui.recipes.RecipeLayoutWithButtons;
 import mezz.jei.gui.recipes.RecipesGui;
-import mezz.jei.library.gui.recipes.RecipeLayout;
 import mezz.jei.library.ingredients.TypedIngredient;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * @author KilaBash

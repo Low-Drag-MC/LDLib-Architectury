@@ -1,9 +1,6 @@
 package com.lowdragmc.lowdraglib.core.mixins.jei;
 
 import mezz.jei.api.gui.drawable.IScalableDrawable;
-import mezz.jei.api.helpers.IModIdHelper;
-import mezz.jei.api.runtime.IIngredientManager;
-import mezz.jei.common.gui.elements.DrawableNineSliceTexture;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.recipes.RecipeLayout;
 import mezz.jei.library.gui.recipes.ShapelessIcon;
