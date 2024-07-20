@@ -5,7 +5,9 @@ import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeSlotsAccessor;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.drawable.IScalableDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.helpers.IModIdHelper;
@@ -14,8 +16,8 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryDecorator;
 import mezz.jei.api.runtime.IIngredientManager;
-import mezz.jei.api.runtime.IIngredientVisibility;
-import mezz.jei.common.gui.textures.Textures;
+import mezz.jei.common.Internal;
+import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.ingredients.RecipeSlot;
 import mezz.jei.library.gui.ingredients.RecipeSlotsView;
 import mezz.jei.library.gui.recipes.RecipeLayout;
@@ -56,11 +58,11 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             T recipe,
             IFocusGroup focuses,
             IIngredientManager ingredientManager,
-            IIngredientVisibility ingredientVisibility,
-            IModIdHelper modIdHelper,
-            Textures textures) {
-        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(recipeCategory, decorators, recipe, ingredientManager, modIdHelper, textures);
-        if (wrapper.setRecipeLayout(recipeCategory, recipe, focuses, ingredientVisibility)) {
+            IScalableDrawable recipeBackground,
+            int recipeBorderPadding
+    ) {
+        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(recipeCategory, decorators, recipe, recipeBackground, recipeBorderPadding);
+        if (wrapper.setRecipeLayout(recipeCategory, recipe, focuses, ingredientManager)) {
             return wrapper;
         }
         return null;
@@ -74,6 +76,10 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
         List<RecipeSlot> recipeSlots = new ArrayList<>();
         List<Widget> allWidgets = recipe.modularUI.getFlatWidgetCollection();
         for (var slot : this.getRecipeSlots().getSlots()) {
+            if (slot instanceof RecipeSlotWrapper slotWrapper) {
+                recipeSlots.add(slotWrapper);
+                continue;
+            }
             var rect = slot.getRect();
             Widget widget = allWidgets.get(rect.getX());
             Position position = widget.getPosition();
@@ -88,13 +94,13 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             IRecipeCategory<R> recipeCategory,
             R recipe,
             IFocusGroup focuses,
-            IIngredientVisibility ingredientVisibility
+            IIngredientManager ingredientManager
     ) {
-        RecipeLayoutBuilder builder = new RecipeLayoutBuilder(accessor.getIngredientManager(), accessor.getIngredientCycleOffset());
+        RecipeLayoutBuilder builder = new RecipeLayoutBuilder(ingredientManager, accessor.getIngredientCycleOffset());
         try {
             recipeCategory.setRecipe(builder, recipe, focuses);
             if (builder.isUsed()) {
-                builder.setRecipeLayout(this, focuses, ingredientVisibility);
+                builder.setRecipeLayout(this, focuses);
                 return true;
             }
         } catch (RuntimeException | LinkageError e) {
@@ -112,11 +118,10 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             IRecipeCategory<R> recipeCategory,
             Collection<IRecipeCategoryDecorator<R>> decorators,
             R recipe,
-            IIngredientManager ingredientManager,
-            IModIdHelper modIdHelper,
-            Textures textures
+            IScalableDrawable recipeBackground,
+            int recipeBorderPadding
     ) {
-        super(recipeCategory, decorators, recipe, ingredientManager, modIdHelper, textures);
+        super(recipeCategory, decorators, recipe, recipeBackground, recipeBorderPadding);
         this.wrapper = (ModularWrapper<?>) recipe;
     }
 
@@ -130,24 +135,26 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
     @Override
     public void drawRecipe(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         IRecipeCategory<R> recipeCategory = getRecipeCategory();
-        IDrawable background = recipeCategory.getBackground();
 
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
-        int posX = accessor.getPosX();
-        int posY = accessor.getPosY();
+        accessor.getRecipeBackground().draw(graphics, getRectWithBorder());
+        ImmutableRect2i area = accessor.getArea();
+        int posX = area.getX();
+        int posY = area.getY();
         final int recipeMouseX = mouseX - posX;
         final int recipeMouseY = mouseY - posY;
-
-        graphics.pose().pushPose();
+        PoseStack poseStack = graphics.pose();
+        poseStack.pushPose();
         {
-            graphics.pose().translate(posX, posY, 0);
+            poseStack.translate(posX, posY, 0);
+            poseStack.pushPose();
+            {
+                recipeCategory.draw(getRecipe(), getRecipeSlots().getView(), graphics, recipeMouseX, recipeMouseY);
 
-            IDrawable categoryBackground = recipeCategory.getBackground();
-            int width = categoryBackground.getWidth() + (2 * RECIPE_BORDER_PADDING);
-            int height = categoryBackground.getHeight() + (2 * RECIPE_BORDER_PADDING);
-            accessor.getRecipeBorder().draw(graphics, -RECIPE_BORDER_PADDING, -RECIPE_BORDER_PADDING, width, height);
-            background.draw(graphics);
+                // drawExtras and drawInfo often render text which messes with the color, this clears it
+                RenderSystem.setShaderColor(1, 1, 1, 1);
+            }
+            poseStack.popPose();
 
             // defensive push/pop to protect against recipe categories changing the last pose
             graphics.pose().pushPose();
@@ -166,12 +173,6 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
 
         }
         graphics.pose().popPose();
-//
-//        if (getRecipeTransferButton() != null) {
-//            Minecraft minecraft = Minecraft.getInstance();
-//            float partialTicks = minecraft.getFrameTime();
-//            getRecipeTransferButton().render(poseStack, mouseX, mouseY, partialTicks);
-//        }
         RenderSystem.disableBlend();
     }
 
@@ -204,7 +205,7 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
         if (outputSlots.isEmpty()) return;
 
         for (RecipeSlot outputSlot : outputSlots) {
-            outputSlot.addTooltipCallback(new RegisterNameTooltipCallback(uid, accessor.getModIdHelper()));
+            outputSlot.addTooltipCallback(new RegisterNameTooltipCallback(uid));
         }
     }
 
@@ -213,9 +214,9 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
         private final ResourceLocation uid;
         private final IModIdHelper modIdHelper;
 
-        private RegisterNameTooltipCallback(String uid, IModIdHelper modIdHelper) {
+        private RegisterNameTooltipCallback(String uid) {
             this.uid = new ResourceLocation(uid);
-            this.modIdHelper = modIdHelper;
+            this.modIdHelper = Internal.getJeiRuntime().getJeiHelpers().getModIdHelper();
         }
 
         @Override

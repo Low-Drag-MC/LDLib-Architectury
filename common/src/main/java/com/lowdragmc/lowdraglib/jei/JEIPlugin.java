@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
+import com.lowdragmc.lowdraglib.core.mixins.RecipeGuiLayoutsAccessor;
 import com.lowdragmc.lowdraglib.core.mixins.jei.RecipesGuiAccessor;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIJeiHandler;
@@ -9,21 +10,21 @@ import com.lowdragmc.lowdraglib.test.TestJEIPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.IRecipeLayoutDrawable;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.IJeiRuntime;
 import mezz.jei.common.input.ClickableIngredient;
 import mezz.jei.common.util.ImmutableRect2i;
+import mezz.jei.gui.recipes.RecipeGuiLayouts;
+import mezz.jei.gui.recipes.RecipeLayoutWithButtons;
 import mezz.jei.gui.recipes.RecipesGui;
-import mezz.jei.library.gui.recipes.RecipeLayout;
 import mezz.jei.library.ingredients.TypedIngredient;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * @author KilaBash
@@ -32,7 +33,7 @@ import java.util.function.Supplier;
  */
 @JeiPlugin
 public class JEIPlugin implements IModPlugin {
-    
+
     public static IJeiRuntime jeiRuntime;
     public static IJeiHelpers jeiHelpers;
     private static final ModularUIJeiHandler modularUIGuiHandler = new ModularUIJeiHandler();
@@ -47,8 +48,12 @@ public class JEIPlugin implements IModPlugin {
     }
 
     @Nonnull
-    public static List<RecipeLayout<?>> getRecipeLayouts(RecipesGui recipesGui) {
-        return new ArrayList<>(((RecipesGuiAccessor)recipesGui).getRecipeLayouts());
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static List<IRecipeLayoutDrawable<?>> getRecipeLayouts(RecipesGui recipesGui) {
+        RecipeGuiLayouts layouts = ((RecipesGuiAccessor) recipesGui).getLayouts();
+        return (List) ((RecipeGuiLayoutsAccessor) layouts).getRecipeLayoutsWithButtons().stream()
+                .map(RecipeLayoutWithButtons::getRecipeLayout)
+                .toList();
     }
 
     public static boolean isJeiEnabled() {
@@ -59,7 +64,7 @@ public class JEIPlugin implements IModPlugin {
     public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
         JEIPlugin.jeiRuntime = jeiRuntime;
     }
-    
+
     @Override
     public void registerGuiHandlers(@Nonnull IGuiHandlerRegistration registration) {
         if (LDLib.isReiLoaded() || LDLib.isEmiLoaded()) return;
