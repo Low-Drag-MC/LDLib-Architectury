@@ -1,3 +1,3 @@
 # ChangeLog
 
-* part 2 (actually fixes the issue)
+* update to latest JEI changes

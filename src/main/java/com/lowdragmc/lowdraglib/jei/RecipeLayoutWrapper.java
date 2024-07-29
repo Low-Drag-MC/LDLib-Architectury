@@ -5,7 +5,9 @@ import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeSlotsAccessor;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
+import lombok.Getter;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.drawable.IScalableDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.helpers.IModIdHelper;
@@ -13,10 +15,8 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryDecorator;
-import mezz.jei.api.runtime.IIngredientManager;
-import mezz.jei.api.runtime.IIngredientVisibility;
 import mezz.jei.common.Internal;
-import mezz.jei.common.gui.textures.Textures;
+import mezz.jei.common.gui.elements.DrawableNineSliceTexture;
 import mezz.jei.library.gui.ingredients.RecipeSlot;
 import mezz.jei.library.gui.ingredients.RecipeSlotsView;
 import mezz.jei.library.gui.recipes.RecipeLayout;
@@ -48,6 +48,7 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
     /**
      * LDLib wraps the recipe inside ModularWrapper so that we can control the rendering of the recipe ourselves.
      */
+    @Getter
     private final ModularWrapper<?> wrapper;
 
 
@@ -56,7 +57,8 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             Collection<IRecipeCategoryDecorator<T>> decorators,
             T recipe,
             IFocusGroup focuses) {
-        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(recipeCategory, decorators, recipe);
+        DrawableNineSliceTexture recipeBackground = Internal.getTextures().getRecipeBackground();
+        RecipeLayoutWrapper<T> wrapper = new RecipeLayoutWrapper<>(recipeCategory, decorators, recipe, recipeBackground, 4);
         if (wrapper.setRecipeLayout(recipeCategory, recipe, focuses)) {
             return wrapper;
         }
@@ -107,14 +109,12 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
     public RecipeLayoutWrapper(
             IRecipeCategory<R> recipeCategory,
             Collection<IRecipeCategoryDecorator<R>> decorators,
-            R recipe
+            R recipe,
+            IScalableDrawable recipeBackground,
+            int recipeBorderPadding
     ) {
-        super(recipeCategory, decorators, recipe);
+        super(recipeCategory, decorators, recipe, recipeBackground, recipeBorderPadding);
         this.wrapper = (ModularWrapper<?>) recipe;
-    }
-
-    public ModularWrapper<?> getWrapper() {
-        return wrapper;
     }
 
     /**
@@ -139,7 +139,7 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             IDrawable categoryBackground = recipeCategory.getBackground();
             int width = categoryBackground.getWidth() + (2 * RECIPE_BORDER_PADDING);
             int height = categoryBackground.getHeight() + (2 * RECIPE_BORDER_PADDING);
-            accessor.getRecipeBorder().draw(graphics, -RECIPE_BORDER_PADDING, -RECIPE_BORDER_PADDING, width, height);
+            accessor.getRecipeBackground().draw(graphics, -RECIPE_BORDER_PADDING, -RECIPE_BORDER_PADDING, width, height);
             background.draw(graphics);
 
             // defensive push/pop to protect against recipe categories changing the last pose

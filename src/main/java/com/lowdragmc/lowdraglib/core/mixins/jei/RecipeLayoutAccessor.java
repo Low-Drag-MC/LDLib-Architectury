@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.core.mixins.jei;
 
-import mezz.jei.common.gui.elements.DrawableNineSliceTexture;
+import mezz.jei.api.gui.drawable.IScalableDrawable;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.recipes.RecipeLayout;
 import mezz.jei.library.gui.recipes.ShapelessIcon;
@@ -18,7 +18,7 @@ public interface RecipeLayoutAccessor {
     int getIngredientCycleOffset();
 
     @Accessor
-    DrawableNineSliceTexture getRecipeBorder();
+    IScalableDrawable getRecipeBackground();
 
     @Accessor
     ShapelessIcon getShapelessIcon();

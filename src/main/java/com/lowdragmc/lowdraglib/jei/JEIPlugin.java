@@ -54,7 +54,7 @@ public class JEIPlugin implements IModPlugin {
     public static List<IRecipeLayoutDrawable<?>> getRecipeLayouts(RecipesGui recipesGui) {
         return ((RecipeGuiLayoutsAccessor)((RecipesGuiAccessor)recipesGui).getLayouts()).getRecipeLayoutsWithButtons()
                 .stream()
-                .map(RecipeLayoutWithButtons::getRecipeLayout)
+                .map(RecipeLayoutWithButtons::recipeLayout)
                 .collect(Collectors.toList());
     }
 

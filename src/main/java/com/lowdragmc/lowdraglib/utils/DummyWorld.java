@@ -206,6 +206,26 @@ public class DummyWorld extends Level {
     }
 
     @Override
+    public void setDayTimeFraction(float v) {
+
+    }
+
+    @Override
+    public float getDayTimeFraction() {
+        return getLevel().getDayTimeFraction();
+    }
+
+    @Override
+    public float getDayTimePerTick() {
+        return getLevel().getDayTimePerTick();
+    }
+
+    @Override
+    public void setDayTimePerTick(float v) {
+
+    }
+
+    @Override
     public FeatureFlagSet enabledFeatures() {
         return getLevel().enabledFeatures();
     }
