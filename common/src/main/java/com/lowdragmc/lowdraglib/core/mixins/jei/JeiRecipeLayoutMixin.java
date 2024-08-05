@@ -22,14 +22,6 @@ import java.util.Optional;
 @Mixin(value = RecipeLayout.class, remap = false)
 public abstract class JeiRecipeLayoutMixin {
 
-    @Shadow
-    @Final
-    private int recipeBorderPadding;
-
-    @Shadow
-    @Final
-    private IScalableDrawable recipeBackground;
-
     @SuppressWarnings({"unchecked"})
     @Inject(method = "create(Lmezz/jei/api/recipe/category/IRecipeCategory;Ljava/util/Collection;Ljava/lang/Object;Lmezz/jei/api/recipe/IFocusGroup;Lmezz/jei/api/runtime/IIngredientManager;Lmezz/jei/api/gui/drawable/IScalableDrawable;I)Ljava/util/Optional;", at = @At(value = "HEAD"), cancellable = true)
     private static <T> void injectCreate(

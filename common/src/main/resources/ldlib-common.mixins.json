@@ -38,8 +38,7 @@
     "emi.EmiRenderHelperMixin",
     "emi.SlotWidgetAccessor",
     "jei.JeiRecipeLayoutMixin",
-    "jei.RecipeLayoutAccessor",
-    "jei.RecipeSlotsAccessor"
+    "jei.RecipeLayoutAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -52,7 +52,7 @@ public class JEIPlugin implements IModPlugin {
     public static List<IRecipeLayoutDrawable<?>> getRecipeLayouts(RecipesGui recipesGui) {
         RecipeGuiLayouts layouts = ((RecipesGuiAccessor) recipesGui).getLayouts();
         return (List) ((RecipeGuiLayoutsAccessor) layouts).getRecipeLayoutsWithButtons().stream()
-                .map(RecipeLayoutWithButtons::getRecipeLayout)
+                .map(RecipeLayoutWithButtons::recipeLayout)
                 .toList();
     }
 

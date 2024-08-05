@@ -4,9 +4,8 @@ import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeSlotAccessor;
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
-import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
@@ -23,7 +22,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 @MethodsReturnNonnullByDefault
@@ -31,16 +29,25 @@ import java.util.stream.Stream;
 public class RecipeSlotWrapper extends RecipeSlot {
 
     private final Widget widget;
-    private final RecipeSlot wrapperSlot;
+    private final IRecipeSlotDrawable wrapperSlot;
     private ImmutableRect2i area;
 
     public RecipeSlotWrapper(
             Widget widget,
-            RecipeSlot wrappedSlot,
+            IRecipeSlotDrawable wrappedSlot,
             int xPos,
             int yPos
     ) {
-        super(wrappedSlot.getRole(), 0, 0, 0);
+        super(wrappedSlot.getRole(),
+                new ImmutableRect2i(xPos, yPos, widget.getSize().width, widget.getSize().height),
+                0,
+                ((RecipeSlotAccessor) wrappedSlot).getTooltipCallbacks(),
+                ((RecipeSlotAccessor) wrappedSlot).getAllIngredients(),
+                ((RecipeSlotAccessor) wrappedSlot).getDisplayIngredients(),
+                ((RecipeSlotAccessor) wrappedSlot).getBackground(),
+                ((RecipeSlotAccessor) wrappedSlot).getOverlay(),
+                ((RecipeSlotAccessor) wrappedSlot).getSlotName(),
+                ((RecipeSlotAccessor) wrappedSlot).getRendererOverrides());
         this.widget = widget;
         this.wrapperSlot = wrappedSlot;
         this.area = new ImmutableRect2i(xPos, yPos, widget.getSize().width, widget.getSize().height);
@@ -99,21 +106,6 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     @Override
-    public void setBackground(IDrawable background) {
-        wrapperSlot.setBackground(background);
-    }
-
-    @Override
-    public void setOverlay(IDrawable overlay) {
-        wrapperSlot.setOverlay(overlay);
-    }
-
-    @Override
-    public void set(List<Optional<ITypedIngredient<?>>> ingredients, Set<Integer> focusMatches) {
-        wrapperSlot.set(ingredients, focusMatches);
-    }
-
-    @Override
     public List<Component> getTooltip() {
         return wrapperSlot.getTooltip();
     }
@@ -131,11 +123,6 @@ public class RecipeSlotWrapper extends RecipeSlot {
     }
 
     @Override
-    public <T> void addRenderOverride(IIngredientType<T> ingredientType, IIngredientRenderer<T> ingredientRenderer) {
-        wrapperSlot.addRenderOverride(ingredientType, ingredientRenderer);
-    }
-
-    @Override
     public void draw(GuiGraphics guiGraphics) {
         wrapperSlot.draw(guiGraphics);
     }
@@ -148,11 +135,6 @@ public class RecipeSlotWrapper extends RecipeSlot {
     @Override
     public Rect2i getRect() {
         return this.area.toMutable();
-    }
-
-    @Override
-    public void setSlotName(String slotName) {
-        wrapperSlot.setSlotName(slotName);
     }
 
     public void onPositionUpdate(RecipeLayoutWrapper<?> layoutWrapper) {

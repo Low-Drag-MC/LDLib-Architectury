@@ -1,15 +1,16 @@
 package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeLayoutAccessor;
-import com.lowdragmc.lowdraglib.core.mixins.jei.RecipeSlotsAccessor;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import mezz.jei.api.gui.drawable.IDrawable;
+import lombok.Getter;
 import mezz.jei.api.gui.drawable.IScalableDrawable;
+import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
@@ -17,12 +18,12 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryDecorator;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.common.Internal;
+import mezz.jei.common.util.ImmutablePoint2i;
 import mezz.jei.common.util.ImmutableRect2i;
 import mezz.jei.library.gui.ingredients.RecipeSlot;
-import mezz.jei.library.gui.ingredients.RecipeSlotsView;
 import mezz.jei.library.gui.recipes.RecipeLayout;
-import mezz.jei.library.gui.recipes.RecipeLayoutBuilder;
 import mezz.jei.library.gui.recipes.ShapelessIcon;
+import mezz.jei.library.gui.recipes.layout.builder.RecipeLayoutBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -32,10 +33,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * To reduce workload and allow for customization, we wrapped and expanded {@link RecipeLayout}  to fit our needs.
@@ -49,6 +47,7 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
     /**
      * LDLib wraps the recipe inside ModularWrapper so that we can control the rendering of the recipe ourselves.
      */
+    @Getter
     private final ModularWrapper<?> wrapper;
 
 
@@ -73,9 +72,9 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
         super.setPosition(posX, posY);
         var recipe = getWrapper();
         recipe.setRecipeLayout(posX, posY);
-        List<RecipeSlot> recipeSlots = new ArrayList<>();
+        List<IRecipeSlotDrawable> recipeSlots = new ArrayList<>();
         List<Widget> allWidgets = recipe.modularUI.getFlatWidgetCollection();
-        for (var slot : this.getRecipeSlots().getSlots()) {
+        for (var slot : accessor.getAllSlots()) {
             if (slot instanceof RecipeSlotWrapper slotWrapper) {
                 recipeSlots.add(slotWrapper);
                 continue;
@@ -96,11 +95,14 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             IFocusGroup focuses,
             IIngredientManager ingredientManager
     ) {
-        RecipeLayoutBuilder builder = new RecipeLayoutBuilder(ingredientManager, accessor.getIngredientCycleOffset());
+        RecipeLayoutBuilder<R> builder = new RecipeLayoutBuilder<>(recipeCategory, recipe, ingredientManager);
         try {
             recipeCategory.setRecipe(builder, recipe, focuses);
-            if (builder.isUsed()) {
-                builder.setRecipeLayout(this, focuses);
+            if (!builder.isEmpty()) {
+                builder.buildRecipeLayout(focuses,
+                        Collections.emptyList(),
+                        accessor.getRecipeBackground(),
+                        accessor.getRecipeBorderPadding());
                 return true;
             }
         } catch (RuntimeException | LinkageError e) {
@@ -109,9 +111,9 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
         return false;
     }
 
-    private void setRecipeSlots(List<RecipeSlot> recipeSlots) {
-        ((RecipeSlotsAccessor) this.getRecipeSlots()).setSlots(recipeSlots);
-        ((RecipeSlotsAccessor) this.getRecipeSlots()).setView(new RecipeSlotsView(recipeSlots));
+    private void setRecipeSlots(List<IRecipeSlotDrawable> recipeSlots) {
+        accessor.getAllSlots().clear();
+        accessor.getAllSlots().addAll(recipeSlots);
     }
 
     public RecipeLayoutWrapper(
@@ -121,12 +123,12 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             IScalableDrawable recipeBackground,
             int recipeBorderPadding
     ) {
-        super(recipeCategory, decorators, recipe, recipeBackground, recipeBorderPadding);
+        super(recipeCategory, decorators, recipe, recipeBackground, recipeBorderPadding,
+                null, new ImmutablePoint2i(
+                        recipeCategory.getWidth() + recipeBorderPadding + RecipeLayout.RECIPE_BUTTON_SPACING,
+                        recipeCategory.getHeight() + recipeBorderPadding - RecipeLayout.RECIPE_BUTTON_SIZE
+        ), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         this.wrapper = (ModularWrapper<?>) recipe;
-    }
-
-    public ModularWrapper<?> getWrapper() {
-        return wrapper;
     }
 
     /**
@@ -149,7 +151,7 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
             poseStack.translate(posX, posY, 0);
             poseStack.pushPose();
             {
-                recipeCategory.draw(getRecipe(), getRecipeSlots().getView(), graphics, recipeMouseX, recipeMouseY);
+                recipeCategory.draw(getRecipe(), getRecipeSlotsView(), graphics, recipeMouseX, recipeMouseY);
 
                 // drawExtras and drawInfo often render text which messes with the color, this clears it
                 RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -191,20 +193,20 @@ public class RecipeLayoutWrapper<R> extends RecipeLayout<R> {
      * Sync slots position.
      */
     public void onPositionUpdate() {
-        this.getRecipeSlots().getSlots()
+        accessor.getAllSlots()
                 .stream()
                 .filter(RecipeSlotWrapper.class::isInstance)
                 .map(RecipeSlotWrapper.class::cast)
                 .forEach(slotWrapper -> slotWrapper.onPositionUpdate(this));
     }
 
-    private void addOutputTooltips(List<RecipeSlot> recipeSlots, String uid) {
-        List<RecipeSlot> outputSlots = recipeSlots.stream()
+    private void addOutputTooltips(List<IRecipeSlotDrawable> recipeSlots, String uid) {
+        List<IRecipeSlotDrawable> outputSlots = recipeSlots.stream()
                 .filter(r -> r.getRole() == RecipeIngredientRole.OUTPUT)
                 .toList();
         if (outputSlots.isEmpty()) return;
 
-        for (RecipeSlot outputSlot : outputSlots) {
+        for (IRecipeSlotDrawable outputSlot : outputSlots) {
             outputSlot.addTooltipCallback(new RegisterNameTooltipCallback(uid));
         }
     }

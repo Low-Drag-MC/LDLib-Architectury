@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix JEI compatibility
+* fix JEI compatibility (again) (incomplete)
