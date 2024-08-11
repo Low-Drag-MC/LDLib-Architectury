@@ -9,14 +9,13 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.registration.*;
+import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IJeiRuntime;
-import mezz.jei.common.input.ClickableIngredient;
-import mezz.jei.common.util.ImmutableRect2i;
-import mezz.jei.library.ingredients.TypedIngredient;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author KilaBash
@@ -34,9 +33,14 @@ public class JEIPlugin implements IModPlugin {
         LDLib.LOGGER.debug("LDLib JEI Plugin created");
     }
 
+    @Nullable
     public static Object getItemIngredient(ItemStack itemStack, int x, int y, int width, int height) {
-        return new ClickableIngredient<>(TypedIngredient.createUnvalidated(VanillaTypes.ITEM_STACK, itemStack),
-                new ImmutableRect2i(x, y, width, height));
+        IIngredientManager ingredientManager = jeiHelpers.getIngredientManager();
+        return ingredientManager.createTypedIngredient(VanillaTypes.ITEM_STACK, itemStack)
+            .map(typedIngredient -> {
+                return new ClickableIngredient<>(typedIngredient, x, y, width, height);
+            })
+            .orElse(null);
     }
 
     public static boolean isJeiEnabled() {
