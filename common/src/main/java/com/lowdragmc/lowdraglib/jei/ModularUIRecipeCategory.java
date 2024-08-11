@@ -12,7 +12,6 @@ import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import mezz.jei.library.gui.recipes.supplier.builder.IngredientSupplierBuilder;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,7 +22,7 @@ import java.util.List;
 
 /**
  * @author KilaBash
- * @date: 2022/04/30
+ * @date 2022/04/30
  * @implNote ModularUIRecipeCategory
  */
 @MethodsReturnNonnullByDefault
@@ -51,18 +50,16 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
                 int width = widget.getSize().width;
                 int height = widget.getSize().height;
 
-                if (!(builder instanceof IngredientSupplierBuilder)) {
-                    slotBuilder.setBackground(IGui2IDrawable.toDrawable(widget.getBackgroundTexture(), width, height), -1, -1);
-                    slotBuilder.setOverlay(IGui2IDrawable.toDrawable(widget.getOverlay(), width, height), -1, -1);
-                    widget.setActive(false);
-                    widget.setVisible(false);
-                    if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
-                        slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
-                    } else if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.TankWidget tankW) {
-                        tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
-                        long capacity = Math.max(1, tankW.getFluidTank().getTankCapacity(tankW.getTank()));
-                        slotBuilder.setFluidRenderer(capacity, false, width - 2, height - 2);
-                    }
+                slotBuilder.setBackground(IGui2IDrawable.toDrawable(widget.getBackgroundTexture(), width, height), -1, -1);
+                slotBuilder.setOverlay(IGui2IDrawable.toDrawable(widget.getOverlay(), width, height), -1, -1);
+                widget.setActive(false);
+                widget.setVisible(false);
+                if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
+                    slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
+                } else if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.TankWidget tankW) {
+                    tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
+                    long capacity = Math.max(1, tankW.getFluidTank().getTankCapacity(tankW.getTank()));
+                    slotBuilder.setFluidRenderer(capacity, false, width - 2, height - 2);
                 }
             }
         }
