@@ -25,7 +25,6 @@
   "mixins": [
     "BlockEntityMixin",
     "PackConfigMixin",
-    "RecipeGuiLayoutsAccessor",
     "ReloadableResourceManagerMixin",
     "WorldLoaderMixin",
     "accessor.AbstractContainerMenuAccessor",
