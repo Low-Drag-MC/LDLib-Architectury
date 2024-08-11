@@ -1,6 +1,7 @@
-package com.lowdragmc.lowdraglib.gui.modular;
+package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import dev.emi.emi.api.EmiDragDropHandler;
 import dev.emi.emi.api.EmiExclusionArea;
 import dev.emi.emi.api.EmiStackProvider;

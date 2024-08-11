@@ -409,7 +409,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }
 
         if (LDLib.isJeiLoaded()) {
-            return List.of(JEIPlugin.getItemIngredient(realStack, getPosition().x, getPosition().y, getSize().width, getSize().height));
+            return List.of(realStack);
         } else if (LDLib.isReiLoaded()) {
             return REICallWrapper.getReiIngredients(realStack);
         } else if (LDLib.isEmiLoaded()) {
@@ -426,7 +426,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     private List<Object> getXEIIngredientsFromCycleTransfer(CycleItemStackHandler transfer, int index) {
         var stream = transfer.getStackList(index).stream().map(this::getRealStack);
         if (LDLib.isJeiLoaded()) {
-            return stream.filter(stack -> !stack.isEmpty()).map(item -> JEIPlugin.getItemIngredient(item, getPosition().x, getPosition().y, getSize().width, getSize().height)).toList();
+            return stream.filter(stack -> !stack.isEmpty()).collect(Collectors.toList());
         } else if (LDLib.isReiLoaded()) {
             return REICallWrapper.getReiIngredients(stream);
         } else if (LDLib.isEmiLoaded()) {
@@ -449,7 +449,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                                 .getTag(pair.getFirst())
                                 .stream()
                                 .flatMap(HolderSet.ListBacked::stream)
-                                .map(item -> JEIPlugin.getItemIngredient(getRealStack(new ItemStack(item.value(), pair.getSecond())), getPosition().x, getPosition().y, getSize().width, getSize().height)))
+                                .map(item -> getRealStack(new ItemStack(item.value(), pair.getSecond()))))
                         .collect(Collectors.toList());
             } else if (LDLib.isReiLoaded()) {
                 ref.returnValue = REICallWrapper.getReiIngredients(this::getRealStack, list);

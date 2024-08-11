@@ -1,3 +1,3 @@
 # ChangeLog
 
-* fix JEI compatibility (again) (incomplete)
+* fix JEI compatibility 2: electric boogaloo

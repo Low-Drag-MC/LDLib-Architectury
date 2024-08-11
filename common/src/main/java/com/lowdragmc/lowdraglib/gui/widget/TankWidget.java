@@ -571,9 +571,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }
 
         private static <T> Object _getPlatformFluidTypeForJEI(IPlatformFluidHelper<T> helper, FluidStack fluidStack, Position pos, Size size) {
-            T ingredient = helper.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
-            return new ClickableIngredient<>(TypedIngredient.createUnvalidated(helper.getFluidIngredientType(), ingredient),
-                    new ImmutableRect2i(pos.x, pos.y, size.width, size.height));
+            return helper.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
         }
     }
 
