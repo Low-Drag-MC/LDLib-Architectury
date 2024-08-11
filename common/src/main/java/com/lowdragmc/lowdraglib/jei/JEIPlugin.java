@@ -37,9 +37,7 @@ public class JEIPlugin implements IModPlugin {
     public static Object getItemIngredient(ItemStack itemStack, int x, int y, int width, int height) {
         IIngredientManager ingredientManager = jeiHelpers.getIngredientManager();
         return ingredientManager.createTypedIngredient(VanillaTypes.ITEM_STACK, itemStack)
-            .map(typedIngredient -> {
-                return new ClickableIngredient<>(typedIngredient, x, y, width, height);
-            })
+            .map(typedIngredient -> new ClickableIngredient<>(typedIngredient, x, y, width, height))
             .orElse(null);
     }
 
@@ -57,13 +55,6 @@ public class JEIPlugin implements IModPlugin {
         if (LDLib.isReiLoaded() || LDLib.isEmiLoaded()) return;
         registration.addGhostIngredientHandler(ModularUIGuiContainer.class, modularUIGuiHandler);
         registration.addGenericGuiContainerHandler(ModularUIGuiContainer.class, modularUIGuiHandler);
-    }
-
-    @Override
-    public void registerAdvanced(@Nonnull IAdvancedRegistration registration) {
-        if (Platform.isDevEnv()) {
-            TestJEIPlugin.registerAdvanced(registration);
-        }
     }
 
     @Override

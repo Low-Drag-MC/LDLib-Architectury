@@ -12,7 +12,7 @@ public class ModularUIGuiEventListener<T extends ModularWrapper<?>> implements I
 
     public ModularUIGuiEventListener(ModularWrapper<?> wrapper) {
         this.wrapper = wrapper;
-        this.area = new ScreenRectangle(wrapper.getLeft(), wrapper.getTop(), wrapper.width, wrapper.height);
+        this.area = new ScreenRectangle(0, 0, wrapper.modularUI.getWidth(), wrapper.modularUI.getHeight());
     }
 
     @Override

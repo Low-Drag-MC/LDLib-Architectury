@@ -31,11 +31,13 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, T wrapper, IFocusGroup focuses) {
+        wrapper.setRecipeWidget(0, 0);
+
         List<Widget> flatVisibleWidgetCollection = wrapper.modularUI.getFlatWidgetCollection();
         for (Widget widget : flatVisibleWidgetCollection) {
             if (widget instanceof IRecipeIngredientSlot slot) {
-                if (widget.getParent() instanceof DraggableScrollableWidgetGroup draggable && draggable.isUseScissor()) {
-                    // don't add the EMI widget at all if we have a draggable group, let the draggable widget handle it instead.
+                if (widget.getParent() instanceof DraggableScrollableWidgetGroup) {
+                    // don't add the JEI widget at all if we have a draggable group, let the draggable widget handle it instead.
                     continue;
                 }
                 Position pos = widget.getPosition();
@@ -58,8 +60,7 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
                     slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
                 } else if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.TankWidget tankW) {
                     tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
-                    long capacity = Math.max(1, tankW.getFluidTank().getTankCapacity(tankW.getTank()));
-                    slotBuilder.setFluidRenderer(capacity, false, width - 2, height - 2);
+                    slotBuilder.setFluidRenderer(1, false, width - 2, height - 2);
                 }
             }
         }

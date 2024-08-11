@@ -3,13 +3,11 @@ package com.lowdragmc.lowdraglib.test;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.jei.ModularUIRecipeCategory;
-import com.lowdragmc.lowdraglib.jei.ModularUIRecipeCategoryDecorator;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import lombok.Getter;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.RecipeType;
-import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.network.chat.Component;
@@ -25,10 +23,6 @@ public class TestJEIPlugin {
 
     public static void registerRecipes(IRecipeRegistration registration) {
         registration.addRecipes(TestJEIRecipeCategory.RECIPE_TYPE, List.of(new TestJEIRecipe()));
-    }
-
-    public static void registerAdvanced(IAdvancedRegistration registration) {
-        registration.addRecipeCategoryDecorator(TestJEIRecipeCategory.RECIPE_TYPE, new ModularUIRecipeCategoryDecorator<>());
     }
 
     private static class TestJEIRecipeCategory extends ModularUIRecipeCategory<TestJEIRecipe> {

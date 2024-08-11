@@ -217,6 +217,8 @@ public abstract class WorldSceneRenderer {
     }
 
     public void render(@Nonnull PoseStack poseStack, float x, float y, float width, float height, int mouseX, int mouseY) {
+        Vector3f topLeft = poseStack.last().pose().transformPosition(new Vector3f(0.0f, 0.0f, 0.0f));
+
         // setupCamera
         var pose = poseStack.last().pose();
         Vector4f pos = new Vector4f(x, y, 0, 1.0F);
@@ -228,7 +230,7 @@ public abstract class WorldSceneRenderer {
         width = size.x() - x;
         height = size.y() - y;
         PositionedRect positionedRect = getPositionedRect((int)x, (int)y, (int)width, (int)height);
-        PositionedRect mouse = getPositionedRect(mouseX, mouseY, 0, 0);
+        PositionedRect mouse = getPositionedRect((int) (mouseX + topLeft.x), (int) (mouseY + topLeft.y), 0, 0);
         mouseX = mouse.position.x;
         mouseY = mouse.position.y;
         setupCamera(positionedRect);

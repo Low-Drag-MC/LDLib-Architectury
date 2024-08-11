@@ -17,6 +17,9 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
+import org.joml.RoundingMode;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
@@ -321,7 +324,9 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         int width = getSize().width;
         int height = getSize().height;
         if (useScissor) {
-            graphics.enableScissor(x, y, x + width, y + height);
+            Vector3f topLeft = graphics.pose().last().pose().transformPosition(new Vector3f(0.0f, 0.0f, 0.0f));
+
+            graphics.enableScissor((int) (x + topLeft.x), (int) (y + topLeft.y), (int) (x + topLeft.x + width), (int) (y + topLeft.y + height));
             if(!hookDrawInBackground(graphics, mouseX, mouseY, partialTicks)) {
                 drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
             }
