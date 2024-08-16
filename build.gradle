@@ -134,7 +134,7 @@ dependencies {
     // JEI
     compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}") { transitive = false }
     compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}") { transitive = false }
-    compileOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
+    runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 
     // REI
     compileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}")
@@ -142,8 +142,8 @@ dependencies {
     compileOnly("me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}") // womp womp, no networking rework so not usable
 
     // EMI
-    compileOnly("dev.emi:emi-neoforge:${emi_version}+${minecraft_version}:api")
-    compileOnly("dev.emi:emi-neoforge:${emi_version}+${minecraft_version}")
+    compileOnly("dev.emi:emi-neoforge:${emi_version}+${minecraft_version_old}:api")
+    compileOnly("dev.emi:emi-neoforge:${emi_version}+${minecraft_version_old}")
 
     // AE2
     compileOnly("appeng:appliedenergistics2-neoforge:${ae2_version}")

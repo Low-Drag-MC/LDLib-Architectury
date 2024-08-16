@@ -1,3 +1,3 @@
 # ChangeLog
 
-* update to latest JEI changes
+* merge 1.20 changes

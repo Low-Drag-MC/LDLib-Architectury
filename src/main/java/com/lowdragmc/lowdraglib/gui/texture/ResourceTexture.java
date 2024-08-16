@@ -63,7 +63,11 @@ public class ResourceTexture extends TransformTexture {
     }
 
     public ResourceTexture(String imageLocation) {
-        this(ResourceLocation.parse(imageLocation), 0, 0, 1, 1);
+        this(ResourceLocation.parse(imageLocation));
+    }
+
+    public ResourceTexture(ResourceLocation imageLocation) {
+        this(imageLocation, 0, 0, 1, 1);
     }
 
     public ResourceTexture getSubTexture(float offsetX, float offsetY, float width, float height) {

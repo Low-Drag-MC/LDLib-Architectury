@@ -29,9 +29,12 @@ import java.util.regex.Pattern;
  */
 public final class ModularUI {
 
+    @Getter
     private final HashMap<Slot, SlotWidget> slotMap = new LinkedHashMap<>();
     public final WidgetGroup mainGroup;
+    @Getter
     private int screenWidth, screenHeight;
+    @Getter
     private int width, height;
     @Getter
     private boolean fullScreen;
@@ -39,6 +42,7 @@ public final class ModularUI {
     private ModularUIGuiContainer guiContainer;
     private ModularUIContainer container;
     private final List<Runnable> uiCloseCallback;
+    @Getter
     private long tickCount;
 
     /**
@@ -69,10 +73,6 @@ public final class ModularUI {
     public void setFullScreen() {
         this.fullScreen = true;
         setSize(getScreenWidth(), getScreenHeight());
-    }
-
-    public HashMap<Slot, SlotWidget> getSlotMap() {
-        return slotMap;
     }
 
     @Nullable
@@ -152,10 +152,6 @@ public final class ModularUI {
     }
 
 
-    public long getTickCount() {
-        return tickCount;
-    }
-
     void addTick() {
         this.tickCount += 1;
     }
@@ -203,22 +199,6 @@ public final class ModularUI {
     public void initWidgets() {
         mainGroup.setGui(this);
         mainGroup.initWidget();
-    }
-
-    public int getScreenWidth() {
-        return screenWidth;
-    }
-
-    public int getScreenHeight() {
-        return screenHeight;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     public int getGuiLeft() {

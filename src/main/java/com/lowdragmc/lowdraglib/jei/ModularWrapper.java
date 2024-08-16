@@ -42,20 +42,6 @@ public class ModularWrapper<T extends Widget> extends ModularUIGuiContainer {
     }
 
     /**
-     * For JEI to use
-     */
-    public void setRecipeLayout(int left, int top) {
-        modularUI.initWidgets();
-        this.left = left;
-        this.top = top;
-        this.width = minecraft.getWindow().getGuiScaledWidth();
-        this.height = minecraft.getWindow().getGuiScaledHeight();
-        modularUI.updateScreenSize(this.width, this.height);
-        Position displayOffset = new Position(modularUI.getGuiLeft(), top);
-        modularUI.mainGroup.setParentPosition(displayOffset);
-    }
-
-    /**
      * For REI to use
      */
     public void setRecipeWidget(int left, int top) {

@@ -2,7 +2,6 @@ package com.lowdragmc.lowdraglib.rei;
 
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
-import com.lowdragmc.lowdraglib.gui.modular.ModularUIReiHandlers;
 import com.lowdragmc.lowdraglib.test.TestREIPlugin;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;

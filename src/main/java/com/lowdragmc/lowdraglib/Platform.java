@@ -18,7 +18,7 @@ public class Platform {
 
     private static final RegistryAccess BLANK = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     @ApiStatus.Internal
-    public static RegistryAccess FROZEN_REGISTRY_ACCESS = null;
+    public static RegistryAccess FROZEN_REGISTRY_ACCESS = BLANK;
 
 
     public static String platformName() {
@@ -56,8 +56,8 @@ public class Platform {
     public static RegistryAccess getFrozenRegistry() {
         if (FROZEN_REGISTRY_ACCESS != null) {
             return FROZEN_REGISTRY_ACCESS;
-        } else if (!LDLib.isRemote()) {
-            if (Minecraft.getInstance() != null && Minecraft.getInstance().getConnection() != null) {
+        } else if (LDLib.isRemote()) {
+            if (Minecraft.getInstance().getConnection() != null) {
                 return Minecraft.getInstance().getConnection().registryAccess();
             }
         }

@@ -30,8 +30,8 @@ public class SpriteSourceListMixin {
     // load ctm textures
     @Inject(method = "list", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;builder()Lcom/google/common/collect/ImmutableList$Builder;"))
     private void ldlib$injectList(ResourceManager resourceManager, CallbackInfoReturnable<List<Supplier<SpriteContents>>> cir,
-                            @Local Map<ResourceLocation, SpriteSource.SpriteSupplier> map,
-                            @Local SpriteSource.Output output) {
+                                  @Local Map<ResourceLocation, SpriteSource.SpriteSupplier> map,
+                                  @Local SpriteSource.Output output) {
         for (ResourceLocation spriteName : map.keySet()) {
             var data = LDLMetadataSection.getMetadata(LDLMetadataSection.spriteToAbsolute(spriteName));
             if (data.connection != null) {

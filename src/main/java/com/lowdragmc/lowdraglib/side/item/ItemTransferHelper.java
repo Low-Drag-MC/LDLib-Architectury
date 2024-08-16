@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.side.item;
 
+import com.lowdragmc.lowdraglib.misc.PlayerInventoryTransfer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -10,7 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -184,7 +184,7 @@ public class ItemTransferHelper {
     public static void giveItemToPlayer(Player player, @Nonnull ItemStack stack, int preferredSlot) {
         if (stack.isEmpty()) return;
 
-        IItemHandler inventory = new InvWrapper(player.getInventory());
+        IItemHandler inventory = new PlayerInventoryTransfer(player.getInventory());
         Level level = player.level();
 
         // try adding it into the inventory
