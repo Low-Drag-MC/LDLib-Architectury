@@ -16,6 +16,7 @@
     "TextureAtlasMixin",
     "WorldRendererMixin",
     "accessor.AbstractContainerScreenAccessor",
+    "accessor.ModelBakeryAccessor",
     "accessor.MouseHandlerAccessor",
     "accessor.ParticleEngineAccessor",
     "accessor.VertexFormatAccessor",

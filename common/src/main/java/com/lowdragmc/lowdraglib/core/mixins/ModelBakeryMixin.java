@@ -60,7 +60,7 @@ public abstract class ModelBakeryMixin {
                 ResourceLocation resourceLocation = new ResourceLocation(blockstateLocation.getNamespace(), blockstateLocation.getPath());
                 var block = BuiltInRegistries.BLOCK.get(resourceLocation);
                 if (block instanceof IBlockRendererProvider) {
-                    var model = this.unbakedCache.computeIfAbsent(new ResourceLocation("ldlib:block/renderer_model"), modelLocation -> {
+                    var model = this.unbakedCache.computeIfAbsent(LDLib.location("block/renderer_model"), modelLocation -> {
                         try {
                             return ModelFactory.getLDLibModel(loadBlockModel(modelLocation));
                         } catch (IOException e) {

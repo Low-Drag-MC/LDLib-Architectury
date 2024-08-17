@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlockEntity;
 import com.lowdragmc.lowdraglib.client.renderer.block.fabric.RendererBlockEntityImpl;
 import com.lowdragmc.lowdraglib.plugin.ILDLibPlugin;
 import com.lowdragmc.lowdraglib.syncdata.TypedPayloadRegistries;
+import com.lowdragmc.lowdraglib.test.NoRendererTestBlock;
 import com.lowdragmc.lowdraglib.test.TestBlock;
 import com.lowdragmc.lowdraglib.test.TestBlockEntity;
 import com.lowdragmc.lowdraglib.test.TestItem;
@@ -18,6 +19,8 @@ import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityT
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 
 public class LDLibFabric implements ModInitializer {
     @Override
@@ -34,6 +37,8 @@ public class LDLibFabric implements ModInitializer {
         if (Platform.isDevEnv()) {
             Registry.register(BuiltInRegistries.BLOCK, LDLib.location("test"), TestBlock.BLOCK);
             Registry.register(BuiltInRegistries.ITEM, LDLib.location("test"), TestItem.ITEM);
+            Registry.register(BuiltInRegistries.BLOCK, LDLib.location("test_2"), NoRendererTestBlock.BLOCK);
+            Registry.register(BuiltInRegistries.ITEM, LDLib.location("test_2"), new BlockItem(NoRendererTestBlock.BLOCK, new Item.Properties()));
             TestBlockEntityImpl.TYPE = Registry.register(
                     BuiltInRegistries.BLOCK_ENTITY_TYPE,
                     LDLib.location("test"),
