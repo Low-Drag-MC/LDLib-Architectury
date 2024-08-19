@@ -14,7 +14,7 @@ import java.util.Map;
 public interface ModelBakeryAccessor {
 
     @Invoker
-    UnbakedModel invokeGetModel(ResourceLocation p_119342_);
+    UnbakedModel invokeGetModel(ResourceLocation modelLocation);
 
     @Accessor
     Map<ModelResourceLocation, UnbakedModel> getTopLevelModels();

@@ -26,9 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Used to baked the model with emissive effect. or multi-layer
- *
- * Making the top layer emissive.
+ * Used to bake the model with emissive effect. or multi-layer making the top layer emissive.
  */
 @OnlyIn(Dist.CLIENT)
 @ParametersAreNonnullByDefault

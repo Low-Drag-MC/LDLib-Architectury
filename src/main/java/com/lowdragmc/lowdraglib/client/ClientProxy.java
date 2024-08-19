@@ -3,11 +3,15 @@ package com.lowdragmc.lowdraglib.client;
 import com.lowdragmc.lowdraglib.CommonProxy;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
+import com.lowdragmc.lowdraglib.client.model.custommodel.LDLMetadataSection;
+import com.lowdragmc.lowdraglib.client.model.forge.CustomBakedModelImpl;
 import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
 import com.lowdragmc.lowdraglib.core.mixins.ParticleEngineAccessor;
+import com.lowdragmc.lowdraglib.core.mixins.accessor.ModelBakeryAccessor;
+import com.lowdragmc.lowdraglib.forge.CommonProxyImpl;
 import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.WidgetTooltipComponent;
@@ -20,6 +24,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.client.resources.model.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -30,6 +36,7 @@ import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 
+import java.util.*;
 import java.util.function.Consumer;
 
 @OnlyIn(Dist.CLIENT)
@@ -71,6 +78,65 @@ public class ClientProxy extends CommonProxy {
     @SubscribeEvent
     public void modelRegistry(final ModelEvent.RegisterGeometryLoaders e) {
         e.register(LDLib.location("renderer"), LDLRendererModel.Loader.INSTANCE);
+    }
+
+    @SubscribeEvent
+    public void modelBake(final ModelEvent.ModifyBakingResult event) {
+        ModelBakery modelBakery = event.getModelBakery();
+        for (Map.Entry<ResourceLocation, BakedModel> entry : event.getModels().entrySet()) {
+            ResourceLocation rl = entry.getKey();
+            UnbakedModel rootModel = ((ModelBakeryAccessor)modelBakery).getTopLevelModels().get(rl);
+            if (rootModel != null) {
+                BakedModel baked = entry.getValue();
+                if (baked instanceof LDLRendererModel) {
+                    continue;
+                }
+                if (baked.isCustomRenderer()) { // Nothing we can add to builtin models
+                    continue;
+                }
+                Deque<ResourceLocation> dependencies = new ArrayDeque<>();
+                Set<ResourceLocation> seenModels = new HashSet<>();
+                dependencies.push(rl);
+                seenModels.add(rl);
+                boolean shouldWrap = ClientProxy.WRAPPED_MODELS.getOrDefault(rl, false);
+                // Breadth-first loop through dependencies, exiting as soon as a CTM texture is found, and skipping duplicates/cycles
+                while (!shouldWrap && !dependencies.isEmpty()) {
+                    ResourceLocation dep = dependencies.pop();
+                    UnbakedModel model;
+                    try {
+                        model = dep == rl ? rootModel : modelBakery.getModel(dep);
+                    } catch (Exception e) {
+                        continue;
+                    }
+
+                    try {
+                        Set<Material> textures = new HashSet<>(ClientProxy.SCRAPED_TEXTURES.get(dep));
+                        for (Material tex : textures) {
+                            // Cache all dependent texture metadata
+                            // At least one texture has CTM metadata, so we should wrap this model
+                            if (!LDLMetadataSection.getMetadata(LDLMetadataSection.spriteToAbsolute(tex.texture())).isMissing()) { // TODO lazy
+                                shouldWrap = true;
+                                break;
+                            }
+                        }
+                        if (!shouldWrap) {
+                            for (ResourceLocation newDep : model.getDependencies()) {
+                                if (seenModels.add(newDep)) {
+                                    dependencies.push(newDep);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        LDLib.LOGGER.error("Error loading model dependency {} for model {}. Skipping...", dep, rl, e);
+                    }
+                }
+                ClientProxy.WRAPPED_MODELS.put(rl, shouldWrap);
+                if (shouldWrap) {
+                    entry.setValue(new CustomBakedModelImpl(baked));
+                }
+            }
+        }
+
     }
 
     @SubscribeEvent
