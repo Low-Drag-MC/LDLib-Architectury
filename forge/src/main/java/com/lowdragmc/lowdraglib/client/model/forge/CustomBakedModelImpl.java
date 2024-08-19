@@ -25,22 +25,17 @@ public class CustomBakedModelImpl extends CustomBakedModel {
 
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
-        BlockAndTintGetter world = data.get(WORLD);
+        BlockAndTintGetter level = data.get(WORLD);
         BlockPos pos = data.get(POS);
-        List<BakedQuad> quads = super.getQuads(state, side, rand, data, renderType);
-        if (world != null && pos != null && state != null) {
-            quads = CustomBakedModel.reBakeCustomQuads(quads, world, pos, state, side, 0.0F);
-        }
-        return quads;
+        return getCustomQuads(level, pos, state, side, rand);
     }
 
 
     @Override
     public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
-        return ModelData.builder()
+        return modelData.derive()
                 .with(WORLD, level)
                 .with(POS, pos)
-                .with(MODEL_DATA, modelData)
                 .build();
     }
 }

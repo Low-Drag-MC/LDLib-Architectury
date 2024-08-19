@@ -3,9 +3,9 @@ package com.lowdragmc.lowdraglib.client.model.fabric;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.model.custommodel.LDLMetadataSection;
-import com.lowdragmc.lowdraglib.core.mixins.accessor.ModelBakeryAccessor;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 
@@ -25,7 +25,7 @@ public class LDLibModelLoadingPlugin implements ModelLoadingPlugin {
             }
             ResourceLocation rl = context.id();
             UnbakedModel rootModel = context.loader().getModel(rl);
-            if (rootModel != null) {
+            if (rootModel != context.loader().getModel(ModelBakery.MISSING_MODEL_LOCATION)) {
                 if (baked instanceof LDLRendererModel) {
                     return baked;
                 }
