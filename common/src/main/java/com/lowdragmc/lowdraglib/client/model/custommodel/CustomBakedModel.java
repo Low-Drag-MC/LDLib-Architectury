@@ -54,13 +54,13 @@ public class CustomBakedModel implements BakedModel {
         var connections = Connections.checkConnections(level, pos, state, side);
         if (side == null) {
             if (noSideCache.isEmpty()) {
-                noSideCache.addAll(buildCustomQuads(connections, parent.getQuads(state, null, rand), 0.002f));
+                noSideCache.addAll(buildCustomQuads(connections, parent.getQuads(state, null, rand), 0.0f));
             }
             return noSideCache;
         }
         if (!sideCache.contains(side, connections)) {
             synchronized (sideCache) {
-                sideCache.put(side, connections, buildCustomQuads(connections, parent.getQuads(state, side, rand), 0.002f));
+                sideCache.put(side, connections, buildCustomQuads(connections, parent.getQuads(state, side, rand), 0.0f));
             }
         }
         return Objects.requireNonNull(sideCache.get(side, connections));
