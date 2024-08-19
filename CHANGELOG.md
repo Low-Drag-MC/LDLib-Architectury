@@ -1,4 +1,3 @@
 # ChangeLog
 
-* added the ability for any model to use LDLib CTM in the textures
-  * works on both forge and fabric
+* fix connected textures causing a crash if not all context is available

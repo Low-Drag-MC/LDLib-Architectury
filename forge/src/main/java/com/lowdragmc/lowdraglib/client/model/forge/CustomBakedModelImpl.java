@@ -27,7 +27,11 @@ public class CustomBakedModelImpl extends CustomBakedModel {
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
         BlockAndTintGetter level = data.get(WORLD);
         BlockPos pos = data.get(POS);
-        return getCustomQuads(level, pos, state, side, rand);
+        if (level != null && pos != null && state != null) {
+            return getCustomQuads(level, pos, state, side, rand);
+        } else {
+            return super.getQuads(state, side, rand, data, renderType);
+        }
     }
 
 
