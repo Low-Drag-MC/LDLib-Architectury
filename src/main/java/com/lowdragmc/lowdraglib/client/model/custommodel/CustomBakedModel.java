@@ -5,12 +5,11 @@ import com.google.common.collect.Tables;
 import com.lowdragmc.lowdraglib.client.bakedpipeline.Quad;
 import com.lowdragmc.lowdraglib.client.bakedpipeline.Submap;
 import com.lowdragmc.lowdraglib.client.model.ModelFactory;
+import net.minecraft.client.renderer.RenderType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -18,49 +17,62 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.model.BakedModelWrapper;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel.RendererBakedModel.POS;
+import static com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel.RendererBakedModel.WORLD;
 
 /**
- * Used to bake the model with emissive effect. or multi-layer making the top layer emissive.
+ * Used to bake the model with emissive effect, as well as connected textures.
  */
 @OnlyIn(Dist.CLIENT)
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class CustomBakedModel implements BakedModel {
-    private final BakedModel parent;
+public class CustomBakedModel<T extends BakedModel> extends BakedModelWrapper<T> {
     private final Table<Direction, Connections, List<BakedQuad>> sideCache;
     private final List<BakedQuad> noSideCache;
 
-    public CustomBakedModel(BakedModel parent) {
-        this.parent = parent;
+    public CustomBakedModel(T parent) {
+        super(parent);
         this.sideCache = Tables.newCustomTable(new EnumMap<>(Direction.class), HashMap::new);
         this.noSideCache = new ArrayList<>();
     }
 
     @Override
-    @Nonnull
-    @Deprecated
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
-        return parent.getQuads(state, side, rand);
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
+        BlockAndTintGetter level = data.get(WORLD);
+        BlockPos pos = data.get(POS);
+        return getCustomQuads(level, pos, state, side, rand, data, renderType);
+    }
+
+    @Override
+    public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
+        modelData = super.getModelData(level, pos, state, modelData);
+        return modelData.derive()
+                .with(WORLD, level)
+                .with(POS, pos)
+                .build();
     }
 
     @Nonnull
-    public List<BakedQuad> getCustomQuads(BlockAndTintGetter level, BlockPos pos, @Nonnull BlockState state, @Nullable Direction side, RandomSource rand) {
+    public List<BakedQuad> getCustomQuads(BlockAndTintGetter level, BlockPos pos, @Nonnull BlockState state, @Nullable Direction side, RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
         var connections = Connections.checkConnections(level, pos, state, side);
         if (side == null) {
             if (noSideCache.isEmpty()) {
-                noSideCache.addAll(buildCustomQuads(connections, parent.getQuads(state, null, rand), 0.0f));
+                noSideCache.addAll(buildCustomQuads(connections, super.getQuads(state, null, rand, data, renderType), 0.0f));
             }
             return noSideCache;
         }
         if (!sideCache.contains(side, connections)) {
             synchronized (sideCache) {
-                sideCache.put(side, connections, buildCustomQuads(connections, parent.getQuads(state, side, rand), 0.0f));
+                sideCache.put(side, connections, buildCustomQuads(connections, super.getQuads(state, side, rand, data, renderType), 0.0f));
             }
         }
         return Objects.requireNonNull(sideCache.get(side, connections));
@@ -103,40 +115,5 @@ public class CustomBakedModel implements BakedModel {
             q = q.setLight(15, 15);
         }
         return q;
-    }
-
-    @Override
-    public boolean useAmbientOcclusion() {
-        return parent.useAmbientOcclusion();
-    }
-
-    @Override
-    public boolean isGui3d() {
-        return parent.isGui3d();
-    }
-
-    @Override
-    public boolean usesBlockLight() {
-        return parent.usesBlockLight();
-    }
-
-    @Override
-    public boolean isCustomRenderer() {
-        return parent.isCustomRenderer();
-    }
-
-    @Override
-    public TextureAtlasSprite getParticleIcon() {
-        return parent.getParticleIcon();
-    }
-
-    @Override
-    public ItemTransforms getTransforms() {
-        return parent.getTransforms();
-    }
-
-    @Override
-    public ItemOverrides getOverrides() {
-        return parent.getOverrides();
     }
 }

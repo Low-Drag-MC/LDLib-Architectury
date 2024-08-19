@@ -12,6 +12,7 @@
         "ItemModelShaperMixin",
         "ItemRendererMixin",
         "LanguageMixin",
+        "ModelBakerImplMixin",
         "ModelBakeryMixin",
         "ParticleEngineAccessor",
         "ParticleEngineMixin",

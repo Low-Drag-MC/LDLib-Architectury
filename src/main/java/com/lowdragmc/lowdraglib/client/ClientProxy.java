@@ -1,22 +1,25 @@
 package com.lowdragmc.lowdraglib.client;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.lowdragmc.lowdraglib.CommonProxy;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
+import com.lowdragmc.lowdraglib.client.model.custommodel.CustomBakedModel;
 import com.lowdragmc.lowdraglib.client.model.custommodel.LDLMetadataSection;
-import com.lowdragmc.lowdraglib.client.model.forge.CustomBakedModelImpl;
 import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
 import com.lowdragmc.lowdraglib.core.mixins.ParticleEngineAccessor;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.ModelBakeryAccessor;
-import com.lowdragmc.lowdraglib.forge.CommonProxyImpl;
 import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.WidgetTooltipComponent;
 import com.lowdragmc.lowdraglib.test.TestBlock;
 import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -35,6 +38,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -75,6 +79,16 @@ public class ClientProxy extends CommonProxy {
         });
     }
 
+    @ApiStatus.Internal
+    public static final Multimap<ResourceLocation, Material> SCRAPED_TEXTURES = HashMultimap.create();
+    @ApiStatus.Internal
+    public static final Object2BooleanMap<ModelResourceLocation> WRAPPED_MODELS = new Object2BooleanLinkedOpenHashMap<>();
+
+    @ApiStatus.Internal
+    public static void textureScraped(ResourceLocation modelLocation, Material material) {
+        SCRAPED_TEXTURES.put(modelLocation, material);
+    }
+
     @SubscribeEvent
     public void modelRegistry(final ModelEvent.RegisterGeometryLoaders e) {
         e.register(LDLib.location("renderer"), LDLRendererModel.Loader.INSTANCE);
@@ -83,9 +97,9 @@ public class ClientProxy extends CommonProxy {
     @SubscribeEvent
     public void modelBake(final ModelEvent.ModifyBakingResult event) {
         ModelBakery modelBakery = event.getModelBakery();
-        for (Map.Entry<ResourceLocation, BakedModel> entry : event.getModels().entrySet()) {
-            ResourceLocation rl = entry.getKey();
-            UnbakedModel rootModel = ((ModelBakeryAccessor)modelBakery).getTopLevelModels().get(rl);
+        for (Map.Entry<ModelResourceLocation, BakedModel> entry : event.getModels().entrySet()) {
+            ModelResourceLocation mrl = entry.getKey();
+            UnbakedModel rootModel = ((ModelBakeryAccessor)modelBakery).getTopLevelModels().get(mrl);
             if (rootModel != null) {
                 BakedModel baked = entry.getValue();
                 if (baked instanceof LDLRendererModel) {
@@ -96,15 +110,16 @@ public class ClientProxy extends CommonProxy {
                 }
                 Deque<ResourceLocation> dependencies = new ArrayDeque<>();
                 Set<ResourceLocation> seenModels = new HashSet<>();
+                ResourceLocation rl = mrl.id();
                 dependencies.push(rl);
                 seenModels.add(rl);
-                boolean shouldWrap = ClientProxy.WRAPPED_MODELS.getOrDefault(rl, false);
+                boolean shouldWrap = ClientProxy.WRAPPED_MODELS.getOrDefault(mrl, false);
                 // Breadth-first loop through dependencies, exiting as soon as a CTM texture is found, and skipping duplicates/cycles
                 while (!shouldWrap && !dependencies.isEmpty()) {
                     ResourceLocation dep = dependencies.pop();
                     UnbakedModel model;
                     try {
-                        model = dep == rl ? rootModel : modelBakery.getModel(dep);
+                        model = dep == rl ? rootModel : ((ModelBakeryAccessor) modelBakery).invokeGetModel(dep);
                     } catch (Exception e) {
                         continue;
                     }
@@ -127,12 +142,12 @@ public class ClientProxy extends CommonProxy {
                             }
                         }
                     } catch (Exception e) {
-                        LDLib.LOGGER.error("Error loading model dependency {} for model {}. Skipping...", dep, rl, e);
+                        LDLib.LOGGER.error("Error loading model dependency {} for model {}. Skipping...", dep, mrl, e);
                     }
                 }
-                ClientProxy.WRAPPED_MODELS.put(rl, shouldWrap);
+                ClientProxy.WRAPPED_MODELS.put(mrl, shouldWrap);
                 if (shouldWrap) {
-                    entry.setValue(new CustomBakedModelImpl(baked));
+                    entry.setValue(new CustomBakedModel<>(baked));
                 }
             }
         }
