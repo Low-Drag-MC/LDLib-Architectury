@@ -49,7 +49,11 @@ public class CustomBakedModel<T extends BakedModel> extends BakedModelWrapper<T>
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data, @Nullable RenderType renderType) {
         BlockAndTintGetter level = data.get(WORLD);
         BlockPos pos = data.get(POS);
-        return getCustomQuads(level, pos, state, side, rand, data, renderType);
+        if (level != null && pos != null && state != null) {
+            return getCustomQuads(level, pos, state, side, rand, data, renderType);
+        } else {
+            return super.getQuads(state, side, rand, data, renderType);
+        }
     }
 
     @Override
