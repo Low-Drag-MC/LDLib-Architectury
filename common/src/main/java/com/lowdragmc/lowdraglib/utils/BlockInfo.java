@@ -28,7 +28,8 @@ public class BlockInfo {
     private CompoundTag tag;
     @Setter
     private boolean hasBlockEntity;
-    private final ItemStack itemStack;
+    @Setter
+    private ItemStack itemStack;
     private BlockEntity lastEntity;
     private final Consumer<BlockEntity> postCreate;
 

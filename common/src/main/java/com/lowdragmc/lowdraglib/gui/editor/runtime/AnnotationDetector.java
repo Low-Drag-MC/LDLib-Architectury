@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.runtime;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.renderer.ISerializableRenderer;
 import com.lowdragmc.lowdraglib.gui.editor.accessors.IConfiguratorAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
@@ -12,6 +13,7 @@ import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
 import com.lowdragmc.lowdraglib.gui.editor.ui.menu.MenuTab;
 import com.lowdragmc.lowdraglib.gui.editor.ui.view.FloatViewWidget;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.test.ui.IUITest;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -42,6 +44,7 @@ public class AnnotationDetector {
     public static final List<Wrapper<LDLRegister, MenuTab>> REGISTER_MENU_TABS = scanClasses(LDLRegister.class, MenuTab.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
     public static final List<IProject> REGISTER_PROJECTS = scanClasses(LDLRegister.class, IProject.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::createNoArgsInstance, (a, b) -> 0, l -> {});
     public static final Map<String, Wrapper<LDLRegisterClient, ? extends ISerializableRenderer>> REGISTER_RENDERERS = new HashMap<>();
+    public static final List<Wrapper<LDLRegisterClient, IUITest>> REGISTER_UI_TESTS = new ArrayList<>();
 
     public static void init() {
         if (LDLib.isClient()) {
@@ -51,6 +54,15 @@ public class AnnotationDetector {
                     AnnotationDetector::checkNoArgsConstructor,
                     AnnotationDetector::toClientUINoArgsBuilder,
                     AnnotationDetector::clientUIWrapperSorter, l -> REGISTER_RENDERERS.putAll(l.stream().collect(Collectors.toMap(w -> w.annotation().name(), w -> w))));
+            if (Platform.isDevEnv()) {
+                REGISTER_UI_TESTS.addAll(AnnotationDetector.scanClasses(
+                        LDLRegisterClient.class,
+                        IUITest.class,
+                        AnnotationDetector::checkNoArgsConstructor,
+                        AnnotationDetector::toClientUINoArgsBuilder,
+                        AnnotationDetector::clientUIWrapperSorter,
+                        l -> {}));
+            }
         }
     }
 

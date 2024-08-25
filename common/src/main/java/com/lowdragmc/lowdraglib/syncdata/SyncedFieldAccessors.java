@@ -2,6 +2,10 @@ package com.lowdragmc.lowdraglib.syncdata;
 
 import com.lowdragmc.lowdraglib.syncdata.accessor.*;
 import net.minecraft.Util;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 
 import java.util.function.BiFunction;
 
@@ -31,6 +35,9 @@ public class SyncedFieldAccessors {
     public static final IAccessor RESOURCE_LOCATION_ACCESSOR = new ResourceLocationAccessor();
     public static final IAccessor RANGE_ACCESSOR = new RangeAccessor();
     public static final IAccessor RENDERER_ACCESSOR = new IRendererAccessor();
+    public static final IAccessor BLOCK_ACCESSOR = new BuiltinRegistryAccessor<>(Block.class, BuiltInRegistries.BLOCK);
+    public static final IAccessor ITEM_ACCESSOR = new BuiltinRegistryAccessor<>(Item.class, BuiltInRegistries.ITEM);
+    public static final IAccessor FLUID_ACCESSOR = new BuiltinRegistryAccessor<>(Fluid.class, BuiltInRegistries.FLUID);
 
 
     private static final BiFunction<IAccessor, Class<?>, IAccessor> ARRAY_ACCESSOR_FACTORY = Util.memoize(ArrayAccessor::new);

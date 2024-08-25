@@ -46,6 +46,7 @@
   "ldlib.gui.editor.group.widget.container": "Container Widgets",
   "ldlib.gui.editor.group.widget.custom": "Custom Widgets",
   "ldlib.gui.editor.group.renderer": "renderer",
+  "ldlib.gui.editor.blockstate.properties": "Properties",
 
   "ldlib.gui.editor.name.slot_background": "slot background",
   "ldlib.gui.editor.name.x_bar_height": "x bar height",

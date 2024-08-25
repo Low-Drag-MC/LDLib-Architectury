@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.configurator;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
 import lombok.Getter;
 import lombok.Setter;
@@ -115,7 +116,7 @@ public class ConfiguratorSelectorConfigurator<T> extends ConfiguratorGroup {
                 .setMaxCount(max)
                 .setIsUp(isUp)
                 .setButtonBackground(ColorPattern.T_GRAY.rectTexture().setRadius(5))
-                .setBackground(ColorPattern.BLACK.rectTexture())
+                .setBackground(new GuiTextureGroup(ColorPattern.BLACK.rectTexture(), ColorPattern.GRAY.borderTexture(1)))
                 .setValue(mapping.apply(value))
         );
         if (configuratorBuilder != null) {

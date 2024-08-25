@@ -587,6 +587,12 @@ public class Widget {
         return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_ALT) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_ALT);
     }
 
+    @Environment(EnvType.CLIENT)
+    public static boolean isKeyDown(int keyCode) {
+        long id = Minecraft.getInstance().getWindow().getWindow();
+        return InputConstants.isKeyDown(id, keyCode);
+    }
+
     public boolean isRemote() {
         return (gui != null && gui.holder != null) ? gui.holder.isRemote() : LDLib.isRemote();
     }

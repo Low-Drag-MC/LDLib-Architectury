@@ -191,6 +191,9 @@ public class TypedPayloadRegistries {
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.GUI_TEXTURE_ACCESSOR, 1000);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.RENDERER_ACCESSOR, 1000);
         register(StringPayload.class, StringPayload::new, SyncedFieldAccessors.COMPONENT_ACCESSOR, 1000);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.BLOCK_ACCESSOR, 1000);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.ITEM_ACCESSOR, 1000);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.FLUID_ACCESSOR, 1000);
     }
 
     public static void postInit() {
