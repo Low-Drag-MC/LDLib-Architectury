@@ -36,12 +36,18 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
         List<Widget> flatVisibleWidgetCollection = wrapper.modularUI.getFlatWidgetCollection();
         for (Widget widget : flatVisibleWidgetCollection) {
             if (widget instanceof IRecipeIngredientSlot slot) {
+                var role = mapToRole(slot.getIngredientIO());
                 if (widget.getParent() instanceof DraggableScrollableWidgetGroup) {
                     // don't add the JEI widget at all if we have a draggable group, let the draggable widget handle it instead.
+                    if (role == null) {
+                        builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addIngredientsUnsafe(slot.getXEIIngredients());
+                        builder.addInvisibleIngredients(RecipeIngredientRole.OUTPUT).addIngredientsUnsafe(slot.getXEIIngredients());
+                    } else {
+                        builder.addInvisibleIngredients(role).addIngredientsUnsafe(slot.getXEIIngredients());
+                    }
                     continue;
                 }
                 Position pos = widget.getPosition();
-                var role = mapToRole(slot.getIngredientIO());
                 IRecipeSlotBuilder slotBuilder;
                 if (role == null) { // both
                     addJEISlot(builder, slot, RecipeIngredientRole.INPUT, pos.x, pos.y);
@@ -69,6 +75,7 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder builder, T wrapper, IFocusGroup focuses) {
         builder.addGuiEventListener(new ModularUIGuiEventListener<>(wrapper));
+        builder.addWidget(new ModularForegroundRecipeWidget(wrapper));
     }
 
     @Override
