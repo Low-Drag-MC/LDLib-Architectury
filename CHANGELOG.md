@@ -1,3 +1,4 @@
 # ChangeLog
 
-* fix connected textures causing a crash if not all context is available
+* fix draggable widgets not adding their contents to JEI pages' lookups
+* fix graphics getting overlayed on JEI slot textures
