@@ -24,6 +24,10 @@ public class Position {
         return new Position(x + other.x, y + other.y);
     }
 
+    public Position add(int x, int y) {
+        return new Position(this.x + x, this.y + y);
+    }
+
     public Position subtract(Position other) {
         return new Position(x - other.x, y - other.y);
     }

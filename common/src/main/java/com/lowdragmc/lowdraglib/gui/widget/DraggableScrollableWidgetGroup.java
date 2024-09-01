@@ -172,6 +172,7 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
 
     @Override
     protected void onChildSelfPositionUpdate(Widget child) {
+        super.onChildSelfPositionUpdate(child);
         if (!isComputingMax && isInitialized()) {
             computeMax();
         }
@@ -179,6 +180,7 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
 
     @Override
     protected void onChildSizeUpdate(Widget child) {
+        super.onChildSizeUpdate(child);
         if (!isComputingMax && isInitialized()) {
             computeMax();
         }

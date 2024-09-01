@@ -85,6 +85,7 @@ public class SwitchWidget extends Widget implements IConfigurableWidget {
     @Override
     @Environment(EnvType.CLIENT)
     public void updateScreen() {
+        super.updateScreen();
         if (baseTexture != null) {
             baseTexture.updateTick();
         }

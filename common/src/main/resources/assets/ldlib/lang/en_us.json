@@ -92,6 +92,15 @@
   "ldlib.gui.editor.name.currentString": "current string",
   "ldlib.gui.editor.name.isBordered": "is bordered",
   "ldlib.gui.editor.name.size": "size",
+  "ldlib.gui.editor.name.align": "align",
+  "ldlib.gui.editor.tips.align": "align position refer to parent",
+  "ldlib.gui.editor.name.layout": "children layout",
+  "ldlib.gui.editor.tips.layout": "layout of children",
+  "ldlib.gui.editor.name.layoutPadding": "children layout padding",
+  "ldlib.gui.editor.tips.layoutPadding": "layout padding of children",
+  "ldlib.gui.editor.name.isDynamicSized": "auto size",
+  "ldlib.gui.editor.tips.isDynamicSized": "size will be adjusted according to content",
+
 
   "ldlib.gui.editor.name.texture_type": "Texture Type",
   "ldlib.gui.editor.name.pos": "position",

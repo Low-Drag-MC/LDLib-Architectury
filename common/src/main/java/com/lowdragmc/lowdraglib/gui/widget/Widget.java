@@ -10,6 +10,8 @@ import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.WidgetUIAccess;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.gui.widget.layout.Align;
+import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Rect;
 import com.lowdragmc.lowdraglib.utils.Size;
@@ -68,6 +70,9 @@ public class Widget {
     @Configurable(name = "ldlib.gui.editor.name.size")
     @Getter
     private Size size;
+    @Configurable(name = "ldlib.gui.editor.name.align", tips = "ldlib.gui.editor.tips.align")
+    @Getter @Setter
+    private Align align = Align.NONE;
     @Getter @Setter
     private boolean isVisible;
     @Getter @Setter
@@ -226,6 +231,7 @@ public class Widget {
 
     @ConfigSetter(field = "selfPosition")
     public void setSelfPosition(Position selfPosition) {
+        if (this.selfPosition.equals(selfPosition)) return;
         this.selfPosition = selfPosition;
         recomputePosition();
         if (isParent(parent)) {
@@ -367,6 +373,19 @@ public class Widget {
      */
     @Environment(EnvType.CLIENT)
     public void updateScreen() {
+        if (align != Align.NONE && isParent(parent)) {
+            switch (align) {
+                case TOP_LEFT -> setSelfPosition(0, 0);
+                case TOP_CENTER -> setSelfPosition((parent.getSize().width - getSize().width) / 2, 0);
+                case TOP_RIGHT -> setSelfPosition(parent.getSize().width - getSize().width, 0);
+                case LEFT_CENTER -> setSelfPosition(0, (parent.getSize().height - getSize().height) / 2);
+                case CENTER -> setSelfPosition((parent.getSize().width - getSize().width) / 2, (parent.getSize().height - getSize().height) / 2);
+                case RIGHT_CENTER -> setSelfPosition(parent.getSize().width - getSize().width, (parent.getSize().height - getSize().height) / 2);
+                case BOTTOM_LEFT -> setSelfPosition(0, parent.getSize().height - getSize().height);
+                case BOTTOM_CENTER -> setSelfPosition((parent.getSize().width - getSize().width) / 2, parent.getSize().height - getSize().height);
+                case BOTTOM_RIGHT -> setSelfPosition(parent.getSize().width - getSize().width, parent.getSize().height - getSize().height);
+            }
+        }
         if (backgroundTexture != null) {
             backgroundTexture.updateTick();
         }
