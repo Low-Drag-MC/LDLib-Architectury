@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.ClientCommands;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.model.fabric.LDLRendererModel;
+import com.lowdragmc.lowdraglib.client.model.fabric.LDLibModelLoadingPlugin;
 import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
 import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
@@ -19,6 +20,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.minecraft.client.renderer.RenderType;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -42,7 +44,7 @@ public class ClientProxyImpl implements ClientModInitializer, SimpleSynchronousR
         ClientLifecycleEvents.CLIENT_STARTED.register(minecraft -> ClientProxy.init());
 
         // register custom model loader
-        ModelLoadingRegistry.INSTANCE.registerResourceProvider(rm -> LDLRendererModel.Loader.INSTANCE);
+        ModelLoadingPlugin.register(new LDLibModelLoadingPlugin());
 
         // register client commands
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {

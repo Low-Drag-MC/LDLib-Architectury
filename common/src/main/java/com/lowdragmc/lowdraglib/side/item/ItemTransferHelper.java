@@ -1,6 +1,6 @@
 package com.lowdragmc.lowdraglib.side.item;
 
-import com.lowdragmc.lowdraglib.misc.ContainerTransfer;
+import com.lowdragmc.lowdraglib.misc.PlayerInventoryTransfer;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -148,7 +148,7 @@ public class ItemTransferHelper {
     public static void giveItemToPlayer(Player player, @Nonnull ItemStack stack, int preferredSlot) {
         if (stack.isEmpty()) return;
 
-        IItemTransfer inventory = new ContainerTransfer(player.getInventory());
+        IItemTransfer inventory = new PlayerInventoryTransfer(player.getInventory());
         Level level = player.level();
 
         // try adding it into the inventory

@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.model.ModelProviderContext;
 import net.fabricmc.fabric.api.client.model.ModelResourceProvider;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.fabricmc.fabric.impl.renderer.VanillaModelEncoder;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -112,7 +113,7 @@ public class LDLRendererModel implements UnbakedModel {
             if (state.getBlock() instanceof IBlockRendererProvider rendererProvider) {
                 IRenderer renderer = rendererProvider.getRenderer(state);
                 if (renderer != null) {
-                    context.bakedModelConsumer().accept(new BakedModel() {
+                    VanillaModelEncoder.emitBlockQuads(new BakedModel() {
                         @Override
                         public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction direction, RandomSource random) {
                             var quads = renderer.renderModel(blockView, pos, state, direction, random);
@@ -156,7 +157,7 @@ public class LDLRendererModel implements UnbakedModel {
                         public ItemOverrides getOverrides() {
                             return ItemOverrides.EMPTY;
                         }
-                    });
+                    }, state, randomSupplier, context, context.getEmitter());
                 }
             }
         }
@@ -166,16 +167,5 @@ public class LDLRendererModel implements UnbakedModel {
             /** use mixin {@link com.lowdragmc.lowdraglib.core.mixins.ItemRendererMixin}*/
         }
 
-    }
-
-    public static final class Loader implements ModelResourceProvider {
-
-        public static final Loader INSTANCE = new Loader();
-        private Loader() {}
-
-        @Override
-        public UnbakedModel loadModelResource(ResourceLocation resourceId, ModelProviderContext context) {
-            return resourceId.equals(new ResourceLocation("ldlib:block/renderer_model")) ? LDLRendererModel.INSTANCE : null;
-        }
     }
 }

@@ -26,9 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Used to baked the model with emissive effect. or multi-layer
- *
- * Making the top layer emissive.
+ * Used to bake the model with emissive effect. or multi-layer making the top layer emissive.
  */
 @Environment(EnvType.CLIENT)
 @ParametersAreNonnullByDefault
@@ -56,13 +54,13 @@ public class CustomBakedModel implements BakedModel {
         var connections = Connections.checkConnections(level, pos, state, side);
         if (side == null) {
             if (noSideCache.isEmpty()) {
-                noSideCache.addAll(buildCustomQuads(connections, parent.getQuads(state, null, rand), 0.002f));
+                noSideCache.addAll(buildCustomQuads(connections, parent.getQuads(state, null, rand), 0.0f));
             }
             return noSideCache;
         }
         if (!sideCache.contains(side, connections)) {
             synchronized (sideCache) {
-                sideCache.put(side, connections, buildCustomQuads(connections, parent.getQuads(state, side, rand), 0.002f));
+                sideCache.put(side, connections, buildCustomQuads(connections, parent.getQuads(state, side, rand), 0.0f));
             }
         }
         return Objects.requireNonNull(sideCache.get(side, connections));

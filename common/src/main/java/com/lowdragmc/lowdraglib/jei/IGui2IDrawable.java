@@ -1,7 +1,6 @@
 package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
-import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.drawable.IDrawable;
 import net.minecraft.client.gui.GuiGraphics;
 
@@ -9,7 +8,7 @@ import javax.annotation.Nonnull;
 
 /**
  * @author KilaBash
- * @date: 2022/04/30
+ * @date 2022/04/30
  * @implNote IGui2IDrawable
  */
 public interface IGui2IDrawable {

@@ -83,14 +83,16 @@ public class Widget {
     @Getter
     @Configurable(name = "ldlib.gui.editor.name.hover_tips", tips = "ldlib.gui.editor.tips.hover_tips")
     protected final List<Component> tooltipTexts = new ArrayList<>();
+    @Getter
     @Configurable(name = "ldlib.gui.editor.name.background")
     protected IGuiTexture backgroundTexture;
     @Configurable(name = "ldlib.gui.editor.name.draw_background_when_hover")
     protected boolean drawBackgroundWhenHover = true;
     @Configurable(name = "ldlib.gui.editor.name.hover_texture")
     protected IGuiTexture hoverTexture;
-    @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
+    @Getter
     @Setter
+    @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
     protected IGuiTexture overlay;
     @Getter
     protected WidgetGroup parent;

@@ -1,6 +1,7 @@
-package com.lowdragmc.lowdraglib.gui.modular;
+package com.lowdragmc.lowdraglib.rei;
 
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import dev.architectury.event.CompoundEventResult;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;

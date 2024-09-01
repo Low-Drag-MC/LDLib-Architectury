@@ -1,7 +1,6 @@
 package com.lowdragmc.lowdraglib.emi;
 
 import com.lowdragmc.lowdraglib.Platform;
-import com.lowdragmc.lowdraglib.gui.modular.ModularUIEmiHandlers;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.test.TestEMIPlugin;
 import dev.emi.emi.api.EmiEntrypoint;

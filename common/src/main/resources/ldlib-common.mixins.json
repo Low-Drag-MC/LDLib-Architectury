@@ -16,14 +16,12 @@
     "TextureAtlasMixin",
     "WorldRendererMixin",
     "accessor.AbstractContainerScreenAccessor",
+    "accessor.ModelBakeryAccessor",
     "accessor.MouseHandlerAccessor",
     "accessor.ParticleEngineAccessor",
     "accessor.VertexFormatAccessor",
     "emi.RecipeScreenMixin",
-    "emi.WidgetGroupMixin",
-    "jei.RecipesGuiAccessor",
-    "jei.RecipesGuiMixin",
-    "jei.RecipeSlotAccessor"
+    "emi.WidgetGroupMixin"
   ],
   "mixins": [
     "BlockEntityMixin",
@@ -34,11 +32,7 @@
     "accessor.EntityAccessor",
     "accessor.ServerPlayerAccessor",
     "accessor.SlotAccessor",
-    "emi.EmiRenderHelperMixin",
-    "emi.SlotWidgetAccessor",
-    "jei.JeiRecipeLayoutMixin",
-    "jei.RecipeLayoutAccessor",
-    "jei.RecipeSlotsAccessor"
+    "emi.EmiRenderHelperMixin"
   ],
   "injectors": {
     "defaultRequire": 1

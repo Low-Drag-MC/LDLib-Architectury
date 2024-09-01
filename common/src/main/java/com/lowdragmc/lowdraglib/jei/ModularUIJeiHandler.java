@@ -1,5 +1,6 @@
-package com.lowdragmc.lowdraglib.gui.modular;
+package com.lowdragmc.lowdraglib.jei;
 
+import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -20,8 +21,6 @@ public class ModularUIJeiHandler implements IGuiContainerHandler<ModularUIGuiCon
     public List<Rect2i> getGuiExtraAreas(@Nonnull ModularUIGuiContainer containerScreen) {
         return containerScreen.getGuiExtraAreas();
     }
-
-
 
     @Override
     public Optional<IClickableIngredient<?>> getClickableIngredientUnderMouse(ModularUIGuiContainer gui, double mouseX, double mouseY) {

@@ -109,7 +109,7 @@ public abstract class ModularEmiRecipe<T extends Widget> implements EmiRecipe {
                     continue;
                 }
                 var io = slot.getIngredientIO();
-                if (io == IngredientIO.BOTH || io == IngredientIO.INPUT || io == IngredientIO.OUTPUT || io == IngredientIO.CATALYST) {
+                if (io != null && io != IngredientIO.RENDER_ONLY) {
                     //noinspection unchecked
                     var ingredients = EmiIngredient.of((List<? extends EmiIngredient>) (List<?>) slot.getXEIIngredients());
 

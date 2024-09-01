@@ -234,7 +234,8 @@ public abstract class WorldSceneRenderer {
         width = size.x() - x;
         height = size.y() - y;
         PositionedRect viewport = getPositionedRect((int)x, (int)y, (int)width, (int)height);
-        PositionedRect mouse = getPositionedRect(mouseX, mouseY, 0, 0);
+        var topLeft = poseStack.last().pose().transformPosition(new Vector3f(0.0f, 0.0f, 0.0f));
+        PositionedRect mouse = getPositionedRect((int) (mouseX + topLeft.x), (int) (mouseY + topLeft.y), 0, 0);
         mouseX = mouse.position.x;
         mouseY = mouse.position.y;
         setupCamera(viewport);

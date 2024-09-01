@@ -29,10 +29,9 @@ public class SpriteResourceLoaderMixin {
     @Inject(method = "list", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;builder()Lcom/google/common/collect/ImmutableList$Builder;"),
             locals = LocalCapture.CAPTURE_FAILHARD)
     private void injectList(ResourceManager resourceManager, CallbackInfoReturnable<List<Supplier<SpriteContents>>> cir,
-                            Map map,
+                            Map<ResourceLocation, SpriteSource.SpriteSupplier> map,
                             SpriteSource.Output output) {
-        for (Object o : map.keySet()) {
-            var spriteName = (ResourceLocation) o;
+        for (ResourceLocation spriteName : map.keySet()) {
             var data = LDLMetadataSection.getMetadata(LDLMetadataSection.spriteToAbsolute(spriteName));
             if (data.connection != null) {
                 new SingleFile(data.connection, Optional.empty()).run(resourceManager, output);
