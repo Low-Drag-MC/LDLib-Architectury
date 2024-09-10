@@ -12,11 +12,10 @@ import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
 import com.lowdragmc.lowdraglib.gui.editor.ui.menu.MenuTab;
 import com.lowdragmc.lowdraglib.gui.editor.ui.view.FloatViewWidget;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.test.ui.IUITest;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -42,9 +41,10 @@ public class AnnotationDetector {
     public static final List<Wrapper<LDLRegister, IConfigurableWidget>> REGISTER_WIDGETS = scanClasses(LDLRegister.class, IConfigurableWidget.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
     public static final List<Wrapper<LDLRegister, FloatViewWidget>> REGISTER_FLOAT_VIEWS = scanClasses(LDLRegister.class, FloatViewWidget.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
     public static final List<Wrapper<LDLRegister, MenuTab>> REGISTER_MENU_TABS = scanClasses(LDLRegister.class, MenuTab.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
-    public static final List<IProject> REGISTER_PROJECTS = scanClasses(LDLRegister.class, IProject.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::createNoArgsInstance, (a, b) -> 0, l -> {});
+    public static final List<Wrapper<LDLRegister, IProject>> REGISTER_PROJECTS = scanClasses(LDLRegister.class, IProject.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
     public static final Map<String, Wrapper<LDLRegisterClient, ? extends ISerializableRenderer>> REGISTER_RENDERERS = new HashMap<>();
     public static final List<Wrapper<LDLRegisterClient, IUITest>> REGISTER_UI_TESTS = new ArrayList<>();
+    public static final Map<String, Wrapper<LDLRegister, ? extends BaseNode>> REGISTER_GP_NODES = new HashMap<>();
 
     public static void init() {
         if (LDLib.isClient()) {
@@ -64,6 +64,13 @@ public class AnnotationDetector {
                         l -> {}));
             }
         }
+        AnnotationDetector.scanClasses(
+                LDLRegister.class,
+                BaseNode.class,
+                AnnotationDetector::checkNoArgsConstructor,
+                AnnotationDetector::toUINoArgsBuilder,
+                AnnotationDetector::UIWrapperSorter,
+                l -> REGISTER_GP_NODES.putAll(l.stream().collect(Collectors.toMap(w -> w.annotation().name(), w -> w))));
     }
 
     public static <A extends Annotation, T, C> List<C> scanClasses(Class<A> annotationClass, Class<T> baseClazz, BiPredicate<A, Class<? extends T>> predicate, Function<Class<? extends T>, C> mapping, Comparator<C> sorter, Consumer<List<C>> onFinished) {

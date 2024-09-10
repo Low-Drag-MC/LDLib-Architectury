@@ -6,7 +6,9 @@ import com.lowdragmc.lowdraglib.client.ClientCommands;
 import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.model.fabric.LDLRendererModel;
 import com.lowdragmc.lowdraglib.client.model.fabric.LDLibModelLoadingPlugin;
+import com.lowdragmc.lowdraglib.client.renderer.ATESRRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
+import com.lowdragmc.lowdraglib.client.renderer.block.fabric.RendererBlockEntityImpl;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
 import com.lowdragmc.lowdraglib.gui.compass.CompassManager;
 import com.lowdragmc.lowdraglib.gui.util.WidgetTooltipComponent;
@@ -22,6 +24,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
+import net.fabricmc.fabric.impl.client.rendering.BlockEntityRendererRegistryImpl;
 import net.minecraft.client.renderer.RenderType;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
@@ -64,6 +67,9 @@ public class ClientProxyImpl implements ClientModInitializer, SimpleSynchronousR
         TooltipComponentCallback.EVENT.register(data -> data instanceof WidgetTooltipComponent tooltipComponent ? new WidgetClientTooltipComponent(tooltipComponent) : null);
 
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(this);
+
+        // BESR
+        BlockEntityRendererRegistryImpl.register(RendererBlockEntityImpl.TYPE(), ATESRRendererProvider::new);
     }
 
     @Override

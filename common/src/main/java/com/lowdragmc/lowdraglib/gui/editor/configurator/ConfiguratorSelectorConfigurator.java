@@ -10,7 +10,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,7 +20,6 @@ public class ConfiguratorSelectorConfigurator<T> extends ConfiguratorGroup {
     protected BiConsumer<T, ConfiguratorSelectorConfigurator<T>> configuratorBuilder;
     protected List<T> candidates;
     protected Function<T, String> mapping;
-    protected Map<String, T> nameMap;
     @Getter
     protected SelectorWidget selector;
 
@@ -39,7 +37,10 @@ public class ConfiguratorSelectorConfigurator<T> extends ConfiguratorGroup {
     protected Consumer<T> onUpdate;
     @Setter
     protected Supplier<T> supplier;
-
+    @Getter
+    @Setter
+    @Nullable
+    protected Supplier<List<T>> candidateSupplier;
 
     public ConfiguratorSelectorConfigurator(String name, boolean isCollapse,
                                             Supplier<T> supplier,
@@ -58,10 +59,6 @@ public class ConfiguratorSelectorConfigurator<T> extends ConfiguratorGroup {
         this.candidates = candidates;
         this.mapping = mapping;
         this.configuratorBuilder = configuratorBuilder;
-        this.nameMap = new HashMap<>();
-        for (T candidate : candidates) {
-            nameMap.put(mapping.apply(candidate), candidate);
-        }
     }
 
     /**
@@ -103,7 +100,12 @@ public class ConfiguratorSelectorConfigurator<T> extends ConfiguratorGroup {
 
     @Override
     public void init(int width) {
-        addWidget(selector = new SelectorWidget(leftWidth + 13, 2, width - leftWidth - 3 - rightWidth - 13, 10, nameMap.keySet().stream().toList(), -1)
+        var nameMap = new HashMap<String, T>();
+        for (T candidate : candidates) {
+            nameMap.put(mapping.apply(candidate), candidate);
+        }
+        addWidget(selector = new SelectorWidget(leftWidth + 13, 2, width - leftWidth - 3 - rightWidth - 13, 10,
+                candidates.stream().map(mapping).toList(), -1)
                 .setOnChanged(s -> {
                     value = nameMap.get(s);
                     updateValue();
@@ -119,6 +121,17 @@ public class ConfiguratorSelectorConfigurator<T> extends ConfiguratorGroup {
                 .setBackground(new GuiTextureGroup(ColorPattern.BLACK.rectTexture(), ColorPattern.GRAY.borderTexture(1)))
                 .setValue(mapping.apply(value))
         );
+        if (candidateSupplier != null) {
+            selector.setCandidatesSupplier(() -> {
+                var list = candidateSupplier.get();
+                candidates = list;
+                nameMap.clear();
+                for (T candidate : candidates) {
+                    nameMap.put(mapping.apply(candidate), candidate);
+                }
+                return list.stream().map(mapping).toList();
+            });
+        }
         if (configuratorBuilder != null) {
             configuratorBuilder.accept(value, this);
         }

@@ -197,13 +197,13 @@ public class ArrayConfiguratorGroup<T> extends ConfiguratorGroup{
         public void init(int width) {
             super.init(width);
             inner.init(width - 10 - 15);
-            ImageWidget imageWidget = new ImageWidget(width - 12, 2, 9, 9, new ColorRectTexture(-1).setRadius(4.5f));
-            imageWidget.setHoverTooltips("ldlib.gui.editor.tips.drag_item");
             if (onReorder != null) {
+                ImageWidget imageWidget = new ImageWidget(width - 12, 2, 9, 9, new ColorRectTexture(-1).setRadius(4.5f));
+                imageWidget.setHoverTooltips("ldlib.gui.editor.tips.drag_item");
                 this.setDraggingProvider(() -> this, (t, p) -> new GuiTextureGroup(new WidgetTexture(p.x, p.y, inner), new WidgetTexture(p.x, p.y, imageWidget)));
                 imageWidget.setDraggingProvider(() -> this, (t, p) -> new GuiTextureGroup(new WidgetTexture(p.x, p.y, inner), new WidgetTexture(p.x, p.y, imageWidget)));
+                this.addWidget(imageWidget);
             }
-            this.addWidget(imageWidget);
         }
 
         @Override

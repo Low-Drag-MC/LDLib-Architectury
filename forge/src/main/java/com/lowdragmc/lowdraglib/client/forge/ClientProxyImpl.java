@@ -6,8 +6,10 @@ import com.lowdragmc.lowdraglib.client.ClientProxy;
 import com.lowdragmc.lowdraglib.client.model.custommodel.LDLMetadataSection;
 import com.lowdragmc.lowdraglib.client.model.forge.CustomBakedModelImpl;
 import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
+import com.lowdragmc.lowdraglib.client.renderer.ATESRRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
+import com.lowdragmc.lowdraglib.client.renderer.block.forge.RendererBlockEntityImpl;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
 import com.lowdragmc.lowdraglib.core.mixins.accessor.ModelBakeryAccessor;
@@ -25,6 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
@@ -45,6 +48,11 @@ public class ClientProxyImpl extends CommonProxyImpl {
     @SubscribeEvent
     public void onRegisterClientTooltipComponentFactoriesEvent(final RegisterClientTooltipComponentFactoriesEvent event) {
         event.register(WidgetTooltipComponent.class, WidgetClientTooltipComponent::new);
+    }
+
+    @SubscribeEvent
+    public void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(RendererBlockEntityImpl.TYPE(), ATESRRendererProvider::new);
     }
 
     @SubscribeEvent

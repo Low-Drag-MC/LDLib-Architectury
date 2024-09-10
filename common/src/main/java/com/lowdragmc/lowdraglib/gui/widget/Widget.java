@@ -79,6 +79,7 @@ public class Widget {
     private boolean isActive;
     @Getter
     private boolean isFocus;
+    @Getter
     protected boolean isClientSideWidget;
     @Getter
     @Configurable(name = "ldlib.gui.editor.name.hover_tips", tips = "ldlib.gui.editor.tips.hover_tips")

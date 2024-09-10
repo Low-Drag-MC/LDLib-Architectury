@@ -17,6 +17,7 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
 import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -51,6 +52,10 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     @Configurable(name = "ldlib.gui.editor.name.layoutPadding", tips = "ldlib.gui.editor.tips.layoutPadding")
     @Getter
     private int layoutPadding = 0;
+    @Configurable(name = "ldlib.gui.editor.name.allowXEIIngredientOverMouse", tips = "ldlib.gui.editor.tips.allowXEIIngredientOverMouse")
+    @Getter
+    @Setter
+    private boolean allowXEIIngredientOverMouse = true;
     protected final List<Widget> waitToRemoved;
     protected final List<Widget> waitToAdded;
 
@@ -334,6 +339,12 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         return addWidget(widgets.size(), widget);
     }
 
+    public <T extends Widget> WidgetGroup addWidget(T widget, Consumer<T> callback) {
+        addWidget(widgets.size(), widget);
+        callback.accept(widget);
+        return this;
+    }
+
     public WidgetGroup addWidget(int index, Widget widget) {
         if (widget == this) {
             throw new IllegalArgumentException("Cannot add self");
@@ -457,10 +468,12 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         if (!isVisible()) {
             return null;
         }
-        for (Widget widget : widgets) {
-            if (widget.isVisible() && widget instanceof IIngredientSlot ingredientSlot) {
-                Object result = ingredientSlot.getXEIIngredientOverMouse(mouseX, mouseY);
-                if (result != null) return result;
+        if (allowXEIIngredientOverMouse) {
+            for (Widget widget : widgets) {
+                if (widget.isVisible() && widget instanceof IIngredientSlot ingredientSlot) {
+                    Object result = ingredientSlot.getXEIIngredientOverMouse(mouseX, mouseY);
+                    if (result != null) return result;
+                }
             }
         }
         return null;

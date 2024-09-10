@@ -39,6 +39,7 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
@@ -270,7 +271,7 @@ public class DrawerHelper {
         }
     }
 
-    public static void drawLines(@Nonnull GuiGraphics graphics, List<Vec2> points, int startColor, int endColor, float width) {
+    public static void drawLines(@Nonnull GuiGraphics graphics, List<Vec2> Vec2s, int startColor, int endColor, float width) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         RenderSystem.enableBlend();
@@ -278,7 +279,7 @@ public class DrawerHelper {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
-        RenderBufferUtils.drawColorLines(graphics.pose(), bufferbuilder, points, startColor, endColor, width);
+        RenderBufferUtils.drawColorLines(graphics.pose(), bufferbuilder, Vec2s, startColor, endColor, width);
 
         tesselator.end();
         RenderSystem.defaultBlendFunc();
@@ -390,8 +391,8 @@ public class DrawerHelper {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
 
             uniform.glUniform1F("Width", width);
-            uniform.glUniform2F("Point1", begin.x, begin.y);
-            uniform.glUniform2F("Point2", end.x, end.y);
+            uniform.glUniform2F("Vec21", begin.x, begin.y);
+            uniform.glUniform2F("Vec22", end.x, end.y);
             uniform.fillRGBAColor("Color1", color1);
             uniform.fillRGBAColor("Color2", color2);
             uniform.glUniform1F("Blur", 2);
@@ -399,6 +400,51 @@ public class DrawerHelper {
 
         RenderSystem.enableBlend();
         uploadScreenPosVertex();
+    }
+
+    public static List<Vec2> getSmoothPoints(Vec2 a, Vec2 b, Vec2 c, float r, int t) {
+        Vec2 ba = new Vec2(a.x - b.x, a.y - b.y);
+        Vec2 bc = new Vec2(c.x - b.x, c.y - b.y);
+
+        Vec2 baNorm = ba.normalized();
+        Vec2 bcNorm = bc.normalized();
+
+        Vec2 bisector = new Vec2(baNorm.x + bcNorm.x, baNorm.y + bcNorm.y);
+        bisector = bisector.normalized();
+
+        float angle_ba_bc = (float) Math.acos(baNorm.x * bcNorm.x + baNorm.y * bcNorm.y);
+        float circleCenterDistance = (float) (r / Math.sin(angle_ba_bc / 2));
+
+        Vec2 center = new Vec2(b.x + bisector.x * circleCenterDistance,
+                b.y + bisector.y * circleCenterDistance);
+
+        Vec2 q = new Vec2(b.x + r * baNorm.x, b.y + r * baNorm.y);
+        Vec2 w = new Vec2(b.x + r * bcNorm.x, b.y + r * bcNorm.y);
+        var list = getReversePointsOnArc(center, q, w, r, t);
+        list.add(0, new Vec2(a.x, a.y));
+        list.add(new Vec2(c.x, c.y));
+        return list;
+    }
+
+    public static List<Vec2> getReversePointsOnArc(Vec2 center, Vec2 q, Vec2 w, float r, int t) {
+        List<Vec2> points = new ArrayList<>();
+        double startAngle = Math.atan2(q.y - center.y, q.x - center.x);
+        double endAngle = Math.atan2(w.y - center.y, w.x - center.x);
+
+        if (startAngle < endAngle) {
+            startAngle += 2 * Math.PI;
+        }
+
+        double angleStep = (startAngle - endAngle) / (t - 1);
+
+        for (int i = 0; i < t; i++) {
+            double angle = startAngle - i * angleStep;
+            double x = center.x + r * Math.cos(angle);
+            double y = center.y + r * Math.sin(angle);
+            points.add(new Vec2((float) x, (float) y));
+        }
+
+        return points;
     }
 
     private static void uploadScreenPosVertex() {

@@ -7,6 +7,8 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.StringConfigurator;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.SnbtPrinterTagVisitor;
+import net.minecraft.nbt.TagParser;
 
 import java.lang.reflect.Field;
 import java.util.function.Consumer;
@@ -34,12 +36,12 @@ public class CompoundTagAccessor extends TypesAccessor<CompoundTag> {
     @Override
     public Configurator create(String name, Supplier<CompoundTag> supplier, Consumer<CompoundTag> consumer, boolean forceUpdate, Field field) {
         var configurator = new StringConfigurator(name,
-                () -> NbtUtils.structureToSnbt(supplier.get()).replaceAll("\t", "").replaceAll("\\n", "").replaceAll(" ", ""),
+                () -> new SnbtPrinterTagVisitor().visit(supplier.get()).replaceAll("\t", "").replaceAll("\\n", ""),
                 text -> {
                     try {
-                        consumer.accept(NbtUtils.snbtToStructure(text));
+                        consumer.accept(TagParser.parseTag(text));
                     } catch (CommandSyntaxException ignored) {}
-                }, NbtUtils.structureToSnbt(defaultValue(field, String.class)).replaceAll("\t", "").replaceAll("\\n", "").replaceAll(" ", ""), forceUpdate);
+                }, new SnbtPrinterTagVisitor().visit(defaultValue(field, String.class)).replaceAll("\t", "").replaceAll("\\n", ""), forceUpdate);
         configurator.setCompoundTag(true);
         return configurator;
     }

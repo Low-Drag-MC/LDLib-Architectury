@@ -1,11 +1,13 @@
 package com.lowdragmc.lowdraglib.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import lombok.NoArgsConstructor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,6 +28,9 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class ATESRRendererProvider<T extends BlockEntity> implements BlockEntityRenderer<T> {
 
     public ATESRRendererProvider() {
+    }
+
+    public ATESRRendererProvider(BlockEntityRendererProvider.Context ctx) {
     }
 
     @Override

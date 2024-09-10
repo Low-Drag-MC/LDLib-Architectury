@@ -53,6 +53,7 @@
   "ldlib.gui.editor.name.y_bar_width": "y bar height",
   "ldlib.gui.editor.name.draggable": "draggable",
   "ldlib.gui.editor.name.scrollable": "scrollable",
+  "ldlib.gui.editor.name.scroll_wheel_direction": "scroll wheel direction",
   "ldlib.gui.editor.name.use_scissor": "use scissor",
   "ldlib.gui.editor.name.x_bar_background": "x bar background",
   "ldlib.gui.editor.name.y_bar_background": "y bar background",
@@ -100,6 +101,8 @@
   "ldlib.gui.editor.tips.layoutPadding": "layout padding of children",
   "ldlib.gui.editor.name.isDynamicSized": "auto size",
   "ldlib.gui.editor.tips.isDynamicSized": "size will be adjusted according to content",
+  "ldlib.gui.editor.name.allowXEIIngredientOverMouse": "support xei ingredient lookup",
+  "ldlib.gui.editor.tips.allowXEIIngredientOverMouse": "if ture, the widget will be able to jump to the xei viewer",
 
 
   "ldlib.gui.editor.name.texture_type": "Texture Type",
@@ -153,7 +156,10 @@
   "ldlib.gui.editor.tips.select_image": "select an image",
   "ldlib.gui.editor.tips.select_model": "select a model",
   "ldlib.gui.editor.tips.save_resource": "save resource",
+  "ldlib.gui.editor.tips.save": "save",
+  "ldlib.gui.editor.tips.save_as": "save as",
   "ldlib.gui.editor.tips.save_project": "save project",
+  "ldlib.gui.editor.tips.ask_to_save": "current project hasn't been saved, do you want to save it?",
   "ldlib.gui.editor.tips.load_resource": "load resource",
   "ldlib.gui.editor.tips.load_project": "load project",
   "ldlib.gui.editor.tips.rename": "Rename",

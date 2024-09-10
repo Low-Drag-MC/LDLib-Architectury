@@ -80,7 +80,7 @@ public abstract class WorldSceneRenderer {
     protected Set<BlockPos> tileEntities;
     protected boolean useCache;
     @Getter @Setter
-    protected boolean endBatchLast = true;// if true, endBatch will be called after all rendering
+    protected boolean endBatchLast = false;// if true, endBatch will be called after all rendering
     protected boolean ortho;
     protected AtomicReference<CacheState> cacheState;
     protected int maxProgress;
@@ -426,7 +426,7 @@ public abstract class WorldSceneRenderer {
                             if (hook != null) {
                                 hook.apply(true, layer);
                             } else {
-                                setDefaultRenderLayerState(layer);
+                                setDefaultRenderLayerState(null);
                             }
 
                             renderTESR(renderedBlocks, poseStack, buffers, hook, particleTicks);
@@ -731,11 +731,11 @@ public abstract class WorldSceneRenderer {
 
     public static void setDefaultRenderLayerState(RenderType layer) {
         RenderSystem.setShaderColor(1, 1, 1, 1);
-        if (layer == RenderType.translucent()) { // SOLID
+        if (layer == RenderType.translucent()) { // TRANSLUCENT
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             RenderSystem.depthMask(false);
-        } else { // TRANSLUCENT
+        } else { // SOLID
             RenderSystem.enableDepthTest();
             RenderSystem.disableBlend();
             RenderSystem.depthMask(true);
