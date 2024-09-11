@@ -1,19 +1,21 @@
-package com.lowdragmc.lowdraglib.gui.graphprocessor.nodes;
+package com.lowdragmc.lowdraglib.gui.graphprocessor.nodes.math;
 
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.InputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.OutputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
-import net.minecraft.core.BlockPos;
 
-@LDLRegister(name = "blockpos", group = "graph_processor.node")
-public class BlockPosNode extends BaseNode {
+@LDLRegister(name = "div", group = "graph_processor.node.math")
+public class DivNode extends BaseNode {
     @InputPort
-    public int x = 0;
+    public float a = 0;
     @InputPort
-    public int y = 0;
-    @InputPort
-    public int z = 0;
+    public float b = 0;
     @OutputPort
-    public BlockPos output = BlockPos.ZERO;
+    public float out = 0;
+
+    @Override
+    public void process() {
+        out = a / b;
+    }
 }

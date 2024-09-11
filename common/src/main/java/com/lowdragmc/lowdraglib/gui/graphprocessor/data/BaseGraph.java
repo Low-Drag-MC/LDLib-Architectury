@@ -172,17 +172,21 @@ public class BaseGraph implements IPersistedSerializable {
      */
     public PortEdge connect(NodePort inputPort, NodePort outputPort, boolean autoDisconnectInputs) {
         var edge = PortEdge.createNewEdge(this, inputPort, outputPort);
+        var hasExistingEdge = edges.stream().anyMatch(e -> e.inputPort == edge.inputPort && e.outputPort == edge.outputPort);
+        if (hasExistingEdge) return null;
 
         //If the input port does not support multi-connection, we remove them
         if (autoDisconnectInputs && !inputPort.portData.acceptMultipleEdges) {
-            for (var e : inputPort.getEdges()) {
+            var copiedEdges = new ArrayList<>(inputPort.getEdges());
+            for (var e : copiedEdges) {
                 // TODO: do not disconnect them if the connected port is the same than the old connected
                 disconnect(e);
             }
         }
         // same for the output port:
         if (autoDisconnectInputs && !outputPort.portData.acceptMultipleEdges) {
-            for (var e : outputPort.getEdges()) {
+            var copiedEdges = new ArrayList<>(outputPort.getEdges());
+            for (var e : copiedEdges) {
                 // TODO: do not disconnect them if the connected port is the same than the old connected
                 disconnect(e);
             }
@@ -414,22 +418,22 @@ public class BaseGraph implements IPersistedSerializable {
     /**
      * Tell if two types can be connected in the context of a graph
      */
-    public static boolean TypesAreConnectable(Class t1, Class t2) {
-        if (t1 == null || t2 == null)
+    public static boolean areTypesConnectable(Class from, Class to) {
+        if (from == null || to == null)
             return false;
 
-        if (TypeAdapter.areIncompatible(t1, t2))
+        if (TypeAdapter.areIncompatible(from, to))
             return false;
 
 //        //Check if there is custom adapters for this assignation
-//        if (CustomPortIO.IsAssignable(t1, t2))
+//        if (CustomPortIO.IsAssignable(from, to))
 //            return true;
 
         //Check for type assignability
-        if (t2.isAssignableFrom(t1))
+        if (to.isAssignableFrom(from))
             return true;
 
         // User defined type convertions
-        return TypeAdapter.areAssignable(t1, t2);
+        return TypeAdapter.areAssignable(from, to);
     }
 }

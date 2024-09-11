@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.gui.editor.runtime;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.renderer.ISerializableRenderer;
+import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.accessors.IConfiguratorAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
@@ -16,6 +17,7 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.test.ui.IUITest;
 import com.lowdragmc.lowdraglib.utils.ReflectionUtils;
+import com.lowdragmc.lowdraglib.utils.TypeAdapter;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -44,6 +46,7 @@ public class AnnotationDetector {
     public static final List<Wrapper<LDLRegister, IProject>> REGISTER_PROJECTS = scanClasses(LDLRegister.class, IProject.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::toUINoArgsBuilder, AnnotationDetector::UIWrapperSorter, l -> {});
     public static final Map<String, Wrapper<LDLRegisterClient, ? extends ISerializableRenderer>> REGISTER_RENDERERS = new HashMap<>();
     public static final List<Wrapper<LDLRegisterClient, IUITest>> REGISTER_UI_TESTS = new ArrayList<>();
+    public static final List<TypeAdapter.ITypeAdapter> REGISTER_TYPE_ADAPTERS = scanClasses(LDLRegister.class, TypeAdapter.ITypeAdapter.class, AnnotationDetector::checkNoArgsConstructor, AnnotationDetector::createNoArgsInstance, (a, b) -> 0, l -> {});
     public static final Map<String, Wrapper<LDLRegister, ? extends BaseNode>> REGISTER_GP_NODES = new HashMap<>();
 
     public static void init() {

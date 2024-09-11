@@ -46,6 +46,7 @@ public class BlockPosAccessor extends TypesAccessor<Vec3i> {
         var defaultValue = defaultValue(field, ReflectionUtils.getRawType(field.getGenericType()));
         var configurator = new Vector3iConfigurator(name, () -> {
             var pos = supplier.get();
+            pos = pos == null ? defaultValue : pos;
             return new Vector3i(pos.getX(), pos.getY(), pos.getZ());
         }, vec3 -> consumer.accept(new BlockPos(vec3.x(), vec3.y(), vec3.z())),
                 new Vector3i(defaultValue.getX(), defaultValue.getY(), defaultValue.getZ()), forceUpdate);

@@ -1,8 +1,11 @@
 package com.lowdragmc.lowdraglib.gui.graphprocessor.widget;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.Configurator;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.NodePort;
+import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
@@ -11,12 +14,14 @@ import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
 import com.lowdragmc.lowdraglib.utils.Position;
+import com.lowdragmc.lowdraglib.utils.Rect;
 import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector4f;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,26 +40,26 @@ public class NodeWidget extends WidgetGroup {
     protected Position lastPosition;
 
     public NodeWidget(GraphViewWidget graphView, BaseNode node) {
-        super(node.position, new Size(100, 30));
+        super(node.position, new Size(node.getMinWidth(), 30));
         this.graphView = graphView;
         this.node = node;
-        addWidget(title = new WidgetGroup(0, 0, 100, 15));
-        title.setBackground(new GuiTextureGroup(
-                new ColorRectTexture(node.getColor()).setTopRadius(5),
-                ColorPattern.BLUE.borderTexture(-1).setTopRadius(5)));
-        addWidget(ports = new WidgetGroup(0, 15, 100, 15));
+        addWidget(title = new WidgetGroup(0, 0, node.getMinWidth(), 15));
+        title.setBackground(new ColorRectTexture(ColorPattern.GRAY.color).setTopRadius(5));
+        addWidget(ports = new WidgetGroup(0, 15, node.getMinWidth(), 15));
         ports.setDynamicSized(true);
         ports.setLayout(Layout.HORIZONTAL_TOP);
-        addWidget(content = new WidgetGroup(0, 30, 100, 0));
+        addWidget(content = new WidgetGroup(0, 30, node.getMinWidth(), 0));
+        content.setBackground(new ColorRectTexture(ColorPattern.DARK_GRAY.color));
         reloadWidget();
     }
 
     public void reloadWidget() {
-        var width = getSizeWidth();
+        var width = node.getMinWidth();
         var height = 15;
         portMap.clear();
         title.clearAllWidgets();
         ports.clearAllWidgets();
+        content.clearAllWidgets();
 
         // load inputs
         var inputGroup = new WidgetGroup(0, 0, 0, 0);
@@ -88,14 +93,34 @@ public class NodeWidget extends WidgetGroup {
 
         height += ports.getSizeHeight();
 
-        //title
+        // title
         title.setSize(width, 15);
         title.addWidget(new ImageWidget(6, 2, width, 11,
-                new TextTexture().setSupplier(node::getName).setWidth(width - 12)
+                new TextTexture().setSupplier(() -> node.getName() + "(%d)".formatted(node.getComputeOrder())).setWidth(width - 12)
                         .setType(TextTexture.TextType.ROLL)));
         // split line
         title.addWidget(new ImageWidget(0, 14, width, 1, ColorPattern.BLACK.rectTexture()));
 
+        // content
+        ConfiguratorGroup group = new ConfiguratorGroup("", false);
+        node.buildConfigurator(group);
+        int h = 1;
+        for (Configurator configurator : group.getConfigurators()) {
+            configurator.init(width - 5);
+            configurator.computeHeight();
+            configurator.setSelfPosition(new Position(0, h));
+            h += configurator.getSize().height + 5;
+            content.addWidget(configurator);
+        }
+        if (h > 1) {
+            content.addWidget(new ImageWidget(0, 0, width, 1, ColorPattern.BLACK.rectTexture()));
+            h -= 5;
+        } else {
+            h = 0;
+        }
+        content.setSelfPosition(new Position(0, height));
+        content.setSize(width, h);
+        height += h;
         setSize(width, height);
     }
 
@@ -104,7 +129,11 @@ public class NodeWidget extends WidgetGroup {
     public void drawInBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         if (isMouseOverElement(mouseX, mouseY)) {
-            DrawerHelper.drawBorder(graphics, getPositionX(), getPositionY(), getSizeWidth(), getSizeHeight(), ColorPattern.BLUE.color, 1);
+            DrawerHelper.drawFrameRoundBox(graphics, Rect.ofRelative((int) getPositionX(), getSizeWidth(), (int) getPositionY(), getSizeHeight()),
+                    1,
+                    new Vector4f(5, 0, 5, 0),
+                    new Vector4f(5, 0, 5, 0),
+                    ColorPattern.BLUE.color);
         }
     }
 

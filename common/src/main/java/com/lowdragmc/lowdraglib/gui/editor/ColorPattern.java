@@ -25,8 +25,8 @@ public enum ColorPattern {
     T_YELLOW(0x88ffff33),
     CYAN(0xff337777),
     T_CYAN(0x88337777),
-    BLUE(0xff3333ff),
-    T_BLUE(0x883333ff),
+    BLUE(0xff4852ff),
+    T_BLUE(0x884852ff),
     ;
     public final int color;
 

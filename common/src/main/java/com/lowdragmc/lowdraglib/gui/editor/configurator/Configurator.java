@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class Configurator extends WidgetGroup {
     @Getter
+    @Nullable
     protected ConfigPanel configPanel;
     @Getter
     protected ConfigPanel.Tab tab;

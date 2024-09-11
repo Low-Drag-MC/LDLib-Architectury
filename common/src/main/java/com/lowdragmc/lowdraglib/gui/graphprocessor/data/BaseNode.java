@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.gui.graphprocessor.data;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.CustomPortBehavior;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.InputPort;
@@ -23,11 +24,11 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Getter
-public abstract class BaseNode implements IPersistedSerializable, ILDLRegister {
+public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, IConfigurable {
     /**
      * Name of the node, it will be displayed in the title section
      */
-    protected String name = getClass().getSimpleName();
+    protected String name = name();
     /**
      * The accent color of the node
      */
@@ -81,7 +82,7 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister {
      */
     public Consumer<String> onPortsUpdated;
 
-    private final Map<String, NodeFieldInformation> nodeFields = new HashMap<>();
+    private final Map<String, NodeFieldInformation> nodeFields = new LinkedHashMap<>();
 
     private final Map<Class, ICustomPortTypeBehaviorDelegate> customPortTypeBehaviorMap = new HashMap<>();
 
@@ -132,6 +133,13 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Get the minimum width of the node in the editor
+     */
+    public int getMinWidth() {
+        return 100;
     }
 
     /**
@@ -279,11 +287,11 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister {
                 updatePortsForField(nodeField.fieldName, false);
             } else {
                 // If we don't have a custom behavior on the node, we just have to create a simple port
-                var port = new PortData();
-                port.acceptMultipleEdges = nodeField.isMultiple;
-                port.displayName = nodeField.name;
-                port.tooltip = Arrays.stream(nodeField.tooltips).toList();
-                port.vertical = nodeField.vertical;
+                var port = new PortData()
+                        .displayName(nodeField.name)
+                        .acceptMultipleEdges(nodeField.isMultiple)
+                        .vertical(nodeField.vertical)
+                        .tooltip(Arrays.stream(nodeField.tooltips).toList());
                 addPort(nodeField.input, nodeField.fieldName, port);
             }
         }
@@ -402,8 +410,9 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister {
             changed = true;
         } else {
             // in case the port type have changed for an incompatible type, we disconnect all the edges attached to this port
-            if (!BaseGraph.TypesAreConnectable(port.portData.displayType, portData.displayType)) {
-                for(var edge : port.getEdges()) graph.disconnect(edge.GUID);
+            if (!BaseGraph.areTypesConnectable(port.portData.displayType, portData.displayType)) {
+                var copiedEdges = new ArrayList<>(port.getEdges());
+                for(var edge : copiedEdges) graph.disconnect(edge.GUID);
             }
 
             // patch the port data

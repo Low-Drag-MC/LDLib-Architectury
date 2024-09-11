@@ -56,7 +56,7 @@ public class PortData {
                     && displayType == other.displayType
                     && acceptMultipleEdges == other.acceptMultipleEdges
 //                && sizeInPixel == other.sizeInPixel
-                    && tooltip.equals(other.tooltip)
+                    && Objects.equals(tooltip, other.tooltip)
                     && vertical == other.vertical;
         return false;
     }

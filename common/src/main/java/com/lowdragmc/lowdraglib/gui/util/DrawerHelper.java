@@ -39,7 +39,6 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
@@ -343,8 +342,14 @@ public class DrawerHelper {
     public static void drawRoundBox(@Nonnull GuiGraphics graphics, Rect square, Vector4f radius, int color) {
         DrawerHelper.ROUND_BOX.use(uniform -> {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
+            uniform.glUniformMatrix4F("PoseStack", new Matrix4f());
+            var point1 = new Vector4f(square.left - 0.5f, square.up - 0.5f, 0, 1);
+            var point2 = new Vector4f(square.right - 0.5f, square.down - 0.5f, 0, 1);
+            var matrix = graphics.pose().last().pose();
+            point1.mul(matrix);
+            point2.mul(matrix);
 
-            uniform.glUniform4F("SquareVertex", square.left - 1f, square.up - 1f, square.right - 1f, square.down - 1f);
+            uniform.glUniform4F("SquareVertex", point1.x, point1.y, point2.x, point2.y);
             uniform.glUniform4F("RoundRadius", radius.x(), radius.y(), radius.z(), radius.w());
             uniform.fillRGBAColor("Color", color);
             uniform.glUniform1F("Blur", 2);
@@ -373,8 +378,14 @@ public class DrawerHelper {
     public static void drawFrameRoundBox(@Nonnull GuiGraphics graphics, Rect square, float thickness, Vector4f radius1, Vector4f radius2, int color) {
         DrawerHelper.FRAME_ROUND_BOX.use(uniform -> {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
+            uniform.glUniformMatrix4F("PoseStack", new Matrix4f());
+            var point1 = new Vector4f(square.left - 0.5f, square.up - 0.5f, 0, 1);
+            var point2 = new Vector4f(square.right - 0.5f, square.down - 0.5f, 0, 1);
+            var matrix = graphics.pose().last().pose();
+            point1.mul(matrix);
+            point2.mul(matrix);
 
-            uniform.glUniform4F("SquareVertex", square.left - 1, square.up - 1, square.right - 1, square.down - 1);
+            uniform.glUniform4F("SquareVertex", point1.x, point1.y, point2.x, point2.y);
             uniform.glUniform4F("RoundRadius1", radius1.x(), radius1.y(), radius1.z(), radius1.w());
             uniform.glUniform4F("RoundRadius2", radius2.x(), radius2.y(), radius2.z(), radius2.w());
             uniform.glUniform1F("Thickness", thickness);
@@ -400,51 +411,6 @@ public class DrawerHelper {
 
         RenderSystem.enableBlend();
         uploadScreenPosVertex();
-    }
-
-    public static List<Vec2> getSmoothPoints(Vec2 a, Vec2 b, Vec2 c, float r, int t) {
-        Vec2 ba = new Vec2(a.x - b.x, a.y - b.y);
-        Vec2 bc = new Vec2(c.x - b.x, c.y - b.y);
-
-        Vec2 baNorm = ba.normalized();
-        Vec2 bcNorm = bc.normalized();
-
-        Vec2 bisector = new Vec2(baNorm.x + bcNorm.x, baNorm.y + bcNorm.y);
-        bisector = bisector.normalized();
-
-        float angle_ba_bc = (float) Math.acos(baNorm.x * bcNorm.x + baNorm.y * bcNorm.y);
-        float circleCenterDistance = (float) (r / Math.sin(angle_ba_bc / 2));
-
-        Vec2 center = new Vec2(b.x + bisector.x * circleCenterDistance,
-                b.y + bisector.y * circleCenterDistance);
-
-        Vec2 q = new Vec2(b.x + r * baNorm.x, b.y + r * baNorm.y);
-        Vec2 w = new Vec2(b.x + r * bcNorm.x, b.y + r * bcNorm.y);
-        var list = getReversePointsOnArc(center, q, w, r, t);
-        list.add(0, new Vec2(a.x, a.y));
-        list.add(new Vec2(c.x, c.y));
-        return list;
-    }
-
-    public static List<Vec2> getReversePointsOnArc(Vec2 center, Vec2 q, Vec2 w, float r, int t) {
-        List<Vec2> points = new ArrayList<>();
-        double startAngle = Math.atan2(q.y - center.y, q.x - center.x);
-        double endAngle = Math.atan2(w.y - center.y, w.x - center.x);
-
-        if (startAngle < endAngle) {
-            startAngle += 2 * Math.PI;
-        }
-
-        double angleStep = (startAngle - endAngle) / (t - 1);
-
-        for (int i = 0; i < t; i++) {
-            double angle = startAngle - i * angleStep;
-            double x = center.x + r * Math.cos(angle);
-            double y = center.y + r * Math.sin(angle);
-            points.add(new Vec2((float) x, (float) y));
-        }
-
-        return points;
     }
 
     private static void uploadScreenPosVertex() {

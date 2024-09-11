@@ -6,6 +6,7 @@ import com.google.common.collect.Tables;
 import com.google.common.util.concurrent.Runnables;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.CustomPortInput;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.CustomPortOutput;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.custom.ICustomPortIODelegate;
 import com.lowdragmc.lowdraglib.utils.TypeAdapter;
 import lombok.Getter;
@@ -78,14 +79,14 @@ public class NodePort {
             var found = false;
             for (var method : methods) {
                 var customPortInput = method.isAnnotationPresent(CustomPortInput.class) ? method.getAnnotation(CustomPortInput.class) : null;
-                var customPortOutput = method.isAnnotationPresent(CustomPortInput.class) ? method.getAnnotation(CustomPortInput.class) : null;
+                var customPortOutput = method.isAnnotationPresent(CustomPortOutput.class) ? method.getAnnotation(CustomPortOutput.class) : null;
                 if (customPortInput == null && customPortOutput == null) continue;
                 if (customPortInput != null && customPortOutput != null) {
                     LDLib.LOGGER.error("The method {} in the class {} is annotated with both CustomPortInput and CustomPortOutput, only one is allowed", method, nodeClazz);
                     continue;
                 }
-                var customPort = customPortInput != null ? customPortInput : customPortOutput;
-                if (customPort.field().equals(fieldName)) {
+                var field = customPortInput != null ? customPortInput.field() : customPortOutput.field();
+                if (field.equals(fieldName)) {
                     if (method.getParameterCount() != 2) {
                         LDLib.LOGGER.error("The method {} in the class {} annotated with CustomPortInput or CustomPortOutput must have 2 parameters", method, nodeClazz);
                         continue;
@@ -97,6 +98,7 @@ public class NodePort {
                     if (!method.getParameterTypes()[1].isAssignableFrom(NodePort.class)) {
                         LDLib.LOGGER.error("The method {} in the class {} annotated with CustomPortInput or CustomPortOutput must have the third parameter of type NodePort", method, nodeClazz);
                     }
+                    method.setAccessible(true);
                     customPortIODelegateTable.put(nodeClazz, fieldName, (owner, edges, outputPort) -> {
                         try {
                             method.invoke(owner, edges, outputPort);
@@ -194,7 +196,7 @@ public class NodePort {
 
             // We do an extra convertion step in case the buffer output is not compatible with the input port
             if (passThroughObject != null)
-                if (TypeAdapter.areAssignable(fieldInfo.getType(), passThroughObject.getClass()))
+                if (TypeAdapter.areAssignable(passThroughObject.getClass(), fieldInfo.getType()))
                     passThroughObject = TypeAdapter.convert(passThroughObject, fieldInfo.getType());
 
             try {
@@ -254,10 +256,18 @@ public class NodePort {
 
                 if (outType.isAssignableFrom(inType)) {
                     // if outType is assignable from inType, we can directly assign the value
-                    outputField.setAccessible(true);
+                    inputField.setAccessible(true);
                     return () -> {
                         try {
-                            outputField.set(edge.outputNode, inputField.get(edge.inputNode));
+                            inputField.set(edge.inputNode, outputField.get(edge.outputNode));
+                        } catch (IllegalAccessException e) {
+                            LDLib.LOGGER.error("Error while pushing data from {} to {}", edge.inputNode, edge.outputNode, e);
+                        }
+                    };
+                } else if (TypeAdapter.areAssignable(outType, inType)) {
+                    return () -> {
+                        try {
+                            inputField.set(edge.inputNode, TypeAdapter.convert(outputField.get(edge.outputNode), inType));
                         } catch (IllegalAccessException e) {
                             LDLib.LOGGER.error("Error while pushing data from {} to {}", edge.inputNode, edge.outputNode, e);
                         }
