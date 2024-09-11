@@ -7,9 +7,18 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.InputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
+import org.joml.Vector3f;
+
+import java.text.NumberFormat;
 
 @LDLRegister(name = "print", group = "graph_processor.node.utils")
 public class PrintNode extends BaseNode {
+    private static NumberFormat numberFormat = NumberFormat.getInstance();
+    static {
+        numberFormat.setMaximumFractionDigits(6);
+        numberFormat.setMinimumFractionDigits(0);
+    }
+
     @InputPort
     public Object in;
 
@@ -20,9 +29,21 @@ public class PrintNode extends BaseNode {
 
     @Override
     public void buildConfigurator(ConfiguratorGroup father) {
-        father.addConfigurators(new WrapperConfigurator("", new ImageWidget(0, 0, 150, 15,
-                new TextTexture("").setWidth(150).setType(TextTexture.TextType.ROLL_ALWAYS)
-                        .setSupplier(() -> in == null ? "null" : in.toString())))
+        var numberFormat = NumberFormat.getInstance();
+        numberFormat.setMaximumFractionDigits(2);
+        father.addConfigurators(new WrapperConfigurator("", new ImageWidget(0, 0, 140, 15,
+                new TextTexture("").setWidth(140).setType(TextTexture.TextType.ROLL_ALWAYS)
+                        .setSupplier(() -> in == null ? "null" : format(in))))
                 .setRemoveTitleBar(true));
+    }
+
+    private String format(Object obj) {
+        if (obj instanceof Number) {
+            return numberFormat.format(obj);
+        }
+        if (obj instanceof Vector3f vec) {
+            return vec.toString(numberFormat);
+        }
+        return obj.toString();
     }
 }

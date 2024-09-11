@@ -37,7 +37,7 @@ public class ConfiguratorParser {
         createConfigurators(father, setters, clazz.getSuperclass(), object);
         if (clazz.isAnnotationPresent(Configurable.class)) {
             Configurable configurable = clazz.getAnnotation(Configurable.class);
-            String name = configurable.name().isEmpty() ? clazz.getSimpleName() : configurable.name();
+            String name = configurable.showName() ? (configurable.name().isEmpty() ? clazz.getSimpleName() : configurable.name()) : "";
             ConfiguratorGroup newGroup = new ConfiguratorGroup(name, configurable.collapse());
             newGroup.setCanCollapse(configurable.canCollapse());
             newGroup.setTips(configurable.tips());
@@ -58,7 +58,7 @@ public class ConfiguratorParser {
                         field.setAccessible(true);
                         var value = field.get(object);
                         if (value != null) {
-                            String name = configurable.name().isEmpty() ? clazz.getSimpleName() : configurable.name();
+                            String name = configurable.showName() ? (configurable.name().isEmpty() ? clazz.getSimpleName() : configurable.name()) : "";
                             ConfiguratorGroup newGroup = new ConfiguratorGroup(name, configurable.collapse());
                             newGroup.setCanCollapse(configurable.canCollapse());
                             newGroup.setTips(configurable.tips());
@@ -73,7 +73,7 @@ public class ConfiguratorParser {
                 } else {
                     IConfiguratorAccessor accessor = ConfiguratorAccessors.findByType(field.getGenericType());
                     field.setAccessible(true);
-                    String name = configurable.name().isEmpty() ? field.getName() : configurable.name();
+                    String name = configurable.showName() ? (configurable.name().isEmpty() ? field.getName() : configurable.name()) : "";
                     Method setter = setters.get(field.getName());
 
                     Configurator configurator = accessor.create(name, () -> {

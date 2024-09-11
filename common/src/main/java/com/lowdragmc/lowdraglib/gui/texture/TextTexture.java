@@ -14,6 +14,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import org.joml.Vector4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -210,7 +211,10 @@ public class TextTexture extends TransformTexture{
         int textW = fontRenderer.width(line);
         int totalW = width + textW + 10;
         float from = x + width;
-        graphics.enableScissor((int) x, (int) y, (int) (x + width), (int) (y + height));
+        var trans = graphics.pose().last().pose();
+        var realPos = trans.transform(new Vector4f(x, y, 0, 1));
+        var realPos2 = trans.transform(new Vector4f(x + width, y + height, 0, 1));
+        graphics.enableScissor((int) realPos.x, (int) realPos.y, (int) realPos2.x, (int) realPos2.y);
         var t = rollSpeed > 0 ? ((((rollSpeed * Math.abs((int)(System.currentTimeMillis() % 1000000)) / 10) % (totalW))) / (totalW)) : 0.5;
         graphics.drawString(fontRenderer, line, (int) (from - t * totalW), (int) _y, color, dropShadow);
         graphics.disableScissor();

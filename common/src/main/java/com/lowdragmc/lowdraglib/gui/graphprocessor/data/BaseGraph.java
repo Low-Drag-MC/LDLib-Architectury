@@ -433,6 +433,9 @@ public class BaseGraph implements IPersistedSerializable {
         if (to.isAssignableFrom(from))
             return true;
 
+        if (to == Object.class)
+            return true;
+
         // User defined type convertions
         return TypeAdapter.areAssignable(from, to);
     }

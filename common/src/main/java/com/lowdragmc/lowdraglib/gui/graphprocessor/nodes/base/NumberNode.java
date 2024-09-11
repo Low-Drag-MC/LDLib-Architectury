@@ -11,7 +11,7 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
 @LDLRegister(name = "number", group = "graph_processor.node.base")
 public class NumberNode extends BaseNode {
     @InputPort
-    @Configurable(name = " ")
+    @Configurable(showName = false)
     @NumberRange(range = {-Float.MAX_VALUE, Float.MAX_VALUE}, wheel = 1f)
     @DefaultValue(numberValue = {0})
     public float in = 0;

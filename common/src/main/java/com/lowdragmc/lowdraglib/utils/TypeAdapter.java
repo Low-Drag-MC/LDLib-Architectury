@@ -69,6 +69,8 @@ public class TypeAdapter {
     public static boolean areAssignable(Class from, Class to) {
         if (!adaptersLoaded)
             loadAllAdapters();
+        if (from == to || to == Object.class)
+            return true;
         if (areIncompatible(from, to))
             return false;
         return adapters.containsKey(new convertion(from, to));
@@ -78,6 +80,8 @@ public class TypeAdapter {
         if (!adaptersLoaded)
             loadAllAdapters();
         var convertion = new convertion(from.getClass(), targetType);
+        if (convertion.from == convertion.to || convertion.to == Object.class)
+            return from;
         if (adapters.containsKey(convertion))
             return adapters.get(convertion).apply(from);
         return null;

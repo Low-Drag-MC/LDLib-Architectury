@@ -254,7 +254,7 @@ public class NodePort {
                 var inType = inputField.getType();
                 var outType = outputField.getType();
 
-                if (outType.isAssignableFrom(inType)) {
+                if (inType.isAssignableFrom(outType)) {
                     // if outType is assignable from inType, we can directly assign the value
                     inputField.setAccessible(true);
                     return () -> {

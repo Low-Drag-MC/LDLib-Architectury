@@ -11,7 +11,7 @@ import org.joml.Vector3f;
 @LDLRegister(name = "vector3", group = "graph_processor.node.base")
 public class Vector3Node extends BaseNode {
     @InputPort(name = "xyz")
-    @Configurable(name = " ")
+    @Configurable(showName = false)
     @NumberRange(range = {-Float.MAX_VALUE, Float.MAX_VALUE}, wheel = 1f)
     public Vector3f in;
     @OutputPort(name = "xyz")

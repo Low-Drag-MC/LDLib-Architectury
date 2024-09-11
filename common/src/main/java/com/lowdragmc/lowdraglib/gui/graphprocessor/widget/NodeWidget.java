@@ -106,9 +106,9 @@ public class NodeWidget extends WidgetGroup {
         node.buildConfigurator(group);
         int h = 1;
         for (Configurator configurator : group.getConfigurators()) {
-            configurator.init(width - 5);
+            configurator.init(width - 4);
             configurator.computeHeight();
-            configurator.setSelfPosition(new Position(0, h));
+            configurator.setSelfPosition(new Position(2, h));
             h += configurator.getSize().height + 5;
             content.addWidget(configurator);
         }

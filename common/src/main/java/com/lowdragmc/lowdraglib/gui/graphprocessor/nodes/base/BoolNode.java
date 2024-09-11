@@ -9,7 +9,7 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
 @LDLRegister(name = "bool", group = "graph_processor.node.base")
 public class BoolNode extends BaseNode {
     @InputPort
-    @Configurable(name = " ")
+    @Configurable(showName = false)
     public boolean in = false;
     @OutputPort
     public boolean out = false;

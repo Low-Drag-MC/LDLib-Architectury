@@ -11,7 +11,7 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
 @LDLRegister(name = "color", group = "graph_processor.node.base")
 public class ColorNode extends BaseNode {
     @InputPort
-    @Configurable(name = " ")
+    @Configurable(showName = false)
     @NumberColor
     @DefaultValue(numberValue = -1)
     public int in;
