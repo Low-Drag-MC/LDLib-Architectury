@@ -37,18 +37,21 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
         for (Widget widget : flatVisibleWidgetCollection) {
             if (widget instanceof IRecipeIngredientSlot slot) {
                 var role = mapToRole(slot.getIngredientIO());
+                Position pos = widget.getPosition();
+                IRecipeSlotBuilder slotBuilder;
                 if (widget.getParent() instanceof DraggableScrollableWidgetGroup) {
                     // don't add the JEI widget at all if we have a draggable group, let the draggable widget handle it instead.
                     if (role == null) {
                         builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addIngredientsUnsafe(slot.getXEIIngredients());
                         builder.addInvisibleIngredients(RecipeIngredientRole.OUTPUT).addIngredientsUnsafe(slot.getXEIIngredients());
+                        builder.addSlotToWidget(RecipeIngredientRole.INPUT, (builder1, recipe, slots) -> {}).addIngredientsUnsafe(slot.getXEIIngredients());
+                        builder.addSlotToWidget(RecipeIngredientRole.OUTPUT, (builder1, recipe, slots) -> {}).addIngredientsUnsafe(slot.getXEIIngredients());
                     } else {
                         builder.addInvisibleIngredients(role).addIngredientsUnsafe(slot.getXEIIngredients());
+                        builder.addSlotToWidget(role, (builder1, recipe, slots) -> {}).addIngredientsUnsafe(slot.getXEIIngredients());
                     }
                     continue;
                 }
-                Position pos = widget.getPosition();
-                IRecipeSlotBuilder slotBuilder;
                 if (role == null) { // both
                     addJEISlot(builder, slot, RecipeIngredientRole.INPUT, pos.x, pos.y);
                     slotBuilder = addJEISlot(builder, slot, RecipeIngredientRole.OUTPUT, pos.x, pos.y);
