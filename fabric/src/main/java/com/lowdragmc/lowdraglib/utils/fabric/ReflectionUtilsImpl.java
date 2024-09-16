@@ -37,7 +37,7 @@ public class ReflectionUtilsImpl {
                         consumer.left().accept(clazz);
                     }
                 } catch (Throwable throwable) {
-                    LDLib.LOGGER.error("Failed to load class {} for notation {} ", name, annotation.getName(), throwable);
+                    LDLib.LOGGER.warn("Failed to load class for notation: " + name);
                 }
             }
         });
