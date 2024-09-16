@@ -8,9 +8,9 @@ public class PortEdge implements IPersistedSerializable {
     @Persisted
     public String GUID;
     @Persisted
-    private String inputNodeGUID;
+    public String inputNodeGUID;
     @Persisted
-    private String outputNodeGUID;
+    public String outputNodeGUID;
     @Persisted
     public String inputFieldName;
     @Persisted
@@ -32,7 +32,7 @@ public class PortEdge implements IPersistedSerializable {
 
     public BaseNode	outputNode;
 
-    protected PortEdge() {}
+    public PortEdge() {}
 
     public static PortEdge createNewEdge(BaseGraph graph, NodePort inputPort, NodePort outputPort) {
         var	edge = new PortEdge();
@@ -67,6 +67,15 @@ public class PortEdge implements IPersistedSerializable {
         IPersistedSerializable.super.deserializeNBT(tag);
     }
 
+    public PortEdge copy() {
+        var edge = new PortEdge();
+        edge.deserializeNBT(serializeNBT());
+        edge.GUID = null;
+        edge.inputNodeGUID = null;
+        edge.outputNodeGUID = null;
+        return edge;
+    }
+
     public void initialize(BaseGraph owner) {
         this.owner = owner;
         if (owner == null || inputNodeGUID == null || outputNodeGUID == null)
@@ -82,6 +91,6 @@ public class PortEdge implements IPersistedSerializable {
 
     @Override
     public String toString(){
-        return "%s:%s -> %s:%s".formatted(outputNode.getName(), outputPort.fieldName, inputNode.getName(), inputPort.fieldName);
+        return "%s:%s -> %s:%s".formatted(outputNode.name(), outputPort.fieldName, inputNode.name(), inputPort.fieldName);
     };
 }

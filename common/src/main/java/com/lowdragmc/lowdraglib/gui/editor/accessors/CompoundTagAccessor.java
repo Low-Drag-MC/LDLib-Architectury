@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.accessors;
 
+import com.google.common.collect.Lists;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.Configurator;
@@ -36,12 +37,12 @@ public class CompoundTagAccessor extends TypesAccessor<CompoundTag> {
     @Override
     public Configurator create(String name, Supplier<CompoundTag> supplier, Consumer<CompoundTag> consumer, boolean forceUpdate, Field field) {
         var configurator = new StringConfigurator(name,
-                () -> new SnbtPrinterTagVisitor().visit(supplier.get()).replaceAll("\t", "").replaceAll("\\n", ""),
+                () -> new SnbtPrinterTagVisitor("  ", 0, Lists.newArrayList()).visit(supplier.get()).replaceAll("\t", "").replaceAll("\\n", ""),
                 text -> {
                     try {
                         consumer.accept(TagParser.parseTag(text));
                     } catch (CommandSyntaxException ignored) {}
-                }, new SnbtPrinterTagVisitor().visit(defaultValue(field, String.class)).replaceAll("\t", "").replaceAll("\\n", ""), forceUpdate);
+                }, new SnbtPrinterTagVisitor("  ", 0, Lists.newArrayList()).visit(defaultValue(field, String.class)).replaceAll("\t", "").replaceAll("\\n", ""), forceUpdate);
         configurator.setCompoundTag(true);
         return configurator;
     }

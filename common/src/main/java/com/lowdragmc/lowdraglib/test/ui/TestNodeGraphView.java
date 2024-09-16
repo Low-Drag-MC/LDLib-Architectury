@@ -2,32 +2,39 @@ package com.lowdragmc.lowdraglib.test.ui;
 
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegisterClient;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseGraph;
-import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
-import com.lowdragmc.lowdraglib.gui.graphprocessor.nodes.math.AdderNode;
-import com.lowdragmc.lowdraglib.gui.graphprocessor.nodes.base.Vector3Node;
-import com.lowdragmc.lowdraglib.gui.graphprocessor.nodes.base.NumberNode;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.parameter.ExposedParameter;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.widget.GraphViewWidget;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import com.lowdragmc.lowdraglib.utils.Position;
 import lombok.NoArgsConstructor;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+
+import java.util.ArrayList;
 
 @LDLRegisterClient(name="node_graph", group = "ui_test")
 @NoArgsConstructor
 public class TestNodeGraphView implements IUITest {
     @Override
     public ModularUI createUI(IUIHolder holder, Player entityPlayer) {
-        var graph = new BaseGraph();
-        var x = BaseNode.createFromType(NumberNode.class, new Position(5, 5));
-        var z = BaseNode.createFromType(NumberNode.class, new Position(205, 5));
-        var vec3 = BaseNode.createFromType(Vector3Node.class, new Position(360, 160));
-        var adder = BaseNode.createFromType(AdderNode.class, new Position(75, 100));
-        graph.addNode(x);
-        graph.addNode(z);
-        graph.addNode(vec3);
-        graph.addNode(adder);
+        var parameters = new ArrayList<ExposedParameter<?>>();
+        parameters.add(new LevelParameter("test_level_get").setAccessor(ExposedParameter.ParameterAccessor.Get));
+        parameters.add(new ExposedParameter.Int("test_int_get").setAccessor(ExposedParameter.ParameterAccessor.Get));
+        parameters.add(new ExposedParameter.Bool("test_bool_get").setAccessor(ExposedParameter.ParameterAccessor.Get));
+        parameters.add(new ExposedParameter.Float("test_float_get").setAccessor(ExposedParameter.ParameterAccessor.Get));
+        parameters.add(new ExposedParameter.String("test_string_get").setAccessor(ExposedParameter.ParameterAccessor.Get));
+        parameters.add(new ExposedParameter.Int("test_int_set").setAccessor(ExposedParameter.ParameterAccessor.Set));
+        parameters.add(new ExposedParameter.Bool("test_bool_set").setAccessor(ExposedParameter.ParameterAccessor.Set));
+        parameters.add(new ExposedParameter.Float("test_float_set").setAccessor(ExposedParameter.ParameterAccessor.Set));
+        parameters.add(new ExposedParameter.String("test_string_set").setAccessor(ExposedParameter.ParameterAccessor.Set));
+        var graph = new BaseGraph(parameters);
         return IUITest.super.createUI(holder, entityPlayer)
-                .widget(new GraphViewWidget(graph, 0, 0, 500, 500));
+                .widget(new GraphViewWidget(graph, 0, 0, getScreenWidth(), getScreenHeight()));
+    }
+
+    public static class LevelParameter extends ExposedParameter<Level> {
+        public LevelParameter(java.lang.String identifier) {
+            super(identifier, Level.class);
+        }
     }
 }

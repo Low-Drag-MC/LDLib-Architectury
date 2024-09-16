@@ -8,5 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface CustomPortBehavior {
+    /**
+     * The field which should be handled by a custom method
+     */
     String field();
 }

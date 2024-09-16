@@ -9,7 +9,6 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.CustomPortBehavior
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.InputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.OutputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.custom.ICustomPortBehaviorDelegate;
-import com.lowdragmc.lowdraglib.gui.graphprocessor.data.custom.ICustomPortTypeBehaviorDelegate;
 import com.lowdragmc.lowdraglib.syncdata.IPersistedSerializable;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.utils.Position;
@@ -19,6 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -28,11 +28,13 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
     /**
      * Name of the node, it will be displayed in the title section
      */
-    protected String name = name();
+    @Persisted
+    @Setter
+    protected String displayName = name();
     /**
-     * The accent color of the node
+     * The accent color of the node title
      */
-    protected int color = ColorPattern.GRAY.color;
+    protected int titleColor = ColorPattern.GRAY.color;
     /**
      * The GUID of the node, which is used to identify the node
      */
@@ -49,7 +51,12 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
     @Persisted
     @Setter
     public Position position;
-
+    @Persisted
+    @Setter
+    public boolean expanded = true;
+    @Persisted
+    @Setter
+    public boolean canBeRemoved = true;
     /**
      * Tell whether the node can be processed.
      * <br>
@@ -84,7 +91,6 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
 
     private final Map<String, NodeFieldInformation> nodeFields = new LinkedHashMap<>();
 
-    private final Map<Class, ICustomPortTypeBehaviorDelegate> customPortTypeBehaviorMap = new HashMap<>();
 
     private record PortUpdate(List<String> fieldNames, BaseNode node) {
     }
@@ -116,6 +122,12 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
         return node;
     }
 
+    public BaseNode copy() {
+        var newNode = createFromTag(serializeNBT());
+        newNode.GUID = null;
+        return newNode;
+    }
+
     /**
      * Create a node of a certain type at a certain position
      *
@@ -139,7 +151,7 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
      * Get the minimum width of the node in the editor
      */
     public int getMinWidth() {
-        return 100;
+        return 50;
     }
 
     /**
@@ -160,19 +172,30 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
         destroy();
     }
 
+    public Field[] getAllFields() {
+        return getClass().getFields();
+    }
+
+    public Method[] getAllMethods() {
+        return getClass().getMethods();
+    }
+
     /**
      * Detect input and output fields of the node
      */
     protected void InitializeInOutDatas() {
-        var fields = getClass().getDeclaredFields();
-        var methods = getClass().getDeclaredMethods();
+        var fields = getAllFields();
+        var methods = getAllMethods();
 
+        var fieldInformations = new ArrayList<NodeFieldInformation>();
         for (var field : fields) {
             var inputPort = field.isAnnotationPresent(InputPort.class) ? field.getAnnotation(InputPort.class) : null;
             var outputPort = field.isAnnotationPresent(OutputPort.class) ? field.getAnnotation(OutputPort.class) : null;
             var isMultiple = false;
             var input = false;
             var name = field.getName();
+            var color = -1;
+            var priority = 0;
             String[] tooltips = null;
 
             if (inputPort == null && outputPort == null) continue;
@@ -188,13 +211,20 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
 
             if (input) {
                 name = inputPort.name().isEmpty() ? name : inputPort.name();
+                color = inputPort.color();
+                priority = inputPort.priority();
             } else {
                 name = outputPort.name().isEmpty() ? name : outputPort.name();
+                color = outputPort.color();
+                priority = outputPort.priority();
             }
 
             // By default we set the behavior to null, if the field have a custom behavior, it will be set in the loop just below
-            nodeFields.put(field.getName(), new NodeFieldInformation(field, name, input, isMultiple, tooltips, false, null));
+            fieldInformations.add(new NodeFieldInformation(field, name, color, input, isMultiple, tooltips, priority, null));
         }
+
+        fieldInformations.sort(Comparator.comparingInt(f -> f.priority));
+        fieldInformations.forEach(f -> nodeFields.put(f.info.getName(), f));
 
         for (var method : methods) {
             if (method.isAnnotationPresent(CustomPortBehavior.class)) {
@@ -270,7 +300,11 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
      */
     public void initialize(BaseGraph graph) {
         this.graph = graph;
-        this.graph.addGUID(GUID);
+        if (GUID == null) {
+            GUID = graph.newGUID().toString();
+        } else {
+            this.graph.addGUID(GUID);
+        }
         enable();
         InitializePorts();
     }
@@ -280,7 +314,6 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
      * This will allow the node creation menu to correctly recognize ports that can be connected between nodes
      */
     public void InitializePorts() {
-        InitializeCustomPortTypeMethods();
         for (var entry : nodeFields.entrySet()) {
             var nodeField = entry.getValue();
             if (hasCustomBehavior(nodeField)) {
@@ -289,8 +322,8 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
                 // If we don't have a custom behavior on the node, we just have to create a simple port
                 var port = new PortData()
                         .displayName(nodeField.name)
+                        .portColor(nodeField.color)
                         .acceptMultipleEdges(nodeField.isMultiple)
-                        .vertical(nodeField.vertical)
                         .tooltip(Arrays.stream(nodeField.tooltips).toList());
                 addPort(nodeField.input, nodeField.fieldName, port);
             }
@@ -351,15 +384,6 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
             for (var portData : fieldInfo.behavior.handle(edges)) {
                 changed |= addPortData(nodePorts, fieldInfo, finalPorts, fieldName, portData);
             }
-        } else {
-            var customPortTypeBehavior = customPortTypeBehaviorMap.get(fieldInfo.info.getType());
-            try {
-                for (var portData : customPortTypeBehavior.handle(fieldName, fieldInfo.name, fieldInfo.info.get(this))) {
-                    changed |= addPortData(nodePorts, fieldInfo, finalPorts, fieldName, portData);
-                }
-            } catch (IllegalAccessException e) {
-                LDLib.LOGGER.error("Error while getting the value of the field " + fieldInfo.info + " for custom port type behavior", e);
-            }
         }
 
         // TODO
@@ -371,6 +395,39 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
                 if (finalPorts.stream().noneMatch(id -> Objects.equals(id, currentPort.portData.identifier))) {
                     removePort(fieldInfo.input, currentPort);
                     changed = true;
+                }
+            }
+        }
+
+        // refresh edges ports
+        for (var edge : edges) {
+            if (fieldInfo.input) {
+                var previousPort = edge.inputPort;
+                edge.inputPort = getPort(fieldName, edge.inputPortIdentifier);
+                if (previousPort != edge.inputPort) {
+                    if (previousPort != null) {
+                        previousPort.remove(edge);
+                    }
+                    if (edge.inputPort != null) {
+                        edge.inputPort.add(edge);
+                    } else {
+                        // If the port is null, we disconnect the edge
+                        graph.disconnect(edge.GUID);
+                    }
+                }
+            } else {
+                var previousPort = edge.outputPort;
+                edge.outputPort = getPort(fieldName, edge.outputPortIdentifier);
+                if (previousPort != edge.outputPort) {
+                    if (previousPort != null) {
+                        previousPort.remove(edge);
+                    }
+                    if (edge.outputPort != null) {
+                        edge.outputPort.add(edge);
+                    } else {
+                        // If the port is null, we disconnect the edge
+                        graph.disconnect(edge.GUID);
+                    }
                 }
             }
         }
@@ -427,10 +484,7 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
     }
 
     protected boolean hasCustomBehavior(NodeFieldInformation info) {
-        if (info.behavior != null)
-            return true;
-
-        return customPortTypeBehaviorMap.containsKey(info.info.getType());
+        return info.behavior != null;
     }
 
     public boolean updatePortsForField(String fieldName) {
@@ -480,36 +534,6 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
         }
 
         return changed;
-    }
-
-    /***
-     * TODO Detect custom port type methods
-     */
-    void InitializeCustomPortTypeMethods() {
-//        var clazz = getClass();
-//        while (true) {
-//            for (var method : clazz.getDeclaredMethods()) {
-//                var typeBehaviors = method.GetCustomAttributes<CustomPortTypeBehavior>().ToArray();
-//
-//                if (typeBehaviors.Length == 0)
-//                    continue;
-//
-//                ICustomPortBehaviorDelegate deleg = null;
-//                try {
-//                    deleg = Delegate.CreateDelegate(typeof(CustomPortTypeBehaviorDelegate), this, method) as CustomPortTypeBehaviorDelegate;
-//                } catch (Exception e) {
-//                    Debug.LogError(e);
-//                    Debug.LogError($"Cannot convert method {method} to a delegate of type {typeof(CustomPortTypeBehaviorDelegate)}");
-//                }
-//
-//                foreach (var typeBehavior in typeBehaviors)
-//                customPortTypeBehaviorMap[typeBehavior.type] = deleg;
-//            }
-//            // Try to also find private methods in the base class
-//            clazz = clazz.BaseType;
-//            if (clazz == null)
-//                break;
-//        }
     }
 
     /**
@@ -669,22 +693,24 @@ public abstract class BaseNode implements IPersistedSerializable, ILDLRegister, 
         public String fieldName;
         public Field info;
         public boolean input;
+        public int color;
         public boolean isMultiple;
         public String[] tooltips;
         @Nullable
         public ICustomPortBehaviorDelegate behavior;
-        public boolean vertical;
+        public int priority;
 
-        public NodeFieldInformation(Field info, String name, boolean input, boolean isMultiple, String[] tooltips,
-                                    boolean vertical, @Nullable ICustomPortBehaviorDelegate behavior) {
+        public NodeFieldInformation(Field info, String name, int color, boolean input, boolean isMultiple, String[] tooltips,
+                                    int priority, @Nullable ICustomPortBehaviorDelegate behavior) {
             this.input = input;
+            this.color = color;
             this.isMultiple = isMultiple;
             this.info = info;
             this.name = name;
             this.fieldName = info.getName();
             this.behavior = behavior;
             this.tooltips = tooltips;
-            this.vertical = vertical;
+            this.priority = priority;
         }
     }
 }

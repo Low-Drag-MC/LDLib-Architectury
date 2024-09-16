@@ -1,16 +1,22 @@
 package com.lowdragmc.lowdraglib.gui.graphprocessor.widget;
 
+import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.utils.RenderBufferUtils;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.*;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.processor.BaseGraphProcessor;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.processor.TriggerProcessor;
+import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
 import com.lowdragmc.lowdraglib.gui.util.TreeNode;
-import com.lowdragmc.lowdraglib.gui.widget.FreeGraphView;
-import com.lowdragmc.lowdraglib.gui.widget.MenuWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.Position;
+import com.lowdragmc.lowdraglib.utils.Rect;
+import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -20,6 +26,7 @@ import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
@@ -30,9 +37,11 @@ import java.util.*;
 @Getter
 public class GraphViewWidget extends WidgetGroup {
     private final BaseGraph graph;
-
     private final FreeGraphView freeGraphView;
     private final Map<BaseNode, NodeWidget> nodeMap = new HashMap<>();
+    private final DebugPanelWidget debugPanel;
+    private final NodePanelWidget nodePanel;
+    private final ParameterPanelWidget parameterPanel;
     @Setter
     private NodePortWidget clickedPort;
     @Setter
@@ -40,6 +49,19 @@ public class GraphViewWidget extends WidgetGroup {
     private BaseGraphProcessor processor;
     @Getter
     private Map<String, List<AnnotationDetector.Wrapper<LDLRegister, ? extends BaseNode>>> nodeGroups = new LinkedHashMap<>();
+    // runtime
+    @Setter
+    private boolean showDebugInfo = Platform.isDevEnv();
+    private boolean isRunStep = false;
+    private Iterator<BaseNode> stepIterator;
+    @Nullable
+    private BaseNode stepNode;
+    private final Set<BaseNode> selectedNodes = new HashSet<>();
+    private final Set<BaseNode> copiedNodes = new HashSet<>();
+    private boolean isDraggingArea = false;
+    private double startMouseX, startMouseY;
+    private int currentMouseX, currentMouseY;
+    private long lastClickTick;
 
     public GraphViewWidget(BaseGraph graph, int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -53,9 +75,9 @@ public class GraphViewWidget extends WidgetGroup {
             }
         });
         this.freeGraphView.setDrawGrid(true);
-        this.freeGraphView.setBackground(ColorPattern.BLACK.rectTexture());
-        this.processor = new BaseGraphProcessor.Process(graph);
-        List<String> supportNodeGroups = new ArrayList<>();
+        this.freeGraphView.setBackground(ColorPattern.SEAL_BLACK.rectTexture());
+        this.processor = new TriggerProcessor(graph);
+        var supportNodeGroups = new ArrayList<String>();
         setupNodeGroups(supportNodeGroups);
         for (String group : supportNodeGroups) {
             for (var wrapper : AnnotationDetector.REGISTER_GP_NODES.values()) {
@@ -65,18 +87,38 @@ public class GraphViewWidget extends WidgetGroup {
             }
         }
         loadGraph();
+        // panels
+        addWidget(this.debugPanel = new DebugPanelWidget(this));
+        this.debugPanel.setSelfPosition(getSizeWidth() - this.debugPanel.getSizeWidth() - 5,
+                getSizeHeight() - this.debugPanel.getSizeHeight() - 5);
+        addWidget(this.nodePanel = new NodePanelWidget(this, 5, 5, 100, getSizeHeight() - 10));
+        this.nodePanel.setDraggable(false);
+        addWidget(this.parameterPanel = new ParameterPanelWidget(this, 110, 5, 200, 200));
+        // node dragging
+        this.setDraggingConsumer(
+                o -> o instanceof BaseNode,
+                o -> {},
+                o -> {},
+                o -> {
+                    if (o instanceof BaseNode baseNode) {
+                        addNode(baseNode, currentMouseX, currentMouseY);
+                    }
+                });
+        freeGraphView.resetFitScaleByWidgets();
     }
 
     protected void setupNodeGroups(List<String> supportNodeGroups) {
-        supportNodeGroups.add("graph_processor.node.base");
-        supportNodeGroups.add("graph_processor.node.conditional");
+        supportNodeGroups.add("graph_processor.node.value");
+        supportNodeGroups.add("graph_processor.node.logic");
         supportNodeGroups.add("graph_processor.node.math");
         supportNodeGroups.add("graph_processor.node.utils");
+        supportNodeGroups.add("graph_processor.node.minecraft");
     }
 
     public void loadGraph() {
         freeGraphView.clearAllWidgets();
         nodeMap.clear();
+        selectedNodes.clear();
         for (var node : graph.nodes) {
             var nodeWidget = new NodeWidget(this, node);
             freeGraphView.addWidget(nodeWidget);
@@ -100,9 +142,167 @@ public class GraphViewWidget extends WidgetGroup {
 
     public void updateComputeOrder() {
         graph.updateComputeOrder(BaseGraph.ComputeOrderType.DepthFirst);
+        stepIterator = null;
+        stepNode = null;
+        isRunStep = false;
         if (processor != null) {
             processor.updateComputeOrder();
         }
+    }
+
+    public void runAll() {
+        if (isRunStep) {
+            if (stepIterator != null) {
+                while (stepIterator.hasNext()) {
+                    stepNode = stepIterator.next();
+                }
+            }
+            stepIterator = null;
+            stepNode = null;
+        }
+        isRunStep = false;
+    }
+
+    public void runStep() {
+        if (!isRunStep && processor != null) {
+            stepIterator = processor.iterator();
+        }
+        isRunStep = true;
+        if (stepIterator.hasNext()) {
+            stepNode = stepIterator.next();
+        } else if (processor != null) {
+            stepNode = null;
+            stepIterator = processor.iterator();
+        }
+    }
+
+    public boolean isRunStepFinish() {
+        return isRunStep && stepNode == null;
+    }
+
+    @Override
+    public void updateScreen() {
+        super.updateScreen();
+        if (processor != null && !isRunStep) {
+            processor.run();
+        }
+    }
+
+
+    public void setCopy(Collection<BaseNode> nodes) {
+        copiedNodes.clear();
+        copiedNodes.addAll(nodes);
+    }
+
+    public void pasteTo(double mouseX, double mouseY) {
+        if (copiedNodes.isEmpty()) return;
+        var nodes = new ArrayList<>(copiedNodes);
+        Position firstPosition = null;
+        Map<BaseNode, BaseNode> old2New = new HashMap<>();
+        List<PortEdge> edges = new ArrayList<>();
+
+        for (var node : nodes) {
+            if (firstPosition == null) {
+                firstPosition = node.position;
+            }
+            var newNode = node.copy();
+            var newPosition = freeGraphView.getViewPosition(mouseX, mouseY);
+            var offset = node.position.subtract(firstPosition);
+            newNode.position = new Position((int) newPosition.x + offset.x, (int) newPosition.y + offset.y);
+            graph.addNode(newNode);
+            var nodeWidget = new NodeWidget(this, newNode);
+            freeGraphView.addWidget(nodeWidget);
+            nodeMap.put(newNode, nodeWidget);
+            old2New.put(node, newNode);
+            // if the edge ports are connected to the copied nodes, then copy the edge
+            for (var edge : node.getAllEdges()) {
+                if (copiedNodes.contains(edge.inputNode) && copiedNodes.contains(edge.outputNode) && !edges.contains(edge)) {
+                    edges.add(edge);
+                }
+            }
+        }
+
+        // make sure we have the same order
+        edges.sort(Comparator.comparingInt(graph.edges::indexOf));
+
+        // copy the edges
+        for (var edge : edges) {
+            var copiedEdge = edge.copy();
+            copiedEdge.GUID = graph.newGUID().toString();
+            copiedEdge.inputNodeGUID = old2New.get(edge.inputNode).getGUID();
+            copiedEdge.outputNodeGUID = old2New.get(edge.outputNode).getGUID();
+            copiedEdge.initialize(graph);
+            graph.edges.add(copiedEdge);
+            graph.edgesPerGUID.put(copiedEdge.GUID, copiedEdge);
+            graph.addGUID(copiedEdge.GUID);
+
+            // Sanity check for the edge:
+            if (copiedEdge.inputPort == null || copiedEdge.outputPort == null) {
+                graph.disconnect(copiedEdge.GUID);
+                continue;
+            }
+
+            // Add the edge to the non-serialized port data
+            copiedEdge.inputPort.owner.onEdgeConnected(copiedEdge);
+            copiedEdge.outputPort.owner.onEdgeConnected(copiedEdge);
+            nodeMap.get(copiedEdge.inputPort.owner).reloadWidget();
+            nodeMap.get(copiedEdge.outputPort.owner).reloadWidget();
+        }
+        updateComputeOrder();
+    }
+
+    public void renameNode(BaseNode node) {
+        DialogWidget.showStringEditorDialog(this, "ldlib.gui.editor.tips.rename", node.getDisplayName(),
+                s -> true, s -> {
+                    if (s != null) {
+                        node.setDisplayName(s);
+                        nodeMap.get(node).reloadWidget();
+                    }
+                });
+    }
+
+    public void addNode(BaseNode node) {
+        graph.addNode(node);
+        var nodeWidget = new NodeWidget(this, node);
+        freeGraphView.addWidget(nodeWidget);
+        nodeMap.put(node, nodeWidget);
+        updateComputeOrder();
+    }
+
+    public void addNode(BaseNode node, int x, int y) {
+        var position = freeGraphView.getViewPosition(x, y);
+        node.position = new Position(position.x, position.y);
+        addNode(node);
+    }
+
+    public void addNodeToCenter(BaseNode node) {
+        addNode(node, getSizeWidth() / 2 + LDLib.random.nextInt(-20, 20),
+                getSizeHeight() / 2 + LDLib.random.nextInt(-20, 20));
+    }
+
+    public void removeNodes(Collection<BaseNode> removeNodes) {
+        var nodes = new ArrayList<>(removeNodes);
+        for (var node : nodes) {
+            if (!node.isCanBeRemoved()) continue;
+            var edges = node.getAllEdges();
+            edges.forEach(graph::disconnect);
+            graph.removeNode(node);
+            var nodeWidget = nodeMap.remove(node);
+            freeGraphView.removeWidget(nodeWidget);
+            edges.forEach(edge -> {
+                if (edge.inputNode == node) {
+                    nodeMap.get(edge.outputNode).reloadWidget();
+                } else {
+                    nodeMap.get(edge.inputNode).reloadWidget();
+                }
+            });
+        }
+        copiedNodes.removeAll(removeNodes);
+        updateComputeOrder();
+    }
+
+    public void openNodePanelDialog() {
+        // TODO open node panel dialog ?
     }
 
     public <T, C> MenuWidget<T, C> openMenu(double posX, double posY, TreeNode<T, C> menuNode) {
@@ -110,7 +310,7 @@ public class GraphViewWidget extends WidgetGroup {
                 .setNodeTexture(MenuWidget.NODE_TEXTURE)
                 .setLeafTexture(MenuWidget.LEAF_TEXTURE)
                 .setNodeHoverTexture(MenuWidget.NODE_HOVER_TEXTURE);
-        waitToAdded(menu.setBackground(MenuWidget.BACKGROUND));
+        parent.waitToAdded(menu.setBackground(MenuWidget.BACKGROUND));
         return menu;
     }
 
@@ -124,28 +324,45 @@ public class GraphViewWidget extends WidgetGroup {
     }
 
     protected TreeBuilder.Menu createMenu(double mouseX, double mouseY) {
-        return TreeBuilder.Menu.start()
-                .branch("add nodes", m -> nodeGroups.forEach((group, wrappers) -> m.branch(group, n -> {
+        var menu =  TreeBuilder.Menu.start()
+                .branch(Icons.ADD, "add nodes", m -> nodeGroups.forEach((group, wrappers) -> m.branch(group, n -> {
                     for (var wrapper : wrappers) {
-                        n.leaf(wrapper.annotation().name(), () -> {
-                            var node = wrapper.creator().get();
-                            var position = freeGraphView.getViewPosition(mouseX, mouseY);
-                            node.position = new Position((int) position.x, (int) position.y);
-                            graph.addNode(node);
-                            var nodeWidget = new NodeWidget(this, node);
-                            freeGraphView.addWidget(nodeWidget);
-                            nodeMap.put(node, nodeWidget);
-                            updateComputeOrder();
-                        });
+                        n.leaf(wrapper.annotation().name(), () -> addNode(wrapper.creator().get(), (int)mouseX, (int)mouseY));
                     }
                 })));
+        if (!selectedNodes.isEmpty()) {
+            menu.crossLine();
+            if (selectedNodes.size() == 1) {
+                menu.leaf("ldlib.gui.editor.menu.rename", () -> renameNode(selectedNodes.iterator().next()));
+            }
+            menu.leaf(Icons.COPY, "ldlib.gui.editor.menu.copy", () -> setCopy(selectedNodes));
+            if (!copiedNodes.isEmpty()) {
+                menu.leaf(Icons.PASTE, "ldlib.gui.editor.menu.paste", () -> pasteTo(mouseX, mouseY));
+            }
+            var canBeRemoved = selectedNodes.stream().filter(BaseNode::isCanBeRemoved).toList();
+            if (!canBeRemoved.isEmpty()) {
+                menu.leaf(Icons.REMOVE, "ldlib.gui.editor.menu.remove", () -> {
+                    removeNodes(canBeRemoved);
+                    selectedNodes.clear();
+                });
+            }
+        }
+        return menu;
     }
 
     @Override
-    public void updateScreen() {
-        super.updateScreen();
-        if (processor != null) {
-            processor.run();
+    public void drawInBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        currentMouseX = mouseX;
+        currentMouseY = mouseY;
+        super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
+        // draw selection area
+        if (isDraggingArea) {
+            var x = (int) Math.min(startMouseX, mouseX);
+            var y = (int) Math.min(startMouseY, mouseY);
+            var w = (int) Math.abs(mouseX - startMouseX);
+            var h = (int) Math.abs(mouseY - startMouseY);
+            DrawerHelper.drawBorder(graphics, x, y, w, h, ColorPattern.BLUE.color, 1);
+            DrawerHelper.drawSolidRect(graphics, x, y, w, h, ColorPattern.T_LIGHT_BLUE.color);
         }
     }
 
@@ -153,20 +370,32 @@ public class GraphViewWidget extends WidgetGroup {
     private void drawGraphLines(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         // existing edges
         for (var edge : graph.edges) {
-            var outputPosition = nodeMap.get(edge.outputNode).portMap.get(edge.outputPort).getPortPosition();
-            var inputPosition = nodeMap.get(edge.inputNode).portMap.get(edge.inputPort).getPortPosition();
-            drawEdge(graphics, outputPosition.vec2(), inputPosition.vec2());
+            var outputPort = nodeMap.get(edge.outputNode).portMap.get(edge.outputPort);
+            var inputPort = nodeMap.get(edge.inputNode).portMap.get(edge.inputPort);
+            if (inputPort == null) {
+                LDLib.LOGGER.error("Edge {} input port {} are not existing: ", edge, edge.inputPort);
+                continue;
+            }
+            if (outputPort == null) {
+                LDLib.LOGGER.error("Edge {} output port {} are not existing: ", edge, edge.outputPort);
+                continue;
+            }
+            var outputPosition = outputPort.getPortPosition();
+            var inputPosition = inputPort.getPortPosition();
+            drawEdge(graphics, outputPosition.vec2(), inputPosition.vec2(), outputPort.getPortColor(), inputPort.getPortColor());
         }
         // dragging edge
         if (clickedPort != null) {
             var outputPosition = clickedPort.isInput ? new Vec2(mouseX, mouseY) : clickedPort.getPortPosition().vec2();
             var inputPosition = clickedPort.isInput ? clickedPort.getPortPosition().vec2() : new Vec2(mouseX, mouseY);
-            drawEdge(graphics, outputPosition, inputPosition);
+            var inputColor = clickedPort.isInput ? clickedPort.getPortColor() : ColorPattern.BLUE.color;
+            var outputColor = clickedPort.isInput ? ColorPattern.BLUE.color : clickedPort.getPortColor();
+            drawEdge(graphics, outputPosition, inputPosition, outputColor, inputColor);
         }
     }
 
     @Environment(EnvType.CLIENT)
-    private void drawEdge(GuiGraphics graphics, Vec2 outputPosition, Vec2 inputPosition) {
+    private void drawEdge(GuiGraphics graphics, Vec2 outputPosition, Vec2 inputPosition, int startColor, int endColor) {
         var tesselator = Tesselator.getInstance();
         var buffer = tesselator.getBuilder();
         RenderSystem.enableBlend();
@@ -176,12 +405,65 @@ public class GraphViewWidget extends WidgetGroup {
 
         var outputController = outputPosition.add(new Vec2(20, 0));
         var inputController = inputPosition.add(new Vec2(-20, 0));
-        RenderBufferUtils.drawColorLines(graphics.pose(), buffer, List.of(outputPosition, outputController), ColorPattern.BLUE.color, ColorPattern.BLUE.color, 0.75f);
-        RenderBufferUtils.drawColorLines(graphics.pose(), buffer, List.of(outputController, inputController), ColorPattern.BLUE.color, ColorPattern.BLUE.color, 0.75f);
-        RenderBufferUtils.drawColorLines(graphics.pose(), buffer, List.of(inputController, inputPosition), ColorPattern.BLUE.color, ColorPattern.BLUE.color, 0.75f);
+        RenderBufferUtils.drawColorLines(graphics.pose(), buffer, List.of(outputPosition, outputController), startColor, startColor, 0.75f);
+        RenderBufferUtils.drawColorLines(graphics.pose(), buffer, List.of(outputController, inputController), startColor, endColor, 0.75f);
+        RenderBufferUtils.drawColorLines(graphics.pose(), buffer, List.of(inputController, inputPosition), endColor, endColor, 0.75f);
 
         tesselator.end();
         RenderSystem.defaultBlendFunc();
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        if (!selectedNodes.isEmpty() && Screen.isCopy(keyCode)) {
+            setCopy(selectedNodes);
+            return true;
+        }
+        if (!copiedNodes.isEmpty() && Screen.isPaste(keyCode)) {
+            pasteTo(currentMouseX, currentMouseY);
+            return true;
+        }
+        if (Screen.isSelectAll(keyCode)) {
+            selectedNodes.clear();
+            selectedNodes.addAll(nodeMap.keySet());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (isMouseOverElement(mouseX, mouseY)) {
+            if (button == 1) {
+                isDraggingArea = false;
+                startMouseX = mouseX;
+                startMouseY = mouseY;
+                return true;
+            } else {
+                if (!isShiftDown() && !isCtrlDown()) {
+                    selectedNodes.clear();
+                }
+                if (super.mouseClicked(mouseX, mouseY, button)) {
+                    return true;
+                }
+                if (lastClickTick != 0 && gui.getTickCount() - lastClickTick < 10) {
+                    openNodePanelDialog();
+                    return true;
+                }
+                lastClickTick = gui.getTickCount();
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        var result = super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        isDraggingArea = button == 1 || isDraggingArea;
+        return result;
     }
 
     @Override
@@ -190,9 +472,26 @@ public class GraphViewWidget extends WidgetGroup {
         clickedPort = null;
         if (!result) {
             if (button == 1) {
-                openMenu(mouseX, mouseY, createMenu(mouseX, mouseY));
+                if (isDraggingArea) {
+                    var start = freeGraphView.getViewPosition(startMouseX, startMouseY);
+                    var end = freeGraphView.getViewPosition(mouseX, mouseY);
+                    var area = Rect.ofAbsolute((int) Math.min(start.x, end.x), (int) Math.max(end.x, start.x),
+                            (int) Math.min(start.y, end.y), (int) Math.max(end.y, start.y));
+                    selectedNodes.clear();
+                    for (NodeWidget widget : nodeMap.values()) {
+                        if (area.isCollide(widget.getRect())) {
+                            selectedNodes.add(widget.getNode());
+                        }
+                    }
+                    if (selectedNodes.isEmpty()) {
+                        openMenu(mouseX, mouseY, createMenu(mouseX, mouseY));
+                    }
+                } else {
+                    openMenu(mouseX, mouseY, createMenu(mouseX, mouseY));
+                }
             }
         }
+        isDraggingArea = false;
         return result;
     }
 }

@@ -73,6 +73,12 @@ public class TextTexture extends TransformTexture{
         setDropShadow(true);
     }
 
+    public TextTexture(Supplier<String> text) {
+        this("", -1);
+        setSupplier(text);
+        setDropShadow(true);
+    }
+
     public TextTexture setSupplier(Supplier<String> supplier) {
         this.supplier = supplier;
         return this;

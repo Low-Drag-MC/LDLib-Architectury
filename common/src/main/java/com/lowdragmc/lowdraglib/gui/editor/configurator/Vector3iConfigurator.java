@@ -53,7 +53,7 @@ public class Vector3iConfigurator extends ValueConfigurator<Vector3i>{
         }, defaultValue.x, forceUpdate);
         x.setRange(min, max);
         x.setWheel(wheel);
-        x.setConfigPanel(configPanel, tab);
+        x.setConfiguratorContainer(configuratorContainer);
         x.init(w);
         x.addSelfPosition(leftWidth, 0);
         addWidget(x);
@@ -64,7 +64,7 @@ public class Vector3iConfigurator extends ValueConfigurator<Vector3i>{
         }, defaultValue.y, forceUpdate);
         y.setRange(min, max);
         y.setWheel(wheel);
-        y.setConfigPanel(configPanel, tab);
+        y.setConfiguratorContainer(configuratorContainer);
         y.init(w);
         y.addSelfPosition(leftWidth + w, 0);
         addWidget(y);
@@ -75,7 +75,7 @@ public class Vector3iConfigurator extends ValueConfigurator<Vector3i>{
         }, defaultValue.z, forceUpdate);
         z.setRange(min, max);
         z.setWheel(wheel);
-        z.setConfigPanel(configPanel, tab);
+        z.setConfiguratorContainer(configuratorContainer);
         z.init(w);
         z.addSelfPosition(leftWidth + w * 2, 0);
         addWidget(z);

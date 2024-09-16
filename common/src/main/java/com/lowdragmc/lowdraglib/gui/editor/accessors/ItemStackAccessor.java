@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.accessors;
 
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
@@ -35,6 +36,12 @@ public class ItemStackAccessor extends TypesAccessor<ItemStack> {
     @Override
     public Configurator create(String name, Supplier<ItemStack> supplier, Consumer<ItemStack> consumer, boolean forceUpdate, Field field) {
         ConfiguratorGroup group = new ConfiguratorGroup(name);
+        if (field.isAnnotationPresent(Configurable.class)) {
+            Configurable configurable = field.getAnnotation(Configurable.class);
+            group.setCollapse(configurable.collapse());
+            group.setCanCollapse(configurable.canCollapse());
+            group.setTips(configurable.tips());
+        }
         var itemHandler = new ItemStackTransfer(supplier.get());
         var slot = new SlotWidget(itemHandler, 0, 0, 0, false, false);
         slot.setClientSideWidget();

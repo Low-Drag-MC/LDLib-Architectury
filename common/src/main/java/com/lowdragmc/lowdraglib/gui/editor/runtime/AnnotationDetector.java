@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib.gui.editor.runtime;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.renderer.ISerializableRenderer;
-import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.accessors.IConfiguratorAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
@@ -99,6 +98,10 @@ public class AnnotationDetector {
     public static <A, T> boolean checkNoArgsConstructor(A annotation, Class<? extends T> clazz) {
         if (annotation instanceof LDLRegister LDLRegister) {
             if (!LDLRegister.modID().isEmpty() && !LDLib.isModLoaded(LDLRegister.modID())) {
+                return false;
+            }
+        } else if (annotation instanceof LDLRegisterClient LDLRegisterClient) {
+            if (!LDLRegisterClient.modID().isEmpty() && !LDLib.isModLoaded(LDLRegisterClient.modID())) {
                 return false;
             }
         }

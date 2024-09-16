@@ -24,6 +24,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.FriendlyByteBuf;
@@ -599,8 +600,7 @@ public class Widget {
 
     @Environment(EnvType.CLIENT)
     public static boolean isCtrlDown() {
-        long id = Minecraft.getInstance().getWindow().getWindow();
-        return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_CONTROL) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_CONTROL);
+        return Screen.hasControlDown();
     }
 
     @Environment(EnvType.CLIENT)

@@ -114,6 +114,7 @@ public class ConfigPanel extends WidgetGroup {
         configurable.buildConfigurator(group);
         for (Configurator configurator : group.getConfigurators()) {
             configurator.setConfigPanel(this, tab);
+//            configurator.setConfiguratorContainer(() -> ConfigPanel.this.computeLayout(tab));
             configurator.init(WIDTH - 2);
             this.configurators.get(tab).add(configurator);
             configuratorGroup.get(tab).addWidget(configurator);

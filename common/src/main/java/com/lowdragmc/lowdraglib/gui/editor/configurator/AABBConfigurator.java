@@ -36,7 +36,7 @@ public class AABBConfigurator extends ValueConfigurator<AABB> {
         }, defaultValue.minX, forceUpdate);
         minX.setRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         minX.setWheel(0.1);
-        minX.setConfigPanel(configPanel, tab);
+        minX.setConfiguratorContainer(configuratorContainer);
         minX.init(w);
         minX.addSelfPosition(leftWidth, 0);
         addWidget(minX);
@@ -48,7 +48,7 @@ public class AABBConfigurator extends ValueConfigurator<AABB> {
         }, defaultValue.minY, forceUpdate);
         minY.setRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         minY.setWheel(0.1);
-        minY.setConfigPanel(configPanel, tab);
+        minY.setConfiguratorContainer(configuratorContainer);
         minY.init(w);
         minY.addSelfPosition(leftWidth + w, 0);
         addWidget(minY);
@@ -60,7 +60,7 @@ public class AABBConfigurator extends ValueConfigurator<AABB> {
         }, defaultValue.minZ, forceUpdate);
         minZ.setRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         minZ.setWheel(0.1);
-        minZ.setConfigPanel(configPanel, tab);
+        minZ.setConfiguratorContainer(configuratorContainer);
         minZ.init(w);
         minZ.addSelfPosition(leftWidth + w * 2, 0);
         addWidget(minZ);
@@ -72,7 +72,7 @@ public class AABBConfigurator extends ValueConfigurator<AABB> {
         }, defaultValue.maxX, forceUpdate);
         maxX.setRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         maxX.setWheel(0.1);
-        maxX.setConfigPanel(configPanel, tab);
+        maxX.setConfiguratorContainer(configuratorContainer);
         maxX.init(w);
         maxX.addSelfPosition(leftWidth, 15);
         addWidget(maxX);
@@ -84,7 +84,7 @@ public class AABBConfigurator extends ValueConfigurator<AABB> {
         }, defaultValue.maxY, forceUpdate);
         maxY.setRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         maxY.setWheel(0.1);
-        maxY.setConfigPanel(configPanel, tab);
+        maxY.setConfiguratorContainer(configuratorContainer);
         maxY.init(w);
         maxY.addSelfPosition(leftWidth + w, 15);
         addWidget(maxY);
@@ -96,7 +96,7 @@ public class AABBConfigurator extends ValueConfigurator<AABB> {
         }, defaultValue.maxZ, forceUpdate);
         maxZ.setRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         maxZ.setWheel(0.1);
-        maxZ.setConfigPanel(configPanel, tab);
+        maxZ.setConfiguratorContainer(configuratorContainer);
         maxZ.init(w);
         maxZ.addSelfPosition(leftWidth + w * 2, 15);
         addWidget(maxZ);

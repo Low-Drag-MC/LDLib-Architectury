@@ -11,5 +11,5 @@ public interface ICustomPortIODelegate {
     /**
      * Push / pull the data from the input port to the output port.
      */
-    void handle(BaseNode node, List<PortEdge> edges, NodePort outputPort);
+    void handle(BaseNode node, List<PortEdge> edges, NodePort port);
 }

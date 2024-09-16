@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.graphprocessor.data;
 
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.parameter.ExposedParameter;
 import com.lowdragmc.lowdraglib.syncdata.IPersistedSerializable;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.utils.TypeAdapter;
@@ -32,6 +33,10 @@ public class BaseGraph implements IPersistedSerializable {
 
     public void addGUID(UUID guid) {
         usedGUIDs.add(guid);
+    }
+
+    public int getDepth() {
+        return nodes.stream().mapToInt(BaseNode::getComputeOrder).max().orElse(0);
     }
 
     @Setter
@@ -84,14 +89,15 @@ public class BaseGraph implements IPersistedSerializable {
 
     private Map<BaseNode, Integer> computeOrderMap = new HashMap<>();
 
-    //graph visual properties
-    @Persisted
-    public float xOffset = 0;
-    @Persisted
-    public float yOffset = 0;
-    @Persisted
-    public float scale = 1;
+    /**
+     * All exposed parameters in the graph
+     */
+    public final Map<String, ExposedParameter> exposedParameters = new LinkedHashMap<>();
 
+    /**
+     * Triggered when the value of an exposed parameter is updated
+     */
+    public Consumer<ExposedParameter> onParameterValueUpdated;
 
     /**
      * Triggered when the graph is changed
@@ -100,17 +106,29 @@ public class BaseGraph implements IPersistedSerializable {
 
     public final Set<BaseNode> graphOutputs = new HashSet<>();
 
+    public BaseGraph() {
+    }
+
+    public BaseGraph(List<ExposedParameter<?>> exposedParameters) {
+        for (ExposedParameter<?> exposedParameter : exposedParameters) {
+            this.exposedParameters.put(exposedParameter.identifier, exposedParameter);
+        }
+    }
+
     public void initialize() {
         initializeGraphElements();
         destroyBrokenGraphElements();
         updateComputeOrder(ComputeOrderType.DepthFirst);
     }
 
+
     private void initializeGraphElements() {
         // Sanitize the element lists (it's possible that nodes are null if their full class name have changed)
         // If you rename / change the assembly of a node or parameter, please use the MovedFrom() attribute to avoid breaking the graph.
         nodes.removeIf(Objects::isNull);
 
+        nodesPerGUID.clear();
+        edgesPerGUID.clear();
         for (var node : nodes) {
             node.initialize(this);
             nodesPerGUID.put(node.getGUID(), node);
@@ -138,12 +156,9 @@ public class BaseGraph implements IPersistedSerializable {
      * Adds a node to the graph
      */
     public BaseNode addNode(BaseNode node) {
-        if (node.getGUID() == null) {
-            node.newGuid(this);
-        }
-        nodesPerGUID.put(node.getGUID(), node);
         nodes.add(node);
         node.initialize(this);
+        nodesPerGUID.put(node.getGUID(), node);
         if (onGraphChanges != null) {
             onGraphChanges.accept(new GraphChanges().addedNode(node));
         }
@@ -259,6 +274,20 @@ public class BaseGraph implements IPersistedSerializable {
         }
     }
 
+    public ExposedParameter<?> getExposedParameterFromIdentifier(String parameterIdentifier) {
+        return exposedParameters.get(parameterIdentifier);
+    }
+
+    public void updateExposedParameter(String identifier, Object input) {
+        var parameter = exposedParameters.get(identifier);
+        if (parameter != null) {
+            parameter.setValue(input);
+            if (onParameterValueUpdated != null) {
+                onParameterValueUpdated.accept(parameter);
+            }
+        }
+    }
+
     /**
      * Invoke the onGraphChanges event, can be used as trigger to execute the graph when the content of a node is changed
      */
@@ -275,12 +304,21 @@ public class BaseGraph implements IPersistedSerializable {
         for (var node : this.nodes) {
             nodes.add(node.serializeNBT());
         }
+        // save nodes
         tag.put("nodes", nodes);
         var edges = new ListTag();
         for (var edge : this.edges) {
             edges.add(edge.serializeNBT());
         }
+        // save edges
         tag.put("edges", edges);
+        // save parameters
+        var parameters = new CompoundTag();
+        for (var parameter : exposedParameters.values()) {
+            var identifier = parameter.identifier;
+            parameters.put(identifier, parameter.serializeNBT());
+        }
+        tag.put("parameters", parameters);
         return tag;
     }
 
@@ -296,16 +334,26 @@ public class BaseGraph implements IPersistedSerializable {
         }
         nodes.clear();
         edges.clear();
+        // load nodes
         IPersistedSerializable.super.deserializeNBT(tag);
         var nodes = tag.getList("nodes", Tag.TAG_COMPOUND);
         for (int i = 0; i < nodes.size(); i++) {
             this.nodes.add(BaseNode.createFromTag(nodes.getCompound(i)));
         }
+        // load edges
         var edges = tag.getList("edges", Tag.TAG_COMPOUND);
         for (int i = 0; i < edges.size(); i++) {
             var edge = new PortEdge();
             edge.deserializeNBT(edges.getCompound(i));
             this.edges.add(edge);
+        }
+        // load parameters
+        var parameters = tag.getCompound("parameters");
+        for (var parameter : exposedParameters.values()) {
+            var identifier = parameter.identifier;
+            if (parameters.contains(identifier)) {
+                parameter.deserializeNBT(parameters.getCompound(identifier));
+            }
         }
         initialize();
     }
@@ -336,6 +384,7 @@ public class BaseGraph implements IPersistedSerializable {
     }
 
     protected final HashSet<BaseNode> infiniteLoopTracker = new HashSet<>();
+
     protected int updateComputeOrderBreadthFirst(int depth, BaseNode node) {
         int computeOrder = 0;
 
@@ -436,7 +485,10 @@ public class BaseGraph implements IPersistedSerializable {
         if (to == Object.class)
             return true;
 
+        if (from == UnknownType.class)
+            return true;
+
         // User defined type convertions
-        return TypeAdapter.areAssignable(from, to);
+        return TypeAdapter.areConvertable(from, to);
     }
 }

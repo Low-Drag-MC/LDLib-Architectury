@@ -91,10 +91,10 @@ public class ColorBorderTexture extends TransformTexture{
     }
 
     public ColorBorderTexture setRadius(float radius) {
-        this.radiusLBInner = radius;
-        this.radiusRTInner = radius;
-        this.radiusRBInner = radius;
-        this.radiusLTInner = radius;
+        this.radiusLBInner = radius - border;
+        this.radiusRTInner = radius - border;
+        this.radiusRBInner = radius - border;
+        this.radiusLTInner = radius - border;
         this.radiusLBOuter = radius;
         this.radiusRTOuter = radius;
         this.radiusRBOuter = radius;

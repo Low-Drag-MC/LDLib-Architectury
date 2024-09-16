@@ -37,7 +37,7 @@ public class PrintNode extends BaseNode {
                 .setRemoveTitleBar(true));
     }
 
-    private String format(Object obj) {
+    public static String format(Object obj) {
         if (obj instanceof Number) {
             return numberFormat.format(obj);
         }

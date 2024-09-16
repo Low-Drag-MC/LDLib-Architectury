@@ -8,6 +8,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface CustomPortInput {
+    /**
+     * The field which should be handled by a custom method
+     */
     String field();
-    Class type();
+    Class type() default Object.class; // TODO auto match in the future
 }

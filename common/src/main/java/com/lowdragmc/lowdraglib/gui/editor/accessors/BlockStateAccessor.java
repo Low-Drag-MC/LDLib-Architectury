@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.accessors;
 
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
@@ -34,6 +35,12 @@ public class BlockStateAccessor extends TypesAccessor<BlockState> {
     @Override
     public Configurator create(String name, Supplier<BlockState> supplier, Consumer<BlockState> consumer, boolean forceUpdate, Field field) {
         ConfiguratorGroup group = new ConfiguratorGroup(name);
+        if (field.isAnnotationPresent(Configurable.class)) {
+            Configurable configurable = field.getAnnotation(Configurable.class);
+            group.setCollapse(configurable.collapse());
+            group.setCanCollapse(configurable.canCollapse());
+            group.setTips(configurable.tips());
+        }
         var propertyGroup = new ConfiguratorGroup("ldlib.gui.editor.blockstate.properties");
         var itemHandler = new ItemStackTransfer(supplier.get().getBlock().asItem().getDefaultInstance());
         var slot = new SlotWidget(itemHandler, 0, 0, 0, false, false);

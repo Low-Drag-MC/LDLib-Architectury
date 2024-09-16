@@ -19,6 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
@@ -319,9 +320,10 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         int width = getSize().width;
         int height = getSize().height;
         if (useScissor) {
-            Vector3f topLeft = graphics.pose().last().pose().transformPosition(new Vector3f(0.0f, 0.0f, 0.0f));
-
-            graphics.enableScissor((int) (x + topLeft.x), (int) (y + topLeft.y), (int) (x + topLeft.x + width), (int) (y + topLeft.y + height));
+            var trans = graphics.pose().last().pose();
+            var realPos = trans.transform(new Vector4f(x, y, 0, 1));
+            var realPos2 = trans.transform(new Vector4f(x + width, y + height, 0, 1));
+            graphics.enableScissor((int) realPos.x, (int) realPos.y, (int) realPos2.x, (int) realPos2.y);
             if(!hookDrawInBackground(graphics, mouseX, mouseY, partialTicks)) {
                 drawWidgetsBackground(graphics, mouseX, mouseY, partialTicks);
             }
@@ -359,7 +361,10 @@ public class DraggableScrollableWidgetGroup extends WidgetGroup {
         int width = getSize().width;
         int height = getSize().height;
         if (useScissor) {
-            graphics.enableScissor(x, y, x + width, y + height);
+            var trans = graphics.pose().last().pose();
+            var realPos = trans.transform(new Vector4f(x, y, 0, 1));
+            var realPos2 = trans.transform(new Vector4f(x + width, y + height, 0, 1));
+            graphics.enableScissor((int) realPos.x, (int) realPos.y, (int) realPos2.x, (int) realPos2.y);
             super.drawOverlay(graphics, mouseX, mouseY, partialTicks);
             graphics.disableScissor();
         } else {

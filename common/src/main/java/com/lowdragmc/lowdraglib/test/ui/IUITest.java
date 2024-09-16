@@ -4,6 +4,8 @@ import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
 import com.lowdragmc.lowdraglib.utils.Size;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -22,6 +24,16 @@ public interface IUITest {
     @Nullable
     default Size getSize() {
         return null;
+    }
+
+    @Environment(EnvType.CLIENT)
+    default int getScreenWidth() {
+        return Minecraft.getInstance().getWindow().getGuiScaledWidth();
+    }
+
+    @Environment(EnvType.CLIENT)
+    default int getScreenHeight() {
+        return Minecraft.getInstance().getWindow().getGuiScaledHeight();
     }
 
     default ModularUI createUI(IUIHolder holder, Player entityPlayer) {

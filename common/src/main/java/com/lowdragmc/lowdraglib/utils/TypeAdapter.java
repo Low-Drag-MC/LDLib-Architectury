@@ -1,6 +1,10 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.UnknownType;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.TriggerLink;
+import org.joml.Vector3f;
 
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -26,14 +30,33 @@ public class TypeAdapter {
     public record convertion(Class from, Class to) {};
     static Map<convertion, Function> adapters = Collections.synchronizedMap(new HashMap<>());
     static Set<convertion> incompatibleTypes = Collections.synchronizedSet(new HashSet<>());
+    static Map<Class, Integer> typeColorMap = Collections.synchronizedMap(new HashMap<>());
+    static Map<Class, String> typeDisplayNameMap = Collections.synchronizedMap(new HashMap<>());
+    static Set<Class> castTypes = Collections.synchronizedSet(new HashSet<>());
     static boolean adaptersLoaded = false;
 
     public static <F, T> void registerAdapter(Class<F> from, Class<T> to, Function<F, T> adapter) {
         adapters.put(new convertion(from, to), adapter);
+        registerCastType(from);
+        registerCastType(to);
+    }
+
+    public static void registerTypeColor(Class<?> clazz, int color) {
+        typeColorMap.put(clazz, color);
+        registerCastType(clazz);
+    }
+
+    public static void registerTypeDisplayName(Class<?> clazz, String name) {
+        typeDisplayNameMap.put(clazz, name);
+        registerCastType(clazz);
     }
 
     public static void registerIncompatibleTypes(Class from, Class to) {
         incompatibleTypes.add(new convertion(from, to));
+    }
+
+    public static void registerCastType(Class<?> clazz) {
+        castTypes.add(clazz);
     }
 
     public static void loadAllAdapters() {
@@ -66,7 +89,7 @@ public class TypeAdapter {
         return incompatibleTypes.stream().anyMatch(t -> t.from == from && t.to == to);
     }
 
-    public static boolean areAssignable(Class from, Class to) {
+    public static boolean areConvertable(Class from, Class to) {
         if (!adaptersLoaded)
             loadAllAdapters();
         if (from == to || to == Object.class)
@@ -86,4 +109,39 @@ public class TypeAdapter {
             return adapters.get(convertion).apply(from);
         return null;
     }
+
+    public static String getTypeDisplayName(Class<?> type) {
+        if (!adaptersLoaded)
+            loadAllAdapters();
+        if (type == TriggerLink.class) {
+            return "Trigger";
+        } else if (type == float.class || type == int.class || type == Float.class || type == Integer.class) {
+            return "Number";
+        } else if (type == Object.class) {
+            return "Any";
+        }
+        return typeDisplayNameMap.getOrDefault(type, type.getSimpleName());
+    }
+
+    public static int getTypeColor(Class<?> type) {
+        if (!adaptersLoaded)
+            loadAllAdapters();
+        if (type == UnknownType.class) {
+            return ColorPattern.generateRainbowColor();
+        } else if (type == TriggerLink.class) {
+            return ColorPattern.YELLOW.color;
+        }else if (type == boolean.class || type == Boolean.class) {
+            return ColorPattern.PINK.color;
+        } if (type.isPrimitive() || type == Integer.class || type == Float.class) {
+            return ColorPattern.LIGHT_BLUE.color;
+        } else if (type == String.class) {
+            return ColorPattern.BROWN.color;
+        } else if (type == Object.class) {
+            return ColorPattern.WHITE.color;
+        } else if (type == Vector3f.class) {
+            return ColorPattern.ORANGE.color;
+        }
+        return typeColorMap.getOrDefault(type, ColorPattern.BLUE.color);
+    }
+
 }

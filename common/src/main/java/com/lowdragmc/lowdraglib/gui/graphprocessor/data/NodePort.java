@@ -54,9 +54,12 @@ public class NodePort {
     public PortData portData;
     @Getter
     private final List<PortEdge> edges = new ArrayList<>();
+    @Getter
     private final Map<PortEdge, IPushDataDelegate> pushDataDelegates = new HashMap<>();
+    @Getter
     private final List<PortEdge> edgeWithRemoteCustomIO = new ArrayList<>();
     @Nullable
+    @Getter
     private ICustomPortIODelegate customPortIOMethod;
 
     public NodePort(BaseNode owner, String fieldName, PortData portData) throws NoSuchFieldException {
@@ -68,14 +71,14 @@ public class NodePort {
         this.owner = owner;
         this.portData  = portData;
         this.fieldOwner = fieldOwner;
-        fieldInfo = fieldOwner.getClass().getDeclaredField(fieldName);
+        fieldInfo = fieldOwner.getClass().getField(fieldName);
         customPortIOMethod = tryGetCustomPortMethod(owner.getClass(), fieldName);
     }
 
     @Nullable
     private static ICustomPortIODelegate tryGetCustomPortMethod(Class<? extends BaseNode> nodeClazz, String fieldName) {
         if (!customPortIODelegateTable.contains(nodeClazz, fieldName)) {
-            var methods = nodeClazz.getDeclaredMethods();
+            var methods = nodeClazz.getMethods();
             var found = false;
             for (var method : methods) {
                 var customPortInput = method.isAnnotationPresent(CustomPortInput.class) ? method.getAnnotation(CustomPortInput.class) : null;
@@ -196,7 +199,7 @@ public class NodePort {
 
             // We do an extra convertion step in case the buffer output is not compatible with the input port
             if (passThroughObject != null)
-                if (TypeAdapter.areAssignable(passThroughObject.getClass(), fieldInfo.getType()))
+                if (TypeAdapter.areConvertable(passThroughObject.getClass(), fieldInfo.getType()))
                     passThroughObject = TypeAdapter.convert(passThroughObject, fieldInfo.getType());
 
             try {
@@ -216,15 +219,13 @@ public class NodePort {
             if (List.class.isAssignableFrom(fieldInfo.getType())) {
                 fieldInfo.setAccessible(true);
                 var list = (List) fieldInfo.get(fieldOwner);
-                list.clear();
+                if (list != null) list.clear();
             }
             var type = fieldInfo.getType();
             if (type.isEnum()) {
                 fieldInfo.set(fieldOwner, null);
             } else if (type.equals(String.class)) {
                 fieldInfo.set(fieldOwner, "");
-            } else if (type.isPrimitive()) {
-                fieldInfo.set(fieldOwner, 0);
             } else {
                 fieldInfo.set(fieldOwner, null);
             }
@@ -249,14 +250,13 @@ public class NodePort {
         private Runnable createRunnable() {
             try {
                 //Creation of the delegate to move the data from the input node to the output node:
-                var inputField = edge.inputNode.getClass().getDeclaredField(edge.inputFieldName);
-                var outputField = edge.outputNode.getClass().getDeclaredField(edge.outputFieldName);
-                var inType = inputField.getType();
-                var outType = outputField.getType();
+                var inputField = edge.inputPort.fieldInfo;
+                var outputField = edge.outputPort.fieldInfo;
+                var inType = edge.inputPort.portData.displayType == null ? inputField.getType() : edge.inputPort.portData.displayType;
+                var outType = edge.outputPort.portData.displayType == null ? outputField.getType() : edge.outputPort.portData.displayType;
 
                 if (inType.isAssignableFrom(outType)) {
                     // if outType is assignable from inType, we can directly assign the value
-                    inputField.setAccessible(true);
                     return () -> {
                         try {
                             inputField.set(edge.inputNode, outputField.get(edge.outputNode));
@@ -264,10 +264,13 @@ public class NodePort {
                             LDLib.LOGGER.error("Error while pushing data from {} to {}", edge.inputNode, edge.outputNode, e);
                         }
                     };
-                } else if (TypeAdapter.areAssignable(outType, inType)) {
+                } else if (TypeAdapter.areConvertable(outType, inType)) {
                     return () -> {
                         try {
-                            inputField.set(edge.inputNode, TypeAdapter.convert(outputField.get(edge.outputNode), inType));
+                            var value = outputField.get(edge.outputNode);
+                            if (value != null) {
+                                inputField.set(edge.inputNode, TypeAdapter.convert(outputField.get(edge.outputNode), inType));
+                            }
                         } catch (IllegalAccessException e) {
                             LDLib.LOGGER.error("Error while pushing data from {} to {}", edge.inputNode, edge.outputNode, e);
                         }

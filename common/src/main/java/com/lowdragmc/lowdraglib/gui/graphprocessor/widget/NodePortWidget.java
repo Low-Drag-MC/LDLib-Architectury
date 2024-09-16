@@ -5,9 +5,11 @@ import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseGraph;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.NodePort;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.TriggerLink;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import com.lowdragmc.lowdraglib.utils.TypeAdapter;
 import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,14 +22,18 @@ import java.util.ArrayList;
 @Getter
 public class NodePortWidget extends Widget {
     public final NodeWidget nodeWidget;
-    public final NodePort port;
     public final boolean isInput;
+    public final NodePort port;
 
-    public NodePortWidget(NodeWidget nodeWidget, NodePort port, boolean isInput) {
+    public NodePortWidget(NodeWidget nodeWidget, boolean isInput, NodePort port) {
         super(Position.ORIGIN, Size.ZERO);
         this.nodeWidget = nodeWidget;
-        this.port = port;
         this.isInput = isInput;
+        this.port = port;
+        initPortInformation();
+    }
+
+    public void initPortInformation() {
         // size is defined by the display name;
         var width = 18;
         if (LDLib.isClient()) {
@@ -36,17 +42,27 @@ public class NodePortWidget extends Widget {
         setSize(width, 15);
         // setup hover tips
         var tooltips = new ArrayList<String>();
-        var displayType = port.portData.displayType;
-        var typeName = displayType.getSimpleName();
-        if (displayType == float.class || displayType == int.class || displayType == Float.class || displayType == Integer.class) {
-            typeName = "Number";
-        }
-        tooltips.add("Type: %s".formatted(typeName));
+        tooltips.add("Type: %s".formatted(getPortTypeName()));
         if (port.portData.tooltip != null && !port.portData.tooltip.isEmpty()) {
             tooltips.addAll(port.portData.tooltip);
         }
         setHoverTooltips(tooltips.toArray(new String[0]));
+    }
 
+    public String getDisplayName() {
+        return port.portData.displayName;
+    }
+
+    public String getPortTypeName() {
+        return TypeAdapter.getTypeDisplayName(port.portData.displayType);
+    }
+
+    public int getPortColor() {
+        var type = port.portData.displayType;
+        if (type != null) {
+            return TypeAdapter.getTypeColor(type);
+        }
+        return ColorPattern.BLUE.color;
     }
 
     public Position getPortPosition() {
@@ -58,8 +74,12 @@ public class NodePortWidget extends Widget {
     public void drawInBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         var isConnecting = !port.getEdges().isEmpty();
+        var isTriggerLink = port.portData.displayType == TriggerLink.class;
         var icon = isConnecting ? Icons.RADIOBOX_MARKED : Icons.RADIOBOX_BLANK;
-        var color = ColorPattern.BLUE.color;
+        if (isTriggerLink) {
+            icon = isConnecting ? Icons.CHECKBOX_MARKED : Icons.CHECKBOX_BLANK;
+        }
+        var color = getPortColor();
         var isHover = isMouseOverElement(mouseX, mouseY);
         var clickedPort = nodeWidget.getGraphView().getClickedPort();
         if (clickedPort == null) {
@@ -73,14 +93,14 @@ public class NodePortWidget extends Widget {
         }
         if (isInput) {
             // draw icon left
-            icon.copy().setColor(color).draw(graphics, mouseX, mouseY, getPositionX() + 2, getPositionY() + 2, 11, 11);
+            icon.copy().setColor(color).draw(graphics, mouseX, mouseY, getPositionX() + 4, getPositionY() + 3, 8, 8);
             // draw text right
-            graphics.drawString(Minecraft.getInstance().font, port.portData.displayName, getPositionX() + 15, getPositionY() + 3, -1);
+            graphics.drawString(Minecraft.getInstance().font, getDisplayName(), getPositionX() + 15, getPositionY() + 3, -1);
         } else {
             // draw text left
-            graphics.drawString(Minecraft.getInstance().font, port.portData.displayName, getPositionX() + 3, getPositionY() + 3, -1);
+            graphics.drawString(Minecraft.getInstance().font, getDisplayName(), getPositionX() + 3, getPositionY() + 3, -1);
             // draw icon right
-            icon.copy().setColor(color).draw(graphics, mouseX, mouseY, getPositionX() + getSizeWidth() - 13, getPositionY() + 2, 11, 11);
+            icon.copy().setColor(color).draw(graphics, mouseX, mouseY, getPositionX() + getSizeWidth() - 11, getPositionY() + 3, 8, 8);
         }
     }
 
@@ -112,7 +132,7 @@ public class NodePortWidget extends Widget {
                 }
             } else  if (button == 1) {
                 var updatedNodes = port.getEdges().stream()
-                        .map(port -> port.inputNode == nodeWidget.getNode() ? port.outputNode : port.inputNode)
+                        .map(edge -> edge.inputNode == nodeWidget.getNode() ? edge.outputNode : edge.inputNode)
                         .map(node -> nodeWidget.getGraphView().getNodeMap().get(node)).toList();
 
                 nodeWidget.getGraphView().removeEdge(port);
@@ -123,4 +143,5 @@ public class NodePortWidget extends Widget {
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
+
 }

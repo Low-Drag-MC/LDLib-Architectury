@@ -343,14 +343,17 @@ public class DrawerHelper {
         DrawerHelper.ROUND_BOX.use(uniform -> {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
             uniform.glUniformMatrix4F("PoseStack", new Matrix4f());
-            var point1 = new Vector4f(square.left - 0.5f, square.up - 0.5f, 0, 1);
-            var point2 = new Vector4f(square.right - 0.5f, square.down - 0.5f, 0, 1);
+            var point1 = new Vector4f(square.left - 0.25f, square.up - 0.25f, 0, 1);
+            var point2 = new Vector4f(square.right - 0.25f, square.down - 0.25f, 0, 1);
             var matrix = graphics.pose().last().pose();
             point1.mul(matrix);
             point2.mul(matrix);
+            var v1 = matrix.transform(new Vector4f(1, 1, 1, 1));
+            var v2 = matrix.transform(new Vector4f(0, 0, 0, 1));
+            var scale = v1.x - v2.x; // we just use the x scale
 
             uniform.glUniform4F("SquareVertex", point1.x, point1.y, point2.x, point2.y);
-            uniform.glUniform4F("RoundRadius", radius.x(), radius.y(), radius.z(), radius.w());
+            uniform.glUniform4F("RoundRadius", radius.x() * scale, radius.y() * scale, radius.z() * scale, radius.w() * scale);
             uniform.fillRGBAColor("Color", color);
             uniform.glUniform1F("Blur", 2);
         });
@@ -379,16 +382,19 @@ public class DrawerHelper {
         DrawerHelper.FRAME_ROUND_BOX.use(uniform -> {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
             uniform.glUniformMatrix4F("PoseStack", new Matrix4f());
-            var point1 = new Vector4f(square.left - 0.5f, square.up - 0.5f, 0, 1);
-            var point2 = new Vector4f(square.right - 0.5f, square.down - 0.5f, 0, 1);
+            var point1 = new Vector4f(square.left - 0.25f, square.up - 0.25f, 0, 1);
+            var point2 = new Vector4f(square.right - 0.25f, square.down - 0.25f, 0, 1);
             var matrix = graphics.pose().last().pose();
             point1.mul(matrix);
             point2.mul(matrix);
+            var v1 = matrix.transform(new Vector4f(1, 1, 1, 1));
+            var v2 = matrix.transform(new Vector4f(0, 0, 0, 1));
+            var scale = v1.x - v2.x; // we just use the x scale
 
             uniform.glUniform4F("SquareVertex", point1.x, point1.y, point2.x, point2.y);
-            uniform.glUniform4F("RoundRadius1", radius1.x(), radius1.y(), radius1.z(), radius1.w());
-            uniform.glUniform4F("RoundRadius2", radius2.x(), radius2.y(), radius2.z(), radius2.w());
-            uniform.glUniform1F("Thickness", thickness);
+            uniform.glUniform4F("RoundRadius1", radius1.x() * scale, radius1.y() * scale, radius1.z() * scale, radius1.w() * scale);
+            uniform.glUniform4F("RoundRadius2", radius2.x() * scale, radius2.y() * scale, radius2.z() * scale, radius2.w() * scale);
+            uniform.glUniform1F("Thickness", thickness * scale);
             uniform.fillRGBAColor("Color", color);
             uniform.glUniform1F("Blur", 2);
         });
@@ -402,8 +408,8 @@ public class DrawerHelper {
             DrawerHelper.updateScreenVshUniform(graphics, uniform);
 
             uniform.glUniform1F("Width", width);
-            uniform.glUniform2F("Vec21", begin.x, begin.y);
-            uniform.glUniform2F("Vec22", end.x, end.y);
+            uniform.glUniform2F("Point1", begin.x, begin.y);
+            uniform.glUniform2F("Point2", end.x, end.y);
             uniform.fillRGBAColor("Color1", color1);
             uniform.fillRGBAColor("Color2", color2);
             uniform.glUniform1F("Blur", 2);

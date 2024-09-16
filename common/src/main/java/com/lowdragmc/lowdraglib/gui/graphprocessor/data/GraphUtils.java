@@ -1,5 +1,8 @@
 package com.lowdragmc.lowdraglib.gui.graphprocessor.data;
 
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.parameter.ExposedParameter;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.parameter.ParameterNode;
+
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -62,10 +65,10 @@ public class GraphUtils {
 
         n.state = State.Grey;
 
-        if (n.node instanceof ParameterNode parameterNode && parameterNode.accessor == ParameterNode.ParameterAccessor.Get){
+        if (n.node instanceof ParameterNode parameterNode && parameterNode.parameter.getAccessor() == ExposedParameter.ParameterAccessor.Get){
             for (var setter : graph.nodes.stream().filter(x-> x.node instanceof ParameterNode p &&
-                            Objects.equals(p.parameterGUID, parameterNode.parameterGUID) &&
-                            p.accessor == ParameterNode.ParameterAccessor.Set).toList()) {
+                            Objects.equals(p.parameterIdentifier, parameterNode.parameterIdentifier) &&
+                            p.parameter.getAccessor() == ExposedParameter.ParameterAccessor.Set).toList()) {
                 if (setter.state == State.White)
                     DFS1(graph, depthFirstNodes, setter);
             }

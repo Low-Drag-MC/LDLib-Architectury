@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.graphprocessor.data;
 
+import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
@@ -18,6 +19,10 @@ public class PortData {
      */
     public String displayName = "";
     /**
+     * port color
+     */
+    public int portColor = 0; // 0 - auto color
+    /**
      * Unique identifier for the port
      */
     @Nullable
@@ -31,19 +36,11 @@ public class PortData {
      * If the port accept multiple connection
      */
     public boolean acceptMultipleEdges;
-//    /**
-//     * Port size, will also affect the size of the connected edge
-//     */
-//    public int sizeInPixel;
     /**
      * Tooltip of the port
      */
     @Nullable
     public List<String> tooltip;
-    /**
-     * Is the port vertical
-     */
-    public boolean vertical;
 
     public PortData() {
     }
@@ -53,21 +50,19 @@ public class PortData {
         if (otherObject instanceof PortData  other)
             return Objects.equals(identifier, other.identifier)
                     && Objects.equals(displayName, other.displayName)
+                    && portColor == other.portColor
                     && displayType == other.displayType
                     && acceptMultipleEdges == other.acceptMultipleEdges
-//                && sizeInPixel == other.sizeInPixel
-                    && Objects.equals(tooltip, other.tooltip)
-                    && vertical == other.vertical;
+                    && Objects.equals(tooltip, other.tooltip);
         return false;
     }
 
     public void CopyFrom(PortData other) {
         identifier = other.identifier;
+        portColor = other.portColor;
         displayName = other.displayName;
         displayType = other.displayType;
         acceptMultipleEdges = other.acceptMultipleEdges;
-//        sizeInPixel = other.sizeInPixel;
         tooltip = other.tooltip;
-        vertical = other.vertical;
     }
 }

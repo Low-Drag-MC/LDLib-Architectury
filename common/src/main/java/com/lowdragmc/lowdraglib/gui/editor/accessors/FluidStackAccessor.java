@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.accessors;
 
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
@@ -37,6 +38,12 @@ public class FluidStackAccessor extends TypesAccessor<FluidStack> {
     @Override
     public Configurator create(String name, Supplier<FluidStack> supplier, Consumer<FluidStack> consumer, boolean forceUpdate, Field field) {
         ConfiguratorGroup group = new ConfiguratorGroup(name);
+        if (field.isAnnotationPresent(Configurable.class)) {
+            Configurable configurable = field.getAnnotation(Configurable.class);
+            group.setCollapse(configurable.collapse());
+            group.setCanCollapse(configurable.canCollapse());
+            group.setTips(configurable.tips());
+        }
         var fluidStorage = new FluidStorage(supplier.get());
         var tank = new TankWidget(fluidStorage, 0, 0, 18, 18, false, false);
         tank.setBackground(TankWidget.FLUID_SLOT_TEXTURE);
