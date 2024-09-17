@@ -306,7 +306,7 @@ public class GraphViewWidget extends WidgetGroup {
     }
 
     public <T, C> MenuWidget<T, C> openMenu(double posX, double posY, TreeNode<T, C> menuNode) {
-        var menu = new MenuWidget<>((int) posX, (int) posY, 14, menuNode)
+        var menu = new MenuWidget<>((int) posX - parent.getPositionX(), (int) posY - parent.getPositionY(), 14, menuNode)
                 .setNodeTexture(MenuWidget.NODE_TEXTURE)
                 .setLeafTexture(MenuWidget.LEAF_TEXTURE)
                 .setNodeHoverTexture(MenuWidget.NODE_HOVER_TEXTURE);

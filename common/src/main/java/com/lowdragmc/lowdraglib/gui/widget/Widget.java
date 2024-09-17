@@ -503,7 +503,7 @@ public class Widget {
     @Environment(EnvType.CLIENT)
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         tryToDrag = false;
-        if (isMouseOverElement(mouseX, mouseY) && draggingAccept.test(getGui().getModularUIGui().getDraggingElement())) {
+        if (isMouseOverElement(mouseX, mouseY) && getGui() != null && draggingAccept.test(getGui().getModularUIGui().getDraggingElement())) {
             var element = getGui().getModularUIGui().getDraggingElement();
             if (draggingElement == element && draggingSuccess != null) {
                 draggingSuccess.accept(element);

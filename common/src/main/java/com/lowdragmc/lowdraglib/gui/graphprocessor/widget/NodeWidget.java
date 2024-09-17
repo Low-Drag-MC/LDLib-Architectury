@@ -219,7 +219,7 @@ public class NodeWidget extends WidgetGroup {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         lastMouseX = mouseX;
         lastMouseY = mouseY;
-        if (button == 0 && title.isMouseOverElement(mouseX, mouseY)) {
+        if (button == 0 && title.isMouseOverElement(mouseX, mouseY) && gui != null) {
             var clickTime = gui.getTickCount();
             if (lastClickTime != 0 && clickTime - lastClickTime < 10) { // double click
                 node.setExpanded(!node.isExpanded());

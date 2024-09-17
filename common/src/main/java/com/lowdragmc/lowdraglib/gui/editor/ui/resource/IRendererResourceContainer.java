@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.gui.editor.ui.resource;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
 import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlockEntity;
+import com.lowdragmc.lowdraglib.client.renderer.impl.UIResourceRenderer;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
@@ -26,7 +27,7 @@ public class IRendererResourceContainer extends ResourceContainer<IRenderer, Wid
     public IRendererResourceContainer(Resource<IRenderer> resource, ResourcePanel panel) {
         super(resource, panel);
         setWidgetSupplier(k -> createPreview(getResource().getResource(k)));
-        setDragging(key -> getResource().getResource(key), (k, o, p) -> new TextTexture(k));
+        setDragging(key -> new UIResourceRenderer(resource, key), (k, o, p) -> new TextTexture(k));
         setOnEdit(key -> {
             if (getResource().getResource(key) instanceof IConfigurable configurable) {
                 getPanel().getEditor().getConfigPanel().openConfigurator(ConfigPanel.Tab.RESOURCE, configurable);
