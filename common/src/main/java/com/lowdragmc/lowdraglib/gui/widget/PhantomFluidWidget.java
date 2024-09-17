@@ -24,7 +24,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
@@ -33,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -99,10 +102,29 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
             ingredient = FluidStack.create(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag());
         }
         if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
-            var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
-            ingredient = fluid == null ? FluidStack.empty() : FluidStack.create(fluid, fluidEmiStack.getAmount(), fluidEmiStack.getNbt());
+            Fluid fluid = fluidEmiStack.getKeyOfType(Fluid.class);
+            if (fluid == null) {
+                Item item = fluidEmiStack.getKeyOfType(Item.class);
+                ingredient = item == null ? null : new ItemStack(item, (int)fluidEmiStack.getAmount());
+                if (ingredient instanceof ItemStack itemStack) {
+                    itemStack.setTag(fluidEmiStack.getNbt());
+                }
+            } else {
+                ingredient = FluidStack.create(fluid, fluidEmiStack.getAmount() == 0L ? 1000L : fluidEmiStack.getAmount(), fluidEmiStack.getNbt());
+            }
         }
-        if (!(ingredient instanceof FluidStack) && drainFrom(ingredient) == null) {
+        if (LDLib.isJeiLoaded() && ingredient.getClass().getName().equals("mezz.jei.library.ingredients.TypedIngredient")) {
+            try {
+                ingredient = ingredient.getClass().getMethod("getIngredient").invoke(ingredient);
+                Class<?> clazz = ingredient.getClass();
+                Method fluidMethod =  clazz.getMethod("getFluid");
+                Method amountMethod = clazz.getMethod("getAmount");
+                Method tagMethod = clazz.getMethod("getTag");
+                ingredient = FluidStack.create((Fluid) fluidMethod.invoke(ingredient),
+                        (int) amountMethod.invoke(ingredient), (CompoundTag) tagMethod.invoke(ingredient));
+            } catch (Exception ignored) { }
+        }
+        if (!(ingredient instanceof FluidStack) && drainFrom(ingredient) == FluidStack.empty()) {
             return Collections.emptyList();
         }
 
@@ -122,14 +144,32 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                 }
                 if (LDLib.isEmiLoaded() && ingredient instanceof EmiStack fluidEmiStack) {
                     var fluid = fluidEmiStack.getKeyOfType(Fluid.class);
-                    ingredient = fluid == null ? FluidStack.empty() : FluidStack.create(fluid, fluidEmiStack.getAmount(), fluidEmiStack.getNbt());
+                    if (fluid == null) {
+                        Item item = fluidEmiStack.getKeyOfType(Item.class);
+                        ingredient = item == null ? null : new ItemStack(item, (int)fluidEmiStack.getAmount());
+                        if (ingredient instanceof ItemStack itemStack) {
+                            itemStack.setTag(fluidEmiStack.getNbt());
+                        }
+                    } else {
+                        ingredient = FluidStack.create(fluid, fluidEmiStack.getAmount() == 0L ? 1000L : fluidEmiStack.getAmount(), fluidEmiStack.getNbt());
+                    }
+                }
+                if (LDLib.isJeiLoaded() && ingredient.getClass().getName().equals("net.minecraftforge.fluids.FluidStack")) {
+                    Class<?> clazz = ingredient.getClass();
+                    try {
+                        Method fluidMethod =  clazz.getMethod("getFluid");
+                        Method amountMethod = clazz.getMethod("getAmount");
+                        Method tagMethod = clazz.getMethod("getTag");
+                        ingredient = FluidStack.create((Fluid) fluidMethod.invoke(ingredient),
+                                (int) amountMethod.invoke(ingredient), (CompoundTag) tagMethod.invoke(ingredient));
+                    } catch (Exception ignored) { }
                 }
                 if (ingredient instanceof FluidStack fluidStack)
                     ingredientStack = fluidStack;
                 else
                     ingredientStack = drainFrom(ingredient);
 
-                if (ingredientStack != null) {
+                if (ingredientStack != FluidStack.empty()) {
                     writeClientAction(2, ingredientStack::writeToBuf);
                 }
 
