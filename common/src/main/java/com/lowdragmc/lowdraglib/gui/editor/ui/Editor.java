@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui;
 
+import com.google.common.util.concurrent.Runnables;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
@@ -11,11 +12,17 @@ import com.lowdragmc.lowdraglib.gui.widget.MenuWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.nbt.NbtIo;
+import org.lwjgl.glfw.GLFW;
 
+import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -24,28 +31,22 @@ import java.util.function.Consumer;
  * @date 2022/11/30
  * @implNote MainPage
  */
+@Getter
 public abstract class Editor extends WidgetGroup implements ILDLRegister {
     @Environment(EnvType.CLIENT)
     public static Editor INSTANCE;
-    @Getter
     protected final File workSpace;
-    @Getter
     protected IProject currentProject;
-    @Getter
+    @Setter
+    @Nullable
+    protected File currentProjectFile;
     protected MenuPanel menuPanel;
-    @Getter
     protected StringTabContainer tabPages;
-    @Getter
     protected ConfigPanel configPanel;
-    @Getter
     protected ResourcePanel resourcePanel;
-    @Getter
     protected WidgetGroup floatView;
-    @Getter
     protected ToolPanel toolPanel;
-    @Getter
     protected String copyType;
-    @Getter
     protected Object copied;
 
     public Editor(String modID) {
@@ -65,6 +66,10 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
 
     @Override
     public void setGui(ModularUI gui) {
+        if (gui != null) {
+            gui.mainGroup.setClientSideWidget();
+            gui.mainGroup.setAllowXEIIngredientOverMouse(false);
+        }
         super.setGui(gui);
         if (isRemote()) {
             if (gui == null) {
@@ -139,8 +144,9 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
     }
 
     public void loadProject(IProject project) {
-        if (currentProject != null) {
+        if (currentProject != null && currentProject != project) {
             currentProject.onClosed(this);
+            currentProjectFile = null;
         }
 
         currentProject = project;
@@ -149,6 +155,7 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
         toolPanel.hide(false);
         configPanel.clearAllConfigurators();
         resourcePanel.clear();
+        floatView.clearAllWidgets();
 
         if (currentProject != null) {
             currentProject.onLoad(this);
@@ -166,4 +173,77 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
         }
     }
 
+    public void askToSaveProject(BooleanConsumer result) {
+        DialogWidget.showCheckBox(this, "ldlib.gui.editor.tips.save_project", "ldlib.gui.editor.tips.ask_to_save", isSave -> {
+            if (isSave) {
+                saveProject(result);
+            } else {
+                result.accept(false);
+            }
+        });
+    }
+
+    public void saveProject(BooleanConsumer result) {
+        if (currentProject != null) {
+            if (currentProjectFile == null) {
+                saveAsProject(result);
+            } else {
+                currentProject.saveProject(currentProjectFile);
+                DialogWidget.showNotification(this, "ldlib.gui.editor.menu.save", "ldlib.gui.compass.save_success");
+                result.accept(true);
+            }
+        } else {
+            result.accept(false);
+        }
+    }
+
+    public void saveAsProject(BooleanConsumer result) {
+        if (currentProject != null) {
+            String suffix = "." + currentProject.getSuffix();
+            DialogWidget.showFileDialog(this, "ldlib.gui.editor.tips.save_as", currentProject.getProjectWorkSpace(this), false,
+                    DialogWidget.suffixFilter(suffix), file -> {
+                        if (file != null && !file.isDirectory()) {
+                            if (!file.getName().endsWith(suffix)) {
+                                file = new File(file.getParentFile(), file.getName() + suffix);
+                            }
+                            currentProject.saveProject(file);
+                            currentProjectFile = file;
+                            result.accept(true);
+                        } else {
+                            result.accept(false);
+                        }
+                    });
+        }
+    }
+
+    public boolean isCurrentProjectSaved() {
+        if (currentProject == null) return true;
+        if (currentProjectFile == null) return false;
+        try {
+            var tag = NbtIo.read(currentProjectFile);
+            return tag != null && tag.equals(currentProject.serializeNBT());
+        } catch (IOException ignored) {}
+        return false;
+    }
+
+    private boolean isWaitingForSave = false;
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if (isWaitingForSave) {
+                getGui().getModularUIGui().onClose();
+                return true;
+            }
+            // esc
+            if (!isCurrentProjectSaved()) {
+                isWaitingForSave = true;
+                askToSaveProject(result -> getGui().getModularUIGui().onClose());
+                return true;
+            }
+            return false;
+        }
+        super.keyPressed(keyCode, scanCode, modifiers);
+        return true;
+    }
 }

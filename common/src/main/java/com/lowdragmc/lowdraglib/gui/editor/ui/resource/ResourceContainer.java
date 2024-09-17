@@ -53,9 +53,12 @@ public class ResourceContainer<T, C extends Widget> extends WidgetGroup {
     protected Supplier<String> nameSupplier;
     @Setter
     protected Predicate<String> renamePredicate;
-
+    // runtime
     @Getter @Nullable
     protected String selected;
+    private boolean firstClick;
+    private String firstClickName;
+    private long firstClickTime;
 
     public ResourceContainer(Resource<T> resource, ResourcePanel panel) {
         super(3, 0, panel.getSize().width - 6, panel.getSize().height - 14);
@@ -129,6 +132,15 @@ public class ResourceContainer<T, C extends Widget> extends WidgetGroup {
         if (button == 1 && isMouseOverElement(mouseX, mouseY)) {
             panel.getEditor().openMenu(mouseX, mouseY, getMenu());
             return true;
+        } else if (button == 0 && isMouseOverElement(mouseX, mouseY) && selected != null && onEdit != null) {
+            if (firstClick && firstClickName.equals(selected) && gui.getTickCount() - firstClickTime < 10) {
+                editResource();
+                firstClick = false;
+                return true;
+            }
+            firstClick = true;
+            firstClickName = selected;
+            firstClickTime = gui.getTickCount();
         }
         return result;
     }

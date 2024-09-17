@@ -10,7 +10,6 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -40,6 +39,7 @@ public class SelectorWidget extends WidgetGroup {
     protected boolean showUp;
     protected boolean isShow;
     protected IGuiTexture popUpTexture = new ColorRectTexture(0xAA000000);
+    private Supplier<List<String>> candidatesSupplier;
     private Supplier<String> supplier;
     private Consumer<String> onChanged;
     public final TextTexture textTexture;
@@ -59,12 +59,13 @@ public class SelectorWidget extends WidgetGroup {
 
     public SelectorWidget(int x, int y, int width, int height, List<String> candidates, int fontColor) {
         super(new Position(x, y), new Size(width, height));
-        this.button = new ButtonWidget(0,0, width, height, textTexture = new TextTexture("", fontColor).setWidth(width).setType(TextTexture.TextType.ROLL), d -> {
+        this.button = new ButtonWidget(0,0, width, height, IGuiTexture.EMPTY, d -> {
             if (d.isRemote) setShow(!isShow);
         });
         this.candidates = candidates;
         this.selectables = new ArrayList<>();
         this.addWidget(button);
+        this.addWidget(new ImageWidget(0, 1, width, height - 1, textTexture = new TextTexture("", fontColor).setWidth(width).setType(TextTexture.TextType.ROLL)));
         this.addWidget(popUp = new DraggableScrollableWidgetGroup(0, height, width, 15));
         popUp.setBackground(popUpTexture);
         popUp.setVisible(false);
@@ -176,6 +177,11 @@ public class SelectorWidget extends WidgetGroup {
         return currentValue;
     }
 
+    public SelectorWidget setCandidatesSupplier(Supplier<List<String>> candidatesSupplier) {
+        this.candidatesSupplier = candidatesSupplier;
+        return this;
+    }
+
     public SelectorWidget setOnChanged(Consumer<String> onChanged) {
         this.onChanged = onChanged;
         return this;
@@ -206,8 +212,16 @@ public class SelectorWidget extends WidgetGroup {
     @Override
     public void updateScreen() {
         super.updateScreen();
-        if (isClientSideWidget && supplier != null) {
-            setValue(supplier.get());
+        if (isClientSideWidget) {
+            if (candidatesSupplier != null) {
+                var latest = candidatesSupplier.get();
+                if (!latest.equals(candidates)) {
+                    setCandidates(latest);
+                }
+            }
+            if (supplier != null) {
+                setValue(supplier.get());
+            }
         }
         if (gui != null) {
             ModularUIGuiContainer container = gui.getModularUIGui();
@@ -220,11 +234,25 @@ public class SelectorWidget extends WidgetGroup {
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
-        if (!isClientSideWidget && supplier != null) {
-            var last = currentValue;
-            setValue(supplier.get());
-            if (!last.equals( currentValue)) {
-                writeUpdateInfo(3, buffer -> buffer.writeUtf(currentValue));
+        if (!isClientSideWidget) {
+            if (candidatesSupplier != null) {
+                var latest = candidatesSupplier.get();
+                if (!latest.equals(candidates)) {
+                    setCandidates(latest);
+                    writeUpdateInfo(4, buffer -> {
+                        buffer.writeVarInt(latest.size());
+                        for (String candidate : latest) {
+                            buffer.writeUtf(candidate);
+                        }
+                    });
+                }
+            }
+            if (supplier != null) {
+                var last = currentValue;
+                setValue(supplier.get());
+                if (!last.equals( currentValue)) {
+                    writeUpdateInfo(3, buffer -> buffer.writeUtf(currentValue));
+                }
             }
         }
     }
@@ -295,6 +323,13 @@ public class SelectorWidget extends WidgetGroup {
         super.readUpdateInfo(id, buffer);
         if (id == 3) {
             setValue(buffer.readUtf());
+        } else if (id == 4) {
+            var size = buffer.readVarInt();
+            List<String> latest = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                latest.add(buffer.readUtf());
+            }
+            setCandidates(latest);
         }
     }
 

@@ -10,6 +10,8 @@ import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.lowdragmc.lowdraglib.gui.modular.WidgetUIAccess;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.gui.widget.layout.Align;
+import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Rect;
 import com.lowdragmc.lowdraglib.utils.Size;
@@ -22,6 +24,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.FriendlyByteBuf;
@@ -68,12 +71,16 @@ public class Widget {
     @Configurable(name = "ldlib.gui.editor.name.size")
     @Getter
     private Size size;
+    @Configurable(name = "ldlib.gui.editor.name.align", tips = "ldlib.gui.editor.tips.align")
+    @Getter @Setter
+    private Align align = Align.NONE;
     @Getter @Setter
     private boolean isVisible;
     @Getter @Setter
     private boolean isActive;
     @Getter
     private boolean isFocus;
+    @Getter
     protected boolean isClientSideWidget;
     @Getter
     @Configurable(name = "ldlib.gui.editor.name.hover_tips", tips = "ldlib.gui.editor.tips.hover_tips")
@@ -81,6 +88,8 @@ public class Widget {
     @Getter
     @Configurable(name = "ldlib.gui.editor.name.background")
     protected IGuiTexture backgroundTexture;
+    @Configurable(name = "ldlib.gui.editor.name.draw_background_when_hover")
+    protected boolean drawBackgroundWhenHover = true;
     @Configurable(name = "ldlib.gui.editor.name.hover_texture")
     protected IGuiTexture hoverTexture;
     @Getter
@@ -123,19 +132,34 @@ public class Widget {
 
     public Widget setHoverTooltips(String... tooltipText) {
         tooltipTexts.clear();
-        Arrays.stream(tooltipText).filter(Objects::nonNull).filter(s->!s.isEmpty()).map(
-                Component::translatable).forEach(tooltipTexts::add);
+        appendHoverTooltips(tooltipText);
         return this;
     }
 
     public Widget setHoverTooltips(Component... tooltipText) {
         tooltipTexts.clear();
-        Arrays.stream(tooltipText).filter(Objects::nonNull).forEach(tooltipTexts::add);
+        appendHoverTooltips(tooltipText);
         return this;
     }
 
     public Widget setHoverTooltips(List<Component> tooltipText) {
         tooltipTexts.clear();
+        appendHoverTooltips(tooltipText);
+        return this;
+    }
+
+    public Widget appendHoverTooltips(String... tooltipText) {
+        Arrays.stream(tooltipText).filter(Objects::nonNull).filter(s->!s.isEmpty()).map(
+                Component::translatable).forEach(tooltipTexts::add);
+        return this;
+    }
+
+    public Widget appendHoverTooltips(Component... tooltipText) {
+        Arrays.stream(tooltipText).filter(Objects::nonNull).forEach(tooltipTexts::add);
+        return this;
+    }
+
+    public Widget appendHoverTooltips(List<Component> tooltipText) {
         tooltipTexts.addAll(tooltipText);
         return this;
     }
@@ -148,6 +172,11 @@ public class Widget {
 
     public Widget setBackground(IGuiTexture... backgroundTexture) {
         this.backgroundTexture = backgroundTexture.length > 1 ? new GuiTextureGroup(backgroundTexture) : backgroundTexture[0];
+        return this;
+    }
+
+    public Widget setDrawBackgroundWhenHover(boolean drawBackgroundWhenHover) {
+        this.drawBackgroundWhenHover = drawBackgroundWhenHover;
         return this;
     }
 
@@ -206,6 +235,7 @@ public class Widget {
 
     @ConfigSetter(field = "selfPosition")
     public void setSelfPosition(Position selfPosition) {
+        if (this.selfPosition.equals(selfPosition)) return;
         this.selfPosition = selfPosition;
         recomputePosition();
         if (isParent(parent)) {
@@ -347,6 +377,19 @@ public class Widget {
      */
     @Environment(EnvType.CLIENT)
     public void updateScreen() {
+        if (align != Align.NONE && isParent(parent)) {
+            switch (align) {
+                case TOP_LEFT -> setSelfPosition(0, 0);
+                case TOP_CENTER -> setSelfPosition((parent.getSize().width - getSize().width) / 2, 0);
+                case TOP_RIGHT -> setSelfPosition(parent.getSize().width - getSize().width, 0);
+                case LEFT_CENTER -> setSelfPosition(0, (parent.getSize().height - getSize().height) / 2);
+                case CENTER -> setSelfPosition((parent.getSize().width - getSize().width) / 2, (parent.getSize().height - getSize().height) / 2);
+                case RIGHT_CENTER -> setSelfPosition(parent.getSize().width - getSize().width, (parent.getSize().height - getSize().height) / 2);
+                case BOTTOM_LEFT -> setSelfPosition(0, parent.getSize().height - getSize().height);
+                case BOTTOM_CENTER -> setSelfPosition((parent.getSize().width - getSize().width) / 2, parent.getSize().height - getSize().height);
+                case BOTTOM_RIGHT -> setSelfPosition(parent.getSize().width - getSize().width, parent.getSize().height - getSize().height);
+            }
+        }
         if (backgroundTexture != null) {
             backgroundTexture.updateTick();
         }
@@ -372,12 +415,13 @@ public class Widget {
 
     @Environment(EnvType.CLIENT)
     protected void drawBackgroundTexture(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
-        if (backgroundTexture != null) {
+        var isHovered = isMouseOverElement(mouseX, mouseY);
+        if (backgroundTexture != null && (!isHovered || drawBackgroundWhenHover)) {
             Position pos = getPosition();
             Size size = getSize();
             backgroundTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
         }
-        if (hoverTexture != null && isMouseOverElement(mouseX, mouseY)) {
+        if (hoverTexture != null && isHovered) {
             Position pos = getPosition();
             Size size = getSize();
             hoverTexture.draw(graphics, mouseX, mouseY, pos.x, pos.y, size.width, size.height);
@@ -459,7 +503,7 @@ public class Widget {
     @Environment(EnvType.CLIENT)
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         tryToDrag = false;
-        if (isMouseOverElement(mouseX, mouseY) && draggingAccept.test(getGui().getModularUIGui().getDraggingElement())) {
+        if (isMouseOverElement(mouseX, mouseY) && getGui() != null && draggingAccept.test(getGui().getModularUIGui().getDraggingElement())) {
             var element = getGui().getModularUIGui().getDraggingElement();
             if (draggingElement == element && draggingSuccess != null) {
                 draggingSuccess.accept(element);
@@ -556,14 +600,19 @@ public class Widget {
 
     @Environment(EnvType.CLIENT)
     public static boolean isCtrlDown() {
-        long id = Minecraft.getInstance().getWindow().getWindow();
-        return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_CONTROL) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_CONTROL);
+        return Screen.hasControlDown();
     }
 
     @Environment(EnvType.CLIENT)
     public static boolean isAltDown() {
         long id = Minecraft.getInstance().getWindow().getWindow();
         return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_ALT) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_ALT);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static boolean isKeyDown(int keyCode) {
+        long id = Minecraft.getInstance().getWindow().getWindow();
+        return InputConstants.isKeyDown(id, keyCode);
     }
 
     public boolean isRemote() {

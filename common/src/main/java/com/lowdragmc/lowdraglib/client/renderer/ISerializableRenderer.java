@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.client.renderer;
 import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
 import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlockEntity;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.ILDLRegisterClient;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.WrapperConfigurator;
@@ -15,15 +16,17 @@ import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Optional;
 
-public interface ISerializableRenderer extends IConfigurable, IRenderer, IAutoPersistedSerializable {
+public interface ISerializableRenderer extends IConfigurable, IRenderer, IAutoPersistedSerializable, ILDLRegisterClient {
 
     static CompoundTag serializeWrapper(ISerializableRenderer renderer) {
         return renderer.serializeNBT();
     }
 
+    @Nullable
     static ISerializableRenderer deserializeWrapper(CompoundTag tag) {
         var type = tag.getString("_type");
         var wrapper = AnnotationDetector.REGISTER_RENDERERS.get(type);

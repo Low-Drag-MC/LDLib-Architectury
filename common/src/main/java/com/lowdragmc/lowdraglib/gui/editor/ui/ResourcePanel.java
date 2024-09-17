@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.data.Resources;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
+import com.lowdragmc.lowdraglib.gui.editor.ui.resource.ResourceContainer;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
@@ -16,6 +17,8 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author KilaBash
@@ -29,13 +32,14 @@ public class ResourcePanel extends WidgetGroup {
     protected Editor editor;
     protected ButtonWidget buttonHide;
     protected TabContainer tabContainer;
-
     @Getter
     @Nullable
     protected Resources resources;
-
     @Getter
     protected boolean isShow = true;
+    @Getter
+    protected Map<Resource, ResourceContainer> containerMap = new HashMap<>();
+
 
     public ResourcePanel(Editor editor) {
         super(0, editor.getSize().height - HEIGHT, editor.getSize().getWidth() - ConfigPanel.WIDTH, HEIGHT);
@@ -110,10 +114,12 @@ public class ResourcePanel extends WidgetGroup {
 
     public void clear() {
         tabContainer.clearAllWidgets();
+        containerMap.clear();
     }
 
     public void loadResource(Resources resources, boolean merge) {
         tabContainer.clearAllWidgets();
+        containerMap.clear();
 
         if (!merge && this.resources != null) {
             this.resources.dispose();
@@ -130,14 +136,28 @@ public class ResourcePanel extends WidgetGroup {
         var maxWidth = (getSize().width - offset) / this.resources.resources.size();
         for (Resource<?> resource : this.resources.resources.values()) {
             var width = Math.min(maxWidth, Minecraft.getInstance().font.width(LocalizationUtils.format(resource.name())) + 8);
+            var resourceContainer = resource.createContainer(this);
             tabContainer.addTab(
                     new TabButton(offset, -15, width, 15).setTexture(
                             new TextTexture(resource.name()).setType(TextTexture.TextType.ROLL).setWidth(width),
                             new GuiTextureGroup(new TextTexture(resource.name(), ColorPattern.T_GREEN.color).setType(TextTexture.TextType.ROLL).setWidth(width), ColorPattern.T_GRAY.rectTexture())
                     ),
-                    resource.createContainer(this)
+                    resourceContainer
             );
+            containerMap.put(resource, resourceContainer);
             offset += width;
+        }
+    }
+
+    public void rebuildResource(String resourceName) {
+        if (resources != null) {
+            var resource = resources.resources.get(resourceName);
+            if (resource != null) {
+                var container = containerMap.get(resource);
+                if (container != null) {
+                    container.reBuild();
+                }
+            }
         }
     }
 

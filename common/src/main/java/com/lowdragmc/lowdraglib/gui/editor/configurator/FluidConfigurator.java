@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SearchComponentWidget;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.material.Fluid;
 
 import javax.annotation.Nonnull;
@@ -53,7 +54,7 @@ public class FluidConfigurator extends ValueConfigurator<Fluid> implements Searc
         searchComponent.setCapacity(5);
         var textFieldWidget = searchComponent.textFieldWidget;
         textFieldWidget.setClientSideWidget();
-        textFieldWidget.setCurrentString(value == null ? defaultValue : value);
+        textFieldWidget.setCurrentString(value == null ? BuiltInRegistries.FLUID.getKey(defaultValue) : BuiltInRegistries.FLUID.getKey(value));
         textFieldWidget.setBordered(false);
     }
 

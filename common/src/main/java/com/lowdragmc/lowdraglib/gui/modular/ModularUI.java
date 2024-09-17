@@ -51,8 +51,12 @@ public final class ModularUI {
     public final IUIHolder holder;
     public final Player entityPlayer;
 
+    public ModularUI(Size size, IUIHolder holder, Player entityPlayer) {
+        this(new WidgetGroup(Position.ORIGIN, size), holder, entityPlayer);
+    }
+
     public ModularUI(int width, int height, IUIHolder holder, Player entityPlayer) {
-        this(new WidgetGroup(Position.ORIGIN, new Size(width, height)), holder, entityPlayer);
+        this(new Size(width, height), holder, entityPlayer);
     }
 
     public ModularUI(WidgetGroup mainGroup, IUIHolder holder, Player entityPlayer) {

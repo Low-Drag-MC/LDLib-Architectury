@@ -57,7 +57,7 @@ public class RangeConfigurator extends ValueConfigurator<Range> {
         }, defaultValue.getA(), forceUpdate);
         x.setRange(min, max);
         x.setWheel(wheel);
-        x.setConfigPanel(configPanel, tab);
+        x.setConfiguratorContainer(configuratorContainer);
         x.init(w);
         x.addSelfPosition(leftWidth, 0);
         addWidget(x);
@@ -68,7 +68,7 @@ public class RangeConfigurator extends ValueConfigurator<Range> {
         }, defaultValue.getB(), forceUpdate);
         y.setRange(min, max);
         y.setWheel(wheel);
-        y.setConfigPanel(configPanel, tab);
+        y.setConfiguratorContainer(configuratorContainer);
         y.init(w);
         y.addSelfPosition(leftWidth + w, 0);
         addWidget(y);

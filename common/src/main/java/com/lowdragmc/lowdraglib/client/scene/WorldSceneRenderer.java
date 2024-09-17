@@ -8,6 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.injectables.annotations.PlatformOnly;
+import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -46,6 +48,7 @@ import java.nio.IntBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static net.minecraft.world.level.block.RenderShape.INVISIBLE;
@@ -76,6 +79,8 @@ public abstract class WorldSceneRenderer {
     protected VertexBuffer[] vertexBuffers;
     protected Set<BlockPos> tileEntities;
     protected boolean useCache;
+    @Getter @Setter
+    protected boolean endBatchLast = false;// if true, endBatch will be called after all rendering
     protected boolean ortho;
     protected AtomicReference<CacheState> cacheState;
     protected int maxProgress;
@@ -86,10 +91,15 @@ public abstract class WorldSceneRenderer {
     protected CameraEntity cameraEntity;
     private Consumer<WorldSceneRenderer> beforeRender;
     private Consumer<WorldSceneRenderer> afterRender;
+    @Setter @Nullable
+    private BiConsumer<MultiBufferSource, Float> beforeBatchEnd;
     private Consumer<BlockHitResult> onLookingAt;
     @Setter @Nullable
     private ISceneEntityRenderHook sceneEntityRenderHook;
     protected int clearColor;
+    @Getter
+    private Vector3f lastHit;
+    @Getter
     private BlockHitResult lastTraceResult;
     private Set<BlockPos> blocked;
     private Vector3f eyePos = new Vector3f(0, 0, 10f);
@@ -212,13 +222,7 @@ public abstract class WorldSceneRenderer {
         this.clearColor = clearColor;
     }
 
-    public BlockHitResult getLastTraceResult() {
-        return lastTraceResult;
-    }
-
     public void render(@Nonnull PoseStack poseStack, float x, float y, float width, float height, int mouseX, int mouseY) {
-        Vector3f topLeft = poseStack.last().pose().transformPosition(new Vector3f(0.0f, 0.0f, 0.0f));
-
         // setupCamera
         var pose = poseStack.last().pose();
         Vector4f pos = new Vector4f(x, y, 0, 1.0F);
@@ -229,19 +233,20 @@ public abstract class WorldSceneRenderer {
         y = pos.y();
         width = size.x() - x;
         height = size.y() - y;
-        PositionedRect positionedRect = getPositionedRect((int)x, (int)y, (int)width, (int)height);
+        PositionedRect viewport = getPositionedRect((int)x, (int)y, (int)width, (int)height);
+        var topLeft = poseStack.last().pose().transformPosition(new Vector3f(0.0f, 0.0f, 0.0f));
         PositionedRect mouse = getPositionedRect((int) (mouseX + topLeft.x), (int) (mouseY + topLeft.y), 0, 0);
         mouseX = mouse.position.x;
         mouseY = mouse.position.y;
-        setupCamera(positionedRect);
+        setupCamera(viewport);
         // render TrackedDummyWorld
         drawWorld();
         // check lookingAt
         this.lastTraceResult = null;
-        if (onLookingAt != null && mouseX > positionedRect.position.x && mouseX < positionedRect.position.x + positionedRect.size.width
-                && mouseY > positionedRect.position.y && mouseY < positionedRect.position.y + positionedRect.size.height) {
-            Vector3f hitPos = unProject(mouseX, mouseY);
-            BlockHitResult result = rayTrace(hitPos);
+        this.lastHit = unProject(mouseX, mouseY);
+        if (onLookingAt != null && mouseX > viewport.position.x && mouseX < viewport.position.x + viewport.size.width
+                && mouseY > viewport.position.y && mouseY < viewport.position.y + viewport.size.height) {
+            BlockHitResult result = rayTrace(lastHit);
             if (result != null) {
                 this.lastTraceResult = null;
                 this.lastTraceResult = result;
@@ -315,15 +320,19 @@ public abstract class WorldSceneRenderer {
         this.maxZ = maxZ;
     }
 
-    protected PositionedRect getPositionedRect(int x, int y, int width, int height) {
+    public PositionedRect getPositionedRect(int x, int y, int width, int height) {
         return new PositionedRect(new Position(x, y), new Size(width, height));
     }
 
-    protected void setupCamera(PositionedRect positionedRect) {
-        int x = positionedRect.getPosition().x;
-        int y = positionedRect.getPosition().y;
-        int width = positionedRect.getSize().width;
-        int height = positionedRect.getSize().height;
+    public PositionedRect getPositionRectRevert(int windowX, int windowY, int windowWidth, int windowHeight) {
+        return new PositionedRect(new Position(windowX, windowY), new Size(windowWidth, windowHeight));
+    }
+
+    protected void setupCamera(PositionedRect viewport) {
+        int x = viewport.getPosition().x;
+        int y = viewport.getPosition().y;
+        int width = viewport.getSize().width;
+        int height = viewport.getSize().height;
 
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
@@ -359,7 +368,7 @@ public abstract class WorldSceneRenderer {
         if (camera != null) {
             camera.setup(world, cameraEntity, false, false, mc.getFrameTime());
         }
-        ShaderManager.getInstance().setViewPort(positionedRect);
+        ShaderManager.getInstance().setViewPort(viewport);
 
     }
 
@@ -401,8 +410,9 @@ public abstract class WorldSceneRenderer {
         Minecraft mc = Minecraft.getInstance();
 
         float particleTicks = mc.getFrameTime();
+        var buffers = mc.renderBuffers().bufferSource();
         if (useCache) {
-            renderCacheBuffer(mc, particleTicks);
+            renderCacheBuffer(mc, buffers, particleTicks);
         } else {
             BlockRenderDispatcher blockrendererdispatcher = mc.getBlockRenderer();
             try { // render com.lowdragmc.lowdraglib.test.block in each layer
@@ -416,13 +426,12 @@ public abstract class WorldSceneRenderer {
                             if (hook != null) {
                                 hook.apply(true, layer);
                             } else {
-                                setDefaultRenderLayerState(layer);
+                                setDefaultRenderLayerState(null);
                             }
 
-                            var buffers = mc.renderBuffers().bufferSource();
                             renderTESR(renderedBlocks, poseStack, buffers, hook, particleTicks);
 
-                            if (hook != null) {
+                            if (hook != null || !endBatchLast) {
                                 buffers.endBatch();
                             }
                         }
@@ -433,12 +442,13 @@ public abstract class WorldSceneRenderer {
                             setDefaultRenderLayerState(layer);
                         }
 
-                        BufferBuilder buffer = Tesselator.getInstance().getBuilder();
-                        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
+                        var buffer = buffers.getBuffer(layer);
 
                         renderBlocks(poseStack, blockrendererdispatcher, layer, new VertexConsumerWrapper(buffer), renderedBlocks, hook, particleTicks);
 
-                        Tesselator.getInstance().end();
+                        if (!endBatchLast) {
+                            buffers.endBatch();
+                        }
                         layer.clearRenderState();
                     }
                 });
@@ -448,10 +458,14 @@ public abstract class WorldSceneRenderer {
 
         if (world instanceof TrackedDummyWorld level) {
             PoseStack poseStack = new PoseStack();
-            var buffers = mc.renderBuffers().bufferSource();
             renderEntities(level, poseStack, buffers, sceneEntityRenderHook, particleTicks);
-            buffers.endBatch();
         }
+
+        if (beforeBatchEnd != null) {
+            beforeBatchEnd.accept(buffers, particleTicks);
+        }
+
+        buffers.endBatch();
 
         if (particleManager != null) {
             @Nonnull PoseStack poseStack = new PoseStack();
@@ -476,7 +490,7 @@ public abstract class WorldSceneRenderer {
         return 0;
     }
 
-    private void renderCacheBuffer(Minecraft mc, float particleTicks) {
+    private void renderCacheBuffer(Minecraft mc, MultiBufferSource.BufferSource buffers, float particleTicks) {
         List<RenderType> layers = RenderType.chunkBufferLayers();
         if (cacheState.get() == CacheState.NEED) {
             progress = 0;
@@ -544,12 +558,13 @@ public abstract class WorldSceneRenderer {
 
                 RenderType layer = layers.get(i);
                 if (layer == RenderType.translucent() && tileEntities != null) { // render tesr before translucent
-                    var buffers = mc.renderBuffers().bufferSource();
                     if (world instanceof TrackedDummyWorld level) {
                         renderEntities(level, matrixstack, buffers, sceneEntityRenderHook, particleTicks);
                     }
                     renderTESR(tileEntities, matrixstack, mc.renderBuffers().bufferSource(), null, particleTicks);
-                    buffers.endBatch();
+                    if (!endBatchLast) {
+                        buffers.endBatch();
+                    }
                 }
 
                 layer.setupRenderState();
@@ -716,11 +731,11 @@ public abstract class WorldSceneRenderer {
 
     public static void setDefaultRenderLayerState(RenderType layer) {
         RenderSystem.setShaderColor(1, 1, 1, 1);
-        if (layer == RenderType.translucent()) { // SOLID
+        if (layer == RenderType.translucent()) { // TRANSLUCENT
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             RenderSystem.depthMask(false);
-        } else { // TRANSLUCENT
+        } else { // SOLID
             RenderSystem.enableDepthTest();
             RenderSystem.disableBlend();
             RenderSystem.depthMask(true);
@@ -732,7 +747,7 @@ public abstract class WorldSceneRenderer {
         if (ortho) {
             startPos = startPos.add(new Vec3(startPos.x - lookAt.x(), startPos.y - lookAt.y(), startPos.z - lookAt.z()).multiply(500, 500, 500));
         }
-        hitPos.mul(2); // Double view range to ensure pos can be seen.
+        hitPos = hitPos.mul(2, new Vector3f()); // Double view range to ensure pos can be seen.
         Vec3 endPos = new Vec3((hitPos.x() - startPos.x), (hitPos.y() - startPos.y), (hitPos.z() - startPos.z));
         try {
             return this.world.clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, cameraEntity));
@@ -775,14 +790,21 @@ public abstract class WorldSceneRenderer {
     }
 
     public Vector3f unProject(int mouseX, int mouseY) {
-        //read depth of pixel under mouse
-        GL11.glReadPixels(mouseX, mouseY, 1, 1, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, PIXEL_DEPTH_BUFFER);
+        return unProject(mouseX, mouseY, true);
+    }
 
-        //rewind buffer after write by glReadPixels
-        PIXEL_DEPTH_BUFFER.rewind();
+    public Vector3f unProject(int mouseX, int mouseY, boolean checkDepth) {
+        var pixelDepth = 0.999f;
+        if (checkDepth) {
+            //read depth of pixel under mouse
+            GL11.glReadPixels(mouseX, mouseY, 1, 1, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, PIXEL_DEPTH_BUFFER);
 
-        //retrieve depth from buffer (0.0-1.0f)
-        float pixelDepth = PIXEL_DEPTH_BUFFER.get();
+            //rewind buffer after write by glReadPixels
+            PIXEL_DEPTH_BUFFER.rewind();
+
+            //retrieve depth from buffer (0.0-1.0f)
+            pixelDepth = PIXEL_DEPTH_BUFFER.get();
+        }
 
         //rewind buffer after read
         PIXEL_DEPTH_BUFFER.rewind();
@@ -832,7 +854,7 @@ public abstract class WorldSceneRenderer {
 
         drawWorld();
 
-        Vector3f hitPos = unProject(mouseX, mouseY);
+        Vector3f hitPos = this.lastHit == null ? unProject(mouseX, mouseY) : this.lastHit;
         BlockHitResult result = rayTrace(hitPos);
 
         resetCamera();

@@ -50,6 +50,15 @@ public abstract class ValueConfigurator<T> extends Configurator {
         value = newValue;
     }
 
+    public void setValue(T value) {
+        onValueUpdate(value);
+    }
+
+    @Nullable
+    public T getValue() {
+        return value;
+    }
+
     @Override
     public void updateScreen() {
         super.updateScreen();

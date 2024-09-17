@@ -173,4 +173,7 @@ public class Rect {
 		return new Rect(left, right, up + delta, down + delta);
 	}
 
+	public boolean isCollide(Rect rect) {
+		return left < rect.right && right > rect.left && up < rect.down && down > rect.up;
+	}
 }

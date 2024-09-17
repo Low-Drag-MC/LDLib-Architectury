@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.editor.configurator;
 
+import com.lowdragmc.lowdraglib.gui.editor.IConfiguratorContainer;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.ui.ConfigPanel;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
@@ -18,8 +19,14 @@ import org.jetbrains.annotations.Nullable;
  */
 public class Configurator extends WidgetGroup {
     @Getter
+    @Nullable
+    protected IConfiguratorContainer configuratorContainer;
+    @Getter
+    @Nullable
+    @Deprecated(since = "1.21")
     protected ConfigPanel configPanel;
     @Getter
+    @Deprecated(since = "1.21")
     protected ConfigPanel.Tab tab;
     protected String[] tips = new String[0];
     @Getter
@@ -46,14 +53,24 @@ public class Configurator extends WidgetGroup {
         this("");
     }
 
+    public void setConfiguratorContainer(@Nullable IConfiguratorContainer configuratorContainer) {
+        this.configuratorContainer = configuratorContainer;
+    }
+
+    @Deprecated(since = "1.21")
     public void setConfigPanel(ConfigPanel configPanel, ConfigPanel.Tab tab) {
         this.configPanel = configPanel;
         this.tab = tab;
+        setConfiguratorContainer(() -> {
+            if (configPanel != null) {
+                configPanel.computeLayout(tab);
+            }
+        });
     }
 
     public void computeLayout() {
-        if (configPanel != null) {
-            configPanel.computeLayout(tab);
+        if (configuratorContainer != null) {
+            configuratorContainer.computeLayout();
         }
     }
 

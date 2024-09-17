@@ -74,7 +74,11 @@ public interface IConfigurableWidget extends IConfigurable {
 
     @SuppressWarnings("unchecked")
     static CompoundTag serializeNBT(IConfigurableWidget widget, Resources resources, boolean isProject) {
-        UIResourceTexture.setCurrentResource((Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject);
+        return serializeNBT(widget, (Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject);
+    }
+
+    static CompoundTag serializeNBT(IConfigurableWidget widget, Resource<IGuiTexture> resources, boolean isProject) {
+        UIResourceTexture.setCurrentResource(resources, isProject);
         CompoundTag tag = widget.serializeInnerNBT();
         UIResourceTexture.clearCurrentResource();
         return tag;
@@ -82,7 +86,11 @@ public interface IConfigurableWidget extends IConfigurable {
 
     @SuppressWarnings("unchecked")
     static void deserializeNBT(IConfigurableWidget widget, CompoundTag tag, Resources resources, boolean isProject) {
-        UIResourceTexture.setCurrentResource((Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject);
+        deserializeNBT(widget, tag, (Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject);
+    }
+
+    static void deserializeNBT(IConfigurableWidget widget, CompoundTag tag, Resource<IGuiTexture> resources, boolean isProject) {
+        UIResourceTexture.setCurrentResource(resources, isProject);
         widget.deserializeInnerNBT(tag);
         UIResourceTexture.clearCurrentResource();
     }

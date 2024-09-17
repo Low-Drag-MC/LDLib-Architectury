@@ -184,6 +184,7 @@ public class TypedPayloadRegistries {
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.RECIPE_ACCESSOR, -1);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.POSITION_ACCESSOR, -1);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.VECTOR3_ACCESSOR, -1);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.AABB_ACCESSOR, -1);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.RANGE_ACCESSOR, -1);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.SIZE_ACCESSOR, -1);
         register(StringPayload.class, StringPayload::new, SyncedFieldAccessors.RESOURCE_LOCATION_ACCESSOR, -1);
@@ -191,6 +192,9 @@ public class TypedPayloadRegistries {
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.GUI_TEXTURE_ACCESSOR, 1000);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.RENDERER_ACCESSOR, 1000);
         register(StringPayload.class, StringPayload::new, SyncedFieldAccessors.COMPONENT_ACCESSOR, 1000);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.BLOCK_ACCESSOR, 1000);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.ITEM_ACCESSOR, 1000);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.FLUID_ACCESSOR, 1000);
     }
 
     public static void postInit() {

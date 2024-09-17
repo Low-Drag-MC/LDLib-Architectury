@@ -43,7 +43,7 @@ public class FloatViewWidget extends WidgetGroup implements ILDLRegister {
             addWidget(title = new WidgetGroup(0, 0, getSize().width, 15));
             title.setBackground(new GuiTextureGroup(ColorPattern.T_RED.rectTexture().setTopRadius(5f), ColorPattern.GRAY.borderTexture(-1).setTopRadius(5f)));
             title.addWidget(new ButtonWidget(2, 2, 11, 11, getIcon(), this::collapse)
-                    .setHoverTexture(getHoverIcon()));
+                    .setHoverTexture(getHoverIcon()).setDrawBackgroundWhenHover(false));
             title.addWidget(new ImageWidget(12, 2, title.getSize().width - 12, 11,
                     new TextTexture().setSupplier(() -> isCollapse ? "" : getTitle())
                             .setWidth(title.getSize().width - 12)

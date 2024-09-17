@@ -19,7 +19,7 @@ public class ReflectionUtilsImpl {
                     try {
                         consumer.accept(Class.forName(annotation.memberName(), false, ReflectionUtilsImpl.class.getClassLoader()));
                     } catch (Throwable throwable) {
-                        LDLib.LOGGER.error("Failed to load class for notation: " + annotation.memberName(), throwable);
+                        LDLib.LOGGER.warn("Failed to load class for notation: " + annotation.memberName());
                     }
                 }
             }

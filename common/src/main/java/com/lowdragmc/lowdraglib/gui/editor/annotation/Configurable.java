@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface Configurable {
     String name() default "";
+    boolean showName() default true;
     String[] tips() default {};
     boolean collapse() default true;
     boolean canCollapse() default true;

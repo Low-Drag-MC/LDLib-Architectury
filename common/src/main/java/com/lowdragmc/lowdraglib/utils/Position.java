@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib.utils;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.world.phys.Vec2;
+import org.joml.Vector2f;
 
 import java.util.Objects;
 
@@ -22,6 +24,10 @@ public class Position {
 
     public Position add(Position other) {
         return new Position(x + other.x, y + other.y);
+    }
+
+    public Position add(int x, int y) {
+        return new Position(this.x + x, this.y + y);
     }
 
     public Position subtract(Position other) {
@@ -68,5 +74,13 @@ public class Position {
                 .add("x", x)
                 .add("y", y)
                 .toString();
+    }
+
+    public Vector2f vector2f() {
+        return new Vector2f(x, y);
+    }
+
+    public Vec2 vec2() {
+        return new Vec2(x, y);
     }
 }

@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
+import org.joml.Vector4f;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -89,7 +90,10 @@ public class TreeListWidget<K, T> extends Widget {
         int y = getPosition().y;
         int width = getSize().width;
         int height = getSize().height;
-        graphics.enableScissor(x, y, x + width, y + height);
+        var trans = graphics.pose().last().pose();
+        var realPos = trans.transform(new Vector4f(x, y, 0, 1));
+        var realPos2 = trans.transform(new Vector4f(x + width, y + height, 0, 1));
+        graphics.enableScissor((int) realPos.x, (int) realPos.y, (int) realPos2.x, (int) realPos2.y);
         int minToRender = scrollOffset / lineHeight;
         int maxToRender = Math.min(list.size(), height / lineHeight + 2 + minToRender);
         for (int i = minToRender; i < maxToRender; i++) {

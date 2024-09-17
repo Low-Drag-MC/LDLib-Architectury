@@ -40,6 +40,7 @@ import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
+import org.joml.Vector4f;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -560,7 +561,10 @@ public class CompassSectionWidget extends WidgetGroup {
         this.drawBackgroundTexture(graphics, mouseX, mouseY);
         var pos = getPosition();
         var size = getSize();
-        graphics.enableScissor(pos.x, pos.y, pos.x + size.width, pos.y + size.height);
+        var trans = graphics.pose().last().pose();
+        var realPos = trans.transform(new Vector4f(pos.x, pos.y, 0, 1));
+        var realPos2 = trans.transform(new Vector4f(pos.x + size.width, pos.y + size.height, 0, 1));
+        graphics.enableScissor((int) realPos.x, (int) realPos.y, (int) realPos2.x, (int) realPos2.y);
         graphics.pose().pushPose();
         graphics.pose().translate(this.getPosition().x, this.getPosition().y, 0);
         graphics.pose().scale(scale, scale, 1);
