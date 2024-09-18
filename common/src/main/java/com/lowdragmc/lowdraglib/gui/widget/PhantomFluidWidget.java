@@ -19,13 +19,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.emi.emi.api.stack.EmiStack;
 import lombok.Getter;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -36,7 +36,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -114,18 +113,10 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                 ingredient = FluidStack.create(fluid, fluidEmiStack.getAmount() == 0L ? 1000L : fluidEmiStack.getAmount(), fluidEmiStack.getNbt());
             }
         }
-        if (LDLib.isJeiLoaded() && ingredient.getClass().getName().equals("mezz.jei.library.ingredients.TypedIngredient")) {
-            try {
-                ingredient = ingredient.getClass().getMethod("getIngredient").invoke(ingredient);
-                Class<?> clazz = ingredient.getClass();
-                Method fluidMethod =  clazz.getMethod("getFluid");
-                Method amountMethod = clazz.getMethod("getAmount");
-                Method tagMethod = clazz.getMethod("getTag");
-                ingredient = FluidStack.create((Fluid) fluidMethod.invoke(ingredient),
-                        (int) amountMethod.invoke(ingredient), (CompoundTag) tagMethod.invoke(ingredient));
-            } catch (Exception ignored) { }
+        if (LDLib.isJeiLoaded() && ingredient instanceof ITypedIngredient<?> typedIngredient) {
+            ingredient = checkJEIIngredient(typedIngredient.getIngredient());
         }
-        if (!(ingredient instanceof FluidStack) && drainFrom(ingredient) == FluidStack.empty()) {
+        if (!(ingredient instanceof FluidStack) && drainFrom(ingredient).isEmpty()) {
             return Collections.emptyList();
         }
 
