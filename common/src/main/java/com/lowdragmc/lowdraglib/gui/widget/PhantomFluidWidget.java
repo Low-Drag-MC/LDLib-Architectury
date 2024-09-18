@@ -16,6 +16,7 @@ import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.emi.emi.api.stack.EmiStack;
 import lombok.Getter;
 import net.fabricmc.api.EnvType;
@@ -154,15 +155,8 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                         ingredient = FluidStack.create(fluid, fluidEmiStack.getAmount() == 0L ? 1000L : fluidEmiStack.getAmount(), fluidEmiStack.getNbt());
                     }
                 }
-                if (LDLib.isJeiLoaded() && ingredient.getClass().getName().equals("net.minecraftforge.fluids.FluidStack")) {
-                    Class<?> clazz = ingredient.getClass();
-                    try {
-                        Method fluidMethod =  clazz.getMethod("getFluid");
-                        Method amountMethod = clazz.getMethod("getAmount");
-                        Method tagMethod = clazz.getMethod("getTag");
-                        ingredient = FluidStack.create((Fluid) fluidMethod.invoke(ingredient),
-                                (int) amountMethod.invoke(ingredient), (CompoundTag) tagMethod.invoke(ingredient));
-                    } catch (Exception ignored) { }
+                if (LDLib.isJeiLoaded()) {
+                    ingredient = checkJEIIngredient(ingredient);
                 }
                 if (ingredient instanceof FluidStack fluidStack)
                     ingredientStack = fluidStack;
@@ -180,6 +174,11 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                 }
             }
         });
+    }
+
+    @ExpectPlatform
+    public static Object checkJEIIngredient(Object ingredient) {
+        throw new AssertionError();
     }
 
     @Override
