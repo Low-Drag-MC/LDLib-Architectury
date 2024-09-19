@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Size;
+import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -20,12 +21,13 @@ import net.fabricmc.api.Environment;
  * @implNote FloatViewWidget, view are some float window widgets.
  * They are technically project-independent and can be used for any project.
  */
+@Getter
 public class FloatViewWidget extends WidgetGroup implements ILDLRegister {
     protected final Editor editor;
     protected final boolean isFixedView;
     protected WidgetGroup title, content;
-    private boolean isDragging, isCollapse;
-    private double lastDeltaX, lastDeltaY;
+    protected boolean isDragging, isCollapse;
+    protected double lastDeltaX, lastDeltaY;
 
     public FloatViewWidget(int x, int y, int width, int height, boolean isFixedView) {
         super(x, y, width, height + 15);
