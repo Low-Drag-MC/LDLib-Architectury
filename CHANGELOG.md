@@ -1,5 +1,6 @@
 # ChangeLog
 
-* editor improvements
-* node graph processor
-* Fix MultiblockInfo can't be added to ME Pattern Encoding Terminal.
+* Fix JEI, support recipe focus for all widgets, including cycle items. 
+* Fix JEI, support both jei internal tooltips and ldlib widget tooltips.
+* Fix item and fluid drop into PhantomWidget issues with JEI and emi
+* Add UIResourceRenderer for editor refs.
