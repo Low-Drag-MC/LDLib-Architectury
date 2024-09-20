@@ -6,7 +6,6 @@ import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.function.Consumer;
 
 public interface IRecipeIngredientSlot extends IIngredientSlot {
 
@@ -37,15 +36,10 @@ public interface IRecipeIngredientSlot extends IIngredientSlot {
     }
 
     /**
-     * support {@link mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback}
+     * Append additional tooltips excluding the ingredient's tooltip.
      */
-    default void addTooltipCallback(Consumer<List<Component>> callback) {
-
+    default List<Component> getAdditionalToolTips(List<Component> toolTips) {
+        return toolTips;
     }
-
-    default void clearTooltipCallback() {
-
-    }
-
 
 }
