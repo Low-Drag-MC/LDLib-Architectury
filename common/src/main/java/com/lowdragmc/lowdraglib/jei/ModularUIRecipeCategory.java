@@ -7,7 +7,7 @@ import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
-import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -15,13 +15,14 @@ import mezz.jei.api.runtime.IClickableIngredient;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.TooltipFlag;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author KilaBash
@@ -33,16 +34,23 @@ import java.util.Map;
 public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> implements IRecipeCategory<T> {
 
     private static void addJEISlot(IRecipeLayoutBuilder builder, IRecipeIngredientSlot slot, RecipeIngredientRole role, int index) {
-        Map<IIngredientType, List> map = new HashMap<>();
-        slot.getXEIIngredients().stream()
-                .filter(IClickableIngredient.class::isInstance)
-                .map(IClickableIngredient.class::cast)
-                .forEach(clickableIngredient -> map.computeIfAbsent(clickableIngredient.getTypedIngredient().getType(),
-                        a -> new ArrayList<>()).add(clickableIngredient.getTypedIngredient().getIngredient()));
+        var slotName = "slot_" + index;
         IRecipeSlotBuilder slotBuilder = builder.addSlotToWidget(role, (extrasBuilder, recipe, slots) -> {
-            extrasBuilder.addWidget(new SlotRecipeWidget(slot, slot.self().getPositionX(), slot.self().getPositionY()));
+            var jeiSlot = slots.stream().filter(s-> s.getSlotName().map(name -> name.equals(slotName)).orElse(false)).findFirst();
+            jeiSlot.ifPresent(drawable -> extrasBuilder.addWidget(new SlotRecipeWidget(slot, drawable)));
         });
-        map.forEach(slotBuilder::addIngredients);
+        // append ingredients
+        for (Object ingredient : slot.getXEIIngredients()) {
+            if (ingredient instanceof IClickableIngredient clickableIngredient) {
+                var type = clickableIngredient.getIngredientType();
+                var ingredients= clickableIngredient.getIngredient();
+                slotBuilder.addIngredient(type, ingredients);
+            }
+        }
+        // set slot name
+        slotBuilder.setSlotName(slotName);
+        // append widget tooltips
+        slotBuilder.addRichTooltipCallback((recipeSlotView, tooltipBuilder) -> tooltipBuilder.addAll(slot.getAdditionalToolTips(new ArrayList<>())));
     }
 
     @Override
