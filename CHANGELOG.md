@@ -1,3 +1,4 @@
 # ChangeLog
 
-* Fix JEI compatibility with 15.17+
+* fix model selection in editor
+* fix widget size can be smaller than 0
