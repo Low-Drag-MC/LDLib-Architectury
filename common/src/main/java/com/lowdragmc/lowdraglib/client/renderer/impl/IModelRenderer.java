@@ -278,6 +278,6 @@ public class IModelRenderer implements ISerializableRenderer {
 
     private static ResourceLocation getModelFromFile(File path, File r){
         var id = path.getPath().replace('\\', '/').split("assets/")[1].split("/")[0];
-        return new ResourceLocation(id, r.getPath().replace(path.getPath(), "").replace(".json", "").replace('\\', '/'));
+        return new ResourceLocation(id, r.getPath().replace(path.getPath(), "").replace(".json", "").replace('\\', '/').substring(1));
     }
 }
