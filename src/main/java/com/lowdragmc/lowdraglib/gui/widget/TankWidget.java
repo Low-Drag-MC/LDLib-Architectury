@@ -213,7 +213,7 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         }
 
         if (LDLib.isJeiLoaded()) {
-            return List.of(JEICallWrapper.getPlatformFluidTypeForJEIClickable(FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount()), getPosition(), getSize()));
+            return List.of(JEICallWrapper.getPlatformFluidTypeForJEIClickable(new FluidStack(lastFluidInTank.getFluid(), lastFluidInTank.getAmount()), getPosition(), getSize()));
         }
         if (LDLib.isReiLoaded()) {
             return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getComponentsPatch())));

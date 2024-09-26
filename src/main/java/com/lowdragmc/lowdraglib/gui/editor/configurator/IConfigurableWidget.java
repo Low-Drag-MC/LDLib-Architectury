@@ -92,7 +92,7 @@ public interface IConfigurableWidget extends IConfigurable {
 
     static void deserializeNBT(IConfigurableWidget widget, CompoundTag tag, Resource<IGuiTexture> resources, boolean isProject, HolderLookup.Provider provider) {
         UIResourceTexture.setCurrentResource(resources, isProject);
-        widget.deserializeInnerNBT(tag, provider);
+        widget.deserializeInnerNBT(provider, tag);
         UIResourceTexture.clearCurrentResource();
     }
 

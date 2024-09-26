@@ -36,11 +36,11 @@ public class UIProject implements IProject {
     }
 
     public UIProject(CompoundTag tag) {
-        deserializeNBT(tag, Platform.getFrozenRegistry());
+        deserializeNBT(Platform.getFrozenRegistry(), tag);
     }
 
     public UIProject(CompoundTag tag, HolderLookup.Provider provider) {
-        deserializeNBT(tag, provider);
+        deserializeNBT(provider, tag);
     }
 
     public UIProject newEmptyProject() {
@@ -57,7 +57,7 @@ public class UIProject implements IProject {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag tag, HolderLookup.Provider provider) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         this.resources = loadResources(tag.getCompound("resources"));
         this.root = new WidgetGroup();
         IConfigurableWidget.deserializeNBT(this.root, tag.getCompound("root"), resources, true, provider);

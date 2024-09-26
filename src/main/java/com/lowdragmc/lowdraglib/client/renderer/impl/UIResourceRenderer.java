@@ -5,12 +5,12 @@ import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
 import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import lombok.Setter;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +21,10 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.common.util.TriState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,31 +66,31 @@ public class UIResourceRenderer implements IRenderer {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void renderItem(ItemStack stack, ItemDisplayContext transformType, boolean leftHand, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, BakedModel model) {
         getRenderer().renderItem(stack, transformType, leftHand, poseStack, buffer, combinedLight, combinedOverlay, model);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public List<BakedQuad> renderModel(@Nullable BlockAndTintGetter level, @Nullable BlockPos pos, @Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
         return getRenderer().renderModel(level, pos, state, side, rand);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void onPrepareTextureAtlas(ResourceLocation atlasName, Consumer<ResourceLocation> register) {
         getRenderer().onPrepareTextureAtlas(atlasName, register);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void onAdditionalModel(Consumer<ResourceLocation> registry) {
+    @OnlyIn(Dist.CLIENT)
+    public void onAdditionalModel(Consumer<ModelResourceLocation> registry) {
         getRenderer().onAdditionalModel(registry);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void registerEvent() {
         getRenderer().registerEvent();
     }
@@ -97,74 +101,74 @@ public class UIResourceRenderer implements IRenderer {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean hasTESR(BlockEntity blockEntity) {
         return getRenderer().hasTESR(blockEntity);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean isGlobalRenderer(BlockEntity blockEntity) {
         return getRenderer().isGlobalRenderer(blockEntity);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public int getViewDistance() {
         return getRenderer().getViewDistance();
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean shouldRender(BlockEntity blockEntity, Vec3 cameraPos) {
         return getRenderer().shouldRender(blockEntity, cameraPos);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void render(BlockEntity blockEntity, float partialTicks, PoseStack stack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         getRenderer().render(blockEntity, partialTicks, stack, buffer, combinedLight, combinedOverlay);
     }
 
     @NotNull
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public TextureAtlasSprite getParticleTexture() {
         return getRenderer().getParticleTexture();
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public boolean useAO() {
+    @OnlyIn(Dist.CLIENT)
+    public TriState useAO() {
         return getRenderer().useAO();
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public boolean useAO(BlockState state) {
-        return getRenderer().useAO(state);
+    @OnlyIn(Dist.CLIENT)
+    public TriState useAO(BlockState state, ModelData data, RenderType renderType) {
+        return getRenderer().useAO(state, data, renderType);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean useBlockLight(ItemStack stack) {
         return getRenderer().useBlockLight(stack);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean reBakeCustomQuads() {
         return getRenderer().reBakeCustomQuads();
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public float reBakeCustomQuadsOffset() {
         return getRenderer().reBakeCustomQuadsOffset();
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean isGui3d() {
         return getRenderer().isGui3d();
     }

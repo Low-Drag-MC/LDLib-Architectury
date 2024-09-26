@@ -1,16 +1,16 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * @author KilaBash
  * @date 2024/06/26
  * @implNote A scene object that can be rendered in the scene editor.
  */
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface ISceneRendering extends ISceneObject {
     /**
      * Called before draw the object in the scene.
@@ -31,7 +31,7 @@ public interface ISceneRendering extends ISceneObject {
      */
     default void draw(PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks){
         poseStack.pushPose();
-        poseStack.mulPoseMatrix(transform().worldToLocalMatrix());
+        poseStack.mulPose(transform().worldToLocalMatrix());
         drawInternal(poseStack, bufferSource, partialTicks);
         poseStack.popPose();
     }

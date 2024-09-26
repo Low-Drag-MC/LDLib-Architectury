@@ -3,7 +3,6 @@ package com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.data;
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject.ISceneObject;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;

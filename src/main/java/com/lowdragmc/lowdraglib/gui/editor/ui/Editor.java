@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.gui.editor.ui;
 
 import com.google.common.util.concurrent.Runnables;
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
@@ -188,7 +189,7 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
             if (currentProjectFile == null) {
                 saveAsProject(result);
             } else {
-                currentProject.saveProject(currentProjectFile);
+                currentProject.saveProject(currentProjectFile.toPath());
                 DialogWidget.showNotification(this, "ldlib.gui.editor.menu.save", "ldlib.gui.compass.save_success");
                 result.accept(true);
             }
@@ -206,7 +207,7 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
                             if (!file.getName().endsWith(suffix)) {
                                 file = new File(file.getParentFile(), file.getName() + suffix);
                             }
-                            currentProject.saveProject(file);
+                            currentProject.saveProject(file.toPath());
                             currentProjectFile = file;
                             result.accept(true);
                         } else {
@@ -220,8 +221,8 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
         if (currentProject == null) return true;
         if (currentProjectFile == null) return false;
         try {
-            var tag = NbtIo.read(currentProjectFile);
-            return tag != null && tag.equals(currentProject.serializeNBT());
+            var tag = NbtIo.read(currentProjectFile.toPath());
+            return tag != null && tag.equals(currentProject.serializeNBT(Platform.getFrozenRegistry()));
         } catch (IOException ignored) {}
         return false;
     }

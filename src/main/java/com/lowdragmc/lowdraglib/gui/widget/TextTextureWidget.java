@@ -7,11 +7,13 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Getter;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
@@ -77,22 +79,22 @@ public class TextTextureWidget extends Widget implements IConfigurableWidget {
     }
 
     @Override
-    public void writeInitialData(FriendlyByteBuf buffer) {
+    public void writeInitialData(RegistryFriendlyByteBuf buffer) {
         super.writeInitialData(buffer);
         if (!isClientSideWidget) {
             buffer.writeBoolean(true);
             this.lastComponent = textSupplier.get();
-            buffer.writeComponent(lastComponent);
+            ComponentSerialization.STREAM_CODEC.encode(buffer, lastComponent);
         } else {
             buffer.writeBoolean(false);
         }
     }
 
     @Override
-    public void readInitialData(FriendlyByteBuf buffer) {
+    public void readInitialData(RegistryFriendlyByteBuf buffer) {
         super.readInitialData(buffer);
         if (buffer.readBoolean()) {
-            this.lastComponent = buffer.readComponent();
+            this.lastComponent = ComponentSerialization.STREAM_CODEC.decode(buffer);
         }
     }
 
@@ -103,21 +105,21 @@ public class TextTextureWidget extends Widget implements IConfigurableWidget {
             var latest = textSupplier.get();
             if (!latest.equals(lastComponent)) {
                 this.lastComponent = latest;
-                writeUpdateInfo(-1, buffer -> buffer.writeComponent(this.lastComponent));
+                writeUpdateInfo(-1, buffer -> ComponentSerialization.STREAM_CODEC.encode(buffer, this.lastComponent));
             }
         }
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
+    @OnlyIn(Dist.CLIENT)
+    public void readUpdateInfo(int id, RegistryFriendlyByteBuf buffer) {
         if (id == -1) {
-            this.lastComponent = buffer.readComponent();
+            this.lastComponent = ComponentSerialization.STREAM_CODEC.decode(buffer);
         }
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void updateScreen() {
         super.updateScreen();
         if (isClientSideWidget) {
@@ -128,7 +130,7 @@ public class TextTextureWidget extends Widget implements IConfigurableWidget {
         }
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         var position = getPosition();

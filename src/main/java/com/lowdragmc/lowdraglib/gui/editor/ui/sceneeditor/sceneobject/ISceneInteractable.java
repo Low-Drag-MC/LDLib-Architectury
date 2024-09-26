@@ -1,13 +1,13 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject;
 
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.data.Ray;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
  * @implNote A scene object that can be interacted in the scene editor.
 
  */
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface ISceneInteractable extends ISceneObject {
 
     /**

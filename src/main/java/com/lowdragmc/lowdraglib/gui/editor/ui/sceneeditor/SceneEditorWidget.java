@@ -9,13 +9,13 @@ import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
@@ -53,19 +53,19 @@ public class SceneEditorWidget extends SceneWidget {
         this(x, y, width, height, world, false);
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public Optional<Ray> getMouseRay() {
         var lastHit = renderer.getLastHit();
         return lastHit == null ? Optional.empty() : Optional.of(Ray.create(renderer.getEyePos(), lastHit));
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public Ray unProject(int mouseX, int mouseY) {
         var mouse = renderer.getPositionedRect(mouseX, mouseY, 0, 0);
         return new Ray(renderer.getEyePos(), renderer.unProject(mouse.position.x, mouse.position.y, false));
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public Vector2f project(Vector3f pos) {
         var window = Minecraft.getInstance().getWindow();
         var result = renderer.project(pos);
@@ -98,7 +98,7 @@ public class SceneEditorWidget extends SceneWidget {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void updateScreen() {
         super.updateScreen();
         if (tipsDuration > 0) {
@@ -113,7 +113,7 @@ public class SceneEditorWidget extends SceneWidget {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (intractable && isMouseOverElement(mouseX, mouseY)) {
             if (button == 0) {
@@ -145,7 +145,7 @@ public class SceneEditorWidget extends SceneWidget {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (intractable) {
             if (isCameraMoving) {
@@ -181,7 +181,7 @@ public class SceneEditorWidget extends SceneWidget {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         isCameraMoving = false;
         if (intractable) {
@@ -203,10 +203,10 @@ public class SceneEditorWidget extends SceneWidget {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public boolean mouseWheelMove(double mouseX, double mouseY, double wheelDelta) {
+    @OnlyIn(Dist.CLIENT)
+    public boolean mouseWheelMove(double mouseX, double mouseY, double wheelX, double wheelY) {
         if (isCameraMoving) {
-            if (wheelDelta > 0) {
+            if (wheelY > 0) {
                 moveSpeed = Mth.clamp(moveSpeed + 0.01f, 0.02f, 10);
             } else {
                 moveSpeed = Mth.clamp(moveSpeed - 0.01f, 0.02f, 10);
@@ -214,11 +214,11 @@ public class SceneEditorWidget extends SceneWidget {
             setScreenTips("Move Speed: x%.2f".formatted(moveSpeed));
             return true;
         }
-        return super.mouseWheelMove(mouseX, mouseY, wheelDelta);
+        return super.mouseWheelMove(mouseX, mouseY, wheelX, wheelY);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     protected void renderBeforeBatchEnd(MultiBufferSource bufferSource, float partialTicks) {
         super.renderBlockOverLay(renderer);
         var poseStack = new PoseStack();
@@ -241,7 +241,7 @@ public class SceneEditorWidget extends SceneWidget {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void drawInBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         lastMouseX = mouseX;
         lastMouseY = mouseY;
@@ -291,20 +291,20 @@ public class SceneEditorWidget extends SceneWidget {
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         super.keyPressed(keyCode, scanCode, modifiers);
         return keyCode != GLFW.GLFW_KEY_ESCAPE;
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void drawInForeground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
         var x = getPositionX();

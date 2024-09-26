@@ -8,6 +8,8 @@ import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -22,29 +24,29 @@ import java.util.List;
 @OnlyIn(Dist.CLIENT)
 public class ClientCommands {
 
-    public static LiteralArgumentBuilder createLiteral(String command) {
+    public static LiteralArgumentBuilder<CommandSourceStack> createLiteral(String command) {
         return Commands.literal(command);
     }
 
-    public static <S> List<LiteralArgumentBuilder<S>> createClientCommands() {
+    public static List<LiteralArgumentBuilder<CommandSourceStack>> createClientCommands() {
         return List.of(
-                (LiteralArgumentBuilder<S>) createLiteral("ldlib_client").then(createLiteral("reload_shader")
+                createLiteral("ldlib_client").then(createLiteral("reload_shader")
                         .executes(context -> {
                             Shaders.reload();
                             ShaderManager.getInstance().reload();
                             return 1;
                         })),
-                (LiteralArgumentBuilder<S>) createLiteral("compass").then(createLiteral("dev_mode")
+                createLiteral("compass").then(createLiteral("dev_mode")
                         .then(Commands.argument("mode", BoolArgumentType.bool())
                                 .executes(context -> {
                                     CompassManager.INSTANCE.devMode = BoolArgumentType.getBool(context, "mode");
                                     return 1;
                                 }))),
-                (LiteralArgumentBuilder<S>) createTestCommands()
+                createTestCommands()
         );
     }
 
-    private static LiteralArgumentBuilder createTestCommands() {
+    private static LiteralArgumentBuilder<CommandSourceStack> createTestCommands() {
         var builder = Commands.literal("ldlib_test");
         for (var uiTest : AnnotationDetector.REGISTER_UI_TESTS) {
             builder = builder.then(createLiteral(uiTest.annotation().name())

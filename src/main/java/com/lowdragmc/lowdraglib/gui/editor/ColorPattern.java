@@ -66,13 +66,13 @@ public enum ColorPattern {
 
     public static int generateRainbowColor(long tick) {
         float hue = (tick % 70) / 70f;
-        int rgb = ColorUtils.HSBtoRGB(hue, 1.0f, 1.0f);
+        int rgb = ColorUtils.HSBtoRGB(hue, 1.0f, 1.0f, 1.0f);
         return (0xff << 24) | (rgb & 0x00FFFFFF);
     }
 
     public static int generateRainbowColor() {
         float hue = (System.currentTimeMillis() % 3600) / 3600f;
-        int rgb = ColorUtils.HSBtoRGB(hue, 1.0f, 1.0f);
+        int rgb = ColorUtils.HSBtoRGB(hue, 1.0f, 1.0f, 1.0f);
         return (0xff << 24) | (rgb & 0x00FFFFFF);
     }
 

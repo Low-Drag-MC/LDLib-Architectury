@@ -38,8 +38,8 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
         // append ingredients
         for (Object ingredient : slot.getXEIIngredients()) {
             if (ingredient instanceof IClickableIngredient clickableIngredient) {
-                var type = clickableIngredient.getIngredientType();
-                var ingredients= clickableIngredient.getIngredient();
+                var type = clickableIngredient.getTypedIngredient().getType();
+                var ingredients = clickableIngredient.getTypedIngredient().getIngredient();
                 slotBuilder.addIngredient(type, ingredients);
             }
         }

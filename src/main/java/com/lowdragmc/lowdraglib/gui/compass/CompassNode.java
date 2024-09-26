@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.gui.compass;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.json.SimpleIGuiTextureJsonUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
@@ -130,12 +131,12 @@ public class CompassNode {
             JsonArray items = GsonHelper.getAsJsonArray(config, "items", new JsonArray());
             for (JsonElement element : items) {
                 var data = element.getAsString();
-                if (ResourceLocation.isValidPath(data)) {
+                if (LDLib.isValidResourceLocation(data)) {
                     Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(data));
                     if (item != Items.AIR) {
                         this.items.add(item);
                     }
-                } else if (data.startsWith("#") && ResourceLocation.isValidPath(data.substring(1))) {
+                } else if (data.startsWith("#") && LDLib.isValidResourceLocation(data.substring(1))) {
                     var tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(data.substring(1)));
                     var tagCollection = BuiltInRegistries.ITEM.getTag(tag);
                     tagCollection.ifPresent(named -> named.forEach(holder -> this.items.add(holder.value())));

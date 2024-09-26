@@ -3,17 +3,18 @@ package com.lowdragmc.lowdraglib.syncdata.accessor;
 import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.payload.ITypedPayload;
 import com.lowdragmc.lowdraglib.syncdata.payload.NbtTagPayload;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
 
-public class AABBAccessor extends CustomObjectAccessor<AABB>{
+public class AABBAccessor extends CustomObjectAccessor<AABB> {
 
     public AABBAccessor() {
         super(AABB.class, true);
     }
 
     @Override
-    public ITypedPayload<?> serialize(AccessorOp op, AABB value) {
+    public ITypedPayload<?> serialize(AccessorOp op, AABB value, HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.putDouble("minX", value.minX);
         tag.putDouble("minY", value.minY);
@@ -25,7 +26,7 @@ public class AABBAccessor extends CustomObjectAccessor<AABB>{
     }
 
     @Override
-    public AABB deserialize(AccessorOp op, ITypedPayload<?> payload) {
+    public AABB deserialize(AccessorOp op, ITypedPayload<?> payload, HolderLookup.Provider provider) {
         if (payload instanceof NbtTagPayload nbtTagPayload && nbtTagPayload.getPayload() instanceof CompoundTag tag) {
             return new AABB(
                     tag.getDouble("minX"),

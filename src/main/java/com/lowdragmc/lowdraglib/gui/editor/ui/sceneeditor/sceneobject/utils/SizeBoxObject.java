@@ -33,7 +33,7 @@ public class SizeBoxObject extends SceneObject implements ISceneRendering, IScen
     @Override
     public void draw(PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks) {
         poseStack.pushPose();
-        poseStack.mulPoseMatrix(new Matrix4f().translate(transform().position()).rotate(transform().rotation()));
+        poseStack.mulPose(new Matrix4f().translate(transform().position()).rotate(transform().rotation()));
         drawInternal(poseStack, bufferSource, partialTicks);
         poseStack.popPose();
     }

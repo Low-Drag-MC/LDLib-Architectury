@@ -68,6 +68,17 @@ public class LDLib {
         return location;
     }
 
+    public static boolean isValidResourceLocation(String string) {
+        for (int i = 0; i < string.length(); i++) {
+            if (!ResourceLocation.isAllowedInResourceLocation(string.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+
+    }
+
     public static ResourceLocation location(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }

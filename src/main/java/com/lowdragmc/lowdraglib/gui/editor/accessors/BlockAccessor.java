@@ -26,7 +26,7 @@ public class BlockAccessor extends TypesAccessor<Block> {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
             if (annotation.stringValue().length > 0) {
-                return BuiltInRegistries.BLOCK.get(new ResourceLocation(annotation.stringValue()[0]));
+                return BuiltInRegistries.BLOCK.get(ResourceLocation.parse(annotation.stringValue()[0]));
             }
         }
         return Blocks.AIR;

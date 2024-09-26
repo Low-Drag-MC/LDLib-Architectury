@@ -165,7 +165,7 @@ public final class CompassManager implements ResourceManagerReloadListener {
     }
 
     public static void onComponentClick(String link, ClickData cd) {
-        if (ResourceLocation.isValidPath(link)) {
+        if (LDLib.isValidResourceLocation(link)) {
             CompassManager.INSTANCE.openCompass(ResourceLocation.parse(link));
         }
     }

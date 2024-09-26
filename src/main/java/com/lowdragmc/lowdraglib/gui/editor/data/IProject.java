@@ -1,23 +1,25 @@
 package com.lowdragmc.lowdraglib.gui.editor.data;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
-import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * @author KilaBash
  * @date 2022/12/9
  * @implNote IProject
  */
-public interface IProject extends ILDLRegister, ITagSerializable<CompoundTag> {
+public interface IProject extends ILDLRegister, INBTSerializable<CompoundTag> {
 
     Resources getResources();
 
@@ -30,11 +32,11 @@ public interface IProject extends ILDLRegister, ITagSerializable<CompoundTag> {
      * Load project from file. return null if loading failed
      */
     @Nullable
-    default IProject loadProject(File file) {
+    default IProject loadProject(Path file) {
         try {
             var tag = NbtIo.read(file);
             if (tag != null) {
-                deserializeNBT(tag);
+                deserializeNBT(Platform.getFrozenRegistry(), tag);
             }
         } catch (IOException ignored) {}
         return this;

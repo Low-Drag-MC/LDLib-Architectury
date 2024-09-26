@@ -5,12 +5,14 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
-import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 import java.lang.reflect.Field;
 import java.util.function.Consumer;
@@ -27,7 +29,7 @@ public class BlockStateAccessor extends TypesAccessor<BlockState> {
     public BlockState defaultValue(Field field, Class<?> type) {
         if (field.isAnnotationPresent(DefaultValue.class)) {
             var annotation = field.getAnnotation(DefaultValue.class);
-            return BuiltInRegistries.BLOCK.get(new ResourceLocation(annotation.stringValue()[0])).defaultBlockState();
+            return BuiltInRegistries.BLOCK.get(ResourceLocation.parse(annotation.stringValue()[0])).defaultBlockState();
         }
         return Blocks.AIR.defaultBlockState();
     }
@@ -42,7 +44,7 @@ public class BlockStateAccessor extends TypesAccessor<BlockState> {
             group.setTips(configurable.tips());
         }
         var propertyGroup = new ConfiguratorGroup("ldlib.gui.editor.blockstate.properties");
-        var itemHandler = new ItemStackTransfer(supplier.get().getBlock().asItem().getDefaultInstance());
+        var itemHandler = new ItemStackHandler(NonNullList.of(ItemStack.EMPTY, supplier.get().getBlock().asItem().getDefaultInstance()));
         var slot = new SlotWidget(itemHandler, 0, 0, 0, false, false);
         slot.setClientSideWidget();
         Runnable updateProperty = () -> {

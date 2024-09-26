@@ -13,7 +13,6 @@ import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.emi.emi.api.stack.EmiStack;
 import lombok.Getter;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -21,7 +20,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.world.item.Item;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.renderer.Rect2i;
@@ -106,15 +107,15 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
             if (fluid == null) {
                 Item item = fluidEmiStack.getKeyOfType(Item.class);
                 ingredient = item == null ? null : new ItemStack(item, (int) fluidEmiStack.getAmount());
-                if (ingredient instanceof ItemStack itemStack) {
-                    itemStack.setTag(fluidEmiStack.getNbt());
+                if (ingredient instanceof ItemStack itemStack && !itemStack.isEmpty()) {
+                    ((PatchedDataComponentMap) itemStack.getComponents()).applyPatch(fluidEmiStack.getComponentChanges());
                 }
             } else {
-                ingredient = new FluidStack(fluid, fluidEmiStack.getAmount() == 0L ? 1000 : (int) fluidEmiStack.getAmount(), fluidEmiStack.getNbt());
+                ingredient = new FluidStack(fluid.builtInRegistryHolder(), fluidEmiStack.getAmount() == 0L ? 1000 : (int) fluidEmiStack.getAmount(), fluidEmiStack.getComponentChanges());
             }
         }
         if (LDLib.isJeiLoaded() && ingredient instanceof ITypedIngredient<?> typedIngredient) {
-            ingredient = checkJEIIngredient(typedIngredient.getIngredient());
+            ingredient = typedIngredient.getIngredient();
         }
         if (!(ingredient instanceof FluidStack) && drainFrom(ingredient).isEmpty()) {
             return Collections.emptyList();
@@ -139,15 +140,12 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                     if (fluid == null) {
                         Item item = fluidEmiStack.getKeyOfType(Item.class);
                         ingredient = item == null ? null : new ItemStack(item, (int) fluidEmiStack.getAmount());
-                        if (ingredient instanceof ItemStack itemStack) {
-                            itemStack.setTag(fluidEmiStack.getNbt());
+                        if (ingredient instanceof ItemStack itemStack && !itemStack.isEmpty()) {
+                            ((PatchedDataComponentMap) itemStack.getComponents()).applyPatch(fluidEmiStack.getComponentChanges());
                         }
                     } else {
-                        ingredient = new FluidStack(fluid, fluidEmiStack.getAmount() == 0L ? 1000 : (int) fluidEmiStack.getAmount(), fluidEmiStack.getNbt());
+                        ingredient = new FluidStack(fluid.builtInRegistryHolder(), fluidEmiStack.getAmount() == 0L ? 1000 : (int) fluidEmiStack.getAmount(), fluidEmiStack.getComponentChanges());
                     }
-                }
-                if (LDLib.isJeiLoaded()) {
-                    ingredient = checkJEIIngredient(ingredient);
                 }
                 if (ingredient instanceof FluidStack fluidStack)
                     ingredientStack = fluidStack;
@@ -165,11 +163,6 @@ public class PhantomFluidWidget extends TankWidget implements IGhostIngredientTa
                 }
             }
         });
-    }
-
-    @ExpectPlatform
-    public static Object checkJEIIngredient(Object ingredient) {
-        throw new AssertionError();
     }
 
     @Override

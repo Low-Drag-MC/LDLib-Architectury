@@ -2,8 +2,8 @@ package com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject;
 
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.SceneEditorWidget;
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.data.Transform;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  * @date 2024/06/26
  * @implNote A scene object that can be placed in the scene editor.
  */
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface ISceneObject {
     /**
      * Get the scene.

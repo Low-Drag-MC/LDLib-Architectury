@@ -16,6 +16,7 @@ import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
 import com.lowdragmc.lowdraglib.gui.widget.HsbColorWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import lombok.Setter;
+import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 

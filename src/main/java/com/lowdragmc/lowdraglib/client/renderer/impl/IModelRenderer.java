@@ -65,7 +65,7 @@ public class IModelRenderer implements ISerializableRenderer {
     @Deprecated(forRemoval = true, since = "1.21")
     protected Map<Direction, BakedModel> blockModels;
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     protected Map<ModelState, BakedModel> modelCaches;
 
     protected IModelRenderer() {
@@ -76,6 +76,7 @@ public class IModelRenderer implements ISerializableRenderer {
         this.modelLocation = modelLocation;
         if (LDLib.isClient()) {
             blockModels = new ConcurrentHashMap<>();
+            modelCaches = new ConcurrentHashMap<>();
             registerEvent();
         }
     }
@@ -177,10 +178,9 @@ public class IModelRenderer implements ISerializableRenderer {
             var modelState = provider.getModelState(level, pos, state);
             if (modelState != null) {
                 return modelCaches.computeIfAbsent(modelState, facing -> getModel().bake(
-                        ModelFactory.getModeBaker(),
+                        ModelFactory.getModelBaker(),
                         this::materialMapping,
-                        modelState,
-                        modelLocation));
+                        modelState));
             }
         }
         return getBlockBakedModel(pos, level);
