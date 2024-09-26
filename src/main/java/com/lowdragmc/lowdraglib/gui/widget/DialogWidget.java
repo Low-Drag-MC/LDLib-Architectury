@@ -179,16 +179,17 @@ public class DialogWidget extends WidgetGroup {
         };
     }
 
-    public static WidgetGroup createContainer(DialogWidget dialog, int width, int height, String titleText) {
+    public static WidgetGroup createContainer(DialogWidget dialog, int x, int y, int width, int height, String titleText) {
         WidgetGroup title, content;
-        var size = dialog.getSize();
-        int x = (size.width - width) / 2;
-        int y = (size.height - height) / 2;
         dialog.addWidget(title = new WidgetGroup(x, y, width, 15));
         title.setBackground(new GuiTextureGroup(ColorPattern.RED.rectTexture().setTopRadius(5f), ColorPattern.GRAY.borderTexture(-1).setTopRadius(5f), new TextTexture(titleText).setWidth(width).setDropShadow(false).setType(TextTexture.TextType.ROLL)));
         dialog.addWidget(content = new WidgetGroup(x, y + 15, width, height - 15));
         content.setBackground(new GuiTextureGroup(ColorPattern.BLACK.rectTexture().setBottomRadius(5f), ColorPattern.GRAY.borderTexture(-1).setBottomRadius(5f)));
         return content;
+    }
+
+    public static WidgetGroup createContainer(DialogWidget dialog, int width, int height, String titleText) {
+        return createContainer(dialog, (dialog.getSize().width - width) / 2, (dialog.getSize().height - height) / 2, width, height, titleText);
     }
 
     public static TextFieldWidget createTextField(WidgetGroup parent, int x, int y, int width, int height) {

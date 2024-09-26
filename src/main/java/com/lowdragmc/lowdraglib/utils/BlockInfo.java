@@ -1,5 +1,9 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
+import com.lowdragmc.lowdraglib.syncdata.IPersistedSerializable;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -21,18 +25,25 @@ import java.util.function.Consumer;
  * Date: 2022/04/26
  * Description:
  */
-public class BlockInfo {
+@NoArgsConstructor
+public class BlockInfo implements IPersistedSerializable, IConfigurable {
     public static final BlockInfo EMPTY = new BlockInfo(Blocks.AIR);
 
     @Setter
+    @Configurable
     private BlockState blockState;
     @Setter
+    private boolean hasBlockEntity;
+    @Setter
+    @Configurable
     private CompoundTag tag;
     @Setter
-    private boolean hasBlockEntity;
-    private final ItemStack itemStack;
+    @Configurable
+    private ItemStack itemStack;
+    @Setter
+    private Consumer<BlockEntity> postCreate;
+    // runtime
     private BlockEntity lastEntity;
-    private final Consumer<BlockEntity> postCreate;
 
     public BlockInfo(Block block) {
         this(block.defaultBlockState());
@@ -46,7 +57,7 @@ public class BlockInfo {
         this(blockState, hasBlockEntity, null, null);
     }
     public BlockInfo(BlockState blockState, Consumer<BlockEntity> postCreate) {
-        this(blockState, true, null, null);
+        this(blockState, true, null, postCreate);
     }
 
     public BlockInfo(BlockState blockState, boolean hasBlockEntity, ItemStack itemStack, Consumer<BlockEntity> postCreate) {

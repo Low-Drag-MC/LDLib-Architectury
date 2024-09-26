@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Size;
+import lombok.Getter;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -20,12 +21,13 @@ import net.neoforged.api.distmarker.OnlyIn;
  * @implNote FloatViewWidget, view are some float window widgets.
  * They are technically project-independent and can be used for any project.
  */
+@Getter
 public class FloatViewWidget extends WidgetGroup implements ILDLRegister {
     protected final Editor editor;
     protected final boolean isFixedView;
     protected WidgetGroup title, content;
-    private boolean isDragging, isCollapse;
-    private double lastDeltaX, lastDeltaY;
+    protected boolean isDragging, isCollapse;
+    protected double lastDeltaX, lastDeltaY;
 
     public FloatViewWidget(int x, int y, int width, int height, boolean isFixedView) {
         super(x, y, width, height + 15);
@@ -43,7 +45,7 @@ public class FloatViewWidget extends WidgetGroup implements ILDLRegister {
             addWidget(title = new WidgetGroup(0, 0, getSize().width, 15));
             title.setBackground(new GuiTextureGroup(ColorPattern.T_RED.rectTexture().setTopRadius(5f), ColorPattern.GRAY.borderTexture(-1).setTopRadius(5f)));
             title.addWidget(new ButtonWidget(2, 2, 11, 11, getIcon(), this::collapse)
-                    .setHoverTexture(getHoverIcon()));
+                    .setHoverTexture(getHoverIcon()).setDrawBackgroundWhenHover(false));
             title.addWidget(new ImageWidget(12, 2, title.getSize().width - 12, 11,
                     new TextTexture().setSupplier(() -> isCollapse ? "" : getTitle())
                             .setWidth(title.getSize().width - 12)

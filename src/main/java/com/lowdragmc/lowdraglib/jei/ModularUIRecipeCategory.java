@@ -1,9 +1,7 @@
 package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
-import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
-import com.lowdragmc.lowdraglib.utils.Position;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -12,12 +10,14 @@ import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.runtime.IClickableIngredient;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,44 +29,39 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> implements IRecipeCategory<T> {
 
+    private static void addJEISlot(IRecipeLayoutBuilder builder, IRecipeIngredientSlot slot, RecipeIngredientRole role, int index) {
+        var slotName = "slot_" + index;
+        IRecipeSlotBuilder slotBuilder = builder.addSlotToWidget(role, (extrasBuilder, recipe, slots) -> {
+            var jeiSlot = slots.stream().filter(s-> s.getSlotName().map(name -> name.equals(slotName)).orElse(false)).findFirst();
+            jeiSlot.ifPresent(drawable -> extrasBuilder.addWidget(new SlotRecipeWidget(slot, drawable)));
+        });
+        // append ingredients
+        for (Object ingredient : slot.getXEIIngredients()) {
+            if (ingredient instanceof IClickableIngredient clickableIngredient) {
+                var type = clickableIngredient.getIngredientType();
+                var ingredients= clickableIngredient.getIngredient();
+                slotBuilder.addIngredient(type, ingredients);
+            }
+        }
+        // set slot name
+        slotBuilder.setSlotName(slotName);
+        // append widget tooltips
+        slotBuilder.addRichTooltipCallback((recipeSlotView, tooltipBuilder) -> tooltipBuilder.addAll(slot.getAdditionalToolTips(new ArrayList<>())));
+    }
+
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, T wrapper, IFocusGroup focuses) {
         wrapper.setRecipeWidget(0, 0);
-
         List<Widget> flatVisibleWidgetCollection = wrapper.modularUI.getFlatWidgetCollection();
-        for (Widget widget : flatVisibleWidgetCollection) {
+        for (int i = 0; i < flatVisibleWidgetCollection.size(); i++) {
+            var widget = flatVisibleWidgetCollection.get(i);
             if (widget instanceof IRecipeIngredientSlot slot) {
                 var role = mapToRole(slot.getIngredientIO());
-                if (widget.getParent() instanceof DraggableScrollableWidgetGroup) {
-                    // don't add the JEI widget at all if we have a draggable group, let the draggable widget handle it instead.
-                    if (role == null) {
-                        builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addIngredientsUnsafe(slot.getXEIIngredients());
-                        builder.addInvisibleIngredients(RecipeIngredientRole.OUTPUT).addIngredientsUnsafe(slot.getXEIIngredients());
-                    } else {
-                        builder.addInvisibleIngredients(role).addIngredientsUnsafe(slot.getXEIIngredients());
-                    }
-                    continue;
-                }
-                Position pos = widget.getPosition();
-                IRecipeSlotBuilder slotBuilder;
                 if (role == null) { // both
-                    addJEISlot(builder, slot, RecipeIngredientRole.INPUT, pos.x, pos.y);
-                    slotBuilder = addJEISlot(builder, slot, RecipeIngredientRole.OUTPUT, pos.x, pos.y);
+                    addJEISlot(builder, slot, RecipeIngredientRole.INPUT, i);
+                    addJEISlot(builder, slot, RecipeIngredientRole.OUTPUT, i);
                 } else {
-                    slotBuilder = addJEISlot(builder, slot, role, pos.x, pos.y);
-                }
-                int width = widget.getSize().width;
-                int height = widget.getSize().height;
-
-                slotBuilder.setBackground(IGui2IDrawable.toDrawable(widget.getBackgroundTexture(), width, height), -1, -1);
-                slotBuilder.setOverlay(IGui2IDrawable.toDrawable(widget.getOverlay(), width, height), -1, -1);
-                widget.setActive(false);
-                widget.setVisible(false);
-                if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.SlotWidget slotW) {
-                    slotW.setDrawHoverOverlay(false).setDrawHoverTips(false);
-                } else if (slot instanceof com.lowdragmc.lowdraglib.gui.widget.TankWidget tankW) {
-                    tankW.setDrawHoverOverlay(false).setDrawHoverTips(false);
-                    slotBuilder.setFluidRenderer(1, false, width - 2, height - 2);
+                    addJEISlot(builder, slot, role, i);
                 }
             }
         }
@@ -94,14 +89,8 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
         }
     }
 
-    private static IRecipeSlotBuilder addJEISlot(IRecipeLayoutBuilder builder, IRecipeIngredientSlot slot, RecipeIngredientRole role, int x, int y) {
-        IRecipeSlotBuilder slotBuilder = builder.addSlot(role, x, y);
-        slotBuilder.addIngredientsUnsafe(slot.getXEIIngredients());
-        return slotBuilder;
-    }
-
     @Nullable
-    private RecipeIngredientRole mapToRole(IngredientIO ingredientIO) {
+    public static RecipeIngredientRole mapToRole(IngredientIO ingredientIO) {
         return switch (ingredientIO) {
             case INPUT -> RecipeIngredientRole.INPUT;
             case OUTPUT -> RecipeIngredientRole.OUTPUT;

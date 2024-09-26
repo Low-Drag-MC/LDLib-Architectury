@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.emi.emi.api.stack.EmiStack;
 import lombok.Setter;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -117,6 +118,9 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
                 itemStack.applyComponents(itemEmiStack.getComponentChanges());
             }
         }
+        if (LDLib.isJeiLoaded() && ingredient instanceof ITypedIngredient<?> itemJeiStack) {
+            ingredient = itemJeiStack.getItemStack().orElse(ItemStack.EMPTY);
+        }
         if (!(ingredient instanceof ItemStack)) {
             return Collections.emptyList();
         }
@@ -135,6 +139,12 @@ public class PhantomSlotWidget extends SlotWidget implements IGhostIngredientTar
                     ingredient = item == null ? null : new ItemStack(item, (int)itemEmiStack.getAmount());
                     if (ingredient instanceof ItemStack itemStack) {
                         itemStack.applyComponents(itemEmiStack.getComponentChanges());
+                    }
+                }
+                if (LDLib.isJeiLoaded() && ingredient instanceof ITypedIngredient<?> itemJeiStack) {
+                    ItemStack itemStack = itemJeiStack.getItemStack().orElse(ItemStack.EMPTY);
+                    if (!itemStack.isEmpty()) {
+                        ingredient = itemStack;
                     }
                 }
                 if (slotReference != null && ingredient instanceof ItemStack stack) {

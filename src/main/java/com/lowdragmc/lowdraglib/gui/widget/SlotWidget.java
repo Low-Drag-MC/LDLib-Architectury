@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -102,8 +101,6 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Setter
     @Getter
     protected float XEIChance = 1f;
-    @NotNull
-    public List<Consumer<List<Component>>> tooltipCallbacks = new ArrayList<>();
 
     public SlotWidget() {
         super(new Position(0, 0), new Size(18, 18));
@@ -187,7 +184,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 gui.getModularUIGui().setHoveredSlot(slotReference);
             }
             if (!stack.isEmpty() && gui != null) {
-                List<Component> tips = new ArrayList<>(getToolTips(DrawerHelper.getItemToolTip(stack)));
+                List<Component> tips = new ArrayList<>(getAdditionalToolTips(DrawerHelper.getItemToolTip(stack)));
                 tips.addAll(tooltipTexts);
                 gui.getModularUIGui().setHoverTooltip(tips, stack, null, stack.getTooltipImage().orElse(null));
             } else {
@@ -341,29 +338,16 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     public List<Component> getTooltipTexts() {
-        List<Component> tooltips = getToolTips(new ArrayList<>());
+        List<Component> tooltips = getAdditionalToolTips(new ArrayList<>());
         tooltips.addAll(tooltipTexts);
         return tooltips;
     }
 
-    private List<Component> getToolTips(List<Component> list) {
+    public List<Component> getAdditionalToolTips(List<Component> list) {
         if (this.onAddedTooltips != null) {
             this.onAddedTooltips.accept(this, list);
         }
-        for (Consumer<List<Component>> tooltipCallback : tooltipCallbacks) {
-            tooltipCallback.accept(list);
-        }
         return list;
-    }
-
-    @Override
-    public void addTooltipCallback(Consumer<List<Component>> callback) {
-        this.tooltipCallbacks.add(callback);
-    }
-
-    @Override
-    public void clearTooltipCallback() {
-        this.tooltipCallbacks.clear();
     }
 
     @Nullable
@@ -403,14 +387,15 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
         if (handler instanceof WidgetSlotItemTransfer widgetSlotItemTransfer) {
             if (widgetSlotItemTransfer.itemHandler instanceof CycleItemStackHandler cycleItemStackHandler) {
-                return getXEIIngredientsFromCycleTransfer(cycleItemStackHandler, widgetSlotItemTransfer.index);
+                return getXEIIngredientsFromCycleTransferClickable(cycleItemStackHandler, widgetSlotItemTransfer.index);
             } else if (widgetSlotItemTransfer.itemHandler instanceof TagOrCycleItemStackTransfer transfer) {
-                return getXEIIngredientsFromTagOrCycleTransfer(transfer, widgetSlotItemTransfer.index);
+                return getXEIIngredientsFromTagOrCycleTransferClickable(transfer, widgetSlotItemTransfer.index);
             }
         }
 
         if (LDLib.isJeiLoaded()) {
-            return List.of(realStack);
+            var ingredient = JEIPlugin.getItemIngredient(realStack, getPosition().x, getPosition().y, getSize().width, getSize().height);
+            return ingredient == null ? Collections.emptyList() : List.of(ingredient);
         } else if (LDLib.isReiLoaded()) {
             return REICallWrapper.getReiIngredients(realStack);
         } else if (LDLib.isEmiLoaded()) {

@@ -14,6 +14,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import org.joml.Vector4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @LDLRegister(name = "text_texture", group = "texture")
-public class TextTexture extends TransformTexture{
+public class TextTexture extends TransformTexture {
 
     @Configurable
     public String text;
@@ -72,12 +73,19 @@ public class TextTexture extends TransformTexture{
         setDropShadow(true);
     }
 
+    public TextTexture(Supplier<String> text) {
+        this("", -1);
+        setSupplier(text);
+        setDropShadow(true);
+    }
+
     public TextTexture setSupplier(Supplier<String> supplier) {
         this.supplier = supplier;
         return this;
     }
 
     @Override
+    @Environment(EnvType.CLIENT)
     public void updateTick() {
         if (Minecraft.getInstance().level != null) {
             long tick = Minecraft.getInstance().level.getGameTime();
@@ -140,6 +148,7 @@ public class TextTexture extends TransformTexture{
     @OnlyIn(Dist.CLIENT)
     @Override
     protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
+        updateTick();
         if (backgroundColor != 0) {
             DrawerHelper.drawSolidRect(graphics, (int) x, (int) y, width, height, backgroundColor);
         }
@@ -210,7 +219,10 @@ public class TextTexture extends TransformTexture{
         int textW = fontRenderer.width(line);
         int totalW = width + textW + 10;
         float from = x + width;
-        graphics.enableScissor((int) x, (int) y, (int) (x + width), (int) (y + height));
+        var trans = graphics.pose().last().pose();
+        var realPos = trans.transform(new Vector4f(x, y, 0, 1));
+        var realPos2 = trans.transform(new Vector4f(x + width, y + height, 0, 1));
+        graphics.enableScissor((int) realPos.x, (int) realPos.y, (int) realPos2.x, (int) realPos2.y);
         var t = rollSpeed > 0 ? ((((rollSpeed * Math.abs((int)(System.currentTimeMillis() % 1000000)) / 10) % (totalW))) / (totalW)) : 0.5;
         graphics.drawString(fontRenderer, line, (int) (from - t * totalW), (int) _y, color, dropShadow);
         graphics.disableScissor();

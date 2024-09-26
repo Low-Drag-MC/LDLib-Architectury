@@ -2,7 +2,6 @@ package com.lowdragmc.lowdraglib.gui.texture;
 
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.editor.data.resource.Resource;
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import lombok.Setter;
 import net.neoforged.api.distmarker.Dist;

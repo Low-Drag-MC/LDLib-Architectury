@@ -63,6 +63,7 @@ public class CommonProxy {
                 }
             } catch (Throwable ignored) {}
         }, () -> {});
+        TypedPayloadRegistries.postInit();
         BLOCKS.register(eventBus);
         ITEMS.register(eventBus);
         BLOCK_ENTITY_TYPES.register(eventBus);

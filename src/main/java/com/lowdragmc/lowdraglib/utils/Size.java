@@ -12,8 +12,8 @@ public class Size {
     public final int height;
 
     public Size(int width, int height) {
-        this.width = width;
-        this.height = height;
+        this.width = Math.max(0, width);
+        this.height = Math.max(0, height);
     }
 
     public static Size of(int width, int height) {

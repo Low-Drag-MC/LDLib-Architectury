@@ -75,7 +75,11 @@ public interface IConfigurableWidget extends IConfigurable {
 
     @SuppressWarnings("unchecked")
     static CompoundTag serializeNBT(IConfigurableWidget widget, Resources resources, boolean isProject, HolderLookup.Provider provider) {
-        UIResourceTexture.setCurrentResource((Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject);
+        return serializeNBT(widget, (Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject, provider);
+    }
+
+    static CompoundTag serializeNBT(IConfigurableWidget widget, Resource<IGuiTexture> resources, boolean isProject, HolderLookup.Provider provider) {
+        UIResourceTexture.setCurrentResource(resources, isProject);
         CompoundTag tag = widget.serializeInnerNBT(provider);
         UIResourceTexture.clearCurrentResource();
         return tag;
@@ -83,8 +87,12 @@ public interface IConfigurableWidget extends IConfigurable {
 
     @SuppressWarnings("unchecked")
     static void deserializeNBT(IConfigurableWidget widget, CompoundTag tag, Resources resources, boolean isProject, HolderLookup.Provider provider) {
-        UIResourceTexture.setCurrentResource((Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject);
-        widget.deserializeInnerNBT(provider, tag);
+        deserializeNBT(widget, tag, (Resource<IGuiTexture>) resources.resources.get(TexturesResource.RESOURCE_NAME), isProject, provider);
+    }
+
+    static void deserializeNBT(IConfigurableWidget widget, CompoundTag tag, Resource<IGuiTexture> resources, boolean isProject, HolderLookup.Provider provider) {
+        UIResourceTexture.setCurrentResource(resources, isProject);
+        widget.deserializeInnerNBT(tag, provider);
         UIResourceTexture.clearCurrentResource();
     }
 

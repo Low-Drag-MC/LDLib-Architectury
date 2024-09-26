@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.utils;
 
+import net.minecraft.core.BlockPos;
 import org.joml.Vector3f;
 
 /**
@@ -22,6 +23,10 @@ public class Vector3fHelper {
 
     public static boolean isZero(Vector3f vec) {
         return vec.x == 0 && vec.y ==0 && vec.z == 0;
+    }
+
+    public static BlockPos toBlockPos(Vector3f vec) {
+        return new BlockPos((int) vec.x, (int) vec.y, (int) vec.z);
     }
 
     public static Vector3f project(Vector3f a, Vector3f b) {

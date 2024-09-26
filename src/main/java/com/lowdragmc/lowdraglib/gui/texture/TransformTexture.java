@@ -14,7 +14,7 @@ import org.joml.Quaternionf;
  * @implNote TransformTexture
  */
 @Configurable(name = "ldlib.gui.editor.group.transform")
-public abstract class TransformTexture implements IGuiTexture{
+public abstract class TransformTexture implements IGuiTexture {
     @Configurable
     @NumberRange(range = {-Float.MAX_VALUE, Float.MAX_VALUE}, wheel = 1)
     protected float xOffset;

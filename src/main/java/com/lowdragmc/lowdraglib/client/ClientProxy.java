@@ -8,6 +8,7 @@ import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.client.model.custommodel.CustomBakedModel;
 import com.lowdragmc.lowdraglib.client.model.custommodel.LDLMetadataSection;
 import com.lowdragmc.lowdraglib.client.model.forge.LDLRendererModel;
+import com.lowdragmc.lowdraglib.client.renderer.ATESRRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.client.utils.WidgetClientTooltipComponent;
@@ -64,6 +65,11 @@ public class ClientProxy extends CommonProxy {
     @SubscribeEvent
     public void onRegisterClientTooltipComponentFactoriesEvent(final RegisterClientTooltipComponentFactoriesEvent event) {
         event.register(WidgetTooltipComponent.class, WidgetClientTooltipComponent::new);
+    }
+
+    @SubscribeEvent
+    public void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(RendererBlockEntityImpl.TYPE(), ATESRRendererProvider::new);
     }
 
     @SubscribeEvent

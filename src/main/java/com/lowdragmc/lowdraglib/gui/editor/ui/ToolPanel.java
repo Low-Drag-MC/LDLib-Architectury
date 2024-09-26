@@ -28,8 +28,10 @@ public class ToolPanel extends WidgetGroup {
 
     @Getter
     protected final Editor editor;
+    @Getter
     protected final List<Widget> toolBoxes = new ArrayList<>();
     protected ButtonWidget buttonHide;
+    @Getter
     protected TabContainer tabContainer;
     protected ImageWidget tabsBackground;
     @Setter

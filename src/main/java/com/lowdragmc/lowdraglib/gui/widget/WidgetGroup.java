@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
 import com.lowdragmc.lowdraglib.gui.animation.Transform;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.*;
 import com.lowdragmc.lowdraglib.gui.ingredient.IGhostIngredientTarget;
@@ -10,9 +12,12 @@ import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.modular.WidgetUIAccess;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.WidgetTexture;
+import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.mojang.blaze3d.systems.RenderSystem;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
@@ -37,7 +42,19 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
 
     public final List<Widget> widgets = new ArrayList<>();
     private final WidgetGroupUIAccess groupUIAccess = new WidgetGroupUIAccess();
-    private final boolean isDynamicSized;
+    @Configurable(name = "ldlib.gui.editor.name.isDynamicSized", tips = "ldlib.gui.editor.tips.isDynamicSized")
+    @Getter
+    private boolean isDynamicSized;
+    @Configurable(name = "ldlib.gui.editor.name.layout", tips = "ldlib.gui.editor.tips.layout")
+    @Getter
+    private Layout layout = Layout.NONE;
+    @Configurable(name = "ldlib.gui.editor.name.layoutPadding", tips = "ldlib.gui.editor.tips.layoutPadding")
+    @Getter
+    private int layoutPadding = 0;
+    @Configurable(name = "ldlib.gui.editor.name.allowXEIIngredientOverMouse", tips = "ldlib.gui.editor.tips.allowXEIIngredientOverMouse")
+    @Getter
+    @Setter
+    private boolean allowXEIIngredientOverMouse = true;
     protected final List<Widget> waitToRemoved;
     protected final List<Widget> waitToAdded;
 
@@ -69,6 +86,27 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         this.isDynamicSized = false;
         waitToRemoved = new ArrayList<>();
         waitToAdded = new ArrayList<>();
+    }
+
+    @ConfigSetter(field = "layout")
+    public void setLayout(Layout layout) {
+        if (layout == this.layout) return;
+        this.layout = layout;
+        recomputeLayout();
+    }
+
+    @ConfigSetter(field = "layoutPadding")
+    public void setLayoutPadding(int layoutPadding) {
+        if (layoutPadding == this.layoutPadding) return;
+        this.layoutPadding = layoutPadding;
+        recomputeLayout();
+    }
+
+    @ConfigSetter(field = "isDynamicSized")
+    public void setDynamicSized(boolean dynamicSized) {
+        if (dynamicSized == this.isDynamicSized) return;
+        isDynamicSized = dynamicSized;
+        recomputeSize();
     }
 
     @Override
@@ -147,11 +185,13 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     protected void onChildSelfPositionUpdate(Widget child) {
-
+        recomputeLayout();
+        recomputeSize();
     }
 
     protected void onChildSizeUpdate(Widget child) {
-
+        recomputeLayout();
+        recomputeSize();
     }
 
     @Nullable
@@ -195,6 +235,56 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         }
     }
 
+    protected void recomputeLayout() {
+        if (layout != Layout.NONE) {
+            var lastPosition = new Position(0, 0);
+            switch (layout) {
+                case VERTICAL_LEFT -> {
+                    for (var widget : widgets) {
+                        lastPosition = lastPosition.addY(layoutPadding);
+                        widget.setSelfPosition(lastPosition);
+                        lastPosition = lastPosition.add(0, widget.getSizeHeight());
+                    }
+                }
+                case VERTICAL_CENTER -> {
+                    for (var widget : widgets) {
+                        lastPosition = lastPosition.addY(layoutPadding);
+                        widget.setSelfPosition(lastPosition.add((getSizeWidth() - widget.getSizeWidth()) / 2, 0));
+                        lastPosition = lastPosition.add(0, widget.getSizeHeight());
+                    }
+                }
+                case VERTICAL_RIGHT -> {
+                    for (var widget : widgets) {
+                        lastPosition = lastPosition.addY(layoutPadding);
+                        widget.setSelfPosition(lastPosition.add(getSizeWidth() - widget.getSizeWidth(), 0));
+                        lastPosition = lastPosition.add(0, widget.getSizeHeight());
+                    }
+                }
+                case HORIZONTAL_TOP -> {
+                    for (var widget : widgets) {
+                        lastPosition = lastPosition.addX(layoutPadding);
+                        widget.setSelfPosition(lastPosition);
+                        lastPosition = lastPosition.add(widget.getSizeWidth(), 0);
+                    }
+                }
+                case HORIZONTAL_CENTER -> {
+                    for (var widget : widgets) {
+                        lastPosition = lastPosition.addX(layoutPadding);
+                        widget.setSelfPosition(lastPosition.add(0, (getSizeHeight() - widget.getSizeHeight()) / 2));
+                        lastPosition = lastPosition.add(widget.getSizeWidth(), 0);
+                    }
+                }
+                case HORIZONTAL_BOTTOM -> {
+                    for (var widget : widgets) {
+                        lastPosition = lastPosition.addX(layoutPadding);
+                        widget.setSelfPosition(lastPosition.add(0, getSizeHeight() - widget.getSizeHeight()));
+                        lastPosition = lastPosition.add(widget.getSizeWidth(), 0);
+                    }
+                }
+            }
+        }
+    }
+
     protected boolean recomputeSize() {
         if (isDynamicSized) {
             Size currentSize = getSize();
@@ -209,7 +299,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
 
     protected Size computeDynamicSize() {
         Position selfPosition = getPosition();
-        Size currentSize = getSize();
+        Size currentSize = Size.ZERO;
         for (Widget widget : widgets) {
             Position size = widget.getPosition().add(widget.getSize()).subtract(selfPosition);
             if (size.x > currentSize.width) {
@@ -248,6 +338,12 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         return addWidget(widgets.size(), widget);
     }
 
+    public <T extends Widget> WidgetGroup addWidget(T widget, Consumer<T> callback) {
+        addWidget(widgets.size(), widget);
+        callback.accept(widget);
+        return this;
+    }
+
     public WidgetGroup addWidget(int index, Widget widget) {
         if (widget == this) {
             throw new IllegalArgumentException("Cannot add self");
@@ -274,6 +370,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
                 });
             }
         }
+        recomputeLayout();
         recomputeSize();
         return this;
     }
@@ -314,6 +411,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         widget.setUiAccess(null);
         widget.setGui(null);
         widget.setParentPosition(Position.ORIGIN);
+        recomputeLayout();
         recomputeSize();
     }
 
@@ -334,6 +432,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
                 waitToAdded.clear();
             }
         }
+        recomputeLayout();
         recomputeSize();
     }
 
@@ -368,10 +467,12 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         if (!isVisible()) {
             return null;
         }
-        for (Widget widget : widgets) {
-            if (widget.isVisible() && widget instanceof IIngredientSlot ingredientSlot) {
-                Object result = ingredientSlot.getXEIIngredientOverMouse(mouseX, mouseY);
-                if (result != null) return result;
+        if (allowXEIIngredientOverMouse) {
+            for (Widget widget : widgets) {
+                if (widget.isVisible() && widget instanceof IIngredientSlot ingredientSlot) {
+                    Object result = ingredientSlot.getXEIIngredientOverMouse(mouseX, mouseY);
+                    if (result != null) return result;
+                }
             }
         }
         return null;

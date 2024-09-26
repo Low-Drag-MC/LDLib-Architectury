@@ -48,7 +48,10 @@ public class IRendererResource extends Resource<IRenderer> {
     @Override
     public IRenderer deserialize(Tag tag, HolderLookup.Provider provider) {
         if (tag instanceof CompoundTag compoundTag) {
-            return ISerializableRenderer.deserializeWrapper(provider, compoundTag);
+            var renderer = ISerializableRenderer.deserializeWrapper(provider, compoundTag);
+            if (renderer != null) {
+                return renderer;
+            }
         }
         return IRenderer.EMPTY;
     }

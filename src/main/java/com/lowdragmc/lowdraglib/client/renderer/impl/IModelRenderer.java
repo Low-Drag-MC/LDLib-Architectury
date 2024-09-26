@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.client.renderer.impl;
 
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.model.ModelFactory;
+import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.ISerializableRenderer;
 import com.lowdragmc.lowdraglib.client.renderer.block.RendererBlock;
@@ -56,10 +57,16 @@ public class IModelRenderer implements ISerializableRenderer {
     @Getter
     @Configurable(forceUpdate = false)
     protected ResourceLocation modelLocation;
+
     @OnlyIn(Dist.CLIENT)
     protected BakedModel itemModel;
+
     @OnlyIn(Dist.CLIENT)
+    @Deprecated(forRemoval = true, since = "1.21")
     protected Map<Direction, BakedModel> blockModels;
+
+    @Environment(EnvType.CLIENT)
+    protected Map<ModelState, BakedModel> modelCaches;
 
     protected IModelRenderer() {
         modelLocation = ResourceLocation.withDefaultNamespace("block/furnace");
@@ -127,7 +134,7 @@ public class IModelRenderer implements ISerializableRenderer {
     @Override
     @OnlyIn(Dist.CLIENT)
     public List<BakedQuad> renderModel(@Nullable BlockAndTintGetter level, @Nullable BlockPos pos, @Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
-        var ibakedmodel = getBlockBakedModel(pos, level);
+        var ibakedmodel = getBlockBakedModel(level, pos, state);
         if (ibakedmodel == null) return Collections.emptyList();
         return ibakedmodel.getQuads(state, side, rand);
     }
@@ -157,11 +164,30 @@ public class IModelRenderer implements ISerializableRenderer {
 
     @OnlyIn(Dist.CLIENT)
     @Nullable
-    protected BakedModel getBlockBakedModel(BlockPos pos, BlockAndTintGetter blockAccess) {
+    @Deprecated(forRemoval = true, since = "1.21")
+    protected BakedModel getBlockBakedModel(@Nullable BlockPos pos, @Nullable BlockAndTintGetter level) {
         return getRotatedModel(Direction.NORTH);
     }
 
     @OnlyIn(Dist.CLIENT)
+    @Nullable
+    protected BakedModel getBlockBakedModel(@Nullable BlockAndTintGetter level, @Nullable BlockPos pos, @Nullable BlockState state) {
+        // TODO make it a standard api since 1.21
+        if (level != null && pos != null && state != null && state.getBlock() instanceof IBlockRendererProvider provider) {
+            var modelState = provider.getModelState(level, pos, state);
+            if (modelState != null) {
+                return modelCaches.computeIfAbsent(modelState, facing -> getModel().bake(
+                        ModelFactory.getModeBaker(),
+                        this::materialMapping,
+                        modelState,
+                        modelLocation));
+            }
+        }
+        return getBlockBakedModel(pos, level);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    @Deprecated(forRemoval = true, since = "1.21")
     public BakedModel getRotatedModel(Direction frontFacing) {
         return blockModels.computeIfAbsent(frontFacing, facing -> getModel().bake(
                 ModelFactory.getModelBaker(),
@@ -180,6 +206,7 @@ public class IModelRenderer implements ISerializableRenderer {
         if (atlasName.equals(TextureAtlas.LOCATION_BLOCKS)) {
             itemModel = null;
             blockModels.clear();
+            modelCaches.clear();
         }
     }
 
@@ -204,6 +231,7 @@ public class IModelRenderer implements ISerializableRenderer {
         if (this.modelLocation != null) {
             if (LDLib.isClient()) {
                 blockModels = new ConcurrentHashMap<>();
+                modelCaches = new ConcurrentHashMap<>();
                 registerEvent();
             }
         }
@@ -215,7 +243,8 @@ public class IModelRenderer implements ISerializableRenderer {
         this.modelLocation = modelLocation;
         if (LDLib.isClient()) {
             itemModel = null;
-            blockModels.clear();
+            if (blockModels != null) blockModels.clear();
+            if (modelCaches != null) modelCaches.clear();
         }
     }
 
@@ -256,6 +285,6 @@ public class IModelRenderer implements ISerializableRenderer {
 
     private static ResourceLocation getModelFromFile(File path, File r){
         var id = path.getPath().replace('\\', '/').split("assets/")[1].split("/")[0];
-        return ResourceLocation.fromNamespaceAndPath(id, r.getPath().replace(path.getPath(), "").replace(".json", "").replace('\\', '/'));
+        return ResourceLocation.fromNamespaceAndPath(id, r.getPath().replace(path.getPath(), "").replace(".json", "").replace('\\', '/').substring(1));
     }
 }

@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.accessors;
 
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigAccessor;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.Configurator;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
@@ -34,6 +35,12 @@ public class SizeAccessor extends TypesAccessor<Size> {
     @Override
     public Configurator create(String name, Supplier<Size> supplier, Consumer<Size> consumer, boolean forceUpdate, Field field) {
         ConfiguratorGroup group = new ConfiguratorGroup(name);
+        if (field.isAnnotationPresent(Configurable.class)) {
+            Configurable configurable = field.getAnnotation(Configurable.class);
+            group.setCollapse(configurable.collapse());
+            group.setCanCollapse(configurable.canCollapse());
+            group.setTips(configurable.tips());
+        }
         group.addConfigurators(new NumberConfigurator("width", () -> supplier.get().width, number -> consumer.accept(new Size(number.intValue(), supplier.get().height)), 0, forceUpdate).setRange(0, Integer.MAX_VALUE));
         group.addConfigurators(new NumberConfigurator("height", () -> supplier.get().height, number -> consumer.accept(new Size(supplier.get().width, number.intValue())), 0, forceUpdate).setRange(0, Integer.MAX_VALUE));
         return group;

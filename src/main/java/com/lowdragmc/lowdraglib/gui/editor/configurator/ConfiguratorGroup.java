@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.editor.configurator;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.IConfiguratorContainer;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.ui.ConfigPanel;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
@@ -9,7 +10,6 @@ import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import lombok.Setter;
 import net.neoforged.api.distmarker.Dist;
@@ -44,10 +44,10 @@ public class ConfiguratorGroup extends Configurator {
     }
 
     @Override
-    public void setConfigPanel(ConfigPanel configPanel, ConfigPanel.Tab tab) {
-        super.setConfigPanel(configPanel, tab);
+    public void setConfiguratorContainer(IConfiguratorContainer configuratorContainer) {
+        super.setConfiguratorContainer(configuratorContainer);
         for (Configurator configurator : configurators) {
-            configurator.setConfigPanel(configPanel, tab);
+            configurator.setConfiguratorContainer(configuratorContainer);
         }
     }
 
@@ -66,7 +66,7 @@ public class ConfiguratorGroup extends Configurator {
     }
 
     public void addConfigurator(int index, Configurator configurator) {
-        configurator.setConfigPanel(configPanel, tab);
+        configurator.setConfiguratorContainer(configuratorContainer);
         configurator.setActive(!isCollapse);
         configurator.setVisible(!isCollapse);
         this.configurators.add(index, configurator);
@@ -92,7 +92,7 @@ public class ConfiguratorGroup extends Configurator {
 
     public void addConfigurators(Configurator... configurators) {
         for (Configurator configurator : configurators) {
-            configurator.setConfigPanel(configPanel, tab);
+            configurator.setConfiguratorContainer(configuratorContainer);
             configurator.setActive(!isCollapse);
             configurator.setVisible(!isCollapse);
             this.configurators.add(configurator);

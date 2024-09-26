@@ -13,6 +13,7 @@ import net.minecraft.nbt.NbtIo;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -26,18 +27,18 @@ public class FileMenu extends MenuTab {
     protected Predicate<IProject> projectFilter = project -> project.group().startsWith(editor.name());
 
     protected TreeBuilder.Menu createMenu() {
-        return TreeBuilder.Menu.start()
+        var menu = TreeBuilder.Menu.start()
                 .branch("ldlib.gui.editor.menu.new", this::newProject)
                 .crossLine()
-                .leaf(Icons.OPEN_FILE, "ldlib.gui.editor.menu.open", this::openProject)
-                .leaf(Icons.SAVE, "ldlib.gui.editor.menu.save", this::saveProject)
+                .leaf(Icons.OPEN_FILE, "ldlib.gui.editor.menu.open", this::openProject);
+        if (editor.getCurrentProjectFile() != null) {
+            menu.leaf(Icons.SAVE, "ldlib.gui.editor.tips.save", () -> editor.saveProject(result -> {}));
+        }
+        menu.leaf(Icons.SAVE, "ldlib.gui.editor.tips.save_as", () -> editor.saveAsProject(result -> {}))
                 .crossLine()
-                .branch(Icons.IMPORT, "ldlib.gui.editor.menu.import", menu -> {
-                    menu.leaf("ldlib.gui.editor.menu.resource", this::importResource);
-                })
-                .branch(Icons.EXPORT, "ldlib.gui.editor.menu.export", menu -> {
-                    menu.leaf("ldlib.gui.editor.menu.resource", this::exportResource);
-                });
+                .branch(Icons.IMPORT, "ldlib.gui.editor.menu.import", m -> m.leaf("ldlib.gui.editor.menu.resource", this::importResource))
+                .branch(Icons.EXPORT, "ldlib.gui.editor.menu.export", m -> m.leaf("ldlib.gui.editor.menu.resource", this::exportResource));
+        return menu;
     }
 
 
@@ -84,29 +85,24 @@ public class FileMenu extends MenuTab {
     }
 
     private void newProject(TreeBuilder.Menu menu) {
-        for (var project : AnnotationDetector.REGISTER_PROJECTS.stream().filter(getProjectPredicate()).toList()) {
-            menu = menu.leaf(project.getTranslateKey(), () -> editor.loadProject(project.newEmptyProject()));
-        }
-    }
-
-    private void saveProject() {
-        var project = editor.getCurrentProject();
-        if (project != null) {
-            String suffix = "." + project.getSuffix();
-            DialogWidget.showFileDialog(editor, "ldlib.gui.editor.tips.save_project", editor.getWorkSpace(), false,
-                    DialogWidget.suffixFilter(suffix), file -> {
-                        if (file != null && !file.isDirectory()) {
-                            if (!file.getName().endsWith(suffix)) {
-                                file = new File(file.getParentFile(), file.getName() + suffix);
-                            }
-                            project.saveProject(file.toPath());
-                        }
+        for (var project : AnnotationDetector.REGISTER_PROJECTS.stream()
+                .map(AnnotationDetector.Wrapper::creator).map(Supplier::get).filter(getProjectPredicate()).toList()) {
+            menu = menu.leaf(project.getTranslateKey(), () -> {
+                if (editor.isCurrentProjectSaved()) {
+                    editor.loadProject(project.newEmptyProject());
+                } else {
+                    editor.askToSaveProject(result -> {
+                        editor.loadProject(project.newEmptyProject());
                     });
+                }
+            });
         }
     }
 
     private void openProject() {
-        var suffixes = AnnotationDetector.REGISTER_PROJECTS.stream().filter(getProjectPredicate()).map(IProject::getSuffix).collect(Collectors.toSet());
+        var suffixes = AnnotationDetector.REGISTER_PROJECTS.stream()
+                .map(AnnotationDetector.Wrapper::creator).map(Supplier::get)
+                .filter(getProjectPredicate()).map(IProject::getSuffix).collect(Collectors.toSet());
         DialogWidget.showFileDialog(editor, "ldlib.gui.editor.tips.load_project", editor.getWorkSpace(), true,
                 node -> {
                     if (node.isLeaf() && node.getContent().isFile()) {
@@ -122,11 +118,21 @@ public class FileMenu extends MenuTab {
                 }, r -> {
                     if (r != null && r.isFile()) {
                         String file = r.getName().toLowerCase();
-                        for (var project : AnnotationDetector.REGISTER_PROJECTS.stream().filter(getProjectPredicate()).toList()) {
+                        for (var project : AnnotationDetector.REGISTER_PROJECTS.stream()
+                                .map(AnnotationDetector.Wrapper::creator).map(Supplier::get)
+                                .filter(getProjectPredicate()).toList()) {
                             if (file.endsWith("." + project.getSuffix())) {
                                 var p = project.loadProject(r.toPath());
                                 if (p != null) {
-                                    editor.loadProject(p);
+                                    if (editor.isCurrentProjectSaved()) {
+                                        editor.loadProject(p);
+                                        editor.setCurrentProjectFile(r);
+                                    } else {
+                                        editor.askToSaveProject(result -> {
+                                            editor.loadProject(p);
+                                            editor.setCurrentProjectFile(r);
+                                        });
+                                    }
                                     break;
                                 }
                             }

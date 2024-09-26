@@ -60,6 +60,10 @@ public class Icons {
     public static ResourceTexture FILE = icon("file");
     public static ResourceTexture IMAGE = icon("image");
     public static ResourceTexture JSON = icon("json");
+    public static ResourceTexture RADIOBOX_BLANK = icon("radiobox_blank");
+    public static ResourceTexture RADIOBOX_MARKED = icon("radiobox_marked");
+    public static ResourceTexture CHECKBOX_BLANK = icon("checkbox_blank");
+    public static ResourceTexture CHECKBOX_MARKED = icon("checkbox_marked");
     //align
     public static ResourceTexture ALIGN_H_C = icon("align_horizontal_center");
     public static ResourceTexture ALIGN_H_D = icon("align_horizontal_distribute");

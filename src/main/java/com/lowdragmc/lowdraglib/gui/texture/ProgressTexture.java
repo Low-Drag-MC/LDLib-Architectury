@@ -35,6 +35,7 @@ public class ProgressTexture extends TransformTexture {
     }
 
     @Override
+    @Environment(EnvType.CLIENT)
     public void updateTick() {
         if (emptyBarArea != null) {
             emptyBarArea.updateTick();

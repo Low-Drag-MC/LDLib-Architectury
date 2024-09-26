@@ -18,11 +18,14 @@ public class WidgetTexture extends TransformTexture{
     private int centerY;
     private boolean isDragging;
     private boolean fixedCenter;
+    private int mouseX, mouseY;
 
     public WidgetTexture(Widget widget) {
         this.widget = widget;
         this.centerX = widget.getPosition().x + widget.getSize().width / 2;
         this.centerY = widget.getPosition().y + widget.getSize().height / 2;
+        this.mouseX = centerX;
+        this.mouseY = centerY;
     }
 
     public WidgetTexture(int mouseX, int mouseY, Widget widget) {
@@ -31,10 +34,18 @@ public class WidgetTexture extends TransformTexture{
         this.centerY = mouseY;
         this.isDragging = true;
         this.fixedCenter = true;
+        this.mouseX = widget.getPosition().x + widget.getSize().width / 2;
+        this.mouseY = widget.getPosition().y + widget.getSize().height / 2;
     }
 
     public WidgetTexture setDragging(boolean dragging) {
         isDragging = dragging;
+        return this;
+    }
+
+    public WidgetTexture setMouse(int mouseX, int mouseY) {
+        this.mouseX = mouseX;
+        this.mouseY = mouseY;
         return this;
     }
 
@@ -66,8 +77,8 @@ public class WidgetTexture extends TransformTexture{
         graphics.pose().translate(-x + -width / 2f, -y + -height / 2f, 0);
 
         graphics.pose().translate(xOffset, yOffset, 0 );
-        widget.drawInBackground(graphics, this.centerX, this.centerY, particleTick);
-        widget.drawInForeground(graphics, this.centerX, this.centerY, particleTick);
+        widget.drawInBackground(graphics, this.mouseX, this.mouseY, particleTick);
+        widget.drawInForeground(graphics, this.mouseX, this.mouseY, particleTick);
         graphics.pose().popPose();
 
     }

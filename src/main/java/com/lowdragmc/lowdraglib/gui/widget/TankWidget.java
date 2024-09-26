@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -104,8 +103,6 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     protected int lastTankCapacity;
     @Setter
     protected Runnable changeListener;
-    @NotNull
-    protected List<Consumer<List<Component>>> tooltipCallback = new ArrayList<>();
 
     public TankWidget() {
         this(null, 0, 0, 18, 18, true, true);
@@ -210,13 +207,13 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
         if (lastFluidInTank == null || lastFluidInTank.isEmpty()) return Collections.emptyList();
 
         if (this.fluidTank instanceof CycleFluidTransfer cycleItemStackHandler) {
-            return getXEIIngredientsFromCycleTransfer(cycleItemStackHandler, tank);
+            return getXEIIngredientsFromCycleTransferClickable(cycleItemStackHandler, tank);
         } else if (this.fluidTank instanceof TagOrCycleFluidTransfer transfer) {
-            return getXEIIngredientsFromTagOrCycleTransfer(transfer, tank);
+            return getXEIIngredientsFromTagOrCycleTransferClickable(transfer, tank);
         }
 
         if (LDLib.isJeiLoaded()) {
-            return List.of(JEICallWrapper.getPlatformFluidTypeForJEI(lastFluidInTank));
+            return List.of(JEICallWrapper.getPlatformFluidTypeForJEIClickable(FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount()), getPosition(), getSize()));
         }
         if (LDLib.isReiLoaded()) {
             return List.of(EntryStacks.of(dev.architectury.fluid.FluidStack.create(lastFluidInTank.getFluid(), lastFluidInTank.getAmount(), lastFluidInTank.getComponentsPatch())));
@@ -327,30 +324,16 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
 
     @Override
     public List<Component> getTooltipTexts() {
-        List<Component> tooltips = getToolTips(new ArrayList<>());
+        List<Component> tooltips = getAdditionalToolTips(new ArrayList<>());
         tooltips.addAll(tooltipTexts);
         return tooltips;
     }
 
-    private List<Component> getToolTips(List<Component> list) {
+    public List<Component> getAdditionalToolTips(List<Component> list) {
         if (this.onAddedTooltips != null) {
             this.onAddedTooltips.accept(this, list);
         }
-        for (Consumer<List<Component>> callback : this.tooltipCallback) {
-            callback.accept(list);
-        }
-
         return list;
-    }
-
-    @Override
-    public void addTooltipCallback(Consumer<List<Component>> callback) {
-        this.tooltipCallback.add(callback);
-    }
-
-    @Override
-    public void clearTooltipCallback() {
-        this.tooltipCallback.clear();
     }
 
     @Override

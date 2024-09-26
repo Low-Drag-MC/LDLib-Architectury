@@ -48,6 +48,7 @@ public class UIProject implements IProject {
                 (WidgetGroup) new WidgetGroup(30, 30, 200, 200).setBackground(ResourceBorderTexture.BORDERED_BACKGROUND));
     }
 
+    @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.put("resources", resources.serializeNBT(provider));
@@ -55,6 +56,7 @@ public class UIProject implements IProject {
         return tag;
     }
 
+    @Override
     public void deserializeNBT(CompoundTag tag, HolderLookup.Provider provider) {
         this.resources = loadResources(tag.getCompound("resources"));
         this.root = new WidgetGroup();
@@ -73,16 +75,6 @@ public class UIProject implements IProject {
         } catch (IOException ignored) {
             // TODO
         }
-    }
-
-    public IProject loadProject(Path file) {
-        try {
-            var tag = NbtIo.read(file);
-            if (tag != null) {
-                return new UIProject(tag);
-            }
-        } catch (IOException ignored) {}
-        return null;
     }
 
     @Override

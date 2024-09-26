@@ -182,6 +182,10 @@ public class ModularUIGuiContainer extends AbstractContainerScreen<ModularUICont
     }
 
     public void setHoveredSlot(Slot hoveredSlot) {
+        // to make sure the widget won't trigger xei slot lookup
+        if (modularUI.mainGroup.isClientSideWidget() && !modularUI.mainGroup.isAllowXEIIngredientOverMouse()) {
+            return;
+        }
         this.hoveredSlot = hoveredSlot;
     }
 

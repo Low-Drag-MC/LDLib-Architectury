@@ -125,6 +125,7 @@ public class AnimationTexture extends TransformTexture {
     @Override
     @OnlyIn(Dist.CLIENT)
     protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
+        updateTick();
         float cell = 1f / this.cellSize;
         int X = currentFrame % cellSize;
         int Y = currentFrame / cellSize;

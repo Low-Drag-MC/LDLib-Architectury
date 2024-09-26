@@ -21,6 +21,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -73,8 +74,8 @@ public class SceneWidget extends WidgetGroup {
     protected boolean useOrtho = false;
     protected boolean autoReleased;
     protected BiConsumer<SceneWidget, List<Component>> onAddedTooltips;
-    private Consumer<SceneWidget> beforeWorldRender;
-    private Consumer<SceneWidget> afterWorldRender;
+    protected Consumer<SceneWidget> beforeWorldRender;
+    protected Consumer<SceneWidget> afterWorldRender;
 
     public SceneWidget(int x, int y, int width, int height, Level world, boolean useFBO) {
         super(x, y, width, height);
@@ -208,6 +209,7 @@ public class SceneWidget extends WidgetGroup {
         center = new Vector3f(0, 0, 0);
         renderer.useOrtho(useOrtho);
         renderer.setOnLookingAt(ray -> {});
+        renderer.setBeforeBatchEnd(this::renderBeforeBatchEnd);
         renderer.setAfterWorldRender(this::renderBlockOverLay);
         if (this.beforeWorldRender != null) {
             renderer.setBeforeWorldRender(s -> beforeWorldRender.accept(this));
@@ -274,6 +276,10 @@ public class SceneWidget extends WidgetGroup {
         return this;
     }
 
+    public SceneWidget setRenderedCore(Collection<BlockPos> blocks) {
+        return setRenderedCore(blocks, null);
+    }
+
     public SceneWidget setRenderedCore(Collection<BlockPos> blocks, ISceneBlockRenderHook renderHook) {
         if (isRemote()) {
             core.clear();
@@ -307,6 +313,10 @@ public class SceneWidget extends WidgetGroup {
             this.onAddedTooltips.accept(this, list);
         }
         return list;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    protected void renderBeforeBatchEnd(MultiBufferSource bufferSource, float partialTicks) {
     }
 
     @OnlyIn(Dist.CLIENT)

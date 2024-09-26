@@ -3,6 +3,10 @@ package com.lowdragmc.lowdraglib.gui.editor.configurator;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.ui.Editor;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUIContainer;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUIGuiContainer;
+import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
@@ -45,7 +49,8 @@ public class ColorConfigurator extends ValueConfigurator<Number> {
     }
 
     private IGuiTexture getCommonColor() {
-        return new ColorRectTexture(value.intValue()).setRadius(5).setRadius(5);
+        return new GuiTextureGroup(new ColorRectTexture(value.intValue()).setRadius(5).setRadius(5),
+                new ColorBorderTexture(ColorPattern.WHITE.color, -1).setRadius(5));
     }
 
     @Override
@@ -85,20 +90,25 @@ public class ColorConfigurator extends ValueConfigurator<Number> {
                     }
                 });
         addWidget(new ButtonWidget(leftWidth, 2, width - leftWidth - 3 - rightWidth, 10, null, cd -> {
+            var position = image.getPosition();
+            var rightPlace = getGui().getScreenWidth() - 110;
+            var dialog = new DialogWidget(Math.min(position.x, rightPlace), position.y - 110, 110, 110);
+            dialog.setClickClose(true);
+            dialog.addWidget(new HsbColorWidget(5, 5, 100, 100)
+                            .setOnChanged(newColor -> {
+                                value = newColor;
+                                updateValue();
+                                image.setImage(getCommonColor());
+                            })
+                            .setColorSupplier(() -> value.intValue())
+                            .setColor(value.intValue()))
+                    .setBackground(new GuiTextureGroup(ColorPattern.BLACK.rectTexture(), ColorPattern.T_WHITE.borderTexture(-1)));
             if (Editor.INSTANCE != null) {
-                var position = image.getPosition();
-                var rightPlace = getGui().getScreenWidth() - 110;
-                var dialog = Editor.INSTANCE.openDialog(new DialogWidget(Math.min(position.x, rightPlace), position.y - 110, 110, 110));
-                dialog.setClickClose(true);
-                dialog.addWidget(new HsbColorWidget(5, 5, 100, 100)
-                                .setOnChanged(newColor -> {
-                                    value = newColor;
-                                    updateValue();
-                                    image.setImage(getCommonColor());
-                                })
-                                .setColorSupplier(() -> value.intValue())
-                                .setColor(value.intValue()))
-                        .setBackground(new GuiTextureGroup(ColorPattern.BLACK.rectTexture(), ColorPattern.T_WHITE.borderTexture(-1)));
+                Editor.INSTANCE.openDialog(dialog);
+            } else {
+                if (Minecraft.getInstance().player.containerMenu instanceof ModularUIContainer container) {
+                    container.getModularUI().mainGroup.addWidget(dialog);
+                }
             }
         }));
     }
