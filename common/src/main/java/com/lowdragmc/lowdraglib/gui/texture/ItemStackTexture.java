@@ -1,5 +1,7 @@
 package com.lowdragmc.lowdraglib.gui.texture;
 
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -8,10 +10,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-public class ItemStackTexture extends TransformTexture{
+@LDLRegister(name = "item_stack_texture", group = "texture")
+public class ItemStackTexture extends TransformTexture {
+    @Configurable(name = "ldlib.gui.editor.name.items")
     public final ItemStack[] itemStack;
     private int index = 0;
     private int ticks = 0;
+    @Configurable(name = "ldlib.gui.editor.name.color")
     private int color = -1;
     private long lastTick;
 
@@ -49,6 +54,7 @@ public class ItemStackTexture extends TransformTexture{
     @Override
     protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
         if (itemStack.length == 0) return;
+        updateTick();
         graphics.pose().pushPose();
         graphics.pose().scale(width / 16f, height / 16f, 1);
         graphics.pose().translate(x * 16 / width, y * 16 / height, -200);

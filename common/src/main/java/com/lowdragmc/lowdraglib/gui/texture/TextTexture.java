@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @LDLRegister(name = "text_texture", group = "texture")
-public class TextTexture extends TransformTexture{
+public class TextTexture extends TransformTexture {
 
     @Configurable
     public String text;
@@ -85,6 +85,7 @@ public class TextTexture extends TransformTexture{
     }
 
     @Override
+    @Environment(EnvType.CLIENT)
     public void updateTick() {
         if (Minecraft.getInstance().level != null) {
             long tick = Minecraft.getInstance().level.getGameTime();
@@ -147,6 +148,7 @@ public class TextTexture extends TransformTexture{
     @Environment(EnvType.CLIENT)
     @Override
     protected void drawInternal(GuiGraphics graphics, int mouseX, int mouseY, float x, float y, int width, int height) {
+        updateTick();
         if (backgroundColor != 0) {
             DrawerHelper.drawSolidRect(graphics, (int) x, (int) y, width, height, backgroundColor);
         }

@@ -2,7 +2,6 @@ package com.lowdragmc.lowdraglib.gui.texture;
 
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,7 +13,7 @@ import org.joml.Quaternionf;
  * @implNote TransformTexture
  */
 @Configurable(name = "ldlib.gui.editor.group.transform")
-public abstract class TransformTexture implements IGuiTexture{
+public abstract class TransformTexture implements IGuiTexture {
     @Configurable
     @NumberRange(range = {-Float.MAX_VALUE, Float.MAX_VALUE}, wheel = 1)
     protected float xOffset;

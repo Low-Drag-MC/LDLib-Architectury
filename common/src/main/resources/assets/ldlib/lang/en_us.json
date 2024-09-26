@@ -103,6 +103,7 @@
   "ldlib.gui.editor.tips.isDynamicSized": "size will be adjusted according to content",
   "ldlib.gui.editor.name.allowXEIIngredientOverMouse": "support xei ingredient lookup",
   "ldlib.gui.editor.tips.allowXEIIngredientOverMouse": "if ture, the widget will be able to jump to the xei viewer",
+  "ldlib.gui.editor.tips.items": "items",
 
 
   "ldlib.gui.editor.name.texture_type": "Texture Type",
@@ -182,6 +183,7 @@
   "ldlib.gui.editor.register.texture.color_rect_texture": "Color Rect Texture",
   "ldlib.gui.editor.register.texture.color_border_texture": "Color Border Texture",
   "ldlib.gui.editor.register.texture.animation_texture": "Animation Texture",
+  "ldlib.gui.editor.register.texture.item_stack_texture": "Item Stack Texture",
   "ldlib.gui.editor.register.texture.shader_texture": "Shader Texture",
   "ldlib.gui.editor.register.texture.progress_texture": "Progress Texture",
   "ldlib.gui.editor.register.texture.group_texture": "Group Texture",
@@ -194,6 +196,7 @@
   "ldlib.gui.editor.register.widget.basic.text_field": "Text Field",
   "ldlib.gui.editor.register.widget.basic.selector": "Selector",
   "ldlib.gui.editor.register.widget.basic.progress": "Progress",
+  "ldlib.gui.editor.register.widget.basic.text_texture": "Text Texture",
   "ldlib.gui.editor.register.widget.basic.color": "Color",
   "ldlib.gui.editor.register.widget.group.group": "Group",
   "ldlib.gui.editor.register.widget.group.draggable_scrollable_group": "Scrollable Group",

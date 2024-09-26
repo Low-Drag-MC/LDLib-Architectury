@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.UIResourceTexture;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.api.EnvType;
@@ -41,7 +42,7 @@ public class ProgressWidget extends Widget implements IConfigurableWidget {
     @Configurable(name = "ldlib.gui.editor.name.overlayTexture")
     @Setter
     private IGuiTexture overlayTexture;
-
+    @Getter
     private double lastProgressValue;
 
     public ProgressWidget() {
