@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.gui.widget;
 
+import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
@@ -41,6 +42,12 @@ public class TextTextureWidget extends Widget implements IConfigurableWidget {
         if (isRemote()) {
             lastComponent = Component.translatable(text);
         }
+    }
+
+    @ConfigSetter(field = "lastComponent")
+    public void setLastComponent(Component component) {
+        this.lastComponent = component;
+        setText(component);
     }
 
     @Override

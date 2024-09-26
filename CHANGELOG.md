@@ -1,4 +1,5 @@
 # ChangeLog
 
-* fix model selection in editor
-* fix widget size can be smaller than 0
+* clean up widget code
+* expose ItemStack Texture
+* add the TextTextureWidget
