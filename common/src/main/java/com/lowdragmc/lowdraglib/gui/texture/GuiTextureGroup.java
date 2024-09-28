@@ -8,7 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 
 @LDLRegister(name = "group_texture", group = "texture")
-public class GuiTextureGroup extends TransformTexture{
+public class GuiTextureGroup extends TransformTexture {
 
     @Configurable(collapse = false)
     public IGuiTexture[] textures;

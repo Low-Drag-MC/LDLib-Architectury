@@ -16,6 +16,11 @@ public class ReflectionUtilsImpl {
         for (ModFileScanData data : ModList.get().getAllScanData()) {
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
                 if (annotationType.equals(annotation.annotationType())) {
+                    if (annotation.annotationData().containsKey("modID") && annotation.annotationData().get("modID") instanceof String modID) {
+                        if (!modID.isEmpty() && !ModList.get().isLoaded(modID)) {
+                            continue;
+                        }
+                    }
                     try {
                         consumer.accept(Class.forName(annotation.memberName(), false, ReflectionUtilsImpl.class.getClassLoader()));
                     } catch (Throwable throwable) {

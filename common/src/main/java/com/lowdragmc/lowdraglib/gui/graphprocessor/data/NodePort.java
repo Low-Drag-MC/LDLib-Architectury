@@ -222,7 +222,29 @@ public class NodePort {
                 if (list != null) list.clear();
             }
             var type = fieldInfo.getType();
-            if (type.isEnum()) {
+            if (type.isPrimitive()) {
+                if (type.equals(boolean.class)) {
+                    fieldInfo.setBoolean(fieldOwner, false);
+                } else if (type.equals(byte.class)) {
+                    fieldInfo.setByte(fieldOwner, (byte) 0);
+                } else if (type.equals(short.class)) {
+                    fieldInfo.setShort(fieldOwner, (short) 0);
+                } else if (type.equals(int.class)) {
+                    fieldInfo.setInt(fieldOwner, 0);
+                } else if (type.equals(long.class)) {
+                    fieldInfo.setLong(fieldOwner, 0);
+                } else if (type.equals(float.class)) {
+                    fieldInfo.setFloat(fieldOwner, 0);
+                } else if (type.equals(double.class)) {
+                    fieldInfo.setDouble(fieldOwner, 0);
+                } else if (type.equals(char.class)) {
+                    fieldInfo.setChar(fieldOwner, '\0');
+                }
+            } else if (type.isEnum()) {
+                var enumConstants = type.getEnumConstants();
+                if (enumConstants != null && enumConstants.length > 0) {
+                    fieldInfo.set(fieldOwner, type.getEnumConstants()[0]);
+                }
                 fieldInfo.set(fieldOwner, null);
             } else if (type.equals(String.class)) {
                 fieldInfo.set(fieldOwner, "");

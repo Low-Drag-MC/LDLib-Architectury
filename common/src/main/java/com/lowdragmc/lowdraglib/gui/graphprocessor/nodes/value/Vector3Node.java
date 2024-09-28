@@ -3,6 +3,7 @@ package com.lowdragmc.lowdraglib.gui.graphprocessor.nodes.value;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.InputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.OutputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
@@ -51,5 +52,15 @@ public class Vector3Node extends BaseNode {
     @Override
     public int getMinWidth() {
         return 150;
+    }
+
+    @Override
+    public void buildConfigurator(ConfiguratorGroup father) {
+        for (var port : getInputPorts()) {
+            if (port.fieldName.equals("in")) {
+                if (!port.getEdges().isEmpty()) return;
+            }
+        }
+        super.buildConfigurator(father);
     }
 }

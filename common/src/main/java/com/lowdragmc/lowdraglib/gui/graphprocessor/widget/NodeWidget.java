@@ -187,10 +187,9 @@ public class NodeWidget extends WidgetGroup {
             for (Configurator configurator : group.getConfigurators()) {
                 configurator.computeHeight();
                 configurator.setSelfPosition(new Position(2, configHeight));
-                configHeight += configurator.getSize().height + 5;
+                configHeight += configurator.getSize().height;
             }
             content.addWidget(new ImageWidget(0, 0, width, 1, ColorPattern.BLACK.rectTexture()));
-            configHeight -= 5;
             content.setVisible(true);
             content.setSelfPosition(new Position(0, height));
             content.setSize(width, configHeight);

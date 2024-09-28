@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.DefaultValue;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.InputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.OutputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
@@ -35,5 +36,15 @@ public class NumberNode extends BaseNode {
             }
         }
         internalValue = out;
+    }
+
+    @Override
+    public void buildConfigurator(ConfiguratorGroup father) {
+        for (var port : getInputPorts()) {
+            if (port.fieldName.equals("in")) {
+                if (!port.getEdges().isEmpty()) return;
+            }
+        }
+        super.buildConfigurator(father);
     }
 }

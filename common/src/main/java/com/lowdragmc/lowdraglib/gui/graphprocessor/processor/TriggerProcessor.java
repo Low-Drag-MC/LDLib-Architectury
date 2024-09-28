@@ -4,6 +4,9 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseGraph;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.ITriggerableNode;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.StartNode;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.nodes.logic.BreakNode;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.nodes.logic.ForLoopNode;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.nodes.logic.LoopStartNode;
 import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -73,21 +76,51 @@ public class TriggerProcessor extends GraphProcessor {
             while (!nodeToExecute.isEmpty()) {
                 // TODO: maxExecutionTimeMS
                 var either = nodeToExecute.pop();
-                if (either.left().isPresent()) {
-                    // if its common node, we execute it as usual
-                    var node = either.left().get();
-                    node.onProcess();
-                    return node;
-                } else if (either.right().isPresent()) {
+                if (either.right().isPresent()) {
                     // if its triggerable node, we execute it with the trigger source
                     var triggerNode = either.right().get().left();
                     var triggerSource = either.right().get().right();
                     // make sure its dependencies are all already executed
                     if (nodeDependenciesGathered.contains(triggerNode)) {
-                        triggerNode.onTrigger(triggerSource);
-                        // select the next nodes to execute
-                        triggerNode.getNextTriggerNodes().stream().sorted((n1, n2) -> n2.getComputeOrder() - n1.getComputeOrder())
-                                .forEach(n -> nodeToExecute.push(Either.right(Pair.of(n, triggerNode))));
+                        if (triggerNode instanceof LoopStartNode) {
+                            continue;
+                        } else if (triggerNode instanceof BreakNode) {
+                            // find last loop start node and break the loop
+                            while (nodeToExecute.peek().right().isEmpty() || !(nodeToExecute.peek().right().get().left() instanceof LoopStartNode)) {
+                                nodeToExecute.pop();
+                            }
+                            nodeToExecute.pop();
+                        } else if (triggerNode instanceof ForLoopNode forLoopNode) {
+                            if (forLoopNode.isLooping) {
+                                triggerNode.onTrigger(triggerSource);
+                                if (forLoopNode.index < forLoopNode.end - 1) {
+                                    return triggerNode.self();
+                                } else {
+                                    forLoopNode.isLooping = false;
+                                }
+                            } else {
+                                forLoopNode.isLooping = true;
+                                forLoopNode.index = forLoopNode.start - 1; // Initialize the start index
+                                forLoopNode.getNextTriggerNodes().stream().sorted((n1, n2) -> n2.getComputeOrder() - n1.getComputeOrder())
+                                        .forEach(n -> nodeToExecute.push(Either.right(Pair.of(n, triggerNode))));
+
+                                nodeToExecute.push(Either.right(Pair.of(new LoopStartNode(), forLoopNode))); // Increment the counter
+
+                                for(int i = forLoopNode.start; i < forLoopNode.end; i++) {
+                                    forLoopNode.getExecutedNodesLoopBody().stream().sorted((n1, n2) -> n2.getComputeOrder() - n1.getComputeOrder())
+                                            .forEach(n -> nodeToExecute.push(Either.right(Pair.of(n, triggerNode))));
+
+                                    nodeToExecute.push(Either.right(Pair.of(forLoopNode, null))); // Increment the counter
+                                }
+                                return triggerNode.self();
+                            }
+                        } else {
+                            triggerNode.onTrigger(triggerSource);
+                            // select the next nodes to execute
+                            triggerNode.getNextTriggerNodes().stream().sorted((n1, n2) -> n2.getComputeOrder() - n1.getComputeOrder())
+                                    .forEach(n -> nodeToExecute.push(Either.right(Pair.of(n, triggerNode))));
+                        }
+                        nodeDependenciesGathered.remove(triggerNode);
                         return triggerNode.self();
                     } else {
                         // lets execute the trigger node later
@@ -97,6 +130,11 @@ public class TriggerProcessor extends GraphProcessor {
                             nodeToExecute.push(Either.left(nonConditionalNode));
                         }
                     }
+                } else if (either.left().isPresent()) {
+                    // if its common node, we execute it as usual
+                    var node = either.left().get();
+                    node.onProcess();
+                    return node;
                 }
             }
             return null;

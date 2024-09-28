@@ -72,7 +72,7 @@ public class SwitchNode extends BaseNode {
     }
 
     @CustomPortBehavior(field = "out")
-    public List<PortData> modifyIfPort(List<PortEdge> edges) {
+    public List<PortData> modifyOutPort(List<PortEdge> edges) {
         return List.of(new PortData()
                 .displayName("out")
                 .identifier("out")

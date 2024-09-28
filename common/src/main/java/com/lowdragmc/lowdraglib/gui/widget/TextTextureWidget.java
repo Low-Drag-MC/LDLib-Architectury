@@ -42,6 +42,7 @@ public class TextTextureWidget extends Widget implements IConfigurableWidget {
         if (isRemote()) {
             lastComponent = Component.translatable(text);
         }
+        setText(text);
     }
 
     @ConfigSetter(field = "lastComponent")
@@ -51,6 +52,7 @@ public class TextTextureWidget extends Widget implements IConfigurableWidget {
     }
 
     @Override
+    @ConfigSetter(field = "size")
     public void setSize(Size size) {
         super.setSize(size);
         textTexture.setWidth(size.width);

@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 @LDLRegister(name = "item_stack_texture", group = "texture")
 public class ItemStackTexture extends TransformTexture {
@@ -19,6 +20,11 @@ public class ItemStackTexture extends TransformTexture {
     @Configurable(name = "ldlib.gui.editor.name.color")
     private int color = -1;
     private long lastTick;
+
+    public ItemStackTexture() {
+        this(Items.APPLE.asItem());
+    }
+
 
     public ItemStackTexture(ItemStack... itemStacks) {
         this.itemStack = itemStacks;
