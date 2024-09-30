@@ -183,9 +183,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 gui.getModularUIGui().setHoveredSlot(slotReference);
             }
             if (!stack.isEmpty() && gui != null) {
-                List<Component> tips = new ArrayList<>(getAdditionalToolTips(DrawerHelper.getItemToolTip(stack)));
-                tips.addAll(tooltipTexts);
-                gui.getModularUIGui().setHoverTooltip(tips, stack, null, stack.getTooltipImage().orElse(null));
+                gui.getModularUIGui().setHoverTooltip(getFullTooltipTexts(), stack, null, stack.getTooltipImage().orElse(null));
             } else {
                 super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
             }
@@ -347,6 +345,19 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             this.onAddedTooltips.accept(this, list);
         }
         return list;
+    }
+
+    @Override
+    public List<Component> getFullTooltipTexts() {
+        if (slotReference != null) {
+            var stack = slotReference.getItem();
+            if (!stack.isEmpty()) {
+                var tips = new ArrayList<>(DrawerHelper.getItemToolTip(stack));
+                tips.addAll(getTooltipTexts());
+                return tips;
+            }
+        }
+        return Collections.emptyList();
     }
 
     @Nullable

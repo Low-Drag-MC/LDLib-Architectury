@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 
 public interface IRecipeIngredientSlot extends IIngredientSlot {
@@ -40,6 +41,13 @@ public interface IRecipeIngredientSlot extends IIngredientSlot {
      */
     default List<Component> getAdditionalToolTips(List<Component> toolTips) {
         return toolTips;
+    }
+
+    /**
+     * Get full tooltips excluding the ingredient's tooltip.
+     */
+    default List<Component> getFullTooltipTexts() {
+        return Collections.emptyList();
     }
 
 }

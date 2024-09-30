@@ -335,6 +335,28 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     }
 
     @Override
+    public List<Component> getFullTooltipTexts() {
+        var tooltips = new ArrayList<Component>();
+        if (lastFluidInTank != null && !lastFluidInTank.isEmpty()) {
+            tooltips.add(FluidHelper.getDisplayName(lastFluidInTank));
+            tooltips.add(Component.translatable("ldlib.fluid.amount", lastFluidInTank.getAmount(), lastTankCapacity).append(" " + FluidHelper.getUnit()));
+            if (!Platform.isForge()) {
+                tooltips.add(Component.literal("§6mB:§r %d/%d".formatted(lastFluidInTank.getAmount() * 1000 / FluidHelper.getBucket(), lastTankCapacity * 1000 / FluidHelper.getBucket())).append(" " + "mB"));
+            }
+            tooltips.add(Component.translatable("ldlib.fluid.temperature", FluidHelper.getTemperature(lastFluidInTank)));
+            tooltips.add(Component.translatable(FluidHelper.isLighterThanAir(lastFluidInTank) ? "ldlib.fluid.state_gas" : "ldlib.fluid.state_liquid"));
+        } else {
+            tooltips.add(Component.translatable("ldlib.fluid.empty"));
+            tooltips.add(Component.translatable("ldlib.fluid.amount", 0, lastTankCapacity).append(" " + FluidHelper.getUnit()));
+            if (!Platform.isForge()) {
+                tooltips.add(Component.literal("§6mB:§r %d/%d".formatted(0, lastTankCapacity * 1000 / FluidHelper.getBucket())).append(" " + "mB"));
+            }
+        }
+        tooltips.addAll(getTooltipTexts());
+        return tooltips;
+    }
+
+    @Override
     @Environment(EnvType.CLIENT)
     public void drawInBackground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
@@ -391,25 +413,8 @@ public class TankWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Environment(EnvType.CLIENT)
     public void drawInForeground(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (drawHoverTips && isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this) {
-            List<Component> tooltips = new ArrayList<>();
-            if (lastFluidInTank != null && !lastFluidInTank.isEmpty()) {
-                tooltips.add(FluidHelper.getDisplayName(lastFluidInTank));
-                tooltips.add(Component.translatable("ldlib.fluid.amount", lastFluidInTank.getAmount(), lastTankCapacity).append(" " + FluidHelper.getUnit()));
-                if (!Platform.isForge()) {
-                    tooltips.add(Component.literal("§6mB:§r %d/%d".formatted(lastFluidInTank.getAmount() * 1000 / FluidHelper.getBucket(), lastTankCapacity * 1000 / FluidHelper.getBucket())).append(" " + "mB"));
-                }
-                tooltips.add(Component.translatable("ldlib.fluid.temperature", FluidHelper.getTemperature(lastFluidInTank)));
-                tooltips.add(Component.translatable(FluidHelper.isLighterThanAir(lastFluidInTank) ? "ldlib.fluid.state_gas" : "ldlib.fluid.state_liquid"));
-            } else {
-                tooltips.add(Component.translatable("ldlib.fluid.empty"));
-                tooltips.add(Component.translatable("ldlib.fluid.amount", 0, lastTankCapacity).append(" " + FluidHelper.getUnit()));
-                if (!Platform.isForge()) {
-                    tooltips.add(Component.literal("§6mB:§r %d/%d".formatted(0, lastTankCapacity * 1000 / FluidHelper.getBucket())).append(" " + "mB"));
-                }
-            }
             if (gui != null) {
-                tooltips.addAll(getTooltipTexts());
-                gui.getModularUIGui().setHoverTooltip(tooltips, ItemStack.EMPTY, null, null);
+                gui.getModularUIGui().setHoverTooltip(getFullTooltipTexts(), ItemStack.EMPTY, null, null);
             }
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1f);
         } else {
