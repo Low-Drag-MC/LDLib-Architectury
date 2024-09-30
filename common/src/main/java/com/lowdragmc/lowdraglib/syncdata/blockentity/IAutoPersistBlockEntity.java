@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.syncdata.blockentity;
 
-import com.google.common.base.Strings;
 import com.lowdragmc.lowdraglib.syncdata.accessor.IManagedAccessor;
 import com.lowdragmc.lowdraglib.utils.TagUtils;
 import net.minecraft.nbt.CompoundTag;
@@ -17,10 +16,7 @@ public interface IAutoPersistBlockEntity extends IManagedBlockEntity {
                 continue;
             }
 
-            String key = fieldKey.getPersistentKey();
-            if (Strings.isNullOrEmpty(key)) {
-                key = fieldKey.getName();
-            }
+            String key = persistedField.getPersistedKey();
             var nbt = fieldKey.readPersistedField(persistedField);
             if (nbt != null) {
                 TagUtils.setTagExtended(tag, key, nbt);

@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.syncdata.accessor;
 
-import com.google.common.base.Strings;
 import com.lowdragmc.lowdraglib.syncdata.AccessorOp;
 import com.lowdragmc.lowdraglib.syncdata.IManaged;
 import com.lowdragmc.lowdraglib.syncdata.IManagedStorage;
@@ -72,11 +71,7 @@ public class IManagedAccessor extends ReadonlyAccessor {
         var persistedFields = managed.getSyncStorage().getPersistedFields();
         for (var persistedField : persistedFields) {
             var fieldKey = persistedField.getKey();
-
-            String key = fieldKey.getPersistentKey();
-            if (Strings.isNullOrEmpty(key)) {
-                key = fieldKey.getName();
-            }
+            var key = persistedField.getPersistedKey();
 
             var nbt = fieldKey.readPersistedField(persistedField);
 
@@ -126,10 +121,7 @@ public class IManagedAccessor extends ReadonlyAccessor {
     public static void writePersistedFields(CompoundTag tag, IRef[] refs) {
         for (var ref : refs) {
             var fieldKey = ref.getKey();
-            String key = fieldKey.getPersistentKey();
-            if (Strings.isNullOrEmpty(key)) {
-                key = fieldKey.getName();
-            }
+            var key = ref.getPersistedKey();
 
             var nbt = TagUtils.getTagExtended(tag, key);
             if (nbt != null) {

@@ -349,6 +349,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         if (widget == this) {
             throw new IllegalArgumentException("Cannot add self");
         }
+        if (widget == null) return this;
         if (widgets.contains(widget)) {
             throw new IllegalArgumentException("Already added");
         }

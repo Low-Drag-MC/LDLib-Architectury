@@ -10,6 +10,9 @@ import lombok.Setter;
 import java.lang.ref.WeakReference;
 
 public class ReadonlyRef implements IRef {
+    @Getter
+    @Setter
+    private String persistedPrefixName;
     protected final boolean lazy;
     private ManagedKey key;
     @Getter

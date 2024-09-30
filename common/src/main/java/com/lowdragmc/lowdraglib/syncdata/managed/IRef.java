@@ -1,10 +1,12 @@
 package com.lowdragmc.lowdraglib.syncdata.managed;
 
+import com.google.common.base.Strings;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedKey;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 
-public interface IRef {
+import javax.annotation.Nullable;
 
+public interface IRef {
     /**
      * ManagedKey refer to ref's meta info.
      */
@@ -57,5 +59,28 @@ public interface IRef {
     boolean isLazy();
 
     <T> T readRaw();
+
+    /**
+     * set persisted prefix name
+     */
+    @Nullable
+    String getPersistedPrefixName();
+
+    /**
+     * set persisted prefix name
+     */
+    void setPersistedPrefixName(String name);
+
+    default String getPersistedKey() {
+        var fieldKey = getKey();
+        String key = fieldKey.getPersistentKey();
+        if (Strings.isNullOrEmpty(key)) {
+            key = fieldKey.getName();
+        }
+        if (!Strings.isNullOrEmpty(getPersistedPrefixName())) {
+            key = getPersistedPrefixName() + "." + key;
+        }
+        return key;
+    }
 
 }
