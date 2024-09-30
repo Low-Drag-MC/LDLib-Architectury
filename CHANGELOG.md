@@ -1,5 +1,3 @@
 # ChangeLog
 
-* clean up widget code
-* expose ItemStack Texture
-* add the TextTextureWidget
+* fix widget group server crash

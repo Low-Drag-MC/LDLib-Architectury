@@ -569,6 +569,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     @Override
+    @Environment(EnvType.CLIENT)
     public void drawOverlay(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawOverlay(graphics, mouseX, mouseY, partialTicks);
         for (Widget widget : widgets) {

@@ -1,6 +1,7 @@
 package com.lowdragmc.lowdraglib.jei;
 
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
+import com.lowdragmc.lowdraglib.utils.Position;
 import mezz.jei.api.gui.builder.IIngredientConsumer;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
@@ -26,15 +27,17 @@ public class SlotRecipeWidget implements ISlottedRecipeWidget {
 
     public final IRecipeIngredientSlot slot;
     public final IRecipeSlotDrawable jeiSlot;
+    public final Position position;
 
     public SlotRecipeWidget(IRecipeIngredientSlot slot, IRecipeSlotDrawable jeiSlot) {
         this.slot = slot;
         this.jeiSlot = jeiSlot;
+        this.position = new Position(slot.self().getPositionX(), slot.self().getPositionY());
     }
 
     @Override
     public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
-        if (slot.self().isMouseOverElement(mouseX, mouseY)) {
+        if (slot.self().isMouseOverElement(mouseX + position.x, mouseY + position.y)) {
             return Optional.of(new RecipeSlotUnderMouse(new RecipeSlotDrawable(), getPosition()));
         }
         return Optional.empty();
@@ -46,7 +49,7 @@ public class SlotRecipeWidget implements ISlottedRecipeWidget {
      */
     @Override
     public ScreenPosition getPosition() {
-        return new ScreenPosition(0, 0);
+        return new ScreenPosition(position.x, position.y);
     }
 
     public class RecipeSlotDrawable implements IRecipeSlotDrawable {
@@ -73,7 +76,7 @@ public class SlotRecipeWidget implements ISlottedRecipeWidget {
 
         @Override
         public boolean isMouseOver(double mouseX, double mouseY) {
-            return slot.self().isMouseOverElement(mouseX, mouseY);
+            return slot.self().isMouseOverElement(mouseX + position.x, mouseY + position.y);
         }
 
         @Override
@@ -92,7 +95,7 @@ public class SlotRecipeWidget implements ISlottedRecipeWidget {
         }
 
         public Rect2i getRect() {
-            return jeiSlot.getRect();
+            return new Rect2i(0, 0, slot.self().getSizeWidth(), slot.self().getSizeHeight());
         }
 
         @Override
