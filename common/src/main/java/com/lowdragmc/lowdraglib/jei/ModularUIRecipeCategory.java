@@ -7,6 +7,7 @@ import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.ingredients.IIngredientRenderer;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -19,9 +20,7 @@ import net.minecraft.world.item.TooltipFlag;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author KilaBash
@@ -36,43 +35,46 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
         var slotName = "slot_" + index;
         var slotBuilder = builder.addSlot(role, slot.self().getPositionX(), slot.self().getPositionY());
         // append ingredients
+        var ingredientMap = new HashMap<IIngredientType, List>();
         for (Object ingredient : slot.getXEIIngredients()) {
             if (ingredient instanceof IClickableIngredient clickableIngredient) {
-                var type = clickableIngredient.getIngredientType();
-                var ingredients= clickableIngredient.getIngredient();
-                slotBuilder.addIngredient(type, ingredients);
-                slotBuilder.setCustomRenderer(type, new IIngredientRenderer<>() {
-                    @Override
-                    public void render(GuiGraphics guiGraphics, Object ingredient) {
-
-                    }
-
-                    @Override
-                    public List<Component> getTooltip(Object ingredient, TooltipFlag tooltipFlag) {
-                        return Collections.emptyList();
-                    }
-
-                    @Override
-                    public void getTooltip(ITooltipBuilder tooltip, Object ingredient, TooltipFlag tooltipFlag) {
-                        tooltip.addAll(slot.getFullTooltipTexts());
-                    }
-
-                    @Override
-                    public int getWidth() {
-                        return slot.self().getSizeWidth();
-                    }
-
-                    @Override
-                    public int getHeight() {
-                        return slot.self().getSizeHeight();
-                    }
-                });
+                ingredientMap.computeIfAbsent(clickableIngredient.getIngredientType(), k -> new ArrayList())
+                        .add(clickableIngredient.getIngredient());
             }
+        }
+        for (var entry : ingredientMap.entrySet()) {
+            var type = entry.getKey();
+            var ingredients = entry.getValue();
+            slotBuilder.addIngredients(type, ingredients);
+            slotBuilder.setCustomRenderer(type, new IIngredientRenderer<>() {
+                @Override
+                public void render(GuiGraphics guiGraphics, Object ingredient) {
+                    slot.setCurrentJEIRenderedIngredient(ingredient);
+                }
+
+                @Override
+                public List<Component> getTooltip(Object ingredient, TooltipFlag tooltipFlag) {
+                    return Collections.emptyList();
+                }
+
+                @Override
+                public void getTooltip(ITooltipBuilder tooltip, Object ingredient, TooltipFlag tooltipFlag) {
+                    tooltip.addAll(slot.getFullTooltipTexts());
+                }
+
+                @Override
+                public int getWidth() {
+                    return slot.self().getSizeWidth();
+                }
+
+                @Override
+                public int getHeight() {
+                    return slot.self().getSizeHeight();
+                }
+            });
         }
         // set slot name
         slotBuilder.setSlotName(slotName);
-        // append widget tooltips
-//        slotBuilder.addRichTooltipCallback((recipeSlotView, tooltipBuilder) -> tooltipBuilder.addAll(slot.getAdditionalToolTips(new ArrayList<>())));
     }
 
     @Override

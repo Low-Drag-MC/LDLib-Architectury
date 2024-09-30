@@ -37,17 +37,17 @@ public interface IRecipeIngredientSlot extends IIngredientSlot {
     }
 
     /**
-     * Append additional tooltips excluding the ingredient's tooltip.
-     */
-    default List<Component> getAdditionalToolTips(List<Component> toolTips) {
-        return toolTips;
-    }
-
-    /**
      * Get full tooltips excluding the ingredient's tooltip.
      */
     default List<Component> getFullTooltipTexts() {
         return Collections.emptyList();
+    }
+
+    /**
+     * Set the ingredient that is currently being rendered by JEI. It is used to render the rotation of ingredients displayed.
+     */
+    default void setCurrentJEIRenderedIngredient(Object ingredient) {
+        // do nothing
     }
 
 }

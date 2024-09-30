@@ -88,4 +88,11 @@ public class FluidHelperImpl {
         return "dl";
     }
 
+    public static FluidStack fromRealFluidStack(Object fluidStack) {
+        if (fluidStack instanceof FluidVariant variant) {
+            return FluidStack.create(variant.getFluid(), 1, variant.getNbt());
+        }
+        return FluidStack.empty();
+    }
+
 }

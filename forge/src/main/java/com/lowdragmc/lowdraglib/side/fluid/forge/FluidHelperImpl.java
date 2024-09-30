@@ -82,4 +82,11 @@ public class FluidHelperImpl {
     public static String getUnit() {
         return "mB";
     }
+
+    public static FluidStack fromRealFluidStack(Object fluidStack) {
+        if (fluidStack instanceof net.minecraftforge.fluids.FluidStack stack) {
+            return toFluidStack(stack);
+        }
+        return FluidStack.empty();
+    }
 }
