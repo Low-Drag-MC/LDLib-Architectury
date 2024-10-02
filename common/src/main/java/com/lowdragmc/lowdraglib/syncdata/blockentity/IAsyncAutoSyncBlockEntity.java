@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import net.minecraft.server.level.ServerLevel;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 
@@ -33,17 +34,39 @@ public interface IAsyncAutoSyncBlockEntity extends IAutoSyncBlockEntity, IAsyncL
         }
     }
 
+    /**
+     * whether it's syncing in an async thread
+     */
+    @ApiStatus.AvailableSince("1.21")
+    default boolean isAsyncSyncing() {
+        return false;
+    }
+
+    /**
+     * set whether it's syncing in an async thread
+     */
+    @ApiStatus.AvailableSince("1.21")
+    default void setAsyncSyncing(boolean syncing) {
+
+    }
+
     @Override
     default void asyncTick(long periodID) {
-        if (Platform.getMinecraftServer() == null) return;
+        var server = Platform.getMinecraftServer();
+        if (server == null || server.isStopped() || !server.isRunning()) return;
         if (useAsyncThread() && !getSelf().isRemoved()) {
             for (IRef field : getNonLazyFields()) {
                 field.update();
             }
-            if (getRootStorage().hasDirtySyncFields()) {
-                Platform.getMinecraftServer().execute(() -> {
-                    var packet = SPacketManagedPayload.of(this, false);
-                    LDLNetworking.NETWORK.sendToTrackingChunk(packet, Objects.requireNonNull(this.getSelf().getLevel()).getChunkAt(this.getCurrentPos()));
+            if (getRootStorage().hasDirtySyncFields() && !isAsyncSyncing()) {
+                setAsyncSyncing(true);
+                server.execute(() -> {
+                    if (!server.isStopped() && server.isRunning()) {
+                        var packet = SPacketManagedPayload.of(this, false);
+                        LDLNetworking.NETWORK.sendToTrackingChunk(packet,
+                                Objects.requireNonNull(this.getSelf().getLevel()).getChunkAt(this.getCurrentPos()));
+                    }
+                    setAsyncSyncing(false);
                 });
             }
         }

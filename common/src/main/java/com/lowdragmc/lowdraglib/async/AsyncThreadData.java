@@ -79,7 +79,7 @@ public class AsyncThreadData extends SavedData {
 
     private void searchingTask() {
         try {
-            if (serverLevel.getServer().isCurrentlySaving()) {
+            if (serverLevel.getServer().isCurrentlySaving() || serverLevel.getServer().isStopped() || !serverLevel.getServer().isRunning()) {
                 return;
             }
             IN_SERVICE.set(true);
