@@ -9,7 +9,6 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.OutputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.LinearTriggerNode;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.side.item.ItemTransferHelper;
-import lombok.SneakyThrows;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -36,13 +35,16 @@ public class GivePlayerItemNode extends LinearTriggerNode {
     }
 
     @Override
-    @SneakyThrows
     public void buildConfigurator(ConfiguratorGroup father) {
         var clazz = getClass();
         for (var port : getInputPorts()) {
             if (port.fieldName.equals("preferredSlot")) {
                 if (port.getEdges().isEmpty()) {
-                    ConfiguratorParser.createFieldConfigurator(clazz.getField("internalPreferredSlot"), father, clazz, new HashMap<>(), this);
+                    try {
+                        ConfiguratorParser.createFieldConfigurator(clazz.getField("internalPreferredSlot"), father, clazz, new HashMap<>(), this);
+                    } catch (NoSuchFieldException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }

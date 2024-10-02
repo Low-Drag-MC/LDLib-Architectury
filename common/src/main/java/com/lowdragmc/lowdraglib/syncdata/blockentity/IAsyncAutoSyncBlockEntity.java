@@ -35,6 +35,8 @@ public interface IAsyncAutoSyncBlockEntity extends IAutoSyncBlockEntity, IAsyncL
 
     @Override
     default void asyncTick(long periodID) {
+        if (Platform.isNotSafe()) return;
+
         if (Platform.getMinecraftServer() == null) return;
         if (useAsyncThread() && !getSelf().isRemoved()) {
             for (IRef field : getNonLazyFields()) {
@@ -42,6 +44,7 @@ public interface IAsyncAutoSyncBlockEntity extends IAutoSyncBlockEntity, IAsyncL
             }
             if (getRootStorage().hasDirtySyncFields()) {
                 Platform.getMinecraftServer().execute(() -> {
+                    if (Platform.isNotSafe()) return;
                     var packet = SPacketManagedPayload.of(this, false);
                     LDLNetworking.NETWORK.sendToTrackingChunk(packet, Objects.requireNonNull(this.getSelf().getLevel()).getChunkAt(this.getCurrentPos()));
                 });

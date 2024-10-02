@@ -8,7 +8,6 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.InputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.OutputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.LinearTriggerNode;
 import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
-import lombok.SneakyThrows;
 import net.minecraft.world.item.ItemStack;
 
 import java.lang.reflect.Method;
@@ -45,7 +44,6 @@ public class ItemTransferExtractNode extends LinearTriggerNode {
     }
 
     @Override
-    @SneakyThrows
     public void buildConfigurator(ConfiguratorGroup father) {
         var setter = new HashMap<String, Method>();
         var clazz = getClass();
@@ -53,17 +51,29 @@ public class ItemTransferExtractNode extends LinearTriggerNode {
             switch (port.fieldName) {
                 case "amount" -> {
                     if (port.getEdges().isEmpty()) {
-                        ConfiguratorParser.createFieldConfigurator(clazz.getField("internalAmount"), father, clazz, setter, this);
+                        try {
+                            ConfiguratorParser.createFieldConfigurator(clazz.getField("internalAmount"), father, clazz, setter, this);
+                        } catch (NoSuchFieldException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
                 case "slot" -> {
                     if (port.getEdges().isEmpty()) {
-                        ConfiguratorParser.createFieldConfigurator(clazz.getField("internalSlot"), father, clazz, setter, this);
+                        try {
+                            ConfiguratorParser.createFieldConfigurator(clazz.getField("internalSlot"), father, clazz, setter, this);
+                        } catch (NoSuchFieldException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
                 case "simulate" -> {
                     if (port.getEdges().isEmpty()) {
-                        ConfiguratorParser.createFieldConfigurator(clazz.getField("internalSimulate"), father, clazz, setter, this);
+                        try {
+                            ConfiguratorParser.createFieldConfigurator(clazz.getField("internalSimulate"), father, clazz, setter, this);
+                        } catch (NoSuchFieldException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }

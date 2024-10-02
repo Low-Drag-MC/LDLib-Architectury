@@ -1,5 +1,6 @@
 package com.lowdragmc.lowdraglib.syncdata.blockentity;
 
+import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
@@ -36,6 +37,8 @@ public interface IAutoSyncBlockEntity extends IManagedBlockEntity {
 
 
     default void defaultServerTick() {
+        if (Platform.isNotSafe()) return;
+
         for (IRef field : getNonLazyFields()) {
             field.update();
         }
