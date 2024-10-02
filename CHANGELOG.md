@@ -1,3 +1,3 @@
 # ChangeLog
 
-* support custom persisted name for IRef
+* fix the server freezes while the server is not running

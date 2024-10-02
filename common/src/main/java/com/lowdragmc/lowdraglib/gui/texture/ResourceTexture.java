@@ -35,7 +35,7 @@ import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX_COLOR;
 @NoArgsConstructor
 public class ResourceTexture extends TransformTexture {
 
-    @Configurable(name = "ldlib.gui.editor.name.resource")
+    @Configurable(name = "ldlib.gui.editor.name.resource", forceUpdate = false)
     public ResourceLocation imageLocation = new ResourceLocation("ldlib:textures/gui/icon.png");
 
     @Configurable

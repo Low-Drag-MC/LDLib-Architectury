@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.networking.LDLNetworking;
 import com.lowdragmc.lowdraglib.networking.s2c.SPacketManagedPayload;
 import com.lowdragmc.lowdraglib.syncdata.managed.IRef;
 import net.minecraft.server.level.ServerLevel;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 
@@ -37,7 +38,6 @@ public interface IAsyncAutoSyncBlockEntity extends IAutoSyncBlockEntity, IAsyncL
     default void asyncTick(long periodID) {
         if (Platform.isNotSafe()) return;
 
-        if (Platform.getMinecraftServer() == null) return;
         if (useAsyncThread() && !getSelf().isRemoved()) {
             for (IRef field : getNonLazyFields()) {
                 field.update();
