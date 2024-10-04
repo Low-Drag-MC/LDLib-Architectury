@@ -436,6 +436,7 @@ public class Widget {
         drawBackgroundTexture(graphics, mouseX, mouseY);
     }
 
+    @OnlyIn(Dist.CLIENT)
     public void drawOverlay(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (overlay != null) {
             Position pos = getPosition();

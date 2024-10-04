@@ -40,7 +40,10 @@ public class CompoundTagAccessor extends TypesAccessor<CompoundTag> {
                 () -> new SnbtPrinterTagVisitor("  ", 0, Lists.newArrayList()).visit(supplier.get()).replaceAll("\t", "").replaceAll("\\n", ""),
                 text -> {
                     try {
-                        consumer.accept(TagParser.parseTag(text));
+                        var newTag = TagParser.parseTag(text);
+                        var outTag = supplier.get();
+                        if (newTag.equals(outTag)) return;
+                        consumer.accept(newTag);
                     } catch (CommandSyntaxException ignored) {}
                 }, new SnbtPrinterTagVisitor("  ", 0, Lists.newArrayList()).visit(defaultValue(field, String.class)).replaceAll("\t", "").replaceAll("\\n", ""), forceUpdate);
         configurator.setCompoundTag(true);

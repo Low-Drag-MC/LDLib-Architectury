@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.async;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.lowdragmc.lowdraglib.LDLib;
+import lombok.Getter;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -50,6 +51,7 @@ public class AsyncThreadData extends SavedData {
             .setDaemon(true)
             .build();
     private static final ThreadLocal<Boolean> IN_SERVICE = ThreadLocal.withInitial(() -> false);
+    @Getter
     private long periodID = Long.MIN_VALUE;
 
     public void createExecutorService() {
@@ -80,7 +82,7 @@ public class AsyncThreadData extends SavedData {
 
     private void searchingTask() {
         try {
-            if (serverLevel.getServer().isCurrentlySaving()) {
+            if (serverLevel.getServer().isCurrentlySaving() || serverLevel.getServer().isStopped() || !serverLevel.getServer().isRunning()) {
                 return;
             }
             IN_SERVICE.set(true);
@@ -107,7 +109,4 @@ public class AsyncThreadData extends SavedData {
         executorService = null;
     }
 
-    public long getPeriodID() {
-        return periodID;
-    }
 }

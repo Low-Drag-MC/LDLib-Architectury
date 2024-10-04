@@ -87,8 +87,8 @@ public class GraphViewWidget extends WidgetGroup {
         setupNodeGroups(supportNodeGroups);
         for (String group : supportNodeGroups) {
             for (var wrapper : AnnotationDetector.REGISTER_GP_NODES.values()) {
-                if (wrapper.annotation().group().equals(group)) {
-                    nodeGroups.computeIfAbsent(group, k -> new ArrayList<>()).add(wrapper);
+                if (wrapper.annotation().group().startsWith(group)) {
+                    nodeGroups.computeIfAbsent(wrapper.annotation().group(), k -> new ArrayList<>()).add(wrapper);
                 }
             }
         }
@@ -97,9 +97,9 @@ public class GraphViewWidget extends WidgetGroup {
         addWidget(this.debugPanel = new DebugPanelWidget(this));
         this.debugPanel.setSelfPosition(getSizeWidth() - this.debugPanel.getSizeWidth() - 5,
                 getSizeHeight() - this.debugPanel.getSizeHeight() - 5);
-        addWidget(this.nodePanel = new NodePanelWidget(this, 5, 5, 100, getSizeHeight() - 10));
+        addWidget(this.nodePanel = new NodePanelWidget(this, 5, 5, 120, getSizeHeight() - 10));
         this.nodePanel.setDraggable(false);
-        addWidget(this.parameterPanel = new ParameterPanelWidget(this, 110, 5, 200, 200));
+        addWidget(this.parameterPanel = new ParameterPanelWidget(this, 130, 5, 200, 200));
         // node dragging
         this.setDraggingConsumer(
                 o -> o instanceof BaseNode,

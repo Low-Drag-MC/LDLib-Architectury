@@ -3,10 +3,11 @@ package com.lowdragmc.lowdraglib.jei;
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
-import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
+import mezz.jei.api.ingredients.IIngredientRenderer;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -14,11 +15,12 @@ import mezz.jei.api.runtime.IClickableIngredient;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.TooltipFlag;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author KilaBash
@@ -31,22 +33,48 @@ public abstract class ModularUIRecipeCategory<T extends ModularWrapper<?>> imple
 
     private static void addJEISlot(IRecipeLayoutBuilder builder, IRecipeIngredientSlot slot, RecipeIngredientRole role, int index) {
         var slotName = "slot_" + index;
-        IRecipeSlotBuilder slotBuilder = builder.addSlotToWidget(role, (extrasBuilder, recipe, slots) -> {
-            var jeiSlot = slots.stream().filter(s-> s.getSlotName().map(name -> name.equals(slotName)).orElse(false)).findFirst();
-            jeiSlot.ifPresent(drawable -> extrasBuilder.addWidget(new SlotRecipeWidget(slot, drawable)));
-        });
+        var slotBuilder = builder.addSlot(role, slot.self().getPositionX(), slot.self().getPositionY());
         // append ingredients
+        var ingredientMap = new HashMap<IIngredientType, List>();
         for (Object ingredient : slot.getXEIIngredients()) {
-            if (ingredient instanceof IClickableIngredient clickableIngredient) {
-                var type = clickableIngredient.getTypedIngredient().getType();
-                var ingredients = clickableIngredient.getTypedIngredient().getIngredient();
-                slotBuilder.addIngredient(type, ingredients);
+            if (ingredient instanceof IClickableIngredient<?> clickableIngredient) {
+                ingredientMap.computeIfAbsent(clickableIngredient.getTypedIngredient().getType(), k -> new ArrayList())
+                        .add(clickableIngredient.getTypedIngredient().getIngredient());
             }
+        }
+        for (var entry : ingredientMap.entrySet()) {
+            var type = entry.getKey();
+            var ingredients = entry.getValue();
+            slotBuilder.addIngredients(type, ingredients);
+            slotBuilder.setCustomRenderer(type, new IIngredientRenderer<>() {
+                @Override
+                public void render(GuiGraphics guiGraphics, Object ingredient) {
+                    slot.setCurrentJEIRenderedIngredient(ingredient);
+                }
+
+                @Override
+                public List<Component> getTooltip(Object ingredient, TooltipFlag tooltipFlag) {
+                    return Collections.emptyList();
+                }
+
+                @Override
+                public void getTooltip(ITooltipBuilder tooltip, Object ingredient, TooltipFlag tooltipFlag) {
+                    tooltip.addAll(slot.getFullTooltipTexts());
+                }
+
+                @Override
+                public int getWidth() {
+                    return slot.self().getSizeWidth();
+                }
+
+                @Override
+                public int getHeight() {
+                    return slot.self().getSizeHeight();
+                }
+            });
         }
         // set slot name
         slotBuilder.setSlotName(slotName);
-        // append widget tooltips
-        slotBuilder.addRichTooltipCallback((recipeSlotView, tooltipBuilder) -> tooltipBuilder.addAll(slot.getAdditionalToolTips(new ArrayList<>())));
     }
 
     @Override

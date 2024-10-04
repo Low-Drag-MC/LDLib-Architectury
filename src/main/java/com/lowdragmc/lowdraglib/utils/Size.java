@@ -20,6 +20,30 @@ public class Size {
         return new Size(width, height);
     }
 
+    public static Size add(Position position) {
+        return new Size(position.x, position.y);
+    }
+
+    public Size add(Size other) {
+        return new Size(width + other.width, height + other.height);
+    }
+
+    public Size add(int width, int height) {
+        return new Size(this.width + width, this.height + height);
+    }
+
+    public Size subtract(Size other) {
+        return new Size(width - other.width, height - other.height);
+    }
+
+    public Size addWidth(int width) {
+        return new Size(this.width + width, height);
+    }
+
+    public Size addHeight(int height) {
+        return new Size(width, this.height + height);
+    }
+
     public int getWidth() {
         return width;
     }

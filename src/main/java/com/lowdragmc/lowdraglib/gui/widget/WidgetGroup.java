@@ -348,6 +348,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
         if (widget == this) {
             throw new IllegalArgumentException("Cannot add self");
         }
+        if (widget == null) return this;
         if (widgets.contains(widget)) {
             throw new IllegalArgumentException("Already added");
         }
@@ -568,6 +569,7 @@ public class WidgetGroup extends Widget implements IGhostIngredientTarget, IIngr
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void drawOverlay(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.drawOverlay(graphics, mouseX, mouseY, partialTicks);
         for (Widget widget : widgets) {

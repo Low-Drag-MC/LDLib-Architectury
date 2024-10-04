@@ -1,5 +1,4 @@
 # ChangeLog
 
-* clean up widget code
-* expose ItemStack Texture
-* add the TextTextureWidget
+* fix crash on launch
+* fix the server freezes while the server is not running

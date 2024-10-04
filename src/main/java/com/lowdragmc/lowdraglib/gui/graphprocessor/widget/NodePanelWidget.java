@@ -1,33 +1,32 @@
 package com.lowdragmc.lowdraglib.gui.graphprocessor.widget;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
+import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
+import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
-import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SearchComponentWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SelectableWidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.gui.widget.layout.Layout;
+import com.lowdragmc.lowdraglib.utils.Position;
 import lombok.Getter;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 @Getter
-public class NodePanelWidget extends DraggablePanelWidget implements SearchComponentWidget.IWidgetSearch<String> {
+public class NodePanelWidget extends DraggablePanelWidget {
     private final GraphViewWidget graphView;
     // runtime
     private DraggableScrollableWidgetGroup nodeListView;
-    private SearchComponentWidget<String> searchComponent;
-    private final Map<String, SelectableWidgetGroup> mapping = new HashMap<>();
+    private String filter = "";
     @Nullable
     private String selectedNode;
-    private boolean firstClick;
-    private String firstClickName;
-    private long firstClickTime;
+    private long lastClickTime;
+    private Map<String, NodeGroupWidget> nodeGroupWidgets = new HashMap<>();
 
     public NodePanelWidget(GraphViewWidget graphView, int x, int y, int width, int height) {
         super("graph_processor.node_panel", x, y, width, height);
@@ -37,104 +36,121 @@ public class NodePanelWidget extends DraggablePanelWidget implements SearchCompo
     @Override
     protected void loadWidgets() {
         super.loadWidgets();
-        mapping.clear();
         // node list
         nodeListView = new DraggableScrollableWidgetGroup(3, 12, content.getSizeWidth() - 6, content.getSizeHeight() - 15);
-        nodeListView.setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(2));
-        nodeListView.setLayout(Layout.VERTICAL_LEFT);
-        for (var group : graphView.getNodeGroups().entrySet()) {
-            // group name
-            nodeListView.addWidget(new ImageWidget(0, 0, nodeListView.getSizeWidth(), 10, new TextTexture(group.getKey())));
-            // split line
-            nodeListView.addWidget(new ImageWidget(0, 0, nodeListView.getSizeWidth() - 4, 1, ColorPattern.WHITE.rectTexture()));
-            // nodes
-            for (var node : group.getValue()) {
-                var selectableWidgetGroup = new SelectableWidgetGroup(0, 0, nodeListView.getSizeWidth(), 10);
-                selectableWidgetGroup.setDraggingProvider(() -> node.creator().get(), (n, pos) -> new TextTexture(n.getDisplayName()));
-                selectableWidgetGroup.addWidget(new ImageWidget(0, 0, nodeListView.getSizeWidth(), 10,
-                        new TextTexture(node.annotation().name()).setWidth(nodeListView.getSizeWidth()).setType(TextTexture.TextType.LEFT_ROLL)));
-                selectableWidgetGroup.setOnSelected(s -> selectedNode = node.annotation().name());
-                selectableWidgetGroup.setOnUnSelected(s -> selectedNode = null);
-                selectableWidgetGroup.setSelectedTexture(ColorPattern.T_GRAY.rectTexture());
-                nodeListView.addWidget(selectableWidgetGroup);
-                mapping.put(node.annotation().name(), selectableWidgetGroup);
-            }
+        nodeListView.setYScrollBarWidth(2).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(1));
+
+        var groupContainer = new WidgetGroup(Position.ORIGIN);
+        groupContainer.setLayout(Layout.VERTICAL_LEFT);
+        groupContainer.setLayoutPadding(2);
+        for (var entry : graphView.getNodeGroups().entrySet()) {
+            var nodeGroupWidget = new NodeGroupWidget(entry.getKey(), entry.getValue(), nodeListView.getSizeWidth() - 3);
+            nodeGroupWidgets.put(entry.getKey(), nodeGroupWidget);
+            groupContainer.addWidget(nodeGroupWidget);
         }
-        nodeListView.setLayout(Layout.NONE);
-        nodeListView.computeMax();
+        nodeListView.addWidget(groupContainer);
         content.addWidget(nodeListView);
 
         // search bar
-        content.addWidget(new ImageWidget(0, 2, content.getSizeWidth() - 3, 10, ColorPattern.T_GRAY.rectTexture().setRadius(5)));
-        content.addWidget(searchComponent = new SearchComponentWidget<>(3, 2, content.getSizeWidth() - 3, 10, this));
-        searchComponent.setShowUp(false);
-        searchComponent.setCapacity(5);
-        var textFieldWidget = searchComponent.textFieldWidget;
-        textFieldWidget.setClientSideWidget();
-        textFieldWidget.setCurrentString("");
-        textFieldWidget.setBordered(false);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        var result = super.mouseClicked(mouseX, mouseY, button);
-        if (button == 0 && nodeListView.isMouseOverElement(mouseX, mouseY)) {
-            if (selectedNode != null && mapping.get(selectedNode).isMouseOverElement(mouseX, mouseY)) {
-                if (firstClick && firstClickName.equals(selectedNode) && gui.getTickCount() - firstClickTime < 10) {
-                    graphView.getNodeGroups().values().stream().flatMap(List::stream)
-                            .filter(node -> node.annotation().name().equals(selectedNode))
-                            .findFirst()
-                            .ifPresent(wrapper -> graphView.addNodeToCenter(wrapper.creator().get()));
-                    selectedNode = null;
-                    return true;
-                }
-                firstClick = true;
-                firstClickName = selectedNode;
-                firstClickTime = gui.getTickCount();
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (isKeyDown(GLFW.GLFW_KEY_ENTER)) {
-            if (selectedNode != null) {
-                graphView.getNodeGroups().values().stream().flatMap(List::stream)
-                        .filter(node -> node.annotation().name().equals(selectedNode))
-                        .findFirst()
-                        .ifPresent(wrapper -> graphView.addNodeToCenter(wrapper.creator().get()));
-                selectedNode = null;
-                return true;
-            }
-        }
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public String resultDisplay(String value) {
-        return value;
-    }
-
-    @Override
-    public void selectResult(String value) {
-        selectedNode = value;
-        nodeListView.setSelected(mapping.get(value));
-        graphView.getNodeGroups().values().stream().flatMap(List::stream)
-                .filter(node -> node.annotation().name().equals(selectedNode))
-                .findFirst()
-                .ifPresent(wrapper -> graphView.addNodeToCenter(wrapper.creator().get()));
-    }
-
-    @Override
-    public void search(String word, Consumer<String> find) {
-        var wordLower = word.toLowerCase();
-        for (var group : graphView.getNodeGroups().values()) {
-            for (var node : group) {
-                if (node.annotation().name().toLowerCase().contains(wordLower)) {
-                    find.accept(node.annotation().name());
+        content.addWidget(new LabelWidget(2, 2, "Search:"));
+        var length = Minecraft.getInstance().font.width("Search:");
+        content.addWidget(new ImageWidget(5 + length, 2, content.getSizeWidth() - 8- length, 10, ColorPattern.T_GRAY.rectTexture().setRadius(5)));
+        content.addWidget(new TextFieldWidget(8 + length, 2, content.getSizeWidth() - 8 - length, 10, () -> filter, s -> {
+            filter = s;
+            nodeGroupWidgets.values().forEach(NodeGroupWidget::reloadNodes);
+            for (NodeGroupWidget groupWidget : nodeGroupWidgets.values()) {
+                if (!groupWidget.nodesGroup.widgets.isEmpty()) {
+                    groupWidget.collapse(false);
                 }
             }
-        }
+        }).setCurrentString(filter).setBordered(false).setClientSideWidget());
     }
+
+    private class NodeGroupWidget extends WidgetGroup {
+        private final WidgetGroup nodesGroup;
+        private final ImageWidget splitLine;
+        private final List<AnnotationDetector.Wrapper<LDLRegister, ? extends BaseNode>> nodes;
+
+        public NodeGroupWidget(String groupName, List<AnnotationDetector.Wrapper<LDLRegister, ? extends BaseNode>> nodes, int width) {
+            super(0, 0, width, 0);
+            this.nodes = nodes;
+            nodesGroup = new WidgetGroup(new Position(2, 16));
+            nodesGroup.setLayout(Layout.VERTICAL_LEFT);
+            setBackground(ColorPattern.WHITE.borderTexture(-1));
+            addWidget(splitLine = new ImageWidget(2, 2, width - 4, 11, ColorPattern.LIGHT_GRAY.rectTexture()));
+            addWidget(new ButtonWidget(2, 2, width - 4, 11, new TextTexture(groupName)
+                    .setType(TextTexture.TextType.ROLL).setWidth(width - 4), b -> collapse(!isCollapsed())));
+            addWidget(nodesGroup);
+            reloadNodes();
+            collapse(true);
+        }
+
+        public boolean isCollapsed() {
+            return !splitLine.isVisible();
+        }
+
+        public void collapse(boolean collapse) {
+            if (isCollapsed() == collapse) return;
+            if (collapse) {
+                splitLine.setVisible(false);
+                splitLine.setActive(false);
+                nodesGroup.setVisible(false);
+                nodesGroup.setActive(false);
+                setSize(getSizeWidth(), 15);
+            } else {
+                splitLine.setVisible(true);
+                splitLine.setActive(true);
+                nodesGroup.setVisible(true);
+                nodesGroup.setActive(true);
+                setSize(getSizeWidth(), 15 + nodesGroup.getSizeHeight() + 2);
+            }
+        }
+
+        public void reloadNodes() {
+            var width = getSizeWidth();
+            nodesGroup.clearAllWidgets();
+            for (var node : nodes) {
+                if (node.annotation().name().contains(filter) || node.annotation().group().contains(filter)) {
+                    var buttonGroup = new WidgetGroup(0, 0, width - 4, 10);
+                    buttonGroup.addWidget(new ButtonWidget(0, 0, width - 4, 10,
+                            new TextTexture(node.annotation().name())
+                                    .setType(TextTexture.TextType.LEFT_HIDE).setWidth(width - 4),
+                            b -> {
+                                if (gui == null) return;
+                                if (!node.annotation().name().equals(selectedNode)) {
+                                    selectedNode = node.annotation().name();
+                                    lastClickTime = gui.getTickCount();
+                                } else {
+                                    var currentClickTime = gui.getTickCount();
+                                    if (currentClickTime - lastClickTime < 10) {
+                                        graphView.addNodeToCenter(node.creator().get());
+                                        lastClickTime = currentClickTime - 10;
+                                    } else {
+                                        lastClickTime = currentClickTime;
+                                    }
+                                }
+                            }));
+                    buttonGroup.addWidget(new ImageWidget(0, 0, width - 4, 10, () ->
+                            node.annotation().name().equals(selectedNode) ? ColorPattern.T_GRAY.rectTexture() : IGuiTexture.EMPTY)
+                            .setDraggingProvider(() -> node.creator().get(), (n, pos) -> new TextTexture(n.getDisplayName())));
+                    nodesGroup.addWidget(buttonGroup);
+                }
+            }
+            if (nodesGroup.widgets.isEmpty()) {
+                setSize(getSizeWidth(), 0);
+                this.setVisible(false);
+                this.setActive(false);
+            } else {
+                if (isCollapsed()) {
+                    setSize(getSizeWidth(), 15);
+                } else {
+                    setSize(getSizeWidth(), 15 + nodesGroup.getSizeHeight() + 2);
+                }
+                this.setVisible(true);
+                this.setActive(true);
+            }
+        }
+
+    }
+
 }

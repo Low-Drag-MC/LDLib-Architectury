@@ -47,6 +47,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
@@ -101,6 +102,8 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
     @Setter
     @Getter
     protected float XEIChance = 1f;
+    @Nullable
+    ItemStack currentJEIRenderedIngredient = null;
 
     public SlotWidget() {
         super(new Position(0, 0), new Size(18, 18));
@@ -184,9 +187,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
                 gui.getModularUIGui().setHoveredSlot(slotReference);
             }
             if (!stack.isEmpty() && gui != null) {
-                List<Component> tips = new ArrayList<>(getAdditionalToolTips(DrawerHelper.getItemToolTip(stack)));
-                tips.addAll(tooltipTexts);
-                gui.getModularUIGui().setHoverTooltip(tips, stack, null, stack.getTooltipImage().orElse(null));
+                gui.getModularUIGui().setHoverTooltip(getFullTooltipTexts(), stack, null, stack.getTooltipImage().orElse(null));
             } else {
                 super.drawInForeground(graphics, mouseX, mouseY, partialTicks);
             }
@@ -201,7 +202,7 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
         super.drawInBackground(graphics, mouseX, mouseY, partialTicks);
         Position pos = getPosition();
         if (slotReference != null) {
-            ItemStack itemStack = getRealStack(slotReference.getItem());
+            ItemStack itemStack = currentJEIRenderedIngredient == null ? getRealStack(slotReference.getItem()) : currentJEIRenderedIngredient;
             ModularUIGuiContainer modularUIGui = gui == null ? null : gui.getModularUIGui();
             if (itemStack.isEmpty() && modularUIGui != null && modularUIGui.getQuickCrafting() && modularUIGui.getQuickCraftSlots().contains(slotReference)) { // draw split
                 int splitSize = modularUIGui.getQuickCraftSlots().size();
@@ -348,6 +349,28 @@ public class SlotWidget extends Widget implements IRecipeIngredientSlot, IConfig
             this.onAddedTooltips.accept(this, list);
         }
         return list;
+    }
+
+    @Override
+    public List<Component> getFullTooltipTexts() {
+        if (slotReference != null) {
+            var stack = currentJEIRenderedIngredient == null ? slotReference.getItem() : this.currentJEIRenderedIngredient;
+            if (!stack.isEmpty()) {
+                var tips = new ArrayList<>(DrawerHelper.getItemToolTip(stack));
+                tips.addAll(getTooltipTexts());
+                return tips;
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void setCurrentJEIRenderedIngredient(Object ingredient) {
+        if (ingredient instanceof ItemStack) {
+            this.currentJEIRenderedIngredient = (ItemStack) ingredient;
+        } else {
+            this.currentJEIRenderedIngredient = null;
+        }
     }
 
     @Nullable

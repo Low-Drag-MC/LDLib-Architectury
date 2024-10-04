@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class ManagedRef implements IRef {
+    @Getter
+    @Setter
+    private String persistedPrefixName;
     protected final IManagedVar<?> field;
     @Getter
     protected boolean isSyncDirty, isPersistedDirty;

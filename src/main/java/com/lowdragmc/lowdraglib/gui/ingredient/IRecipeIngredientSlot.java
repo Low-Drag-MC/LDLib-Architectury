@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 
 public interface IRecipeIngredientSlot extends IIngredientSlot {
@@ -36,10 +37,17 @@ public interface IRecipeIngredientSlot extends IIngredientSlot {
     }
 
     /**
-     * Append additional tooltips excluding the ingredient's tooltip.
+     * Get full tooltips excluding the ingredient's tooltip.
      */
-    default List<Component> getAdditionalToolTips(List<Component> toolTips) {
-        return toolTips;
+    default List<Component> getFullTooltipTexts() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Set the ingredient that is currently being rendered by JEI. It is used to render the rotation of ingredients displayed.
+     */
+    default void setCurrentJEIRenderedIngredient(Object ingredient) {
+        // do nothing
     }
 
 }
