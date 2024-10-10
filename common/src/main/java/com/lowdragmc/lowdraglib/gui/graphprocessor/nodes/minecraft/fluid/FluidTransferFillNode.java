@@ -9,7 +9,6 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.annotation.OutputPort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.LinearTriggerNode;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
-import lombok.SneakyThrows;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -36,14 +35,17 @@ public class FluidTransferFillNode extends LinearTriggerNode {
     }
 
     @Override
-    @SneakyThrows
     public void buildConfigurator(ConfiguratorGroup father) {
         var setter = new HashMap<String, Method>();
         var clazz = getClass();
         for (var port : getInputPorts()) {
             if (port.fieldName.equals("simulate")) {
                 if (port.getEdges().isEmpty()) {
-                    ConfiguratorParser.createFieldConfigurator(clazz.getField("internalSimulate"), father, clazz, setter, this);
+                    try {
+                        ConfiguratorParser.createFieldConfigurator(clazz.getField("internalSimulate"), father, clazz, setter, this);
+                    } catch (NoSuchFieldException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }

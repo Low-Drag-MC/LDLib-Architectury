@@ -14,7 +14,6 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.data.NodePort;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.PortData;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.PortEdge;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
-import lombok.SneakyThrows;
 import net.minecraft.nbt.*;
 
 import java.util.Collections;
@@ -42,7 +41,6 @@ public class CompoundReaderNode extends BaseNode {
     public String internalKey = "";
 
     @Override
-    @SneakyThrows
     public void buildConfigurator(ConfiguratorGroup father) {
         super.buildConfigurator(father);
         for (var port : getInputPorts()) {

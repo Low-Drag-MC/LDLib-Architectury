@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.async;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.lowdragmc.lowdraglib.LDLib;
+import com.lowdragmc.lowdraglib.Platform;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -79,9 +80,7 @@ public class AsyncThreadData extends SavedData {
 
     private void searchingTask() {
         try {
-            if (serverLevel.getServer().isCurrentlySaving() || serverLevel.getServer().isStopped() || !serverLevel.getServer().isRunning()) {
-                return;
-            }
+            if (Platform.isNotSafe()) return;
             IN_SERVICE.set(true);
             for (IAsyncLogic logic : asyncLogics) {
                 logic.asyncTick(periodID);

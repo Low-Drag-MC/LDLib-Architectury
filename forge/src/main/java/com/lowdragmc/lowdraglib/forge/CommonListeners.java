@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib.async.AsyncThreadData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -21,6 +22,16 @@ public class CommonListeners {
         LevelAccessor world = event.getLevel();
         if (!world.isClientSide() && world instanceof ServerLevel serverLevel) {
             AsyncThreadData.getOrCreate(serverLevel).releaseExecutorService();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerStopping(ServerStoppingEvent event) {
+        var levels = event.getServer().getAllLevels();
+        for (var level : levels) {
+            if (!level.isClientSide()) {
+                AsyncThreadData.getOrCreate(level).releaseExecutorService();
+            }
         }
     }
 

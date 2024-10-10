@@ -34,39 +34,19 @@ public interface IAsyncAutoSyncBlockEntity extends IAutoSyncBlockEntity, IAsyncL
         }
     }
 
-    /**
-     * whether it's syncing in an async thread
-     */
-    @ApiStatus.AvailableSince("1.21")
-    default boolean isAsyncSyncing() {
-        return false;
-    }
-
-    /**
-     * set whether it's syncing in an async thread
-     */
-    @ApiStatus.AvailableSince("1.21")
-    default void setAsyncSyncing(boolean syncing) {
-
-    }
-
     @Override
     default void asyncTick(long periodID) {
-        var server = Platform.getMinecraftServer();
-        if (server == null || server.isStopped() || !server.isRunning()) return;
+        if (Platform.isNotSafe()) return;
+
         if (useAsyncThread() && !getSelf().isRemoved()) {
             for (IRef field : getNonLazyFields()) {
                 field.update();
             }
-            if (getRootStorage().hasDirtySyncFields() && !isAsyncSyncing()) {
-                setAsyncSyncing(true);
-                server.execute(() -> {
-                    if (!server.isStopped() && server.isRunning()) {
-                        var packet = SPacketManagedPayload.of(this, false);
-                        LDLNetworking.NETWORK.sendToTrackingChunk(packet,
-                                Objects.requireNonNull(this.getSelf().getLevel()).getChunkAt(this.getCurrentPos()));
-                    }
-                    setAsyncSyncing(false);
+            if (getRootStorage().hasDirtySyncFields()) {
+                Platform.getMinecraftServer().execute(() -> {
+                    if (Platform.isNotSafe()) return;
+                    var packet = SPacketManagedPayload.of(this, false);
+                    LDLNetworking.NETWORK.sendToTrackingChunk(packet, Objects.requireNonNull(this.getSelf().getLevel()).getChunkAt(this.getCurrentPos()));
                 });
             }
         }
