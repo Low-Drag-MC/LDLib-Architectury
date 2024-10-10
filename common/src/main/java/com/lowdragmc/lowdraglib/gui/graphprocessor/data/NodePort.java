@@ -196,19 +196,19 @@ public class NodePort {
         // take multiple inputs, you must create a custom input function see CustomPortsNode.cs
         if (!edges.isEmpty()) {
             var passThroughObject = edges.stream().findFirst().get().passThroughBuffer;
-
-            // We do an extra convertion step in case the buffer output is not compatible with the input port
-            if (passThroughObject != null)
-                if (TypeAdapter.areConvertable(passThroughObject.getClass(), fieldInfo.getType()))
-                    passThroughObject = TypeAdapter.convert(passThroughObject, fieldInfo.getType());
-
             try {
                 if (passThroughObject == null) {
                     setFieldDefault(fieldInfo, fieldOwner);
-                } else if (fieldInfo.getType().isAssignableFrom(passThroughObject.getClass())) {
-                    fieldInfo.set(fieldOwner, passThroughObject);
                 } else {
-                    setFieldDefault(fieldInfo, fieldOwner);
+                    // We do an extra convertion step in case the buffer output is not compatible with the input port
+                    if (TypeAdapter.areConvertable(passThroughObject.getClass(), fieldInfo.getType())) {
+                        passThroughObject = TypeAdapter.convert(passThroughObject, fieldInfo.getType());
+                        fieldInfo.set(fieldOwner, passThroughObject);
+                    } else if (fieldInfo.getType().isAssignableFrom(passThroughObject.getClass())) {
+                        fieldInfo.set(fieldOwner, passThroughObject);
+                    } else {
+                        setFieldDefault(fieldInfo, fieldOwner);
+                    }
                 }
             } catch (Exception e) {
                 LDLib.LOGGER.error("Error while setting the value of the field {} with {} for pull data", fieldInfo, passThroughObject, e);
@@ -226,8 +226,8 @@ public class NodePort {
                 fieldInfo.setAccessible(true);
                 var list = (List) fieldInfo.get(fieldOwner);
                 if (list != null) list.clear();
-                setFieldDefault(fieldInfo, fieldOwner);
             }
+            setFieldDefault(fieldInfo, fieldOwner);
         } catch (Exception e) {
             LDLib.LOGGER.error("Error while resetting the value of the field {}", fieldInfo, e);
         }
@@ -259,8 +259,6 @@ public class NodePort {
                 fieldInfo.set(fieldOwner, type.getEnumConstants()[0]);
             }
             fieldInfo.set(fieldOwner, null);
-        } else if (type.equals(String.class)) {
-            fieldInfo.set(fieldOwner, "");
         } else {
             fieldInfo.set(fieldOwner, null);
         }
@@ -320,6 +318,8 @@ public class NodePort {
                             var value = outputField.get(edge.outputNode);
                             if (value == null) {
                                 setFieldDefault(inputField, edge.inputNode);
+                            } else if ((TypeAdapter.areConvertable(value.getClass(), inputField.getType()))) {
+                                inputField.set(edge.inputNode,  TypeAdapter.convert(value, inputField.getType()));
                             } else if (inputField.getType().isAssignableFrom(value.getClass())) {
                                 inputField.set(edge.inputNode, value);
                             }

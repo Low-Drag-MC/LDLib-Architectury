@@ -184,6 +184,7 @@ public class TypedPayloadRegistries {
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.RECIPE_ACCESSOR, -1);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.POSITION_ACCESSOR, -1);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.VECTOR3_ACCESSOR, -1);
+        register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.QUATERNION_ACCESSOR, -1);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.AABB_ACCESSOR, -1);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.RANGE_ACCESSOR, -1);
         register(NbtTagPayload.class, NbtTagPayload::new, SyncedFieldAccessors.SIZE_ACCESSOR, -1);

@@ -8,6 +8,7 @@ import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Getter;
@@ -116,11 +117,29 @@ public class ConfigPanel extends WidgetGroup {
             configurator.setConfigPanel(this, tab);
 //            configurator.setConfiguratorContainer(() -> ConfigPanel.this.computeLayout(tab));
             configurator.init(WIDTH - 2);
+            configurator.addListener(c -> onConfiguratorChangeUpdate(tab, c));
             this.configurators.get(tab).add(configurator);
             configuratorGroup.get(tab).addWidget(configurator);
         }
         computeLayout(tab);
         configuratorGroup.get(tab).setScrollYOffset(0);
+    }
+
+    public void onConfiguratorChangeUpdate(Tab tab, Configurator configurator) {
+        // update history view
+        if (editor.currentProject == null) return;
+        var historyName = LocalizationUtils.format(configurator.getName());
+        var data = editor.currentProject.serializeNBT();
+        if (!editor.getHistory().isEmpty()) {
+            var latestHistory = editor.getHistory().get(editor.getHistory().size() - 1);
+            // if the data is the same as the latest history, do not add a new history
+            if (data.equals(latestHistory.date())) return;
+            // if new history is the same as the latest history, update the latest history
+            if (latestHistory.name().equals(historyName) && configurator.equals(latestHistory.source())) {
+                editor.getHistory().remove(latestHistory);
+            }
+        }
+        editor.addHistory(historyName, data, configurator);
     }
 
     public void switchTag(Tab tab) {

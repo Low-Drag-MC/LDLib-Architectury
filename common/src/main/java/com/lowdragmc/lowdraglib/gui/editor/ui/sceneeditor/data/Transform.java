@@ -1,9 +1,11 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.data;
 
+import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject.ISceneObject;
+import com.lowdragmc.lowdraglib.syncdata.IPersistedSerializable;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -19,23 +21,26 @@ import java.util.List;
  * @implNote A transform that represents the position, rotation, and scale of a scene object.
  */
 @Accessors(fluent = true)
-public final class Transform {
+public final class Transform implements IPersistedSerializable, IConfigurable {
     /**
      * Position of the transform relative to the parent transform.
      */
     @Getter
+    @Configurable(name = "transform.position", tips = "transform.position.tips")
     private Vector3f localPosition = new Vector3f();
 
     /**
      * Rotation of the transform relative to the parent transform.
      */
     @Getter
+    @Configurable(name = "transform.rotation", tips = "transform.rotation.tips")
     private Quaternionf localRotation = new Quaternionf();
 
     /**
      * Scale of the transform relative to the parent transform.
      */
     @Getter
+    @Configurable(name = "transform.scale", tips = "transform.scale.tips")
     private Vector3f localScale = new Vector3f(1, 1, 1);
 
     /**

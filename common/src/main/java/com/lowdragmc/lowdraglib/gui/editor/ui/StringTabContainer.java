@@ -11,9 +11,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 @Getter
@@ -25,6 +23,7 @@ public class StringTabContainer extends TabContainer {
     protected Map<WidgetGroup, Runnable> onSelected;
     protected Map<WidgetGroup, Runnable> onDeselected;
     public BiConsumer<WidgetGroup, WidgetGroup> onChanged;
+    private List<WidgetGroup> tabGroups;
 
     public StringTabContainer(Editor editor) {
         super(0, 0, editor.getSize().width - editor.getConfigPanel().getSize().width, editor.getSize().height);
@@ -32,9 +31,29 @@ public class StringTabContainer extends TabContainer {
         this.tabTextures = new HashMap<>();
         this.onSelected = new HashMap<>();
         this.onDeselected = new HashMap<>();
+        this.tabGroups = new ArrayList<>();
         super.setOnChanged(this::onTabChanged);
     }
 
+    public int getTabIndex() {
+        if (focus == null) return -1;
+        return tabGroups.indexOf(focus);
+    }
+
+    public void switchTabIndex(int index) {
+        if (tabGroups.size() > index && index >= 0) {
+            switchTag(tabGroups.get(index));
+        }
+    }
+
+    @Override
+    public void clearAllWidgets() {
+        super.clearAllWidgets();
+        this.tabTextures.clear();
+        this.onSelected.clear();
+        this.onDeselected.clear();
+        this.tabGroups.clear();
+    }
 
     public TabContainer setOnChanged(BiConsumer<WidgetGroup, WidgetGroup> onChanged) {
         this.onChanged = onChanged;
@@ -47,6 +66,12 @@ public class StringTabContainer extends TabContainer {
         if (onChanged != null) {
             onChanged.accept(oldGroup, newGroup);
         }
+    }
+
+    @Override
+    public final void addTab(TabButton tabButton, WidgetGroup tabWidget) {
+        super.addTab(tabButton, tabWidget);
+        tabGroups.add(tabWidget);
     }
 
     public void addTab(String name, WidgetGroup group, @Nullable Runnable onSelected, @Nullable Runnable onDeselected) {

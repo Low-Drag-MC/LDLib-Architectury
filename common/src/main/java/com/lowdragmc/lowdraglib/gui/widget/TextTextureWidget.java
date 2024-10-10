@@ -37,6 +37,7 @@ public class TextTextureWidget extends Widget implements IConfigurableWidget {
 
     public TextTextureWidget(int xPosition, int yPosition, int width, int height, String text) {
         super(xPosition, yPosition, width, height);
+        textTexture.setDropShadow(true);
         textTexture.setWidth(width);
         textTexture.setSupplier(() -> lastComponent == null ? "" : lastComponent.getString());
         if (isRemote()) {

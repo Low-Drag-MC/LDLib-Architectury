@@ -1,14 +1,15 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui;
 
-import com.google.common.util.concurrent.Runnables;
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ILDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.data.IProject;
+import com.lowdragmc.lowdraglib.gui.editor.ui.view.HistoryView;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.util.TreeBuilder;
 import com.lowdragmc.lowdraglib.gui.util.TreeNode;
 import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
 import com.lowdragmc.lowdraglib.gui.widget.MenuWidget;
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
@@ -17,12 +18,15 @@ import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -48,6 +52,10 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
     protected ToolPanel toolPanel;
     protected String copyType;
     protected Object copied;
+    public record HistoryItem(String name, CompoundTag date, @Nullable Object source) { }
+    protected final List<HistoryItem> history = new ArrayList<>();
+    @Nullable
+    protected HistoryItem currentHistory;
 
     public Editor(String modID) {
         this(new File(LDLib.getLDLibDir(), "assets/" + modID));
@@ -88,7 +96,9 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
         super.onScreenSizeUpdate(screenWidth, screenHeight);
         this.clearAllWidgets();
         initEditorViews();
+        var lastPageIndex = tabPages.getTabIndex();
         loadProject(currentProject);
+        tabPages.switchTabIndex(lastPageIndex);
     }
 
     public void initEditorViews() {
@@ -143,8 +153,45 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
                 .setOnNodeClicked(TreeBuilder.Menu::handle);
     }
 
+    public void addHistory(String name, CompoundTag date) {
+        addHistory(name, date, null);
+    }
+
+    public void addHistory(String name, CompoundTag date, @Nullable Object source) {
+        if (currentProject != null) {
+            if (currentHistory != null) {
+                var index = history.indexOf(currentHistory);
+                if (index >= 0) {
+                    while (history.size() > index + 1) {
+                        history.remove(history.size() - 1);
+                    }
+                }
+            }
+            currentHistory = new HistoryItem(name, date, source);
+            history.add(currentHistory);
+            // if history view is opened, update it
+            for (Widget widget : floatView.widgets) {
+                if (widget instanceof HistoryView historyView) {
+                    historyView.loadList();
+                    break;
+                }
+            }
+        }
+    }
+
+    public void jumpToHistory(HistoryItem historyItem) {
+        if (currentProject != null && history.contains(historyItem)) {
+            var lastPageIndex = tabPages.getTabIndex();
+            currentProject.deserializeNBT(historyItem.date());
+            loadProject(currentProject);
+            tabPages.switchTabIndex(lastPageIndex);
+            currentHistory = historyItem;
+        }
+    }
+
     public void loadProject(IProject project) {
         if (currentProject != null && currentProject != project) {
+            history.clear();
             currentProject.onClosed(this);
             currentProjectFile = null;
         }

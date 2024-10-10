@@ -1,6 +1,5 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.menu;
 
-import com.google.common.util.concurrent.Runnables;
 import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.data.IProject;

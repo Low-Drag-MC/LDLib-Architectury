@@ -485,7 +485,7 @@ public class BaseGraph implements IPersistedSerializable {
         if (to == Object.class)
             return true;
 
-        if (from == UnknownType.class)
+        if (from == UnknownType.class || from == Object.class)
             return true;
 
         // User defined type convertions

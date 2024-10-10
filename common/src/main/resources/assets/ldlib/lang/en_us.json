@@ -208,7 +208,7 @@
   "ldlib.gui.editor.register.widget.container.phantom_fluid_slot": "Phantom Fluid Slot",
   "ldlib.gui.editor.register.widget.custom.player_inventory": "Player Inventory",
 
-  "ldlib.gui.editor.register.view.history_view": "History View",
+  "ldlib.gui.editor.register.editor.history": "History View",
 
   "ldlib.gui.editor.register.editor.ui.ui": "UI Project",
 
@@ -264,5 +264,13 @@
   "graph_processor.process_mode.step": "run step",
   "graph_processor.process_mode.step_finish": "finish!",
   "graph_processor.node_panel": "node panel",
-  "graph_processor.parameter_panel": "parameter panel"
+  "graph_processor.parameter_panel": "parameter panel",
+
+  "transform.position": "Position",
+  "transform.position.tips": "It is the local position",
+  "transform.rotation": "Rotation",
+  "transform.rotation.tips": "It is the local rotation",
+  "transform.scale": "Scale",
+  "transform.scale.tips": "scale"
+
 }
