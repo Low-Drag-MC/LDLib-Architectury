@@ -41,15 +41,16 @@ public class HistoryView extends FloatViewWidget {
         var width = container.getSizeWidth();
         var history = editor.getHistory();
         for (var historyItem : history) {
-            var group = new WidgetGroup(4, container.widgets.size() * 10, width - 4, 10);
-            group.addWidget(new ButtonWidget(0, 0, width, 10,
-                    new TextTexture(historyItem.name()).setType(TextTexture.TextType.LEFT_ROLL).setWidth(width), cd -> {
+            var group = new WidgetGroup(0, container.widgets.size() * 10, width, 10);
+            group.addWidget(new ButtonWidget(0, 0, width, 10, IGuiTexture.EMPTY, cd -> {
                 editor.jumpToHistory(historyItem);
                 if (!editor.getFloatView().widgets.contains(this)) {
                     editor.getFloatView().addWidget(this);
                 }
                 loadList();
             }).setHoverBorderTexture(-1, -1));
+            group.addWidget(new TextTextureWidget(3, 0, width - 3, 10, historyItem.name())
+                    .textureStyle(t -> t.setType(TextTexture.TextType.LEFT_ROLL)));
             group.addWidget(new ImageWidget(0, 0, width, 10,
                     () -> editor.getCurrentHistory() == historyItem ? ColorPattern.T_WHITE.rectTexture() : IGuiTexture.EMPTY));
             container.addWidget(group);
