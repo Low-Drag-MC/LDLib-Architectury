@@ -6,7 +6,6 @@ import com.lowdragmc.lowdraglib.utils.ISearch;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.SearchEngine;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
