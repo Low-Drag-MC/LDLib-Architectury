@@ -243,37 +243,40 @@ public class IModelRenderer implements ISerializableRenderer {
 
     @Override
     public void createPreview(ConfiguratorGroup father) {
-        var preview = new WidgetGroup(0, 0, 100, 120);
-        var level = new TrackedDummyWorld();
-        level.addBlock(BlockPos.ZERO, BlockInfo.fromBlock(RendererBlock.BLOCK));
-        Optional.ofNullable(level.getBlockEntity(BlockPos.ZERO)).ifPresent(blockEntity -> {
-            if (blockEntity instanceof RendererBlockEntity holder) {
-                holder.setRenderer(this);
-            }
-        });
+        father.addConfigurators(new WrapperConfigurator("ldlib.gui.editor.group.preview", wrapper -> {
+            var preview = new WidgetGroup(0, 0, 100, 120);
+            var level = new TrackedDummyWorld();
+            level.addBlock(BlockPos.ZERO, BlockInfo.fromBlock(RendererBlock.BLOCK));
+            Optional.ofNullable(level.getBlockEntity(BlockPos.ZERO)).ifPresent(blockEntity -> {
+                if (blockEntity instanceof RendererBlockEntity holder) {
+                    holder.setRenderer(this);
+                }
+            });
 
-        var sceneWidget = new SceneWidget(0, 0, 100, 100, level);
-        sceneWidget.setRenderFacing(false);
-        sceneWidget.setRenderSelect(false);
-        sceneWidget.createScene(level);
-        sceneWidget.getRenderer().setOnLookingAt(null); // better performance
-        sceneWidget.setRenderedCore(Collections.singleton(BlockPos.ZERO), null);
-        sceneWidget.setBackground(new ColorBorderTexture(2, ColorPattern.T_WHITE.color));
+            var sceneWidget = new SceneWidget(0, 0, 100, 100, level);
+            sceneWidget.setRenderFacing(false);
+            sceneWidget.setRenderSelect(false);
+            sceneWidget.createScene(level);
+            sceneWidget.getRenderer().setOnLookingAt(null); // better performance
+            sceneWidget.setRenderedCore(Collections.singleton(BlockPos.ZERO), null);
+            sceneWidget.setBackground(new ColorBorderTexture(2, ColorPattern.T_WHITE.color));
 
-        preview.addWidget(new ButtonWidget(5, 110, 90, 10,
-                new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture().setRadius(5), new TextTexture("ldlib.gui.editor.tips.select_model")), cd -> {
-            if (Editor.INSTANCE == null) return;
-            File path = new File(Editor.INSTANCE.getWorkSpace(), "models");
-            DialogWidget.showFileDialog(Editor.INSTANCE, "ldlib.gui.editor.tips.select_model", path, true,
-                    DialogWidget.suffixFilter(".json"), r -> {
-                        if (r != null && r.isFile()) {
-                            updateModelWithoutReloadingResource(getModelFromFile(path, r));
-                        }
-                    });
+            preview.addWidget(new ButtonWidget(5, 110, 90, 10,
+                    new GuiTextureGroup(ColorPattern.T_GRAY.rectTexture().setRadius(5), new TextTexture("ldlib.gui.editor.tips.select_model")), cd -> {
+                if (Editor.INSTANCE == null) return;
+                File path = new File(Editor.INSTANCE.getWorkSpace(), "models");
+                DialogWidget.showFileDialog(Editor.INSTANCE, "ldlib.gui.editor.tips.select_model", path, true,
+                        DialogWidget.suffixFilter(".json"), r -> {
+                            if (r != null && r.isFile()) {
+                                updateModelWithoutReloadingResource(getModelFromFile(path, r));
+                                wrapper.notifyChanges();
+                            }
+                        });
+            }));
+
+            preview.addWidget(sceneWidget);
+            return preview;
         }));
-
-        preview.addWidget(sceneWidget);
-        father.addConfigurators(new WrapperConfigurator("ldlib.gui.editor.group.preview", preview));
     }
 
     private static ResourceLocation getModelFromFile(File path, File r){

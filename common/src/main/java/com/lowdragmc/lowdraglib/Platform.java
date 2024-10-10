@@ -16,7 +16,7 @@ public class Platform {
 
     // This is a helper method to check if the ServerLevel is safe to access.
     // @return true if the ServerLevel is not safe to access, otherwise false.
-    public static boolean isNotSafe() {
+    public static boolean isServerNotSafe() {
         if (Platform.isClient()) {
             return Minecraft.getInstance().getConnection() == null;
         } else {

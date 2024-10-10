@@ -14,7 +14,6 @@ import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.EnvType;
@@ -152,25 +151,28 @@ public class AnimationTexture extends TransformTexture {
     @Override
     public void createPreview(ConfiguratorGroup father) {
         super.createPreview(father);
-        WidgetGroup widgetGroup = new WidgetGroup(0, 0, 100, 100);
-        ImageWidget imageWidget;
-        widgetGroup.addWidget(imageWidget = new ImageWidget(0, 0, 100, 100, new GuiTextureGroup(new ResourceTexture(imageLocation.toString()), this::drawGuides)).setBorder(2, ColorPattern.T_WHITE.color));
-        widgetGroup.addWidget(new ButtonWidget(0, 0, 100, 100, IGuiTexture.EMPTY, cd -> {
-            if (Editor.INSTANCE == null) return;
-            File path = new File(Editor.INSTANCE.getWorkSpace(), "textures");
-            DialogWidget.showFileDialog(Editor.INSTANCE, "ldlib.gui.editor.tips.select_image", path, true,
-                    DialogWidget.suffixFilter(".png"), r -> {
-                        if (r != null && r.isFile()) {
-                            imageLocation = getTextureFromFile(path, r);
-                            cellSize = 1;
-                            from = 0;
-                            to = 0;
-                            animation = 0;
-                            imageWidget.setImage(new GuiTextureGroup(new ResourceTexture(imageLocation.toString()), this::drawGuides));
-                        }
-                    });
-        }));
-        WrapperConfigurator base = new WrapperConfigurator("ldlib.gui.editor.group.base_image", widgetGroup);
+        WrapperConfigurator base = new WrapperConfigurator("ldlib.gui.editor.group.base_image", wrapper -> {
+            WidgetGroup widgetGroup = new WidgetGroup(0, 0, 100, 100);
+            ImageWidget imageWidget;
+            widgetGroup.addWidget(imageWidget = new ImageWidget(0, 0, 100, 100, new GuiTextureGroup(new ResourceTexture(imageLocation.toString()), this::drawGuides)).setBorder(2, ColorPattern.T_WHITE.color));
+            widgetGroup.addWidget(new ButtonWidget(0, 0, 100, 100, IGuiTexture.EMPTY, cd -> {
+                if (Editor.INSTANCE == null) return;
+                File path = new File(Editor.INSTANCE.getWorkSpace(), "textures");
+                DialogWidget.showFileDialog(Editor.INSTANCE, "ldlib.gui.editor.tips.select_image", path, true,
+                        DialogWidget.suffixFilter(".png"), r -> {
+                            if (r != null && r.isFile()) {
+                                imageLocation = getTextureFromFile(path, r);
+                                cellSize = 1;
+                                from = 0;
+                                to = 0;
+                                animation = 0;
+                                imageWidget.setImage(new GuiTextureGroup(new ResourceTexture(imageLocation.toString()), this::drawGuides));
+                                wrapper.notifyChanges();
+                            }
+                        });
+            }));
+            return widgetGroup;
+        });
         base.setTips("ldlib.gui.editor.tips.click_select_image");
         father.addConfigurators(base);
     }

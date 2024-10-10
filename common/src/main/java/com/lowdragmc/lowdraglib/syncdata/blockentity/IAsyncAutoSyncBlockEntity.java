@@ -34,19 +34,37 @@ public interface IAsyncAutoSyncBlockEntity extends IAutoSyncBlockEntity, IAsyncL
         }
     }
 
+    /**
+     * whether it's syncing in an async thread
+     */
+    @ApiStatus.AvailableSince("1.21")
+    default boolean isAsyncSyncing() {
+        return false;
+    }
+
+    /**
+     * set whether it's syncing in an async thread
+     */
+    @ApiStatus.AvailableSince("1.21")
+    default void setAsyncSyncing(boolean syncing) {
+
+    }
+
     @Override
     default void asyncTick(long periodID) {
-        if (Platform.isNotSafe()) return;
+        if (Platform.isServerNotSafe()) return;
 
         if (useAsyncThread() && !getSelf().isRemoved()) {
             for (IRef field : getNonLazyFields()) {
                 field.update();
             }
-            if (getRootStorage().hasDirtySyncFields()) {
+            if (getRootStorage().hasDirtySyncFields() && !isAsyncSyncing()) {
+                setAsyncSyncing(true);
                 Platform.getMinecraftServer().execute(() -> {
-                    if (Platform.isNotSafe()) return;
+                    if (Platform.isServerNotSafe()) return;
                     var packet = SPacketManagedPayload.of(this, false);
                     LDLNetworking.NETWORK.sendToTrackingChunk(packet, Objects.requireNonNull(this.getSelf().getLevel()).getChunkAt(this.getCurrentPos()));
+                    setAsyncSyncing(false);
                 });
             }
         }

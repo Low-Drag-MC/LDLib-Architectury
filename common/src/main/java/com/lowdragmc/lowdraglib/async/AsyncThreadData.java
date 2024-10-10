@@ -80,7 +80,7 @@ public class AsyncThreadData extends SavedData {
 
     private void searchingTask() {
         try {
-            if (Platform.isNotSafe()) return;
+            if (Platform.isServerNotSafe()) return;
             IN_SERVICE.set(true);
             for (IAsyncLogic logic : asyncLogics) {
                 logic.asyncTick(periodID);
