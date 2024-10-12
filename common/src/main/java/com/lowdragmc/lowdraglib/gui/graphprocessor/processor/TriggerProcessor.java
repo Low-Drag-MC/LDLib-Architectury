@@ -2,6 +2,8 @@ package com.lowdragmc.lowdraglib.gui.graphprocessor.processor;
 
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseGraph;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.BaseNode;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.parameter.ExposedParameter;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.parameter.ParameterNode;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.ITriggerableNode;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.StartNode;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.nodes.logic.BreakNode;
@@ -61,6 +63,15 @@ public class TriggerProcessor extends GraphProcessor {
         private final HashSet<ITriggerableNode> nodeDependenciesGathered = new HashSet<>();
 
         private InternalIterator() {
+            // Process Out Parameters always
+            graph.nodes.stream().filter(n -> n instanceof ParameterNode parameterNode && parameterNode.parameter != null
+                            && parameterNode.parameter.getAccessor() == ExposedParameter.ParameterAccessor.Set)
+                    .forEach(n -> {
+                        nodeToExecute.push(Either.left(n));
+                        for (BaseNode node : gatherNonConditionalDependencies(n)) {
+                            nodeToExecute.push(Either.left(node));
+                        }
+                    });
             // make low priority nodes to be executed first
             startNodeList.stream().sorted((n1, n2) -> n2.getComputeOrder() - n1.getComputeOrder())
                     .forEach(n -> nodeToExecute.push(Either.right(Pair.of(n, null))));

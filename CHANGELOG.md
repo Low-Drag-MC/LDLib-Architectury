@@ -1,8 +1,5 @@
 # ChangeLog
 
-* Add event handler for forge server stopping 
-* fix node graph push data crash
-* discard unsafe thread interrupt for the search engine
-* add search component + notify changes for configurator
-* add history view
+* fix model renderer textures mess up after the resource reload
+* always execute output parameter nodes
 
