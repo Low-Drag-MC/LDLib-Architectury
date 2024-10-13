@@ -60,7 +60,7 @@ public class TransformAnchorObject extends SceneObject implements ISceneRenderin
         }
         if (isMovingX || isMovingY || isMovingZ) {
             var direction = new Vector3f(isMovingX ? 1 : 0, isMovingY ? 1 : 0, isMovingZ ? 1 : 0);
-            var transformMatrix = transform().localToWorldMatrix();
+            var transformMatrix = transform().worldToLocalMatrix();
             if (start == null) {
                 start = scene.project(transformMatrix.transformPosition(direction.mul(5, new Vector3f())));
                 end = scene.project(transformMatrix.transformPosition(direction.mul(-5, new Vector3f())));

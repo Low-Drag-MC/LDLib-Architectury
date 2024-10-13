@@ -23,6 +23,7 @@ import java.util.function.Consumer;
  */
 public class Configurator extends WidgetGroup {
     @Nullable
+    @Getter
     protected IConfiguratorContainer configuratorContainer;
     @Getter
     @Nullable

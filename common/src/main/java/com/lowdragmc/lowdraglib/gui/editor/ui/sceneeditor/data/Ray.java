@@ -66,14 +66,14 @@ public record Ray(Vector3f startPos, Vector3f endPos) {
      * Transform the ray with a transform. from local to world.
      */
     public Ray localToWorld(Transform transform) {
-        return transform(transform.localToWorldMatrix());
+        return transform(transform.worldToLocalMatrix());
     }
 
     /**
      * Transform the ray with a transform. from world to local.
      */
     public Ray worldToLocal(Transform transform) {
-        return transform(transform.worldToLocalMatrix());
+        return transform(transform.localToWorldMatrix());
     }
 
     public BlockHitResult clip(VoxelShape shape) {

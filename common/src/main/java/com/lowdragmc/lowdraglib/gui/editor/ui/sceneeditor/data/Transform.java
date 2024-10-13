@@ -1,6 +1,8 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.data;
 
+import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
+import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject.ISceneObject;
 import com.lowdragmc.lowdraglib.syncdata.IPersistedSerializable;
@@ -27,13 +29,15 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
      */
     @Getter
     @Configurable(name = "transform.position", tips = "transform.position.tips")
+    @NumberRange(range = {-Float.MAX_VALUE, Float.MAX_VALUE})
     private Vector3f localPosition = new Vector3f();
 
     /**
      * Rotation of the transform relative to the parent transform.
      */
     @Getter
-    @Configurable(name = "transform.rotation", tips = "transform.rotation.tips")
+    @Configurable(name = "transform.rotation", tips = "transform.rotation.tips", forceUpdate = false)
+    @NumberRange(range = {-Float.MAX_VALUE, Float.MAX_VALUE})
     private Quaternionf localRotation = new Quaternionf();
 
     /**
@@ -41,6 +45,7 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
      */
     @Getter
     @Configurable(name = "transform.scale", tips = "transform.scale.tips")
+    @NumberRange(range = {-Float.MAX_VALUE, Float.MAX_VALUE})
     private Vector3f localScale = new Vector3f(1, 1, 1);
 
     /**
@@ -135,23 +140,23 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
     }
 
     /**
-     * Matrix that transforms from world space to local space.
+     * Matrix that transforms from local space to world space.
      */
-    public Matrix4f worldToLocalMatrix() {
+    public Matrix4f localToWorldMatrix() {
         if (worldToLocalMatrix == null) {
             worldToLocalMatrix = parent == null ?
                     localTransformMatrix() :
-                    new Matrix4f(parent.worldToLocalMatrix()).mul(localTransformMatrix());
+                    new Matrix4f(parent.localToWorldMatrix()).mul(localTransformMatrix());
         }
         return worldToLocalMatrix;
     }
 
     /**
-     * Matrix that transforms from local space to world space.
+     * Matrix that transforms from world space to local space.
      */
-    public Matrix4f localToWorldMatrix() {
+    public Matrix4f worldToLocalMatrix() {
         if (localToWorldMatrix == null) {
-            localToWorldMatrix = worldToLocalMatrix().invert(new Matrix4f());
+            localToWorldMatrix = localToWorldMatrix().invert(new Matrix4f());
         }
         return localToWorldMatrix;
     }
@@ -173,9 +178,9 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
         if (position == null) {
             position = parent == null ?
                     localPosition :
-                    new Vector3f(localPosition).mulPosition(parent.localToWorldMatrix());
+                    parent.localToWorldMatrix().transformPosition(new Vector3f(localPosition));
         }
-        return position;
+        return new Vector3f(position);
     }
 
     public void position(Vector3f position) {
@@ -184,10 +189,11 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
         if (parent == null) {
             this.localPosition = new Vector3f(position);
         } else {
-            this.localPosition = new Vector3f(position).mulPosition(parent.worldToLocalMatrix());
+            this.localPosition = parent.worldToLocalMatrix().transformPosition(new Vector3f(position));
         }
     }
 
+    @ConfigSetter(field = "localPosition")
     public void localPosition(Vector3f localPosition) {
         this.localPosition = localPosition;
         onTransformChanged();
@@ -200,9 +206,9 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
         if (rotation == null) {
             rotation = parent == null ?
                     localRotation :
-                    new Quaternionf(localRotation).mul(parent.rotation());
+                    parent.rotation().mul(localRotation);
         }
-        return rotation;
+        return new Quaternionf(rotation);
     }
 
     public void rotation(Quaternionf rotation) {
@@ -211,10 +217,11 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
         if (parent == null) {
             this.localRotation = new Quaternionf(rotation);
         } else {
-            this.localRotation = new Quaternionf(rotation).mul(parent.rotation().invert(new Quaternionf()));
+            this.localRotation = parent.rotation().invert().mul(rotation);
         }
     }
 
+    @ConfigSetter(field = "localRotation")
     public void localRotation(Quaternionf localRotation) {
         this.localRotation = localRotation;
         onTransformChanged();
@@ -229,7 +236,7 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
                     localScale :
                     new Vector3f(localScale).mul(parent.scale());
         }
-        return scale;
+        return new Vector3f(scale);
     }
 
     public void scale(Vector3f scale) {
@@ -242,6 +249,7 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
         }
     }
 
+    @ConfigSetter(field = "localScale")
     public void localScale(Vector3f localScale) {
         this.localScale = localScale;
         onTransformChanged();

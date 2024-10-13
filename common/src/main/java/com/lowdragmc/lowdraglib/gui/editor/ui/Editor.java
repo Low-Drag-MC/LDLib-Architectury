@@ -96,9 +96,11 @@ public abstract class Editor extends WidgetGroup implements ILDLRegister {
         super.onScreenSizeUpdate(screenWidth, screenHeight);
         this.clearAllWidgets();
         initEditorViews();
-        var lastPageIndex = tabPages.getTabIndex();
+        var lastPageIndex = tabPages == null ? -1 : tabPages.getTabIndex();
         loadProject(currentProject);
-        tabPages.switchTabIndex(lastPageIndex);
+        if (tabPages != null) {
+            tabPages.switchTabIndex(lastPageIndex);
+        }
     }
 
     public void initEditorViews() {

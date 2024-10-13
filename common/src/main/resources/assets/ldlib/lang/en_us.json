@@ -271,6 +271,6 @@
   "transform.rotation": "Rotation",
   "transform.rotation.tips": "It is the local rotation",
   "transform.scale": "Scale",
-  "transform.scale.tips": "scale"
+  "transform.scale.tips": "It is the local scale"
 
 }
