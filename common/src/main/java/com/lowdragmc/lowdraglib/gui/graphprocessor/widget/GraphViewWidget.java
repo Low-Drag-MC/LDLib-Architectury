@@ -8,6 +8,8 @@ import com.lowdragmc.lowdraglib.gui.editor.Icons;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.LDLRegister;
 import com.lowdragmc.lowdraglib.gui.editor.runtime.AnnotationDetector;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.data.*;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.parameter.ExposedParameter;
+import com.lowdragmc.lowdraglib.gui.graphprocessor.data.parameter.ParameterNode;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.processor.BaseGraphProcessor;
 import com.lowdragmc.lowdraglib.gui.graphprocessor.processor.TriggerProcessor;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
@@ -275,6 +277,12 @@ public class GraphViewWidget extends WidgetGroup {
     }
 
     public void addNodeToCenter(BaseNode node) {
+        if(node instanceof ParameterNode parameterNode && parameterNode.parameter != null &&
+                parameterNode.parameter.getAccessor() == ExposedParameter.ParameterAccessor.Set) {
+            if (graph.nodes.stream().anyMatch(n -> n instanceof ParameterNode pn && pn.parameter == parameterNode.parameter)) {
+                return;
+            }
+        }
         addNode(node, getSizeWidth() / 2 + LDLib.random.nextInt(-20, 20),
                 getSizeHeight() / 2 + LDLib.random.nextInt(-20, 20));
     }

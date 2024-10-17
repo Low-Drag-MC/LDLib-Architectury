@@ -15,6 +15,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
+import org.lwjgl.opengl.GL;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -121,4 +122,13 @@ public class Shaders {
 			throw new RuntimeException(e);
 		}
     }
+
+	public static boolean supportComputeShader() {
+		return GL.getCapabilities().GL_ARB_compute_shader;
+	}
+
+	public static boolean supportSSBO() {
+		return GL.getCapabilities().GL_ARB_shader_storage_buffer_object;
+	}
+
 }

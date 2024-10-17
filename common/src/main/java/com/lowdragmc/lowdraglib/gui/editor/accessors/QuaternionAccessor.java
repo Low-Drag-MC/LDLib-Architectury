@@ -31,10 +31,13 @@ public class QuaternionAccessor extends TypesAccessor<Quaternionf> {
     @Override
     public Configurator create(String name, Supplier<Quaternionf> supplier, Consumer<Quaternionf> consumer, boolean forceUpdate, Field field) {
         var configurator = new Vector3Configurator(name,
-                () -> supplier.get().getEulerAnglesXYZ(new Vector3f()),
+                () -> supplier.get().getEulerAnglesXYZ(new Vector3f()).mul(57.29577951308232f),
                 v -> {
                     var q = new Quaternionf();
-                    q.rotateXYZ(v.x, v.y, v.z);
+                    q.rotateXYZ(
+                            (float) Math.toRadians(v.x),
+                            (float) Math.toRadians(v.y),
+                            (float) Math.toRadians(v.z));
                     consumer.accept(q);
                 },
                 defaultValue(field, ReflectionUtils.getRawType(field.getGenericType())).getEulerAnglesXYZ(new Vector3f()), forceUpdate);
