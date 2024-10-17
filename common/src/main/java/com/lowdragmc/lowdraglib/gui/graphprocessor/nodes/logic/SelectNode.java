@@ -7,10 +7,10 @@ import com.lowdragmc.lowdraglib.gui.graphprocessor.data.trigger.TriggerNode;
 
 @LDLRegister(name = "select", group = "graph_processor.node.logic")
 public class SelectNode extends TriggerNode {
-    @InputPort
-    public Object a;
-    @InputPort
-    public Object b;
+    @InputPort(name = "true")
+    public Object _true;
+    @InputPort(name = "false")
+    public Object _false;
     @InputPort
     public boolean condition;
     @OutputPort
@@ -18,6 +18,6 @@ public class SelectNode extends TriggerNode {
 
     @Override
     public void process() {
-        out = condition ? a : b;
+        out = condition ? _true : _false;
     }
 }
