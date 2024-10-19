@@ -1,6 +1,4 @@
 # ChangeLog
 
-* add compute shader support
-* add select(ternary operation) node
-* add null node
+* fix player inventory not working correctly on the server
 

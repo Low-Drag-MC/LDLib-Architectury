@@ -2,6 +2,7 @@ package com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor;
 
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.data.Ray;
+import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject.IScene;
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject.ISceneInteractable;
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject.ISceneObject;
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject.ISceneRendering;
@@ -24,22 +25,20 @@ import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A scene which provides editable features as a unity scene.
  */
-public class SceneEditorWidget extends SceneWidget {
+public class SceneEditorWidget extends SceneWidget implements IScene {
     protected float moveSpeed = 0.1f;
     protected boolean isCameraMoving = false;
     @Nullable
     protected String screenTips = null;
     protected int tipsDuration = 0;
     @Getter
-    protected Set<ISceneObject> sceneObjects = new LinkedHashSet<>();
+    protected Map<UUID, ISceneObject> sceneObjects = new LinkedHashMap<>();
     @Getter
     protected int lastMouseX, lastMouseY;
 
@@ -80,21 +79,26 @@ public class SceneEditorWidget extends SceneWidget {
         tipsDuration = 20;
     }
 
-    /**
-     * Add a scene object to the scene root.
-     */
-    public void addSceneObject(ISceneObject sceneObject) {
-        sceneObject.destroy();
-        sceneObject.transform().parent(null);
-        sceneObject.setScene(this);
-        sceneObjects.add(sceneObject);
+    @Override
+    @Nullable
+    public ISceneObject getSceneObject(UUID uuid) {
+        return sceneObjects.get(uuid);
     }
 
-    /**
-     * Remove a scene object from the scene root.
-     */
-    public void removeSceneObject(ISceneObject sceneObject) {
-        sceneObjects.remove(sceneObject);
+    @Override
+    public Collection<ISceneObject> getAllSceneObjects() {
+        return sceneObjects.values();
+    }
+
+    @Override
+    public void addSceneObjectInternal(ISceneObject sceneObject) {
+        sceneObject.setScene(this);
+        sceneObjects.put(sceneObject.id(), sceneObject);
+    }
+
+    @Override
+    public void removeSceneObjectInternal(ISceneObject sceneObject) {
+        sceneObjects.remove(sceneObject.id(), sceneObject);
     }
 
     @Override
@@ -107,7 +111,7 @@ public class SceneEditorWidget extends SceneWidget {
                 screenTips = null;
             }
         }
-        for (ISceneObject sceneObject : sceneObjects) {
+        for (ISceneObject sceneObject : sceneObjects.values()) {
             sceneObject.executeAll(ISceneObject::updateTick);
         }
     }
@@ -120,7 +124,7 @@ public class SceneEditorWidget extends SceneWidget {
                 // left click - select object
                 if (getMouseRay().map(ray -> {
                     var result = new AtomicBoolean(false);
-                    for (ISceneObject sceneObject : sceneObjects) {
+                    for (ISceneObject sceneObject : sceneObjects.values()) {
                         sceneObject.executeAll(so -> {
                             if (so instanceof ISceneInteractable sceneInteractable) {
                                 result.set(result.get() | sceneInteractable.onMouseClick(ray));
@@ -167,7 +171,7 @@ public class SceneEditorWidget extends SceneWidget {
                 return false;
             } else {
                 getMouseRay().ifPresent(ray -> {
-                    for (ISceneObject sceneObject : sceneObjects) {
+                    for (ISceneObject sceneObject : sceneObjects.values()) {
                         sceneObject.executeAll(so -> {
                             if (so instanceof ISceneInteractable sceneInteractable) {
                                 sceneInteractable.onMouseDrag(ray);
@@ -187,7 +191,7 @@ public class SceneEditorWidget extends SceneWidget {
         if (intractable) {
             if (button == 0) {
                 getMouseRay().ifPresent(ray -> {
-                    for (ISceneObject sceneObject : sceneObjects) {
+                    for (ISceneObject sceneObject : sceneObjects.values()) {
                         sceneObject.executeAll(so -> {
                             if (so instanceof ISceneInteractable sceneInteractable) {
                                 sceneInteractable.onMouseRelease(ray);
@@ -222,7 +226,7 @@ public class SceneEditorWidget extends SceneWidget {
     protected void renderBeforeBatchEnd(MultiBufferSource bufferSource, float partialTicks) {
         super.renderBlockOverLay(renderer);
         var poseStack = new PoseStack();
-        for (ISceneObject sceneObject : sceneObjects) {
+        for (ISceneObject sceneObject : sceneObjects.values()) {
             sceneObject.executeAll(so -> so.updateFrame(partialTicks));
             sceneObject.executeAll(so -> {
                 if (so instanceof ISceneRendering sceneRendering) {

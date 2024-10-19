@@ -1,11 +1,13 @@
 package com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.data;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.ConfigSetter;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.Configurable;
 import com.lowdragmc.lowdraglib.gui.editor.annotation.NumberRange;
 import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurable;
 import com.lowdragmc.lowdraglib.gui.editor.ui.sceneeditor.sceneobject.ISceneObject;
 import com.lowdragmc.lowdraglib.syncdata.IPersistedSerializable;
+import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.joml.Matrix4f;
@@ -16,6 +18,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author KilaBash
@@ -24,6 +27,10 @@ import java.util.List;
  */
 @Accessors(fluent = true)
 public final class Transform implements IPersistedSerializable, IConfigurable {
+    @Getter
+    @Accessors(fluent = true)
+    @Persisted
+    private final UUID id = UUID.randomUUID();
     /**
      * Position of the transform relative to the parent transform.
      */
@@ -54,6 +61,8 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
     @Nullable
     @Getter
     private Transform parent;
+    @Persisted
+    private UUID _parentId;
 
     /**
      * The children transforms of the transform.
@@ -81,7 +90,7 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
     private Matrix4f worldToLocalMatrix = null;
     private Matrix4f localToWorldMatrix = null;
 
-    public Transform(ISceneObject sceneObject) {
+    public Transform(@Nonnull ISceneObject sceneObject) {
         this.sceneObject = sceneObject;
     }
 
@@ -110,11 +119,17 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
         if (this.parent == parent) {
             return;
         }
+        if (parent != null) {
+            if (parent.isInheritedParent(this)) {
+                throw new IllegalArgumentException("Cannot set parent to a child transform.");
+            }
+        }
         if (this.parent != null) {
             this.parent.children.remove(this);
             this.parent.sceneObject.onChildChanged();
         }
         this.parent = parent;
+        this._parentId = parent == null ? null : parent.id();
         if (parent != null) {
             parent.children.add(this);
             this.sceneObject.setScene(parent.sceneObject.getScene());
@@ -127,6 +142,17 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
         position(lastPosition);
         rotation(lastRotation);
         scale(lastScale);
+        this.sceneObject.onParentChanged();
+    }
+
+    public boolean isInheritedParent(Transform parent) {
+        if (this.parent == null) {
+            return false;
+        }
+        if (this.parent == parent) {
+            return true;
+        }
+        return this.parent.isInheritedParent(parent);
     }
 
     /**
@@ -253,5 +279,16 @@ public final class Transform implements IPersistedSerializable, IConfigurable {
     public void localScale(Vector3f localScale) {
         this.localScale = localScale;
         onTransformChanged();
+    }
+
+    public void awake() {
+        if (_parentId != null && sceneObject.getScene() != null) {
+            var parent = sceneObject.getScene().getSceneObject(_parentId);
+            if (parent != null) {
+                parent(parent.transform());
+            } else {
+                LDLib.LOGGER.warn("Parent transform {} not found.", _parentId);
+            }
+        }
     }
 }
